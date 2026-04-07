@@ -335,7 +335,7 @@
         : '💀 Game Over';
 
       document.getElementById('result-msg').textContent = won
-        ? `It was ${target.name}! You guessed it in ${guesses.length} tries${guesses.length > 1 ? 's' : ''}.`
+        ? `It was ${target.name}! You guessed it in ${guesses.length} tries.`
         : `It was ${target.name}. Better luck next time!`;
     }
 
