@@ -10,7 +10,6 @@
          img    → caminho para a imagem PNG
                   coloca os teus ficheiros em images/<nome>.png
                   deixa "" para usar o placeholder emoji
-         emoji  → emoji de fallback enquanto não tens imagem
     ======================================================= */
     const CHARS = [
       {
@@ -19,8 +18,7 @@
         type:  "Classic",
         color: "Brown",
         year:  1993,
-        img:   "images/chars/freddy.png",    
-        emoji: "🐻"
+        img:   "images/chars/freddy.png"
       },
       {
         name:  "Bonnie",
@@ -28,8 +26,7 @@
         type:  "Classic",
         color: "Blue",
         year:  1993,
-        img:   "images/chars/bonnie.png",
-        emoji: "🐰"
+        img:   "images/chars/bonnie.png"
       },
       {
         name:  "Chica",
@@ -37,8 +34,7 @@
         type:  "Classic",
         color: "Yellow",
         year:  1993,
-        img:   "images/chars/chica.png",
-        emoji: "🐤"
+        img:   "images/chars/chica.png"
       },
       {
         name:  "Foxy",
@@ -46,8 +42,7 @@
         type:  "Classic",
         color: "Red",
         year:  1993,
-        img:   "images/chars/foxy.png",
-        emoji: "🦊"
+        img:   "images/chars/foxy.png"
       },
       {
         name:  "Golden Freddy",
@@ -55,8 +50,7 @@
         type:  "Classic",
         color: "Yellow",
         year:  1993,          
-        img:   "images/chars/golden_freddy.png",
-        emoji: "✨"
+        img:   "images/chars/golden_freddy.png"
       },
       {
         name:  "Toy Freddy",
@@ -64,8 +58,7 @@
         type:  "Toy",
         color: "Brown",
         year:  1987,          
-        img:   "images/chars/toy_freddy.png",
-        emoji: "🐻"
+        img:   "images/chars/toy_freddy.png"
       },
       {
         name:  "Toy Bonnie",
@@ -73,8 +66,7 @@
         type:  "Toy",
         color: "Blue",
         year:  1987,          
-        img:   "images/chars/toy_bonnie.png",
-        emoji: "🐻"
+        img:   "images/chars/toy_bonnie.png"
       },
       {
         name:  "Toy Chica",
@@ -82,8 +74,7 @@
         type:  "Toy",
         color: "Yellow",
         year:  1987,          
-        img:   "images/chars/toy_chica.png",
-        emoji: "🐻"
+        img:   "images/chars/toy_chica.png"
       },
       {
         name:  "Mangle",
@@ -91,8 +82,7 @@
         type:  "Toy",
         color: "White",
         year:  1987,          
-        img:   "images/chars/mangle.png",
-        emoji: "🐻"
+        img:   "images/chars/mangle.png"
       },
       {
         name:  "Balloon Boy",
@@ -100,8 +90,7 @@
         type:  "Toy",
         color: "Red",
         year:  1987,          
-        img:   "images/chars/bb.png",
-        emoji: "🐻"
+        img:   "images/chars/bb.png"
       },
       {
         name:  "Puppet",
@@ -109,8 +98,7 @@
         type:  "Toy",
         color: "Black",
         year:  1987,          
-        img:   "images/chars/puppet.png",
-        emoji: "🐻"
+        img:   "images/chars/puppet.png"
       },
       {
         name:  "Withered Freddy",
@@ -118,8 +106,7 @@
         type:  "Withered",
         color: "Brown",
         year:  1987,          
-        img:   "images/chars/withered_freddy.png",
-        emoji: "🐻"
+        img:   "images/chars/withered_freddy.png"
       },
       {
         name:  "Withered Bonnie",
@@ -127,8 +114,7 @@
         type:  "Withered",
         color: "Blue",
         year:  1987,          
-        img:   "images/chars/withered_bonnie.png",
-        emoji: "🐻"
+        img:   "images/chars/withered_bonnie.png"
       },
       {
         name:  "Withered Chica",
@@ -136,8 +122,7 @@
         type:  "Withered",
         color: "Yellow",
         year:  1987,          
-        img:   "images/chars/withered_chica.png",
-        emoji: "🐻"
+        img:   "images/chars/withered_chica.png"
       },
       {
         name:  "Withered Foxy",
@@ -145,8 +130,7 @@
         type:  "Withered",
         color: "Red",
         year:  1987,          
-        img:   "images/chars/withered_foxy.png",
-        emoji: "🐻"
+        img:   "images/chars/withered_foxy.png"
       },
       {
         name:  "Withered Golden Freddy",
@@ -154,8 +138,7 @@
         type:  "Withered",
         color: "Yellow",
         year:  1987,          
-        img:   "images/chars/withered_golden.png",
-        emoji: "🐻"
+        img:   "images/chars/withered_golden.png"
       },
       {
         name:  "JJ",
@@ -163,8 +146,7 @@
         type:  "Toy",
         color: "Purple",
         year:  1987,          
-        img:   "images/chars/jj.png",
-        emoji: "🐻"
+        img:   "images/chars/jj.png"
       },
       {
         name:  "Shadow Freddy",
@@ -172,8 +154,7 @@
         type:  "Shadow",
         color: "Purple",
         year:  1987,          
-        img:   "images/chars/shadow_freddy.png",
-        emoji: "🐻"
+        img:   "images/chars/shadow_freddy.png"
       },
       {
         name:  "RWQFSFASXC",
@@ -181,8 +162,7 @@
         type:  "Shadiw",
         color: "Black",
         year:  1987,          
-        img:   "images/chars/rxq.png",
-        emoji: "🐻"
+        img:   "images/chars/rxq.png"
       },
       {
         name:  "Endo-01",
@@ -190,8 +170,7 @@
         type:  "Endo",
         color: "Grey",
         year:  1993,          
-        img:   "images/chars/endo01.png",
-        emoji: "🐻"
+        img:   "images/chars/endo01.png"
       },
       {
         name:  "Endo-02",
@@ -199,8 +178,7 @@
         type:  "Endo",
         color: "Grey",
         year:  1987,          
-        img:   "images/chars/endo02.png",
-        emoji: "🐻"
+        img:   "images/chars/endo02.png"
       },
     ];
 
