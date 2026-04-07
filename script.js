@@ -180,6 +180,78 @@
         year:  1987,          
         img:   "images/chars/endo02.png"
       },
+      {
+        name:  "Springtrap",
+        animal:"Rabbit",
+        type:  "Springlock",
+        color: "Green",
+        year:  2023,          
+        img:   "images/chars/springtrap.png"
+      },
+      {
+        name:  "Phantom Freddy",
+        animal:"Bear",
+        type:  "Phantom",
+        color: "Green",
+        year:  2023,          
+        img:   "images/chars/endo02.png"
+      },
+      {
+        name:  "Phantom Chica",
+        animal:"Chicken",
+        type:  "Phantom",
+        color: "Green",
+        year:  2023,          
+        img:   "images/chars/endo02.png"
+      },
+      {
+        name:  "Phantom Foxy",
+        animal:"Fox",
+        type:  "Phantom",
+        color: "Green",
+        year:  2023,          
+        img:   "images/chars/endo02.png"
+      },
+      {
+        name:  "Phantom Mangle",
+        animal:"Fox",
+        type:  "Phantom",
+        color: "Green",
+        year:  2023,          
+        img:   "images/chars/endo02.png"
+      },
+      {
+        name:  "Phantom Puppet",
+        animal:"Humanoid",
+        type:  "Phantom",
+        color: "Green",
+        year:  2023,          
+        img:   "images/chars/endo02.png"
+      },
+      {
+        name:  "Phantom BB",
+        animal:"Humanoid",
+        type:  "Phantom",
+        color: "Green",
+        year:  2023,          
+        img:   "images/chars/endo02.png"
+      },
+      {
+        name:  "Springbonnie",
+        animal:"Rabbit",
+        type:  "Springlock",
+        color: "Yellow",
+        year:  1983,          
+        img:   "images/chars/endo02.png"
+      },
+      {
+        name:  "Fredbear",
+        animal:"Bear",
+        type:  "Springlock",
+        color: "Yellow",
+        year:  1983,          
+        img:   "images/chars/endo02.png"
+      },
     ];
 
     /* =======================================================
