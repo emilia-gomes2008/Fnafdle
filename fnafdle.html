@@ -3,15 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FNAFdle</title>
-
-  <!-- =====================================================
-       FONTE - podes substituir pela fonte FNaF real:
-       @font-face {
-         font-family: 'FNaF';
-         src: url('fonts/FiveFontsatFreddys-Regular.ttf') format('truetype');
-       }
-       ===================================================== -->
+  <title>FNAFdle Reborn</title>
   <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Oswald:wght@400;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css"/>
 </head>
@@ -21,15 +13,15 @@
     <div class="fnaf-title">
       <img src="images/title/fnafdle.png" alt="Fnafdle"/>
     </div>
-    <div class="fnaf-subtitle">Adivinha o animatronic</div>
+    <div class="fnaf-subtitle">Guess the animatronic</div>
   </div>
   
   <div class="container">
     
     <!-- Legenda -->
     <div class="legend">
-      <div class="legend-item"><div class="legend-dot correct"></div> Correto</div>
-      <div class="legend-item"><div class="legend-dot wrong"></div> Errado</div>
+      <div class="legend-item"><div class="legend-dot correct"></div> Correct</div>
+      <div class="legend-item"><div class="legend-dot wrong"></div> Wrong</div>
     </div>
     
     <!-- Pesquisa -->
@@ -45,12 +37,12 @@
     
     <!-- Cabeçalho da tabela -->
     <div class="table-header">
-      <div class="col-label">Personagem</div>
-      <div class="col-label">Nome</div>
+      <div class="col-label">Character</div>
+      <div class="col-label">Name</div>
       <div class="col-label">Animal</div>
-      <div class="col-label">Tipo</div>
-      <div class="col-label">Cor</div>
-      <div class="col-label">Ano</div>
+      <div class="col-label">Type</div>
+      <div class="col-label">Color</div>
+      <div class="col-label">Year</div>
     </div>
     
     <!-- Linhas de guess geradas por JS -->
@@ -60,7 +52,7 @@
     <div class="result-banner" id="result-banner">
       <div class="result-title" id="result-title"></div>
       <p class="result-msg" id="result-msg"></p>
-      <button onclick="initGame()">Jogar de novo</button>
+      <button onclick="initGame()">Try again</button>
     </div>
     
   </div><!-- /.container -->

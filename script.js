@@ -58,6 +58,150 @@
         img:   "images/chars/golden_freddy.png",
         emoji: "✨"
       },
+      {
+        name:  "Toy Freddy",
+        animal:"Bear",
+        type:  "Toy",
+        color: "Brown",
+        year:  1987,          
+        img:   "images/chars/toy_freddy.png",
+        emoji: "🐻"
+      },
+      {
+        name:  "Toy Bonnie",
+        animal:"Rabbit",
+        type:  "Toy",
+        color: "Blue",
+        year:  1987,          
+        img:   "images/chars/toy_bonnie.png",
+        emoji: "🐻"
+      },
+      {
+        name:  "Toy Chica",
+        animal:"Chicken",
+        type:  "Toy",
+        color: "Yellow",
+        year:  1987,          
+        img:   "images/chars/toy_chica.png",
+        emoji: "🐻"
+      },
+      {
+        name:  "Mangle",
+        animal:"Fox",
+        type:  "Toy",
+        color: "White",
+        year:  1987,          
+        img:   "images/chars/mangle.png",
+        emoji: "🐻"
+      },
+      {
+        name:  "Balloon Boy",
+        animal:"Hunanoid",
+        type:  "Toy",
+        color: "Red",
+        year:  1987,          
+        img:   "images/chars/bb.png",
+        emoji: "🐻"
+      },
+      {
+        name:  "Puppet",
+        animal:"Hunanoid",
+        type:  "Toy",
+        color: "Black",
+        year:  1987,          
+        img:   "images/chars/puppet.png",
+        emoji: "🐻"
+      },
+      {
+        name:  "Withered Freddy",
+        animal:"Bear",
+        type:  "Withered",
+        color: "Brown",
+        year:  1987,          
+        img:   "images/chars/withered_freddy.png",
+        emoji: "🐻"
+      },
+      {
+        name:  "Withered Bonnie",
+        animal:"Rabbit",
+        type:  "Withered",
+        color: "Blue",
+        year:  1987,          
+        img:   "images/chars/withered_bonnie.png",
+        emoji: "🐻"
+      },
+      {
+        name:  "Withered Chica",
+        animal:"Chicken",
+        type:  "Withered",
+        color: "Yellow",
+        year:  1987,          
+        img:   "images/chars/withered_chica.png",
+        emoji: "🐻"
+      },
+      {
+        name:  "Withered Foxy",
+        animal:"Fox",
+        type:  "Withered",
+        color: "Red",
+        year:  1987,          
+        img:   "images/chars/withered_foxy.png",
+        emoji: "🐻"
+      },
+      {
+        name:  "Withered Golden Freddy",
+        animal:"Bear",
+        type:  "Withered",
+        color: "Yellow",
+        year:  1987,          
+        img:   "images/chars/withered_golden.png",
+        emoji: "🐻"
+      },
+      {
+        name:  "JJ",
+        animal:"Humanoid",
+        type:  "Toy",
+        color: "Purple",
+        year:  1987,          
+        img:   "images/chars/jj.png",
+        emoji: "🐻"
+      },
+      {
+        name:  "Shadow Freddy",
+        animal:"Bear",
+        type:  "Shadow",
+        color: "Purple",
+        year:  1987,          
+        img:   "images/chars/shadow_freddy.png",
+        emoji: "🐻"
+      },
+      {
+        name:  "RWQFSFASXC",
+        animal:"Rabbit",
+        type:  "Shadiw",
+        color: "Black",
+        year:  1987,          
+        img:   "images/chars/rxq.png",
+        emoji: "🐻"
+      },
+      {
+        name:  "Endo-01",
+        animal:"Skeleton",
+        type:  "Endo",
+        color: "Grey",
+        year:  1993,          
+        img:   "images/chars/endo01.png",
+        emoji: "🐻"
+      },
+      {
+        name:  "Endo-02",
+        animal:"Skeleton",
+        type:  "Endo",
+        color: "Grey",
+        year:  1987,          
+        img:   "images/chars/endo02.png",
+        emoji: "🐻"
+      },
     ];
 
     /* =======================================================
@@ -76,7 +220,7 @@
       banner.classList.remove('show', 'lose');
       document.getElementById('search-input').disabled = false;
       document.getElementById('search-input').value    = '';
-      document.getElementById('search-input').placeholder = 'Escreve o nome do animatronic...';
+      document.getElementById('search-input').placeholder = 'Write an animatronic...';
       document.getElementById('search-area').style.display = '';
       document.getElementById('dropdown').style.display    = 'none';
 
@@ -86,7 +230,7 @@
     function updateAttemptsLeft() {
       const el        = document.getElementById('attempts-left');
       const remaining = MAX_GUESSES - guesses.length;
-      el.textContent  = gameOver ? '' : `Tentativas restantes: ${remaining}`;
+      el.textContent  = gameOver ? '' : `Tries left: ${remaining}`;
     }
 
     /* =======================================================
@@ -187,12 +331,12 @@
       if (!won) banner.classList.add('lose');
 
       document.getElementById('result-title').textContent = won
-        ? '🎉 Correto!'
+        ? '🎉 Got it!'
         : '💀 Game Over';
 
       document.getElementById('result-msg').textContent = won
-        ? `Era o ${target.name}! Conseguiste em ${guesses.length} tentativa${guesses.length > 1 ? 's' : ''}.`
-        : `Era o ${target.name}. Mais sorte na próxima!`;
+        ? `It was ${target.name}! You guessed it in ${guesses.length} tries${guesses.length > 1 ? 's' : ''}.`
+        : `It was ${target.name}. Better luck next time!`;
     }
 
     /* =======================================================
