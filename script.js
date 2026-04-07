@@ -17,6 +17,7 @@
         animal:"Bear",
         type:  "Classic",
         color: "Brown",
+        eyeColor: "Blue",
         year:  1993,
         img:   "images/chars/freddy.png"
       },
@@ -25,6 +26,7 @@
         animal:"Rabbit",
         type:  "Classic",
         color: "Blue",
+        eyeColor: "Red",
         year:  1993,
         img:   "images/chars/bonnie.png"
       },
@@ -33,6 +35,7 @@
         animal:"Chicken",
         type:  "Classic",
         color: "Yellow",
+        eyeColor: "Magenta",
         year:  1993,
         img:   "images/chars/chica.png"
       },
@@ -41,6 +44,7 @@
         animal:"Fox",
         type:  "Classic",
         color: "Red",
+        eyeColor: "Yellow",
         year:  1993,
         img:   "images/chars/foxy.png"
       },
@@ -49,6 +53,7 @@
         animal:"Bear",
         type:  "Classic",
         color: "Yellow",
+        eyeColor: "Black",
         year:  1993,          
         img:   "images/chars/golden_freddy.png"
       },
@@ -57,6 +62,7 @@
         animal:"Bear",
         type:  "Toy",
         color: "Brown",
+        eyeColor: "Blue",
         year:  1987,          
         img:   "images/chars/toy_freddy.png"
       },
@@ -65,6 +71,7 @@
         animal:"Rabbit",
         type:  "Toy",
         color: "Blue",
+        eyeColor: "Green",
         year:  1987,          
         img:   "images/chars/toy_bonnie.png"
       },
@@ -73,6 +80,7 @@
         animal:"Chicken",
         type:  "Toy",
         color: "Yellow",
+        eyeColor: "Blue",
         year:  1987,          
         img:   "images/chars/toy_chica.png"
       },
@@ -81,6 +89,7 @@
         animal:"Fox",
         type:  "Toy",
         color: "White",
+        eyeColor: "Yellow",
         year:  1987,          
         img:   "images/chars/mangle.png"
       },
@@ -89,6 +98,7 @@
         animal:"Hunanoid",
         type:  "Toy",
         color: "Red",
+        eyeColor: "Blue",
         year:  1987,          
         img:   "images/chars/bb.png"
       },
@@ -97,6 +107,7 @@
         animal:"Hunanoid",
         type:  "Toy",
         color: "Black",
+        eyeColor: "Black",
         year:  1987,          
         img:   "images/chars/puppet.png"
       },
@@ -105,6 +116,7 @@
         animal:"Bear",
         type:  "Withered",
         color: "Brown",
+        eyeColor: "Blue",
         year:  1987,          
         img:   "images/chars/withered_freddy.png"
       },
@@ -113,6 +125,7 @@
         animal:"Rabbit",
         type:  "Withered",
         color: "Blue",
+        eyeColor: "Red",
         year:  1987,          
         img:   "images/chars/withered_bonnie.png"
       },
@@ -121,6 +134,7 @@
         animal:"Chicken",
         type:  "Withered",
         color: "Yellow",
+        eyeColor: "Magenta",
         year:  1987,          
         img:   "images/chars/withered_chica.png"
       },
@@ -129,6 +143,7 @@
         animal:"Fox",
         type:  "Withered",
         color: "Red",
+        eyeColor: "Yellow",
         year:  1987,          
         img:   "images/chars/withered_foxy.png"
       },
@@ -137,6 +152,7 @@
         animal:"Bear",
         type:  "Withered",
         color: "Yellow",
+        eyeColor: "Black",
         year:  1987,          
         img:   "images/chars/withered_golden.png"
       },
@@ -145,6 +161,7 @@
         animal:"Humanoid",
         type:  "Toy",
         color: "Purple",
+        eyeColor: "Magenta",
         year:  1987,          
         img:   "images/chars/jj.png"
       },
@@ -153,14 +170,16 @@
         animal:"Bear",
         type:  "Shadow",
         color: "Purple",
+        eyeColor: "Black",
         year:  1987,          
         img:   "images/chars/shadow_freddy.png"
       },
       {
         name:  "RWQFSFASXC",
         animal:"Rabbit",
-        type:  "Shadiw",
+        type:  "Shadow",
         color: "Black",
+        eyeColor: "Black",
         year:  1987,          
         img:   "images/chars/rxq.png"
       },
@@ -169,6 +188,7 @@
         animal:"Skeleton",
         type:  "Endo",
         color: "Grey",
+        eyeColor: "Blue",
         year:  1993,          
         img:   "images/chars/endo01.png"
       },
@@ -177,6 +197,7 @@
         animal:"Skeleton",
         type:  "Endo",
         color: "Grey",
+        eyeColor: "Blue",
         year:  1987,          
         img:   "images/chars/endo02.png"
       },
@@ -185,6 +206,7 @@
         animal:"Rabbit",
         type:  "Springlock",
         color: "Green",
+        eyeColor: "Silver",
         year:  2023,          
         img:   "images/chars/springtrap.png"
       },
@@ -193,6 +215,7 @@
         animal:"Bear",
         type:  "Phantom",
         color: "Green",
+        eyeColor: "Black",
         year:  2023,          
         img:   "images/chars/p_freddy.png"
       },
@@ -201,6 +224,7 @@
         animal:"Chicken",
         type:  "Phantom",
         color: "Green",
+        eyeColor: "Black",
         year:  2023,          
         img:   "images/chars/p_chica.png"
       },
@@ -209,6 +233,7 @@
         animal:"Fox",
         type:  "Phantom",
         color: "Green",
+        eyeColor: "Black",
         year:  2023,          
         img:   "images/chars/p_foxy.png"
       },
@@ -217,6 +242,7 @@
         animal:"Fox",
         type:  "Phantom",
         color: "Green",
+        eyeColor: "Black",
         year:  2023,          
         img:   "images/chars/p_mangle.png"
       },
@@ -225,6 +251,7 @@
         animal:"Humanoid",
         type:  "Phantom",
         color: "Green",
+        eyeColor: "Black",
         year:  2023,          
         img:   "images/chars/p_puppet.png"
       },
@@ -233,6 +260,7 @@
         animal:"Humanoid",
         type:  "Phantom",
         color: "Green",
+        eyeColor: "Black",
         year:  2023,          
         img:   "images/chars/p_bb.png"
       },
@@ -241,6 +269,7 @@
         animal:"Rabbit",
         type:  "Springlock",
         color: "Yellow",
+        eyeColor: "Green",
         year:  1983,          
         img:   "images/chars/springbonnie.png"
       },
@@ -249,6 +278,7 @@
         animal:"Bear",
         type:  "Springlock",
         color: "Yellow",
+        eyeColor: "Blue",
         year:  1983,          
         img:   "images/chars/fredbear.png"
       },
@@ -297,6 +327,7 @@ function renderGuess(char) {
     { key: 'animal', label: char.animal },
     { key: 'type', label: char.type },
     { key: 'color', label: char.color },
+    { key: 'eyeColor', label: "Eye Color" },
     { key: 'year', label: char.year },
   ];
 
