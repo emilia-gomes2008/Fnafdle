@@ -389,16 +389,19 @@ function endGame(won) {
 ======================================================= */
 function renderDropdown() {
   const q = input.value.trim().toLowerCase();
-  if (!q) { dropdown.style.display = 'none'; return; }
 
   const filtered = CHARS.filter(c =>
-    c.name.toLowerCase().includes(q) &&
+    (q === '' || c.name.toLowerCase().includes(q)) &&
     !guesses.some(g => g.name === c.name)
   );
 
-  if (!filtered.length) { dropdown.style.display = 'none'; return; }
+  if (!filtered.length) { 
+    dropdown.style.display = 'none'; 
+    return; 
+  }
 
   dropdown.innerHTML = '';
+
   filtered.forEach(char => {
     const item = document.createElement('div');
     item.className = 'dropdown-item';
@@ -408,13 +411,15 @@ function renderDropdown() {
       const img = document.createElement('img');
       img.src = char.img;
       img.alt = char.name;
+
       const span = document.createElement('span');
       span.textContent = char.name;
+
       item.appendChild(img);
       item.appendChild(span);
     } else {
       const span = document.createElement('span');
-      span.textContent = char.emoji || '?';
+      span.textContent = char.name; // melhor mostrar nome em vez de emoji aqui
       item.appendChild(span);
     }
 
@@ -426,6 +431,7 @@ function renderDropdown() {
   selectedIndex = -1;
 }
 
+input.addEventListener('focus', renderDropdown);
 input.addEventListener('input', renderDropdown);
 
 /* NAVEGAÇÃO COM TECLADO */
