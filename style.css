@@ -70,7 +70,7 @@
       background-color: var(--bg-card);
       border-radius: 10px;
       width: 95%;
-      max-width: 860px;   /* aumentado para acomodar 6 colunas */
+      max-width: 900px;   /* aumentado para acomodar 6 colunas */
       margin: 0 auto;
       padding: 20px;
       box-shadow: 0 0 18px rgba(255, 208, 0, 0.15);
@@ -190,7 +190,7 @@
     .table-header,
     .guess-row {
       display: grid;
-      grid-template-columns: 70px 1fr 1fr 1fr 1fr 72px;
+      grid-template-columns: 70px 1fr 1fr 1fr 1fr 1fr 72px;
       gap: 6px;
       margin-bottom: 6px;
     }

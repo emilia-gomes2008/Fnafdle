@@ -327,7 +327,7 @@ function renderGuess(char) {
     { key: 'animal', label: char.animal },
     { key: 'type', label: char.type },
     { key: 'color', label: char.color },
-    { key: 'eyeColor', label: "Eye Color" },
+    { key: 'eyeColor', label: char.eyeColor},
     { key: 'year', label: char.year },
   ];
 
@@ -382,7 +382,7 @@ function submitGuess(char) {
   if (gameOver) return;
 
   if (guesses.some(g => g.name === char.name)) {
-    input.placeholder = 'Já tentaste esse!';
+    input.placeholder = 'You tried that already!';
     input.value = '';
     dropdown.style.display = 'none';
     return;
