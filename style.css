@@ -20,9 +20,15 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
+    @font-face {
+    font-family: 'FNaF';
+    src: url('fonts/FiveFontsatFreddy\'s-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
     body {
-      font-family: 'Oswald', sans-serif;
-      /* Substitui 'Oswald' por 'FNaF' se tiveres a fonte instalada */
+      font-family: 'FNaF', sans serif;
       background-color: var(--bg-page);
       color: var(--text);
       min-height: 100vh;
