@@ -194,7 +194,7 @@
         type:  "Phantom",
         color: "Green",
         year:  2023,          
-        img:   "images/chars/endo02.png"
+        img:   "images/chars/p_freddy.png"
       },
       {
         name:  "Phantom Chica",
@@ -202,7 +202,7 @@
         type:  "Phantom",
         color: "Green",
         year:  2023,          
-        img:   "images/chars/endo02.png"
+        img:   "images/chars/p_chica.png"
       },
       {
         name:  "Phantom Foxy",
@@ -210,7 +210,7 @@
         type:  "Phantom",
         color: "Green",
         year:  2023,          
-        img:   "images/chars/endo02.png"
+        img:   "images/chars/p_foxy.png"
       },
       {
         name:  "Phantom Mangle",
@@ -218,7 +218,7 @@
         type:  "Phantom",
         color: "Green",
         year:  2023,          
-        img:   "images/chars/endo02.png"
+        img:   "images/chars/p_mangle.png"
       },
       {
         name:  "Phantom Puppet",
@@ -226,7 +226,7 @@
         type:  "Phantom",
         color: "Green",
         year:  2023,          
-        img:   "images/chars/endo02.png"
+        img:   "images/chars/p_puppet.png"
       },
       {
         name:  "Phantom BB",
@@ -234,7 +234,7 @@
         type:  "Phantom",
         color: "Green",
         year:  2023,          
-        img:   "images/chars/endo02.png"
+        img:   "images/chars/p_bb.png"
       },
       {
         name:  "Springbonnie",
@@ -242,7 +242,7 @@
         type:  "Springlock",
         color: "Yellow",
         year:  1983,          
-        img:   "images/chars/endo02.png"
+        img:   "images/chars/springbonnie.png"
       },
       {
         name:  "Fredbear",
@@ -250,7 +250,7 @@
         type:  "Springlock",
         color: "Yellow",
         year:  1983,          
-        img:   "images/chars/endo02.png"
+        img:   "images/chars/fredbear.png"
       },
     ];
 
