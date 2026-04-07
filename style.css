@@ -107,6 +107,11 @@
     /* =====================================================
        BARRA DE PESQUISA
        ===================================================== */
+
+    .dropdown-item.selected {
+  background-color: #007bff;
+  color: white;
+}
     .search-area {
       position: relative;
       margin-bottom: 1.2rem;
