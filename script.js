@@ -40,6 +40,15 @@
         img:   "images/chars/classic/chica.png"
       },
       {
+        name:  "Cupcake",
+        animal:"Cupcake",
+        type:  "Classic",
+        color: "Pink",
+        eyeColor: "Yellow",
+        year:  1993,          
+        img:   "images/chars/classic/cupcake.png"
+      },
+      {
         name:  "Foxy",
         animal:"Fox",
         type:  "Classic",
@@ -56,6 +65,15 @@
         eyeColor: "Black",
         year:  1993,          
         img:   "images/chars/classic/golden_freddy.png"
+      },
+      {
+        name:  "Endo-01",
+        animal:"Skeleton",
+        type:  "Endo",
+        color: "Grey",
+        eyeColor: "Blue",
+        year:  1993,          
+        img:   "images/chars/endo/endo01.png"
       },
       {
         name:  "Toy Freddy",
@@ -85,6 +103,15 @@
         img:   "images/chars/toy/toy_chica.png"
       },
       {
+        name:  "Toy Cupcake",
+        animal:"Cupcake",
+        type:  "Toy",
+        color: "Pinnk",
+        eyeColor: "Blue",
+        year:  1987,          
+        img:   "images/chars/toy/toy_cupcake.png"
+      },
+      {
         name:  "Mangle",
         animal:"Fox",
         type:  "Toy",
@@ -101,6 +128,24 @@
         eyeColor: "Blue",
         year:  1987,          
         img:   "images/chars/toy/bb.png"
+      },
+      {
+        name:  "JJ",
+        animal:"Humanoid",
+        type:  "Toy",
+        color: "Purple",
+        eyeColor: "Magenta",
+        year:  1987,          
+        img:   "images/chars/toy/jj.png"
+      },
+      {
+        name:  "Endo-02",
+        animal:"Skeleton",
+        type:  "Endo",
+        color: "Grey",
+        eyeColor: "Blue",
+        year:  1987,          
+        img:   "images/chars/endo/endo02.png"
       },
       {
         name:  "Puppet",
@@ -157,15 +202,6 @@
         img:   "images/chars/withered/withered_golden.png"
       },
       {
-        name:  "JJ",
-        animal:"Humanoid",
-        type:  "Toy",
-        color: "Purple",
-        eyeColor: "Magenta",
-        year:  1987,          
-        img:   "images/chars/toy/jj.png"
-      },
-      {
         name:  "Shadow Freddy",
         animal:"Bear",
         type:  "Shadow",
@@ -182,24 +218,6 @@
         eyeColor: "White",
         year:  1987,          
         img:   "images/chars/shadow/rxq.png"
-      },
-      {
-        name:  "Endo-01",
-        animal:"Skeleton",
-        type:  "Endo",
-        color: "Grey",
-        eyeColor: "Blue",
-        year:  1993,          
-        img:   "images/chars/endo/endo01.png"
-      },
-      {
-        name:  "Endo-02",
-        animal:"Skeleton",
-        type:  "Endo",
-        color: "Grey",
-        eyeColor: "Blue",
-        year:  1987,          
-        img:   "images/chars/endo/endo02.png"
       },
       {
         name:  "Springtrap",
@@ -227,6 +245,15 @@
         eyeColor: "Black",
         year:  2023,          
         img:   "images/chars/phantom/p_chica.png"
+      },
+      {
+        name:  "Shadow Cupcake",
+        animal:"Cupcake",
+        type:  "Shadow",
+        color: "Black",
+        eyeColor: "Black",
+        year:  1987,          
+        img:   "images/chars/shadow/cupcake.png"
       },
       {
         name:  "Phantom Foxy",
@@ -281,33 +308,6 @@
         eyeColor: "Blue",
         year:  1983,          
         img:   "images/chars/springlock/fredbear.png"
-      },
-      {
-        name:  "Cupcake",
-        animal:"Cupcake",
-        type:  "Classic",
-        color: "Pink",
-        eyeColor: "Yellow",
-        year:  1993,          
-        img:   "images/chars/classic/cupcake.png"
-      },
-      {
-        name:  "Toy Cupcake",
-        animal:"Cupcake",
-        type:  "Toy",
-        color: "Pinnk",
-        eyeColor: "Blue",
-        year:  1987,          
-        img:   "images/chars/toy/toy_cupcake.png"
-      },
-      {
-        name:  "Shadow Cupcake",
-        animal:"Cupcake",
-        type:  "Shadow",
-        color: "Black",
-        eyeColor: "Black",
-        year:  1987,          
-        img:   "images/chars/shadow/cupcake.png"
       },
       {
         name:  "Golden Cupcake",
