@@ -19,7 +19,7 @@
         color: "Brown",
         eyeColor: "Blue",
         year:  1993,
-        img:   "images/chars/freddy.png"
+        img:   "images/chars/classic/freddy.png"
       },
       {
         name:  "Bonnie",
@@ -28,7 +28,7 @@
         color: "Blue",
         eyeColor: "Red",
         year:  1993,
-        img:   "images/chars/bonnie.png"
+        img:   "images/chars/classic/bonnie.png"
       },
       {
         name:  "Chica",
@@ -37,7 +37,7 @@
         color: "Yellow",
         eyeColor: "Magenta",
         year:  1993,
-        img:   "images/chars/chica.png"
+        img:   "images/chars/classic/chica.png"
       },
       {
         name:  "Foxy",
@@ -46,7 +46,7 @@
         color: "Red",
         eyeColor: "Yellow",
         year:  1993,
-        img:   "images/chars/foxy.png"
+        img:   "images/chars/classic/foxy.png"
       },
       {
         name:  "Golden Freddy",
@@ -55,7 +55,7 @@
         color: "Yellow",
         eyeColor: "Black",
         year:  1993,          
-        img:   "images/chars/golden_freddy.png"
+        img:   "images/chars/classic/golden_freddy.png"
       },
       {
         name:  "Toy Freddy",
@@ -64,7 +64,7 @@
         color: "Brown",
         eyeColor: "Blue",
         year:  1987,          
-        img:   "images/chars/toy_freddy.png"
+        img:   "images/chars/toy/toy_freddy.png"
       },
       {
         name:  "Toy Bonnie",
@@ -73,7 +73,7 @@
         color: "Blue",
         eyeColor: "Green",
         year:  1987,          
-        img:   "images/chars/toy_bonnie.png"
+        img:   "images/chars/toy/toy_bonnie.png"
       },
       {
         name:  "Toy Chica",
@@ -82,7 +82,7 @@
         color: "Yellow",
         eyeColor: "Blue",
         year:  1987,          
-        img:   "images/chars/toy_chica.png"
+        img:   "images/chars/toy/toy_chica.png"
       },
       {
         name:  "Mangle",
@@ -91,7 +91,7 @@
         color: "White",
         eyeColor: "Yellow",
         year:  1987,          
-        img:   "images/chars/mangle.png"
+        img:   "images/chars/toy/mangle.png"
       },
       {
         name:  "Balloon Boy",
@@ -100,7 +100,7 @@
         color: "Red",
         eyeColor: "Blue",
         year:  1987,          
-        img:   "images/chars/bb.png"
+        img:   "images/chars/toy/bb.png"
       },
       {
         name:  "Puppet",
@@ -109,7 +109,7 @@
         color: "Black",
         eyeColor: "Black",
         year:  1987,          
-        img:   "images/chars/puppet.png"
+        img:   "images/chars/toy/puppet.png"
       },
       {
         name:  "Withered Freddy",
@@ -118,7 +118,7 @@
         color: "Brown",
         eyeColor: "Blue",
         year:  1987,          
-        img:   "images/chars/withered_freddy.png"
+        img:   "images/chars/withered/withered_freddy.png"
       },
       {
         name:  "Withered Bonnie",
@@ -127,7 +127,7 @@
         color: "Blue",
         eyeColor: "Red",
         year:  1987,          
-        img:   "images/chars/withered_bonnie.png"
+        img:   "images/chars/withered/withered_bonnie.png"
       },
       {
         name:  "Withered Chica",
@@ -136,7 +136,7 @@
         color: "Yellow",
         eyeColor: "Magenta",
         year:  1987,          
-        img:   "images/chars/withered_chica.png"
+        img:   "images/chars/withered/withered_chica.png"
       },
       {
         name:  "Withered Foxy",
@@ -145,7 +145,7 @@
         color: "Red",
         eyeColor: "Yellow",
         year:  1987,          
-        img:   "images/chars/withered_foxy.png"
+        img:   "images/chars/withered/withered_foxy.png"
       },
       {
         name:  "Withered Golden Freddy",
@@ -154,7 +154,7 @@
         color: "Yellow",
         eyeColor: "Black",
         year:  1987,          
-        img:   "images/chars/withered_golden.png"
+        img:   "images/chars/withered/withered_golden.png"
       },
       {
         name:  "JJ",
@@ -163,7 +163,7 @@
         color: "Purple",
         eyeColor: "Magenta",
         year:  1987,          
-        img:   "images/chars/jj.png"
+        img:   "images/chars/toy/jj.png"
       },
       {
         name:  "Shadow Freddy",
@@ -172,16 +172,16 @@
         color: "Purple",
         eyeColor: "Black",
         year:  1987,          
-        img:   "images/chars/shadow_freddy.png"
+        img:   "images/chars/shadow/shadow_freddy.png"
       },
       {
         name:  "RWQFSFASXC",
         animal:"Rabbit",
         type:  "Shadow",
         color: "Black",
-        eyeColor: "Black",
+        eyeColor: "White",
         year:  1987,          
-        img:   "images/chars/rxq.png"
+        img:   "images/chars/shadow/rxq.png"
       },
       {
         name:  "Endo-01",
@@ -190,7 +190,7 @@
         color: "Grey",
         eyeColor: "Blue",
         year:  1993,          
-        img:   "images/chars/endo01.png"
+        img:   "images/chars/endo/endo01.png"
       },
       {
         name:  "Endo-02",
@@ -199,7 +199,7 @@
         color: "Grey",
         eyeColor: "Blue",
         year:  1987,          
-        img:   "images/chars/endo02.png"
+        img:   "images/chars/endo/endo02.png"
       },
       {
         name:  "Springtrap",
@@ -208,7 +208,7 @@
         color: "Green",
         eyeColor: "Silver",
         year:  2023,          
-        img:   "images/chars/springtrap.png"
+        img:   "images/chars/springlock/springtrap.png"
       },
       {
         name:  "Phantom Freddy",
@@ -217,7 +217,7 @@
         color: "Green",
         eyeColor: "Black",
         year:  2023,          
-        img:   "images/chars/p_freddy.png"
+        img:   "images/chars/phantom/p_freddy.png"
       },
       {
         name:  "Phantom Chica",
@@ -226,7 +226,7 @@
         color: "Green",
         eyeColor: "Black",
         year:  2023,          
-        img:   "images/chars/p_chica.png"
+        img:   "images/chars/phantom/p_chica.png"
       },
       {
         name:  "Phantom Foxy",
@@ -235,7 +235,7 @@
         color: "Green",
         eyeColor: "Black",
         year:  2023,          
-        img:   "images/chars/p_foxy.png"
+        img:   "images/chars/phantom/p_foxy.png"
       },
       {
         name:  "Phantom Mangle",
@@ -244,7 +244,7 @@
         color: "Green",
         eyeColor: "Black",
         year:  2023,          
-        img:   "images/chars/p_mangle.png"
+        img:   "images/chars/phantom/p_mangle.png"
       },
       {
         name:  "Phantom Puppet",
@@ -253,7 +253,7 @@
         color: "Green",
         eyeColor: "Black",
         year:  2023,          
-        img:   "images/chars/p_puppet.png"
+        img:   "images/chars/phantom/p_puppet.png"
       },
       {
         name:  "Phantom BB",
@@ -262,7 +262,7 @@
         color: "Green",
         eyeColor: "Black",
         year:  2023,          
-        img:   "images/chars/p_bb.png"
+        img:   "images/chars/phantom/p_bb.png"
       },
       {
         name:  "Springbonnie",
@@ -271,7 +271,7 @@
         color: "Yellow",
         eyeColor: "Green",
         year:  1983,          
-        img:   "images/chars/springbonnie.png"
+        img:   "images/chars/springlock/springbonnie.png"
       },
       {
         name:  "Fredbear",
@@ -280,7 +280,43 @@
         color: "Yellow",
         eyeColor: "Blue",
         year:  1983,          
-        img:   "images/chars/fredbear.png"
+        img:   "images/chars/springlock/fredbear.png"
+      },
+      {
+        name:  "Cupcake",
+        animal:"Cupcake",
+        type:  "Classic",
+        color: "Pink",
+        eyeColor: "Yellow",
+        year:  1993,          
+        img:   "images/chars/classic/cupcake.png"
+      },
+      {
+        name:  "Toy Cupcake",
+        animal:"Cupcake",
+        type:  "Toy",
+        color: "Pinnk",
+        eyeColor: "Blue",
+        year:  1987,          
+        img:   "images/chars/toy/toy_cupcake.png"
+      },
+      {
+        name:  "Shadow Cupcake",
+        animal:"Cupcake",
+        type:  "Shadow",
+        color: "Black",
+        eyeColor: "Black",
+        year:  1987,          
+        img:   "images/chars/shadow/cupcake.png"
+      },
+      {
+        name:  "Golden Cupcake",
+        animal:"Cupcake",
+        type:  "Springlock",
+        color: "Yellow",
+        eyeColor: "Yellow",
+        year:  1983,          
+        img:   "images/chars/springlock/cupcake.png"
       },
     ];
 
