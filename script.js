@@ -361,7 +361,7 @@
         color: "Pink",
         eyeColor: "Yellow",
         year:  1983,          
-        img:   "images/chars/nightmare/nightmare_cupcake.png"
+        img:   "images/chars/nightmare/cupcake.png"
       },
       {
         name:  "Nightmare Foxy",
