@@ -241,7 +241,7 @@
         type:  "Other",
         color: "White",
         eyeColor: "Grey",
-        year:  "1980s",          
+        year:  "Unconfirmed",          
         img:   "images/chars/other/crying_child.png"
       },
       {
@@ -250,7 +250,7 @@
         type:  "Other",
         color: "Purple",
         eyeColor: "White",
-        year:  "1980s",          
+        year:  "Unconfirmed",          
         img:   "images/chars/other/afton.png"
       },
       {
@@ -502,7 +502,7 @@
         type:  "Other",
         color: "Purple",
         eyeColor: "Blue",
-        year:  "1980s",          
+        year:  "Unconfirmed",          
         img:   "images/chars/other/michael_afton.png"
       },
       {
@@ -511,7 +511,7 @@
         type:  "Endo",
         color: "Grey",
         eyeColor: "Green",
-        year:  "1980s",          
+        year:  "Unconfirmed",          
         img:   "images/chars/endo/plush.png"
       },
       {
@@ -520,7 +520,7 @@
         type:  "Other",
         color: "Red",
         eyeColor: "Red",
-        year:  "1980s",          
+        year:  "Unconfirmed",          
         img:   "images/chars/other/omc.png"
       },
       {
@@ -556,7 +556,7 @@
         type:  "Funtime",
         color: "White",
         eyeColor: "Blue",
-        year:  "1980s",          
+        year:  "Unconfirmed",          
         img:   "images/chars/funtime/funtime_freddy.png"
       },
       {
@@ -565,7 +565,7 @@
         type:  "Funtime",
         color: "White",
         eyeColor: "Yellow",
-        year:  "1980s",          
+        year:  "Unconfirmed",          
         img:   "images/chars/funtime/funtime_foxy.png"
       },
       {
@@ -574,7 +574,7 @@
         type:  "Funtime",
         color: "Blue",
         eyeColor: "Magenta",
-        year:  "1980s",          
+        year:  "Unconfirmed",          
         img:   "images/chars/funtime/bon-bon.png"
       },
       {
@@ -583,7 +583,7 @@
         type:  "Funtime",
         color: "Pink",
         eyeColor: "Blue",
-        year:  "1980s",          
+        year:  "Unconfirmed",          
         img:   "images/chars/funtime/bonnet.png"
       },
       {
@@ -592,7 +592,7 @@
         type:  "Funtime",
         color: "White",
         eyeColor: "Green",
-        year:  "1980s",          
+        year:  "Unconfirmed",          
         img:   "images/chars/funtime/baby.png"
       },
       {
@@ -601,7 +601,7 @@
         type:  "Funtime",
         color: "White",
         eyeColor: "Magenta",
-        year:  "1980s",          
+        year:  "Unconfirmed",          
         img:   "images/chars/funtime/bidybab.png"
       },
       {
@@ -610,7 +610,7 @@
         type:  "Funtime",
         color: "White",
         eyeColor: "Yellow",
-        year:  "1980s",          
+        year:  "Unconfirmed",          
         img:   "images/chars/funtime/electrobab.png"
       },
       {
@@ -619,7 +619,7 @@
         type:  "Funtime",
         color: "White",
         eyeColor: "Magenta",
-        year:  "1980s",          
+        year:  "Unconfirmed",          
         img:   "images/chars/funtime/ballora.png"
       },
       {
@@ -628,7 +628,7 @@
         type:  "Funtime",
         color: "White",
         eyeColor: "black",
-        year:  "1980s",          
+        year:  "Unconfirmed",          
         img:   "images/chars/funtime/minireena.png"
       },
       {
@@ -637,7 +637,7 @@
         type:  "Funtime",
         color: "White",
         eyeColor: "White",
-        year:  "1980s",          
+        year:  "Unconfirmed",          
         img:   "images/chars/funtime/lolbit.png"
       },
       {
@@ -646,7 +646,7 @@
         type:  "Endo",
         color: "Grey",
         eyeColor: "Yellow",
-        year:  "1980s",          
+        year:  "Unconfirmed",          
         img:   "images/chars/endo/yenndo.png"
       },
       {
@@ -655,7 +655,7 @@
         type:  "Endo",
         color: "White",
         eyeColor: "Blue",
-        year:  "1980s",          
+        year:  "Unconfirmed",          
         img:   "images/chars/endo/ennard.png"
       },
       {
@@ -664,7 +664,7 @@
         type:  "Other",
         color: "Yellow",
         eyeColor: "Black",
-        year:  "1980s",          
+        year:  "Unconfirmed",          
         img:   "images/chars/other/handunit.png"
       },
       {
@@ -673,7 +673,7 @@
         type:  "Other",
         color: "White",
         eyeColor: "Black",
-        year:  "1980s",          
+        year:  "Unconfirmed",          
         img:   "images/chars/other/clara.png"
       },
       {
@@ -682,7 +682,16 @@
         type:  "Other",
         color: "Blue",
         eyeColor: "Black",
-        year:  "1980s",          
+        year:  "Unconfirmed",          
+        img:   "images/chars/other/vlad.png"
+      },
+      {
+        name:  "Vlad's Son",
+        animal:"Humanoid",
+        type:  "Other",
+        color: "Blue",
+        eyeColor: "Black",
+        year:  "Unconfirmed",          
         img:   "images/chars/other/vlad.png"
       },
       {
@@ -691,7 +700,7 @@
         type:  "Other",
         color: "White",
         eyeColor: "Green",
-        year:  "1980s",          
+        year:  "Unconfirmed",          
         img:   "images/chars/other/elizabeth_afton.png"
       },
     ];
