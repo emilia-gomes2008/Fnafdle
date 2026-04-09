@@ -692,7 +692,7 @@
         color: "Blue",
         eyeColor: "Black",
         year:  "Unconfirmed",          
-        img:   "images/chars/other/vlad.png"
+        img:   "images/chars/other/VladsSon.png"
       },
       {
         name:  "Elizabeth Afton",
