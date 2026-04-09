@@ -1,5 +1,5 @@
 /* =======================================================
-       ESTADO DO JOGO
+       Game State
 ======================================================= */
 let target, guesses, gameOver;
 const MAX_GUESSES = 6;
@@ -33,7 +33,7 @@ function updateAttemptsLeft() {
 }
 
 /* =======================================================
-       RENDERIZAR UMA LINHA DE GUESS
+       Renders Guess Line
 ======================================================= */
 function renderGuess(char) {
   const fields = [
@@ -90,7 +90,7 @@ function renderGuess(char) {
 }
 
 /* =======================================================
-       SUBMETER UM GUESS
+       Submit Guess
 ======================================================= */
 function submitGuess(char) {
   if (gameOver) return;
@@ -130,7 +130,7 @@ function endGame(won) {
 }
 
 /* =======================================================
-       DROPDOWN / PESQUISA COM TECLADO
+       Dropdown Menu
 ======================================================= */
 function renderDropdown() {
   const q = input.value.trim().toLowerCase();
@@ -179,7 +179,7 @@ function renderDropdown() {
 input.addEventListener('focus', renderDropdown);
 input.addEventListener('input', renderDropdown);
 
-/* NAVEGAÇÃO COM TECLADO */
+/* Keyboard Navigation */
 input.addEventListener('keydown', e => {
   const items = Array.from(dropdown.querySelectorAll('.dropdown-item'));
   if (!items.length) return;
@@ -212,7 +212,7 @@ input.addEventListener('keydown', e => {
   }
 });
 
-/* Fechar dropdown ao clicar fora */
+/* Close Dropdown */
 document.addEventListener('click', e => {
   if (!document.getElementById('search-area').contains(e.target)) {
     dropdown.style.display = 'none';
