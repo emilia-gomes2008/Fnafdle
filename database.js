@@ -1,13 +1,13 @@
 /* =======================================================
-       BASE DE DADOS DE PERSONAGENS
+       Character Database
        =======================================================
-       Campos:
-         name   → nome do personagem (aparece na célula "Nome")
-         animal → tipo de animal (Bear, Rabbit, etc.)
-         type   → variante (Classic, Withered, Toy, Shadow, etc.)
-         color  → cor principal
-         year   → ano de origem
-         img    → caminho para a imagem PNG
+       Fields:
+         name   → character name
+         animal → animal type (Bear, Rabbit, etc.)
+         type   → variant (Classic, Withered, Toy, Shadow, etc.)
+         color  → main color
+         year   → origin year
+         img    → ./images/chars/<type>/<name>.<format>
     ======================================================= */
     const CHARS = [
       {
