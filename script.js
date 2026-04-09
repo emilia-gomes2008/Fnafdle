@@ -106,10 +106,19 @@
         name:  "Toy Cupcake",
         animal:"Cupcake",
         type:  "Toy",
-        color: "Pinnk",
+        color: "Pink",
         eyeColor: "Blue",
         year:  1987,          
         img:   "images/chars/toy/toy_cupcake.png"
+      },
+      {
+        name:  "Toy Foxy",
+        animal:"Fox",
+        type:  "Toy",
+        color: "White",
+        eyeColor: "Yellow",
+        year:  1987,          
+        img:   "images/chars/toy/toy_foxy.png"
       },
       {
         name:  "Mangle",
@@ -218,6 +227,33 @@
         eyeColor: "White",
         year:  1987,          
         img:   "images/chars/shadow/rxq.png"
+      },
+      {
+        name:  "Paper Pals",
+        animal:"Other",
+        type:  "Other",
+        color: "White",
+        eyeColor: "White",
+        year:  1987,          
+        img:   "images/chars/other/Paperpals.png"
+      },
+      {
+        name:  "Crying Child",
+        animal:"Other",
+        type:  "Other",
+        color: "White",
+        eyeColor: "Grey",
+        year:  "1980s",          
+        img:   "images/chars/other/crying_child.png"
+      },
+      {
+        name:  "William Afton",
+        animal:"Human",
+        type:  "Other",
+        color: "Purple",
+        eyeColor: "White",
+        year:  "1980s",          
+        img:   "images/chars/other/afton.png"
       },
       {
         name:  "Springtrap",
@@ -452,6 +488,42 @@
         eyeColor: "White",
         year:  1983,          
         img:   "images/chars/nightmare/nightmarionne.png"
+      },
+      {
+        name:  "Endo Plush",
+        animal:"Skeleton",
+        type:  "Endo",
+        color: "Grey",
+        eyeColor: "Green",
+        year:  "1980s",          
+        img:   "images/chars/endo/plush.png"
+      },
+      {
+        name:  "Animdude",
+        animal:"Human",
+        type:  "Other",
+        color: "Blue",
+        eyeColor: "White",
+        year:  1978,          
+        img:   "images/chars/other/Animdude.png"
+      },
+      {
+        name:  "Mr. Chipper",
+        animal:"Beaver",
+        type:  "Other",
+        color: "Brown",
+        eyeColor: "Blue",
+        year:  2013,          
+        img:   "images/chars/other/chipper.png"
+      },
+      {
+        name:  "Coffee",
+        animal:"Coffee Machine",
+        type:  "Other",
+        color: "Brown",
+        eyeColor: "Yellow",
+        year:  2012,          
+        img:   "images/chars/other/coffee.png"
       },
     ];
 
