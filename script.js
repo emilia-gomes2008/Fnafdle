@@ -318,6 +318,141 @@
         year:  1983,          
         img:   "images/chars/springlock/cupcake.png"
       },
+      {
+        name:  "Nightmare Freddy",
+        animal:"Bear",
+        type:  "Nightmare",
+        color: "Brown",
+        eyeColor: "Yellow",
+        year:  1983,          
+        img:   "images/chars/nightmare/nightmare_freddy.png"
+      },
+      {
+        name:  "Freddles",
+        animal:"Bear",
+        type:  "Nightmare",
+        color: "Brown",
+        eyeColor: "White",
+        year:  1983,          
+        img:   "images/chars/nightmare/freddles.png"
+      },
+      {
+        name:  "Nightmare Bonnie",
+        animal:"Rabbit",
+        type:  "Nightmare",
+        color: "Blue",
+        eyeColor: "Magenta",
+        year:  1983,          
+        img:   "images/chars/nightmare/nightmare_bonnie.png"
+      },
+      {
+        name:  "Nightmare Chica",
+        animal:"Chicken",
+        type:  "Nightmare",
+        color: "Yellow",
+        eyeColor: "Red",
+        year:  1983,          
+        img:   "images/chars/nightmare/nightmare_chica.png"
+      },
+      {
+        name:  "Nightmare Cupcake",
+        animal:"Cupcake",
+        type:  "Nightmare",
+        color: "Pink",
+        eyeColor: "Yellow",
+        year:  1983,          
+        img:   "images/chars/nightmare/nightmare_cupcake.png"
+      },
+      {
+        name:  "Nightmare Foxy",
+        animal:"Fox",
+        type:  "Nightmare",
+        color: "Red",
+        eyeColor: "Yellow",
+        year:  1983,          
+        img:   "images/chars/nightmare/nightmare_foxy.png"
+      },
+      {
+        name:  "Nightmare Fredbear",
+        animal:"Bear",
+        type:  "Nightmare",
+        color: "Yellow",
+        eyeColor: "Yellow",
+        year:  1983,          
+        img:   "images/chars/nightmare/nightmare_fredbear.png"
+      },
+      {
+        name:  "Plushtrap",
+        animal:"Rabbit",
+        type:  "Nightmare",
+        color: "Green",
+        eyeColor: "Black",
+        year:  1983,          
+        img:   "images/chars/nightmare/creonzadoruin.png"
+      },
+      {
+        name:  "Nightmare",
+        animal:"Bear",
+        type:  "Nightmare",
+        color: "Black",
+        eyeColor: "Red",
+        year:  1983,          
+        img:   "images/chars/nightmare/nightmare.png"
+      },
+      {
+        name:  "Jack-O-Bonnie",
+        animal:"Rabbit",
+        type:  "Jack-O",
+        color: "Orange",
+        eyeColor: "Orange",
+        year:  1983,          
+        img:   "images/chars/nightmare/jack-o/bonnie.png"
+      },
+      {
+        name:  "Jack-O-Chica",
+        animal:"Chicken",
+        type:  "Jack-O",
+        color: "Orange",
+        eyeColor: "Orange",
+        year:  1983,          
+        img:   "images/chars/nightmare/jack-o/chica.png"
+      },
+      {
+        name:  "Jack-O-Lantern",
+        animal:"Cuocake",
+        type:  "Jack-O",
+        color: "Orange",
+        eyeColor: "Yellow",
+        year:  1983,          
+        img:   "images/chars/nightmare/jack-o/lantern.png"
+      },
+      {
+        name:  "Nightmare Mangle",
+        animal:"Fox",
+        type:  "Nightmare",
+        color: "White",
+        eyeColor: "Yellow",
+        year:  1983,          
+        img:   "images/chars/nightmare/nightmare_mangle.png"
+      },
+      {
+        name:  "Nightmare Balloon Boy",
+        animal:"Humanoid",
+        type:  "Nightmare",
+        color: "Purple",
+        eyeColor: "Red",
+        year:  1983,          
+        img:   "images/chars/nightmare/nightmare_bb.png"
+      },
+      {
+        name:  "Nightmarionne",
+        animal:"Humanoid",
+        type:  "Nightmare",
+        color: "Black",
+        eyeColor: "White",
+        year:  1983,          
+        img:   "images/chars/nightmare/nightmarionne.png"
+      },
     ];
 
 /* =======================================================
