@@ -328,6 +328,15 @@
         img:   "images/chars/phantom/p_bb.png"
       },
       {
+        name:  "Dark Springtrap",
+        animal:"Rabbit",
+        type:  "Springlock",
+        color: "Green",
+        eyeColor: "Silver",
+        year:  2023,          
+        img:   "images/chars/springlock/dark_springtrap.png"
+      },
+      {
         name:  "Springbonnie",
         animal:"Rabbit",
         type:  "Springlock",
@@ -490,6 +499,15 @@
         img:   "images/chars/nightmare/nightmarionne.png"
       },
       {
+        name:  "Michael Afton",
+        animal:"Human",
+        type:  "Other",
+        color: "Purple",
+        eyeColor: "Blue",
+        year:  "1980s",          
+        img:   "images/chars/other/michael_afton.png"
+      },
+      {
         name:  "Endo Plush",
         animal:"Skeleton",
         type:  "Endo",
@@ -497,6 +515,15 @@
         eyeColor: "Green",
         year:  "1980s",          
         img:   "images/chars/endo/plush.png"
+      },
+      {
+        name:  "Old Man Consequences",
+        animal:"Aligator",
+        type:  "Other",
+        color: "Red",
+        eyeColor: "Red",
+        year:  "1980s",          
+        img:   "images/chars/other/omc.png"
       },
       {
         name:  "Animdude",
@@ -524,6 +551,150 @@
         eyeColor: "Yellow",
         year:  2012,          
         img:   "images/chars/other/coffee.png"
+      },
+      {
+        name:  "Funtime Freddy",
+        animal:"Bear",
+        type:  "Funtime",
+        color: "White",
+        eyeColor: "Blue",
+        year:  "1980s",          
+        img:   "images/chars/funtime/funtime_freddy.png"
+      },
+      {
+        name:  "Funtime Foxy",
+        animal:"Fox",
+        type:  "Funtime",
+        color: "White",
+        eyeColor: "Yellow",
+        year:  "1980s",          
+        img:   "images/chars/funtime/funtime_foxy.png"
+      },
+      {
+        name:  "Bon-Bon",
+        animal:"Rabbit",
+        type:  "Funtime",
+        color: "Blue",
+        eyeColor: "Magenta",
+        year:  "1980s",          
+        img:   "images/chars/funtime/bon-bon.png"
+      },
+      {
+        name:  "Bon-Bon",
+        animal:"Rabbit",
+        type:  "Funtime",
+        color: "Pink",
+        eyeColor: "Blue",
+        year:  "1980s",          
+        img:   "images/chars/funtime/bonnet.png"
+      },
+      {
+        name:  "Circus Baby",
+        animal:"Humanoid",
+        type:  "Funtime",
+        color: "White",
+        eyeColor: "Green",
+        year:  "1980s",          
+        img:   "images/chars/funtime/baby.png"
+      },
+      {
+        name:  "Bidybab",
+        animal:"Humanoid",
+        type:  "Funtime",
+        color: "White",
+        eyeColor: "Magenta",
+        year:  "1980s",          
+        img:   "images/chars/funtime/bidybab.png"
+      },
+      {
+        name:  "Electrobab",
+        animal:"Humanoid",
+        type:  "Funtime",
+        color: "White",
+        eyeColor: "Yellow",
+        year:  "1980s",          
+        img:   "images/chars/funtime/electrobab.png"
+      },
+      {
+        name:  "Ballora",
+        animal:"Humanoid",
+        type:  "Funtime",
+        color: "White",
+        eyeColor: "Magenta",
+        year:  "1980s",          
+        img:   "images/chars/funtime/ballora.png"
+      },
+      {
+        name:  "Minireena",
+        animal:"Humanoid",
+        type:  "Funtime",
+        color: "White",
+        eyeColor: "black",
+        year:  "1980s",          
+        img:   "images/chars/funtime/minireena.png"
+      },
+      {
+        name:  "Lolbit",
+        animal:"Fox",
+        type:  "Funtime",
+        color: "White",
+        eyeColor: "White",
+        year:  "1980s",          
+        img:   "images/chars/funtime/lolbit.png"
+      },
+      {
+        name:  "Yenndo",
+        animal:"Skeleton",
+        type:  "Endo",
+        color: "Grey",
+        eyeColor: "Yellow",
+        year:  "1980s",          
+        img:   "images/chars/endo/yenndo.png"
+      },
+      {
+        name:  "Ennard",
+        animal:"Skeleton",
+        type:  "Endo",
+        color: "White",
+        eyeColor: "Blue",
+        year:  "1980s",          
+        img:   "images/chars/endo/ennard.png"
+      },
+      {
+        name:  "HandUnit",
+        animal:"Keypad",
+        type:  "Other",
+        color: "Yellow",
+        eyeColor: "Black",
+        year:  "1980s",          
+        img:   "images/chars/other/handunit.png"
+      },
+      {
+        name:  "Clara",
+        animal:"Human",
+        type:  "Other",
+        color: "White",
+        eyeColor: "Black",
+        year:  "1980s",          
+        img:   "images/chars/other/clara.png"
+      },
+      {
+        name:  "Vlad",
+        animal:"Humanoid",
+        type:  "Other",
+        color: "Blue",
+        eyeColor: "Black",
+        year:  "1980s",          
+        img:   "images/chars/other/vlad.png"
+      },
+      {
+        name:  "Elizabeth Afton",
+        animal:"Human",
+        type:  "Other",
+        color: "White",
+        eyeColor: "Green",
+        year:  "1980s",          
+        img:   "images/chars/other/elizabeth_afton.png"
       },
     ];
 
