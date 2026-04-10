@@ -33,21 +33,104 @@ function updateAttemptsLeft() {
 }
 
 /* =======================================================
+       Color Comparison Helpers
+======================================================= */
+
+// Normalise to array (handles legacy string values gracefully)
+function toArr(val) {
+  if (Array.isArray(val)) return val;
+  return val !== undefined && val !== null ? [String(val)] : [];
+}
+
+// Returns 'correct' | 'partial' | 'wrong'
+function colorMatch(guessVal, targetVal) {
+  const g = toArr(guessVal).map(v => v.toLowerCase());
+  const t = toArr(targetVal).map(v => v.toLowerCase());
+
+  const gSorted = [...g].sort().join(',');
+  const tSorted = [...t].sort().join(',');
+
+  if (gSorted === tSorted) return 'correct';           // exact same set
+  if (g.some(v => t.includes(v))) return 'partial';   // at least one overlap
+  return 'wrong';
+}
+
+/* =======================================================
+       Color Swatches
+======================================================= */
+
+const COLOR_HEX = {
+  red:      '#e05555',
+  blue:     '#5580e0',
+  yellow:   '#e0c935',
+  green:    '#3db55a',
+  purple:   '#8b55e0',
+  pink:     '#e055a8',
+  white:    '#e8e8e8',
+  black:    '#333',
+  grey:     '#888',
+  gray:     '#888',
+  brown:    '#8b5e3c',
+  orange:   '#e07830',
+  magenta:  '#cc44aa',
+  silver:   '#aaa',
+  rainbow:  'linear-gradient(90deg,#e05555,#e0c935,#3db55a,#5580e0,#8b55e0)',
+  colorful: 'linear-gradient(90deg,#e05555,#e0c935,#3db55a,#5580e0)',
+};
+
+function makeSwatch(colorName) {
+  const swatch = document.createElement('span');
+  swatch.className = 'color-swatch';
+  const key = colorName.toLowerCase();
+  const fill = COLOR_HEX[key] || '#666';
+  if (fill.startsWith('linear')) {
+    swatch.style.backgroundImage = fill;
+  } else {
+    swatch.style.backgroundColor = fill;
+  }
+  swatch.title = colorName;
+  return swatch;
+}
+
+function makeColorLabel(colors) {
+  const arr = toArr(colors);
+  const wrap = document.createElement('div');
+  wrap.className = 'color-label';
+
+  arr.forEach((c, i) => {
+    wrap.appendChild(makeSwatch(c));
+    const txt = document.createElement('span');
+    txt.className = 'color-name';
+    txt.textContent = c;
+    wrap.appendChild(txt);
+    if (i < arr.length - 1) {
+      const sep = document.createElement('span');
+      sep.className = 'color-sep';
+      sep.textContent = '/';
+      wrap.appendChild(sep);
+    }
+  });
+
+  return wrap;
+}
+
+/* =======================================================
        Renders Guess Line
 ======================================================= */
 function renderGuess(char) {
   const fields = [
-    { key: 'name',     label: char.name },
-    { key: 'animal',   label: char.animal },
-    { key: 'type',     label: char.type },
-    { key: 'color',    label: char.color },
-    { key: 'eyeColor', label: char.eyeColor },
-    { key: 'year',     label: char.year },
+    { key: 'name',     isColor: false },
+    { key: 'animal',   isColor: false },
+    { key: 'type',     isColor: false },
+    { key: 'color',    isColor: true  },
+    { key: 'eyeColor', isColor: true  },
+    { key: 'year',     isColor: false },
   ];
 
   const row = document.createElement('div');
   row.className = 'guess-row';
 
+  // Image cell
   const imgCell = document.createElement('div');
   imgCell.className = 'cell cell-img';
 
@@ -75,13 +158,23 @@ function renderGuess(char) {
   fields.forEach(f => {
     const cell = document.createElement('div');
     cell.className = 'cell';
-    const isCorrect = String(char[f.key]) === String(target[f.key]);
-    cell.classList.add(isCorrect ? 'correct' : 'wrong');
 
-    const label = document.createElement('div');
-    label.className = 'cell-label';
-    label.textContent = f.label;
-    cell.appendChild(label);
+    let matchClass;
+    if (f.isColor) {
+      matchClass = colorMatch(char[f.key], target[f.key]);
+    } else {
+      matchClass = String(char[f.key]) === String(target[f.key]) ? 'correct' : 'wrong';
+    }
+    cell.classList.add(matchClass);
+
+    if (f.isColor) {
+      cell.appendChild(makeColorLabel(char[f.key]));
+    } else {
+      const label = document.createElement('div');
+      label.className = 'cell-label';
+      label.textContent = char[f.key];
+      cell.appendChild(label);
+    }
 
     row.appendChild(cell);
   });

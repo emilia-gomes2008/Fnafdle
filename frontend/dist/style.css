@@ -16,6 +16,9 @@
       --red-bg:      #3a1a1a;
       --red-border:  #8a2d2d;
       --red-text:    #dd6d6d;
+      --yellow-bg:   #2e2a00;
+      --yellow-border:#a08800;
+      --yellow-text: #f0d060;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -102,6 +105,7 @@
     }
 
     .legend-dot.correct { background: var(--green-border); }
+    .legend-dot.partial { background: var(--yellow-border); }
     .legend-dot.wrong   { background: var(--red-border); }
 
     /* =====================================================
@@ -228,10 +232,48 @@
       color: var(--green-text);
     }
 
+    .cell.partial {
+      background: var(--yellow-bg);
+      border-color: var(--yellow-border);
+      color: var(--yellow-text);
+    }
+
     .cell.wrong {
       background: var(--red-bg);
       border-color: var(--red-border);
       color: var(--red-text);
+    }
+
+    /* =====================================================
+       Color Swatches
+       ===================================================== */
+    .color-label {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+    }
+
+    .color-swatch {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.2);
+      flex-shrink: 0;
+    }
+
+    .color-name {
+      font-size: 0.72rem;
+      letter-spacing: 0.3px;
+      line-height: 1.2;
+    }
+
+    .color-sep {
+      font-size: 0.65rem;
+      opacity: 0.5;
+      margin: 0 1px;
     }
 
     /* =====================================================
