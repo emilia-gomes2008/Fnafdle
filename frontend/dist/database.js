@@ -2006,7 +2006,7 @@
         color: ["Black"],
         eyeColor: ["Purple"],
         year:  "Unconfirmed",
-        img:   "../../images/chars/classic/shadow_mangle.png"
+        img:   "../../images/chars/shadow/shadow_mangle.png"
       },
 
       // === Variants ===
@@ -2075,7 +2075,7 @@
         color: ["Yellow", "Purple"],
         eyeColor: ["Purple"],
         year:  "Unconfirmed",
-        img:   "../../images/chars/other/glitchtrap.png"
+        img:   "../../images/chars/springlock/glitchtrap.png"
       },
 
       // === Curse of Dreadbear ===
@@ -2104,6 +2104,6 @@
         color: ["White"],
         eyeColor: ["Purple"],
         year:  "Unconfirmed",
-        img:   "../../images/chars/nightmare/ghost_helpy.png"
+        img:   "../../images/chars/other/ghost_helpy.png"
       },
     ];
