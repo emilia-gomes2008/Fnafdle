@@ -11,6 +11,8 @@
          img    → ../../images/chars/<type>/<name>.<format>
     ======================================================= */
     const CHARS = [
+
+      // === Fnaf 1 ===
       {
         name:  "Freddy Fazbear",
         animal:"Bear",
@@ -92,6 +94,8 @@
         year:  1993,          
         img:   "../../images/chars/endo/endo01.png"
       },
+
+      // === Fnaf 2 ===
       {
         name:  "Toy Freddy",
         animal:"Bear",
@@ -159,7 +163,7 @@
         name:  "JJ",
         animal:"Humanoid",
         type:  "Toy",
-        color: ["Purple"],
+        color: ["Purple", "Blue"],
         eyeColor: ["Magenta"],
         year:  1987,          
         img:   "../../images/chars/toy/jj.png"
@@ -254,6 +258,8 @@
         year:  1987,          
         img:   "../../images/chars/other/Paperpals.png"
       },
+
+      // === Fnaf 2 Minigmaes ===
       {
         name:  "Crying Children",
         animal:"Other",
@@ -272,6 +278,8 @@
         year:  "Unconfirmed",          
         img:   "../../images/chars/other/afton.png"
       },
+
+      // === Fnaf 3 ===
       {
         name:  "Springtrap",
         animal:"Rabbit",
@@ -362,6 +370,8 @@
         year:  2023,          
         img:   "../../images/chars/springlock/dark_springtrap.png"
       },
+
+      // === Fredbear's Family Diner ===
       {
         name:  "Springbonnie",
         animal:"Rabbit",
@@ -389,6 +399,8 @@
         year:  1983,          
         img:   "../../images/chars/springlock/cupcake.png"
       },
+
+      // === Fnaf 4 ===
       {
         name:  "Nightmare Freddy",
         animal:"Bear",
@@ -470,6 +482,8 @@
         year:  1983,          
         img:   "../../images/chars/nightmare/nightmare.png"
       },
+
+      // === Fnaf 4 Halloween Edition ===
       {
         name:  "Jack-O-Bonnie",
         animal:"Rabbit",
@@ -542,23 +556,572 @@
         year:  "Unconfirmed",          
         img:   "../../images/chars/other/michael_afton.png"
       },
+
+      // === Fnaf World ===
+      // === Fazbear Hills ===
       {
-        name:  "Endo Plush",
-        animal:"Skeleton",
-        type:  "Endo",
-        color: ["Grey"],
-        eyeColor: ["Green"],
+        name:  "Mechrab",
+        animal:"Crab",
+        type:  "Enemy",
+        color: ["Pink"],
+        eyeColor: ["Magenta"],
         year:  "Unconfirmed",          
-        img:   "../../images/chars/endo/plush.png"
+        img:   "../../images/chars/fnaf_world_enemies/mechrab.png"
       },
       {
         name:  "Bouncepot",
-        animal:"Bouncepot",
-        type:  "Other",
+        animal:"Plant",
+        type:  "Enemy",
         color: ["Green"],
         eyeColor: ["White"],
         year:  "Unconfirmed",          
-        img:   "../../images/chars/other/bouncepot.png"
+        img:   "../../images/chars/fnaf_world_enemies/bouncepot.png"
+      },
+      {
+        name:  "Gearrat",
+        animal:"Mouse",
+        type:  "Enemy",
+        color: ["Brown"],
+        eyeColor: ["Blue"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/gearrat.png"
+      },
+      {
+        name:  "Auto Chipper",
+        animal:"Beaver",
+        type:  "Enemy",
+        color: ["Brown"],
+        eyeColor: ["Orange"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/auto_chipper.png"
+      },
+
+      // === Choppy's Woods ===
+      {
+        name:  "Chop 'N Roll",
+        animal:"Humanoid",
+        type:  "Enemy",
+        color: ["Brown"],
+        eyeColor: ["Yellow"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/chop_n_roll.png"
+      },
+      {
+        name:  "Totemole",
+        animal:"Mouse",
+        type:  "Enemy",
+        color: ["Brown"],
+        eyeColor: ["Yellow"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/totemole.png"
+      },
+      {
+        name:  "Mad Endo",
+        animal:"Skeleton",
+        type:  "Endo",
+        color: ["Grey"],
+        eyeColor: ["Red"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/endo/mad_endo.png"
+      },
+
+      // === Dusting Fields ===
+      {
+        name:  "Boxbyte",
+        animal:"Humanoid",
+        type:  "Enemy",
+        color: ["Grey"],
+        eyeColor: ["Yellow"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/boxbyte.png"
+      },
+      {
+        name:  "Chillax",
+        animal:"Crab",
+        type:  "Enemy",
+        color: ["Blue", "Orange"],
+        eyeColor: ["Green"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/chillax.webp"
+      },
+      {
+        name:  "Flan",
+        animal:"Slime",
+        type:  "Enemy",
+        color: ["Teal"],
+        eyeColor: ["Yellow"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/flan.png"
+      },
+      {
+        name:  "Bouncer",
+        animal:"Snowman",
+        type:  "Enemy",
+        color: ["White"],
+        eyeColor: ["Black", "White"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/bouncer.png"
+      },
+      {
+        name:  "Snowcone",
+        animal:"Snowman",
+        type:  "Enemy",
+        color: ["White"],
+        eyeColor: ["Black", "White"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/bouncer.png"
+      },
+
+      // === Lilygear Lake ===
+      {
+        name:  "Colossal",
+        animal:"Squid",
+        type:  "Enemy",
+        color: ["White"],
+        eyeColor: ["Red"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/colossal.png"
+      },
+      {
+        name:  "Crabapple",
+        animal:"Crab",
+        type:  "Enemy",
+        color: ["Orange", "Red"],
+        eyeColor: ["White"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/crabapple.png"
+      },
+      {
+        name:  "Seaweed",
+        animal:"Slime",
+        type:  "Enemy",
+        color: ["Green"],
+        eyeColor: ["Yellow"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/seaweed.png"
+      },
+      {
+        name:  "Seagoon",
+        animal:"Squid",
+        type:  "Enemy",
+        color: ["Blue"],
+        eyeColor: ["White"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/seagoon.png"
+      },
+      {
+        name:  "Supergoon",
+        animal:"Squid",
+        type:  "Enemy",
+        color: ["Blue"],
+        eyeColor: ["White"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/seagoon.png"
+      },
+      {
+        name:  "Porkpatch",
+        animal:"Pig",
+        type:  "Enemy",
+        color: ["Brown", "Pink", "Green"],
+        eyeColor: ["Blue"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/porkpatch.png"
+      },
+
+      // === Mysterious Mine ===
+      {
+        name:  "Goldmine",
+        animal:"Golem",
+        type:  "Enemy",
+        color: ["Yellow"],
+        eyeColor: ["Red"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/goldmine.png"
+      },
+      {
+        name:  "Metalman",
+        animal:"Humanoid",
+        type:  "Enemy",
+        color: ["Grey"],
+        eyeColor: ["Green"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/metalman.webp"
+      },
+      {
+        name:  "Quarry",
+        animal:"Golem",
+        type:  "Enemy",
+        color: ["Grey"],
+        eyeColor: ["Grey"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/quarry.png"
+      },
+      {
+        name:  "Eyesore",
+        animal:"Humanoid",
+        type:  "Enemy",
+        color: ["White"],
+        eyeColor: ["Orange"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/eyesore.png"
+      },
+      {
+        name:  "Chipper's Revenge",
+        animal:"Beaver",
+        type:  "Enemy",
+        color: ["Grey"],
+        eyeColor: ["Red"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/chippers_revenge.png"
+      },
+      {
+        name:  "Mr. Chipper",
+        animal:"Beaver",
+        type:  "Other",
+        color: ["Brown"],
+        eyeColor: ["Blue"],
+        year:  2013,          
+        img:   "../../images/chars/other/chipper.png"
+      },
+
+      // === Blacktomb Yard ===
+      {
+        name:  "Beartrap",
+        animal:"Bear",
+        type:  "Enemy",
+        color: ["Grey", "Brown"],
+        eyeColor: ["Blue"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/beartrap.png"
+      },
+      {
+        name:  "Graveweed",
+        animal:"Plant",
+        type:  "Enemy",
+        color: ["Black"],
+        eyeColor: ["White"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/graveweed.png"
+      },
+      {
+        name:  "Prototype",
+        animal:"Bear",
+        type:  "Endo",
+        color: ["Grey", "Brown", "Magenta"],
+        eyeColor: ["Red"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/prototype.png"
+      },
+
+      // === Deep-Metal Mine ===
+      {
+        name:  "Blacktrap",
+        animal:"Bear",
+        type:  "Enemy",
+        color: ["Grey", "Black"],
+        eyeColor: ["White"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/blacktrap.png"
+      },
+      {
+        name:  "Tombstack",
+        animal:"Mouse",
+        type:  "Enemy",
+        color: ["Black", "Brown"],
+        eyeColor: ["Red"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/tombstack.png"
+      },
+      {
+        name:  "Overclock",
+        animal:"Skeleton",
+        type:  "Endo",
+        color: ["Grey"],
+        eyeColor: ["Red"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/endo/overclock.png"
+      },
+
+      // === Pinwheel Circus ===
+      {
+        name:  "Ballboy",
+        animal:"Humanoid",
+        type:  "Enemy",
+        color: ["Red", "Blue"],
+        eyeColor: ["Blue"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/ballboy.png"
+      },
+      {
+        name:  "Dogfight",
+        animal:"Pilot",
+        type:  "Enemy",
+        color: ["Purple"],
+        eyeColor: ["Blue"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/dogfight.png"
+      },
+      {
+        name:  "Meringue",
+        animal:"Cake",
+        type:  "Enemy",
+        color: ["Brown", "Yellow"],
+        eyeColor: ["Orange"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/meringue.png"
+      },
+      {
+        name:  "Browboy",
+        animal:"Humanoid",
+        type:  "Enemy",
+        color: ["Purple", "Black"],
+        eyeColor: ["Red"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/browboy.png"
+      },
+      {
+        name:  "Security Owl",
+        animal:"Owl",
+        type:  "Enemy",
+        color: ["Grey", "Purple"],
+        eyeColor: ["Red", "Green"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/security.png"
+      },
+
+      // === Pinwheel Funhouse ===
+      {
+        name:  "Redbear",
+        animal:"Bear",
+        type:  "Enemy",
+        color: ["Red"],
+        eyeColor: ["White"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/redbear.png"
+      },
+      {
+        name:  "Tangle",
+        animal:"Fox",
+        type:  "Enemy",
+        color: ["White", "Green"],
+        eyeColor: ["White"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/toy/tangle.png"
+      },
+      {
+        name:  "White Rabbit",
+        animal:"Rabbit",
+        type:  "Enemy",
+        color: ["White"],
+        eyeColor: ["Black"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/shadow/white_rabbit.png"
+      },
+      {
+        name:  "Bubba",
+        animal:"Bear",
+        type:  "Enemy",
+        color: ["Brown"],
+        eyeColor: ["Yellow"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/bubba.png"
+      },
+      {
+        name:  "Gold Endo",
+        animal:"Skeleton",
+        type:  "Endo",
+        color: ["Yellow"],
+        eyeColor: ["White"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/endo/gold_endo.png"
+      },
+
+      // === &* TWRE (Glitch Area) ===
+      {
+        name:  ">>>>>>",
+        animal:"Glitched Enemy",
+        type:  "Enemy",
+        color: ["Photo-Negative"],
+        eyeColor: ["Photo-Negative"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/glitch3.webp"
+      },
+      {
+        name:  "%_^^&(",
+        animal:"Glitched Enemy",
+        type:  "Enemy",
+        color: ["Photo-Negative"],
+        eyeColor: ["Photo-Negative"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/%_^^&(.webp"
+      },
+      {
+        name:  "_!2222",
+        animal:"Glitched Enemy",
+        type:  "Enemy",
+        color: ["Photo-Negative"],
+        eyeColor: ["Photo-Negative"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/_!2222.webp"
+      },
+
+      // === Geist Lair ===
+      {
+        name:  "Jangle",
+        animal:"Humanoid",
+        type:  "Enemy",
+        color: ["Red"],
+        eyeColor: ["Red"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/jangle.png"
+      },
+      {
+        name:  "Neon",
+        animal:"Humanoid",
+        type:  "Enemy",
+        color: ["Yellow"],
+        eyeColor: ["Yellow"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/neon.png"
+      },
+      {
+        name:  "P. Goon",
+        animal:"Humanoid",
+        type:  "Enemy",
+        color: ["Purple"],
+        eyeColor: ["Purple"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/p_goon.png"
+      },
+      {
+        name:  "PurpleGeist",
+        animal:"Humanoid",
+        type:  "Enemy",
+        color: ["Purple"],
+        eyeColor: ["White"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/purplegeist.png"
+      },
+      {
+        name:  "Chica's Magic Rainbow",
+        animal:"Rainbow",
+        type:  "Other",
+        color: ["Rainbow"],
+        eyeColor: ["Black"],
+        year:  "Unknown",
+        img:   "../../images/chars/other/rainbow.png"
+      },
+
+      // === Halloween Edition Exclusives ===
+      {
+        name:  "Mad Jack",
+        animal:"Humanoid",
+        type:  "Enemy",
+        color: ["Orange", "Purple"],
+        eyeColor: ["Black"],
+        year:  "Unconfirmed",
+        img:   "../../images/chars/fnaf_world_enemies/mad_jack.png"
+      },
+      {
+        name:  "Big Jack",
+        animal:"Humanoid",
+        type:  "Enemy",
+        color: ["Red", "Blue"],
+        eyeColor: ["Red"],
+        year:  "Unconfirmed",
+        img:   "../../images/chars/fnaf_world_enemies/big_jack.png"
+      },
+      {
+        name:  "Cheesehead",
+        animal:"Humanoid",
+        type:  "Enemy",
+        color: ["Yellow", "Red"],
+        eyeColor: ["White"],
+        year:  "Unconfirmed",
+        img:   "../../images/chars/fnaf_world_enemies/cheesehead.png"
+      },
+      {
+        name:  "Half-Bake",
+        animal:"Cake",
+        type:  "Enemy",
+        color: ["Yellow", "Pink"],
+        eyeColor: ["Black"],
+        year:  "Unconfirmed",
+        img:   "../../images/chars/fnaf_world_enemies/half-bake.png"
+      },
+      {
+        name:  "Mudpie",
+        animal:"Cake",
+        type:  "Enemy",
+        color: ["Brown"],
+        eyeColor: ["Black"],
+        year:  "Unconfirmed",
+        img:   "../../images/chars/fnaf_world_enemies/mudpie.png"
+      },
+      {
+        name:  "Xangle",
+        animal:"Fox",
+        type:  "Enemy",
+        color: ["Red"],
+        eyeColor: ["Yellow"],
+        year:  "Unconfirmed",
+        img:   "../../images/chars/fnaf_world_enemies/xangle.png"
+      },
+      {
+        name:  "Quad Endo",
+        animal:"Skeleton",
+        type:  "Endo",
+        color: ["Grey"],
+        eyeColor: ["Blue"],
+        year:  "Unconfirmed",
+        img:   "../../images/chars/endo/quad_endo.png"
+      },
+      {
+        name:  "Party Hat A",
+        animal:"Humanoid",
+        type:  "Enemy",
+        color: ["White", "Pink"],
+        eyeColor: ["Yellow"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/party_hat_a.png"
+      },
+      {
+        name:  "Party Hat B",
+        animal:"Humanoid",
+        type:  "Enemy",
+        color: ["Red", "Orange"],
+        eyeColor: ["Green"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/fnaf_world_enemies/party_hat_b.webp"
+      },
+      {
+        name:  "Mini P",
+        animal:"Humanoid",
+        type:  "Enemy",
+        color: ["Purple"],
+        eyeColor: ["Orange"],
+        year:  "Unconfirmed",
+        img:   "../../images/chars/fnaf_world_enemies/mini_p.png"
+      },
+      {
+        name:  "Security",
+        animal:"Humanoid",
+        type:  "Enemy",
+        color: ["Grey", "Red"],
+        eyeColor: ["Yellow"],
+        year:  "Unconfirmed",
+        img:   "../../images/chars/fnaf_world_enemies/security_halloween.png"
+      },
+
+      // === NPCs / Other ===
+      {
+        name:  "Mendo",
+        animal:"Skeleton",
+        type:  "Endo",
+        color: ["Blue"],
+        eyeColor: ["Yellow"],
+        year:  "Unconfirmed",
+        img:   "../../images/chars/endo/mendo.png"
       },
       {
         name:  "Dee Dee",
@@ -566,26 +1129,8 @@
         type:  "Other",
         color: ["Purple", "Yellow"],
         eyeColor: ["Green"],
-        year:  2023,
-        img:   "../../images/chars/other/egg_baby.png"
-      },
-      {
-        name:  "Tangle",
-        animal:"Fox",
-        type:  "Toy",
-        color: ["White"],
-        eyeColor: ["BlaWhiteck"],
-        year:  "Unconfirmed",          
-        img:   "../../images/chars/toy/tangle.png"
-      },
-      {
-        name:  "White Rabbit",
-        animal:"Rabbit",
-        type:  "Shadow",
-        color: ["White"],
-        eyeColor: ["Black"],
-        year:  "Unconfirmed",          
-        img:   "../../images/chars/shadow/white_rabbit.png"
+        year:  "Unconfirmed",
+        img:   "../../images/chars/other/dee_dee.png"
       },
       {
         name:  "Old Man Consequences",
@@ -597,6 +1142,33 @@
         img:   "../../images/chars/other/omc.png"
       },
       {
+        name:  "8-Bit Fredbear",
+        animal:"Bear",
+        type:  "Springlock",
+        color: ["Yellow"],
+        eyeColor: ["Yellow"],
+        year:  "Unconfirmed",
+        img:   "../../images/chars/springlock/8-bit_fredbear.png"
+      },
+      {
+        name:  "Desk Man",
+        animal:"Human",
+        type:  "Other",
+        color: ["Grey"],
+        eyeColor: ["Grey"],
+        year:  "Unconfirmed",
+        img:   "../../images/chars/other/desk_man.png"
+      },
+            {
+        name:  "Endo Plush",
+        animal:"Skeleton",
+        type:  "Endo",
+        color: ["Grey"],
+        eyeColor: ["Green"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/endo/plush.png"
+      },
+      {
         name:  "Animdude",
         animal:"Human",
         type:  "Other",
@@ -604,24 +1176,6 @@
         eyeColor: ["White"],
         year:  1978,          
         img:   "../../images/chars/other/Animdude.png"
-      },
-      {
-        name:  "Chica's Magic Rainbow",
-        animal:"Rainbow",
-        type:  "Other",
-        color: ["Rainbow"],
-        eyeColor: ["Black"],
-        year:  "Unknown",
-        img:   "../../images/chars/other/rainbow.png"
-      },
-      {
-        name:  "Mr. Chipper",
-        animal:"Beaver",
-        type:  "Other",
-        color: ["Brown"],
-        eyeColor: ["Blue"],
-        year:  2013,          
-        img:   "../../images/chars/other/chipper.png"
       },
       {
         name:  "Coffee",
@@ -632,6 +1186,8 @@
         year:  2012,          
         img:   "../../images/chars/other/coffee.png"
       },
+
+      // === Trophies ===
       {
         name:  "Security Trophy",
         animal:"Owl",
@@ -704,6 +1260,8 @@
         year:  2016,          
         img:   "../../images/chars/trophy/fan_trophy.png"
       },
+
+      // === Sister Location ===
       {
         name:  "Funtime Freddy",
         animal:"Bear",
@@ -822,6 +1380,17 @@
         img:   "../../images/chars/other/handunit.png"
       },
       {
+        name:  "Module Heads",
+        animal:"Humanoid",
+        type:  "Other",
+        color: ["White"],
+        eyeColor: ["Yellow"],
+        year:  "Unconfirmed",          
+        img:   "../../images/chars/other/module_heads.png"
+      },
+
+      // === Immortal and the Restless ===
+      {
         name:  "Clara",
         animal:"Human",
         type:  "Other",
@@ -848,15 +1417,8 @@
         year:  "Unconfirmed",          
         img:   "../../images/chars/other/VladsSon.png"
       },
-      {
-        name:  "Module Heads",
-        animal:"Humanoid",
-        type:  "Other",
-        color: ["White"],
-        eyeColor: ["Yellow"],
-        year:  "Unconfirmed",          
-        img:   "../../images/chars/other/module_heads.png"
-      },
+
+      // === Sister Location Minigames ===
       {
         name:  "Elizabeth Afton",
         animal:"Human",
@@ -866,6 +1428,8 @@
         year:  "Unconfirmed",          
         img:   "../../images/chars/other/elizabeth_afton.png"
       },
+
+      // === Pizza Sim Fakeout ===
       {
         name:  "Minigame Freddy",
         animal:"Bear",
@@ -884,6 +1448,8 @@
         year:  2023,
         img:   "../../images/chars/other/minigame_grey_freddy.png"
       },
+
+      // === Freddy Fazbear's Pizzeria Simulator Night Sections ===
       {
         name:  "Scraptrap",
         animal:"Rabbit",
@@ -947,6 +1513,9 @@
         year:  2023,
         img:   "../../images/chars/other/ads.png"
       },
+
+      // === FFPS Buyables ===
+      // === Mediocre Melodies ===
       {
         name:  "Mr. Hippo",
         animal:"Hippo",
@@ -992,6 +1561,8 @@
         year:  2023,
         img:   "../../images/chars/mediocre_melodies/nedd_bear.png"
       },
+
+      // === Rockstars ===
       {
         name:  "Rockstar Freddy",
         animal:"Bear",
@@ -1028,6 +1599,8 @@
         year:  2023,
         img:   "../../images/chars/rockstar/rockstar_foxy.png"
       },
+
+      // === Other Buyables ===
       {
         name:  "Candy Cadet",
         animal:"Robot",
@@ -1181,18 +1754,11 @@
         year:  2023,
         img:   "../../images/chars/other/ballpit_tower.png"
       },
+
+      // === Trash & the Gang ===
       {
         name:  "Pan Stan",
         animal:"Pan",
-        type:  "Trash",
-        color: ["Grey"],
-        eyeColor: ["Black"],
-        year:  2023,
-        img:   "../../images/chars/trash/pan_stan.png"
-      },
-            {
-        name:  "Pan Stan",
-        animal:"Trash",
         type:  "Trash",
         color: ["Grey"],
         eyeColor: ["Black"],
@@ -1235,6 +1801,8 @@
         year:  2023,
         img:   "../../images/chars/trash/mr_hugs.png"
       },
+
+      // === Ultimate Custom Night Plushies ===
       {
         name:  "Plush Freddy",
         animal:"Bear",
@@ -1316,6 +1884,8 @@
         year:  2023,
         img:   "../../images/chars/plush/baby.png"
       },
+
+      // === Ultimate Custom Night Extras ===
       {
         name:  "Loading Freddy",
         animal:"Bear",
@@ -1334,6 +1904,8 @@
         year:  2023,
         img:   "../../images/chars/other/xor.png"
       },
+
+      // === Ultimate Custom Night Trophies ===
       {
         name:  "The Bronze One",
         animal:"Bear",
