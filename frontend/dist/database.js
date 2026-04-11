@@ -1151,6 +1151,15 @@
         img:   "../../images/chars/springlock/8-bit_fredbear.png"
       },
       {
+        name:  "Souldozer",
+        animal:"Humanoid",
+        type:  "Enemy",
+        color: ["Grey", "Yellow"],
+        eyeColor: ["Yellow"],
+        year:  2011,
+        img:   "../../images/chars/fnaf_world_enemies/souldozer.png"
+      },
+      {
         name:  "Desk Man",
         animal:"Human",
         type:  "Other",
@@ -1932,5 +1941,169 @@
         eyeColor: ["Yellow"],
         year:  2023,
         img:   "../../images/chars/trophy/games_freddy.png"
+      },
+
+      // === Help Wanted ===
+      // === Blacklight Levels ===
+      {
+        name:  "Dark Freddy",
+        animal:"Bear",
+        type:  "Classic",
+        color: ["Black"],
+        eyeColor: ["White"],
+        year:  "Unconfirmed",
+        img:   "../../images/chars/classic/dark_freddy.png"
+      },
+      {
+        name:  "Party Freddy",
+        animal:"Bear",
+        type:  "Classic",
+        color: ["Black"],
+        eyeColor: ["Red"],
+        year:  "Unconfirmed",
+        img:   "../../images/chars/classic/party_freddy.png"
+      },
+      {
+        name:  "Neon Bonnie",
+        animal:"Rabbit",
+        type:  "Classic",
+        color: ["Black"],
+        eyeColor: ["Blue", "White"],
+        year:  "Unconfirmed",
+        img:   "../../images/chars/classic/neon_bonnie.png"
+      },
+      {
+        name:  "Neon Chica",
+        animal:"Chicken",
+        type:  "Classic",
+        color: ["Black"],
+        eyeColor: ["Yellow", "White"],
+        year:  "Unconfirmed",
+        img:   "../../images/chars/classic/neon_chica.png"
+      },
+      {
+        name:  "Burnt Foxy",
+        animal:"Fox",
+        type:  "Classic",
+        color: ["Grey"],
+        eyeColor: ["Orange"],
+        year:  "Unconfirmed",
+        img:   "../../images/chars/classic/burnt_foxy.png"
+      },
+      {
+        name:  "Dark Foxy",
+        animal:"Fox",
+        type:  "Classic",
+        color: ["Black"],
+        eyeColor: ["White"],
+        year:  "Unconfirmed",
+        img:   "../../images/chars/classic/dark_foxy.png"
+      },
+      {
+        name:  "Shadow Mangle",
+        animal:"Fox",
+        type:  "Classic",
+        color: ["Black"],
+        eyeColor: ["Purple"],
+        year:  "Unconfirmed",
+        img:   "../../images/chars/classic/shadow_mangle.png"
+      },
+
+      // === Variants ===
+      {
+        name:  "Captain Foxy",
+        animal:"Fox",
+        type:  "Classic",
+        color: ["Red", "Blue"],
+        eyeColor: ["Yellow"],
+        year:  "Unconfirmed",
+        img:   "../../images/chars/classic/captain_foxy.png"
+      },
+      {
+        name:  "Plushbaby",
+        animal:"Humanoid",
+        type:  "Plush",
+        color: ["White", "Red"],
+        eyeColor: ["Green"],
+        year:  "Unconfirmed",
+        img:   "../../images/chars/plush/plushbaby.png"
+      },
+      {
+        name:  "Scrap Plushbaby",
+        animal:"Humanoid",
+        type:  "Plush",
+        color: ["Grey", "Orange"],
+        eyeColor: ["Green"],
+        year:  "Unconfirmed",
+        img:   "../../images/chars/plush/scrap_plushbaby.png"
+      },
+
+      // === Endos ===
+      {
+        name:  "Ghetto Endo",
+        animal:"Skeleton",
+        type:  "Endo",
+        color: ["Grey"],
+        eyeColor: ["Red"],
+        year:  "Unconfirmed",
+        img:   "../../images/chars/endo/ghetto_endo.png"
+      },
+      {
+        name:  "Nightmare Endo",
+        animal:"Skeleton",
+        type:  "Endo",
+        color: ["Grey"],
+        eyeColor: ["Red"],
+        year:  "Unconfirmed",
+        img:   "../../images/chars/endo/nightmare_endo.png"
+      },
+
+      // === Others ===
+      {
+        name:  "Tape Girl",
+        animal:"Human",
+        type:  "Other",
+        color: ["White"],
+        eyeColor: ["Green"],
+        year:  "Unconfirmed",
+        img:   "../../images/chars/other/tape_girl.png"
+      },
+      {
+        name:  "Glitchtrap",
+        animal:"Rabbit",
+        type:  "Other",
+        color: ["Yellow", "Purple"],
+        eyeColor: ["Purple"],
+        year:  "Unconfirmed",
+        img:   "../../images/chars/other/glitchtrap.png"
+      },
+
+      // === Curse of Dreadbear ===
+      {
+        name:  "Dreadbear",
+        animal:"Bear",
+        type:  "Nightmare",
+        color: ["Green"],
+        eyeColor: ["Yellow"],
+        year:  "Unconfirmed",
+        img:   "../../images/chars/nightmare/dreadbear.png"
+      },
+      {
+        name:  "Grimm Foxy",
+        animal:"Fox",
+        type:  "Nightmare",
+        color: ["Orange"],
+        eyeColor: ["Yellow"],
+        year:  "Unconfirmed",
+        img:   "../../images/chars/nightmare/grimm_foxy.png"
+      },
+      {
+        name:  "Ghost Helpy",
+        animal:"Bear",
+        type:  "Other",
+        color: ["White"],
+        eyeColor: ["Purple"],
+        year:  "Unconfirmed",
+        img:   "../../images/chars/nightmare/ghost_helpy.png"
       },
     ];
