@@ -2234,7 +2234,7 @@
         color: ["White", "Grey"],
         eyeColor: ["Black"],
         year:  2035,
-        img:   "../../images/chars/staff_bots/instructor.png"
+        img:   "../../images/chars/staff_bot/instructor.png"
       },
       {
         name:  "Comedy Bot",
@@ -2243,7 +2243,7 @@
         color: ["White", "Grey"],
         eyeColor: ["Black"],
         year:  2035,
-        img:   "../../images/chars/staff_bots/comedy.png"
+        img:   "../../images/chars/staff_bot/comedy.png"
       },
       {
         name:  "Magician Bot",
@@ -2252,7 +2252,7 @@
         color: ["White", "Black"],
         eyeColor: ["Black"],
         year:  2035,
-        img:   "../../images/chars/staff_bots/magician.png"
+        img:   "../../images/chars/staff_bot/magician.png"
       },
       {
         name:  "Map Bot",
@@ -2261,7 +2261,7 @@
         color: ["White", "Yellow"],
         eyeColor: ["Black"],
         year:  2035,
-        img:   "../../images/chars/staff_bots/map.png"
+        img:   "../../images/chars/staff_bot/map.png"
       },
       {
         name:  "Mop Bot",
@@ -2270,7 +2270,7 @@
         color: ["White"],
         eyeColor: ["Black"],
         year:  2035,
-        img:   "../../images/chars/staff_bots/mop.png"
+        img:   "../../images/chars/staff_bot/mop.png"
       },
       {
         name:  "Nightmare S.T.A.F.F. Bot",
@@ -2279,7 +2279,7 @@
         color: ["White", "Black"],
         eyeColor: ["White"],
         year:  2035,
-        img:   "../../images/chars/staff_bots/nightmare.png"
+        img:   "../../images/chars/staff_bot/nightmare.png"
       },
       {
         name:  "Party Bot",
@@ -2288,7 +2288,7 @@
         color: ["White", "Purple"],
         eyeColor: ["Black"],
         year:  2035,
-        img:   "../../images/chars/staff_bots/party.png"
+        img:   "../../images/chars/staff_bot/party.png"
       },
       {
         name:  "Sewer Bot",
@@ -2297,7 +2297,7 @@
         color: ["White", "Green"],
         eyeColor: ["Black"],
         year:  2035,
-        img:   "../../images/chars/staff_bots/sewer.png"
+        img:   "../../images/chars/staff_bot/sewer.png"
       },
       {
         name:  "Chef Bot",
@@ -2306,7 +2306,7 @@
         color: ["White", "Pink"],
         eyeColor: ["Black"],
         year:  2035,
-        img:   "../../images/chars/staff_bots/chef.png"
+        img:   "../../images/chars/staff_bot/pizza.png"
       },
       {
         name:  "Security Bot",
@@ -2315,7 +2315,7 @@
         color: ["White", "Black"],
         eyeColor: ["Black"],
         year:  2035,
-        img:   "../../images/chars/staff_bots/security.png"
+        img:   "../../images/chars/staff_bot/security.png"
       },
       {
         name:  "Attendant Bot",
@@ -2324,7 +2324,7 @@
         color: ["White", "Red"],
         eyeColor: ["Black"],
         year:  2035,
-        img:   "../../images/chars/staff_bots/attendant.png"
+        img:   "../../images/chars/staff_bot/attendant.png"
       },
       {
         name:  "Alien Bot",
@@ -2333,7 +2333,7 @@
         color: ["White", "Green"],
         eyeColor: ["Black"],
         year:  2035,
-        img:   "../../images/chars/staff_bots/alien.png"
+        img:   "../../images/chars/staff_bot/alien.png"
       },
       {
         name:  "S.T.A.F.F. Bot",
@@ -2342,7 +2342,7 @@
         color: ["White"],
         eyeColor: ["Black"],
         year:  2035,
-        img:   "../../images/chars/staff_bots/staff.png"
+        img:   "../../images/chars/staff_bot/staff.png"
       },
       {
         name:  "Wet Floor Bot",
@@ -2418,7 +2418,7 @@
         color: ["White", "Blue"],
         eyeColor: ["Brown"],
         year:  2035,
-        img:   "../../images/chars/other/gregory.png"
+        img:   "../../images/chars/other/ggy.png"
       },
       {
         name:  "Vanessa",
