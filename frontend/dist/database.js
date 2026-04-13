@@ -1000,7 +1000,7 @@
         color: ["Purple"],
         eyeColor: ["White"],
         year:  "Unconfirmed",          
-        img:   "../../images/chars/fnaf_world_enemies/purplegeist.png"
+        img:   "../../images/chars/fnaf_world_enemies/purpleGeist.png"
       },
       {
         name:  "Chica's Magic Rainbow",
@@ -2075,7 +2075,7 @@
         color: ["Yellow", "Purple"],
         eyeColor: ["Purple"],
         year:  "Unconfirmed",
-        img:   "../../images/chars/springlock/glitchtrap.png"
+        img:   "../../images/chars/springlock/Glitchtrap.png"
       },
 
       // === Curse of Dreadbear ===
@@ -2105,5 +2105,346 @@
         eyeColor: ["Purple"],
         year:  "Unconfirmed",
         img:   "../../images/chars/other/ghost_helpy.png"
+      },
+
+      // === Security Breach ===
+      {
+        name:  "Glamrock Freddy",
+        animal:"Bear",
+        type:  "Glamrock",
+        color: ["Orange"],
+        eyeColor: ["Blue"],
+        year:  2035,
+        img:   "../../images/chars/glamrock/freddy.png"
+      },
+      {
+        name:  "Shattered Glamrock Freddy",
+        animal:"Bear",
+        type:  "Glamrock",
+        color: ["Orange"],
+        eyeColor: ["Yellow"],
+        year:  2035,
+        img:   "../../images/chars/glamrock/shatter/freddy.png"
+      },
+      {
+        name:  "Glamrock Chica",
+        animal:"Chicken",
+        type:  "Glamrock",
+        color: ["White"],
+        eyeColor: ["Purple"],
+        year:  2035,
+        img:   "../../images/chars/glamrock/chica.png"
+      },
+      {
+        name:  "Shattered Glamrock Chica",
+        animal:"Chicken",
+        type:  "Glamrock",
+        color: ["White"],
+        eyeColor: ["Purple"],
+        year:  2035,
+        img:   "../../images/chars/glamrock/shatter/chica.png"
+      },
+      {
+        name:  "Montegomery Gator",
+        animal:"Alligator",
+        type:  "Glamrock",
+        color: ["Green"],
+        eyeColor: ["Orange"],
+        year:  2035,
+        img:   "../../images/chars/glamrock/monty.png"
+      },
+      {
+        name:  "Shattered Montegomery Gator",
+        animal:"Alligator",
+        type:  "Glamrock",
+        color: ["Green"],
+        eyeColor: ["Orange"],
+        year:  2035,
+        img:   "../../images/chars/glamrock/shatter/monty.png"
+      },
+      {
+        name:  "Roxane Wolf",
+        animal:"Wolf",
+        type:  "Glamrock",
+        color: ["Grey", "Red"],
+        eyeColor: ["Yellow"],
+        year:  2035,
+        img:   "../../images/chars/glamrock/roxy.png"
+      },
+      {
+        name:  "Shattered Roxane Wolf",
+        animal:"Wolf",
+        type:  "Glamrock",
+        color: ["Grey", "Red"],
+        eyeColor: ["Yellow"],
+        year:  2035,
+        img:   "../../images/chars/glamrock/shatter/roxy.png"
+      },
+      {
+        name:  "Glamrock Mr. Hippo",
+        animal:"Hippo",
+        type:  "Glamrock",
+        color: ["Grey", "Newspaper"],
+        eyeColor: ["Grey", "Newspaper"],
+        year:  2035,
+        img:   "../../images/chars/glamrock/hippo.png"
+      },
+      {
+        name:  "Glamrock Endo",
+        animal:"Skeleton",
+        type:  "Endo",
+        color: ["Grey"],
+        eyeColor: ["Black"],
+        year:  2035,
+        img:   "../../images/chars/endo/glamrock.png"
+      },
+      {
+        name:  "Wind Up Music Man",
+        animal:"Spider",
+        type:  "Other",
+        color: ["White", "Pink"],
+        eyeColor: ["Black"],
+        year:  2035,
+        img:   "../../images/chars/other/lil_music.png"
+      },
+      {
+        name:  "DJ Music Man",
+        animal:"Spider",
+        type:  "Other",
+        color: ["White", "Pink"],
+        eyeColor: ["Black"],
+        year:  2035,
+        img:   "../../images/chars/other/dj_music_man.png"
+      },
+      {
+        name:  "Sun",
+        animal:"Humanoid",
+        type:  "Other",
+        color: ["Yellow"],
+        eyeColor: ["White"],
+        year:  2035,
+        img:   "../../images/chars/other/sun.png"
+      },
+
+      // === STAFF Bots ===
+      {
+        name:  "Instructor Bot",
+        animal:"Humanoid",
+        type:  "S.T.A.F.F. Bot",
+        color: ["White", "Grey"],
+        eyeColor: ["Black"],
+        year:  2035,
+        img:   "../../images/chars/staff_bots/instructor.png"
+      },
+      {
+        name:  "Comedy Bot",
+        animal:"Humanoid",
+        type:  "S.T.A.F.F. Bot",
+        color: ["White", "Grey"],
+        eyeColor: ["Black"],
+        year:  2035,
+        img:   "../../images/chars/staff_bots/comedy.png"
+      },
+      {
+        name:  "Magician Bot",
+        animal:"Humanoid",
+        type:  "S.T.A.F.F. Bot",
+        color: ["White", "Black"],
+        eyeColor: ["Black"],
+        year:  2035,
+        img:   "../../images/chars/staff_bots/magician.png"
+      },
+      {
+        name:  "Map Bot",
+        animal:"Humanoid",
+        type:  "S.T.A.F.F. Bot",
+        color: ["White", "Yellow"],
+        eyeColor: ["Black"],
+        year:  2035,
+        img:   "../../images/chars/staff_bots/map.png"
+      },
+      {
+        name:  "Mop Bot",
+        animal:"Humanoid",
+        type:  "S.T.A.F.F. Bot",
+        color: ["White"],
+        eyeColor: ["Black"],
+        year:  2035,
+        img:   "../../images/chars/staff_bots/mop.png"
+      },
+      {
+        name:  "Nightmare S.T.A.F.F. Bot",
+        animal:"Humanoid",
+        type:  "S.T.A.F.F. Bot",
+        color: ["White", "Black"],
+        eyeColor: ["White"],
+        year:  2035,
+        img:   "../../images/chars/staff_bots/nightmare.png"
+      },
+      {
+        name:  "Party Bot",
+        animal:"Humanoid",
+        type:  "S.T.A.F.F. Bot",
+        color: ["White", "Purple"],
+        eyeColor: ["Black"],
+        year:  2035,
+        img:   "../../images/chars/staff_bots/party.png"
+      },
+      {
+        name:  "Sewer Bot",
+        animal:"Humanoid",
+        type:  "S.T.A.F.F. Bot",
+        color: ["White", "Green"],
+        eyeColor: ["Black"],
+        year:  2035,
+        img:   "../../images/chars/staff_bots/sewer.png"
+      },
+      {
+        name:  "Chef Bot",
+        animal:"Humanoid",
+        type:  "S.T.A.F.F. Bot",
+        color: ["White", "Pink"],
+        eyeColor: ["Black"],
+        year:  2035,
+        img:   "../../images/chars/staff_bots/chef.png"
+      },
+      {
+        name:  "Security Bot",
+        animal:"Humanoid",
+        type:  "S.T.A.F.F. Bot",
+        color: ["White", "Black"],
+        eyeColor: ["Black"],
+        year:  2035,
+        img:   "../../images/chars/staff_bots/security.png"
+      },
+      {
+        name:  "Attendant Bot",
+        animal:"Humanoid",
+        type:  "S.T.A.F.F. Bot",
+        color: ["White", "Red"],
+        eyeColor: ["Black"],
+        year:  2035,
+        img:   "../../images/chars/staff_bots/attendant.png"
+      },
+      {
+        name:  "Alien Bot",
+        animal:"Humanoid",
+        type:  "S.T.A.F.F. Bot",
+        color: ["White", "Green"],
+        eyeColor: ["Black"],
+        year:  2035,
+        img:   "../../images/chars/staff_bots/alien.png"
+      },
+      {
+        name:  "S.T.A.F.F. Bot",
+        animal:"Humanoid",
+        type:  "S.T.A.F.F. Bot",
+        color: ["White"],
+        eyeColor: ["Black"],
+        year:  2035,
+        img:   "../../images/chars/staff_bots/staff.png"
+      },
+      {
+        name:  "Wet Floor Bot",
+        animal:"Sign",
+        type:  "Other",
+        color: ["Yellow", "Black"],
+        eyeColor: ["Yellow"],
+        year:  2035,
+        img:   "../../images/chars/other/wet.png"
+      },
+
+      // === Princess Quest ===
+      {
+        name:  "Princess",
+        animal:"Human",
+        type:  "Princess Quest",
+        color: ["Yellow"],
+        eyeColor: ["Yellow"],
+        year:  2035,
+        img:   "../../images/chars/princess_quest/princess.png"
+      },
+      {
+        name:  "Rabbit Head",
+        animal:"Rabbit",
+        type:  "Princess Quest",
+        color: ["Black", "Green"],
+        eyeColor: ["Green"],
+        year:  2035,
+        img:   "../../images/chars/princess_quest/rabbit_head.png"
+      },
+      {
+        name:  "Glitchtrap Chaser",
+        animal:"Rabbit",
+        type:  "Princess Quest",
+        color: ["Black", "Green"],
+        eyeColor: ["Green"],
+        year:  2035,
+        img:   "../../images/chars/princess_quest/glitchtrap_chaser.png"
+      },
+      {
+        name:  "Bunny Sentry",
+        animal:"Rabbit",
+        type:  "Princess Quest",
+        color: ["Black", "White"],
+        eyeColor: ["White"],
+        year:  2035,
+        img:   "../../images/chars/princess_quest/bunny_sentry.png"
+      },
+      {
+        name:  "Amalgam Glitchtrap",
+        animal:"Rabbit",
+        type:  "Princess Quest",
+        color: ["Purple", "Black"],
+        eyeColor: ["Purple"],
+        year:  2035,
+        img:   "../../images/chars/princess_quest/amalgamtrap.png"
+      },
+
+      // === The Rest ===
+      {
+        name:  "Burntrap", //the goat
+        animal:"Rabbit",
+        type:  "Springlock",
+        color: ["Green"],
+        eyeColor: ["Purple"],
+        year:  2035,
+        img:   "../../images/chars/springlock/burntrap.png"
+      },
+      {
+        name:  "Gregory",
+        animal:"Human",
+        type:  "Other",
+        color: ["White", "Blue"],
+        eyeColor: ["Brown"],
+        year:  2035,
+        img:   "../../images/chars/other/gregory.png"
+      },
+      {
+        name:  "Vanessa",
+        animal:"Human",
+        type:  "Other",
+        color: ["White", "Yellow"],
+        eyeColor: ["Green"],
+        year:  2012,
+        img:   "../../images/chars/other/vanessa.png"
+      },
+      {
+        name:  "Vanny",
+        animal:"Rabbit",
+        type:  "Other",
+        color: ["White"],
+        eyeColor: ["Red"],
+        year:  2035,
+        img:   "../../images/chars/other/vanny.png"
+      },
+      {
+        name:  "Tangle Blob",
+        animal:"Blob",
+        type:  "Endo",
+        color: ["Black", "White"],
+        eyeColor: ["Red"],
+        year:  2035,
+        img:   "../../images/chars/endo/blob.png"
       },
     ];
