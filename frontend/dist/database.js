@@ -2483,7 +2483,7 @@ const CHARS = [
     color: ["Blue"],
     eyeColor: ["White"],
     year: 2035,
-    img: "../../images/chars/ruined/bonnie.png"
+    img: "../../images/chars/ruined/glamrock_bonnie.png"
   },
   {
     name: "Ruined Chica",
@@ -2519,7 +2519,7 @@ const CHARS = [
     color: ["Yellow", "Orange"],
     eyeColor: ["White"],
     year: 2035,
-    img: "../../images/chars/ruined/sun.png"
+    img: "../../images/chars/ruined/ruined_sun.png"
   },
   {
     name: "Ruined Moon",
@@ -2528,7 +2528,7 @@ const CHARS = [
     color: ["Blue", "White"],
     eyeColor: ["Red"],
     year: 2035,
-    img: "../../images/chars/ruined/moon.png"
+    img: "../../images/chars/ruined/ruined_moon.png"
   },
   {
     name: "Eclipse",
@@ -2564,7 +2564,7 @@ const CHARS = [
     color: ["White"],
     eyeColor: ["Blue"],
     year: 2035,
-    img: "../../images/chars/other/helpi.png"
+    img: "../../images/chars/other/Helpi.png"
   },
   {
     name: "Elephant Mascot Suit",
@@ -2609,7 +2609,7 @@ const CHARS = [
     color: ["Brown", "Blue"],
     eyeColor: ["Blue"],
     year: 2035,
-    img: "../../images/chars/endo/m2_costumed.png"
+    img: "../../images/chars/endo/costumed_mimic.png"
   },
   {
     name: "Cassie",
@@ -2627,7 +2627,7 @@ const CHARS = [
     color: ["White"],
     eyeColor: ["Black"],
     year: 2035,
-    img: "../../images/chars/staff_bot/maskbot.png"
+    img: "../../images/chars/staff_bot/mask_bot.png"
   },
   {
     name: "Giant Glamrock Endo",
@@ -2637,5 +2637,70 @@ const CHARS = [
     eyeColor: ["Purple"],
     year: 2035,
     img: "../../images/chars/endo/giant_glamrock_endo.png"
+  },
+
+  // === HELP WANTED 2 ===
+  {
+    name: "Ruined DJ Music Man",
+    animal: "Spider",
+    type: "Ruined",
+    color: ["White", "Pink"],
+    eyeColor: ["Black"],
+    year: 2035,
+    img: "../../images/chars/ruined/ruined_dj_music_man.png"
+  },
+  {
+    name: "Carnie",
+    animal: "Bear",
+    type: "Rockstar",
+    color: ["Brown", "Green"],
+    eyeColor: ["Yellow"],
+    year: 2035,
+    img: "../../images/chars/rockstar/carnie.png"
+  },
+  {
+    name: "Burned Carnie",
+    animal: "Bear",
+    type: "Rockstar",
+    color: ["Brown", "Green"],
+    eyeColor: ["Yellow"],
+    year: 2035,
+    img: "../../images/chars/rockstar/carnie.png"
+  },
+  {
+    name: "Mystic Hippo",
+    animal: "Hippo",
+    type: "Mediocre Melodies",
+    color: ["Purple"],
+    eyeColor: ["Blue"],
+    year: 2035,
+    img: "../../images/chars/mediocre_melodies/mystic_hippo.png"
+  },
+  {
+    name: "Jack-O-Moon",
+    animal: "Humanoid",
+    type: "Other",
+    color: ["Orange", "Black"],
+    eyeColor: ["Orange"],
+    year: 2035,
+    img: "../../images/chars/other/jack_o_moon.png"
+  },
+  {
+    name: "Head Chef Bot",
+    animal: "Humanoid",
+    type: "S.T.A.F.F. Bot",
+    color: ["White", "Yellow", "Red"],
+    eyeColor: ["Black"],
+    year: 2035,
+    img: "../../images/chars/staff_bot/head_chef_bot.png"
+  },
+  {
+    name: "VR Endo",
+    animal: "Skeleton",
+    type: "Endo",
+    color: ["Grey"],
+    eyeColor: ["Black"],
+    year: 2035,
+    img: "../../images/chars/endo/vr_endo.png"
   },
 ];
