@@ -1115,6 +1115,15 @@ const CHARS = [
 
   // === NPCs / Other ===
   {
+    name: "Virtua Freddy",
+    animal: "Bear",
+    type: "Other",
+    color: ["Green"],
+    eyeColor: ["Green"],
+    year: "Unconfirmed",
+    img: "../../images/chars/fnaf_world_enemies/virtua_freddy.png"
+  },
+  {
     name: "Mendo",
     animal: "Skeleton",
     type: "Endo",
@@ -2610,5 +2619,23 @@ const CHARS = [
     eyeColor: ["Brown"],
     year: 2035,
     img: "../../images/chars/other/cassie.png"
+  },
+  {
+    name: "Mask Bot",
+    animal: "Humanoid",
+    type: "S.T.A.F.F. Bot",
+    color: ["White"],
+    eyeColor: ["Black"],
+    year: 2035,
+    img: "../../images/chars/staff_bot/maskbot.png"
+  },
+  {
+    name: "Giant Glamrock Endo",
+    animal: "Skeleton",
+    type: "Endo",
+    color: ["Grey", "Purple"],
+    eyeColor: ["Purple"],
+    year: 2035,
+    img: "../../images/chars/endo/giant_glamrock_endo.png"
   },
 ];
