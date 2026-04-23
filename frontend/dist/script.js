@@ -199,7 +199,7 @@ function renderGuess(char) {
 
   if (char.img) {
     const img = document.createElement('img');
-    img.src = char.img.split('/').map(encodeURIComponent).join('/');;
+    img.src = char.img;
     img.alt = char.name;
     img.onerror = () => {
       imgCell.innerHTML = '';
