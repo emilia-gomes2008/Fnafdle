@@ -2576,7 +2576,7 @@ const CHARS = [
     img: "../../images/chars/other/elephant_mascot_suit.png"
   },
   {
-    name: "Pengiun Mascot Suit",
+    name: "Penguin Mascot Suit",
     animal: "Penguin",
     type: "Other",
     color: ["Blue"],
@@ -2674,7 +2674,7 @@ const CHARS = [
     color: ["Purple"],
     eyeColor: ["Blue"],
     year: 2035,
-    img: "../../images/chars/mediocre_melodies/mystic_hippo.png"
+    img: "../../images/chars/sotm/mystic_hippo.png"
   },
   {
     name: "Jack-O-Moon",
@@ -2702,5 +2702,442 @@ const CHARS = [
     eyeColor: ["Black"],
     year: 2035,
     img: "../../images/chars/endo/vr_endo.png"
+  },
+
+  // === Secret of the Mimic ===
+
+  // Welcome Show
+  {
+    name: "Arnold",
+    animal: "Human",
+    type: "Other",
+    color: ["Beige"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "../../images/chars/other/arnold.png"
+  },
+  {
+    name: "Dispatch",
+    animal: "Human",
+    type: "Other",
+    color: ["Beige"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "../../images/chars/other/dispatch.png"
+  },
+  {
+    name: "Mr. Helpful",
+    animal: "Bear",
+    type: "Other",
+    color: ["White", "Purple"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "../../images/chars/sotm/mr_helpful.png"
+  },
+  {
+    name: "Mrs. Helpful",
+    animal: "Bear",
+    type: "Other",
+    color: ["White", "Purple"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "../../images/chars/sotm/mrs_helpful.png"
+  },
+
+  // First encounter
+  {
+    name: "Elephant",
+    animal: "Elephant",
+    type: "Mascot Suit",
+    color: ["Grey"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "../../images/chars/sotm/mascot/elephant.png"
+  },
+
+  // Jackie in the Box
+  {
+    name: "Clean-O-Vac",
+    animal: "Vacuum",
+    type: "S.T.A.F.F. Bot",
+    color: ["Grey"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "../../images/chars/sotm/clean_o_vac.png"
+  },
+  {
+    name: "Jackie",
+    animal: "Humanoid",
+    type: "Other",
+    color: ["White", "Red"],
+    eyeColor: ["Green"],
+    year: 1979,
+    img: "../../images/chars/sotm/jackie.png"
+  },
+  {
+    name: "Digi-Typer",
+    animal: "Humanoid",
+    type: "S.T.A.F.F. Bot",
+    color: ["Grey"],
+    eyeColor: ["White"],
+    year: 1979,
+    img: "../../images/chars/sotm/digi-typer.png"
+  },
+
+  // Roaming Mascots
+  {
+    name: "Hedgehog Hudgie",
+    animal: "Hedgehog",
+    type: "Mascot Suit",
+    color: ["Blue"],
+    eyeColor: ["Brown"],
+    year: 1979,
+    img: "../../images/chars/sotm/mascot/hudgie.png"
+  },
+  {
+    name: "Lyrical Lemur",
+    animal: "Lemur",
+    type: "Mascot Suit",
+    color: ["Green"],
+    eyeColor: ["Yellow"],
+    year: 1979,
+    img: "../../images/chars/sotm/mascot/lemur.png"
+  },
+  {
+    name: "Swing Bee",
+    animal: "Bee",
+    type: "Mascot Suit",
+    color: ["Yellow", "Brown"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "../../images/chars/sotm/mascot/swing_bee.png"
+  },
+  {
+    name: "Penguin",
+    animal: "Penguin",
+    type: "Mascot Suit",
+    color: ["Blue"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "../../images/chars/sotm/mascot/linux.png"
+  },
+  {
+    name: "Lion",
+    animal: "Lion",
+    type: "Mascot Suit",
+    color: ["Brown"],
+    eyeColor: ["Grey"],
+    year: 1979,
+    img: "../../images/chars/sotm/mascot/lion.png"
+  },
+  {
+    name: "Sharpay",
+    animal: "Dog",
+    type: "Mascot Suit",
+    color: ["White", "Pink"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "../../images/chars/sotm/mascot/sharpay.png"
+  },
+
+  // Big Top Showroom
+  {
+    name: "Big Top",
+    animal: "Spider",
+    type: "Other",
+    color: ["Red", "White"],
+    eyeColor: ["White"],
+    year: 1979,
+    img: "../../images/chars/sotm/big_top.png"
+  },
+  {
+    name: "Mycellium Man",
+    animal: "Mushroom",
+    type: "Mascot Suit",
+    color: ["Beige", "Blue"],
+    eyeColor: ["Yellow"],
+    year: 1979,
+    img: "../../images/chars/sotm/mascot/mycellium_man.png"
+  },
+
+  // Pirate Show
+  {
+    name: "Captain Springlocks",
+    animal: "Sea Dog",
+    type: "Springlock",
+    color: ["Brown", "Blue"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "../../images/chars/springlock/captain_springlock.png"
+  },
+  {
+    name: "Puppet Foxy",
+    animal: "Fox",
+    type: "Puppet Crew",
+    color: ["Red"],
+    eyeColor: ["Yellow"],
+    year: 1979,
+    img: "../../images/chars/sotm/puppet_crew/puppet_foxy.png"
+  },
+  {
+    name: "Puppet Roxy",
+    animal: "Wolf",
+    type: "Puppet Crew",
+    color: ["Grey"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "../../images/chars/sotm/puppet_crew/puppet_roxy.png"
+  },
+  {
+    name: "Kit",
+    animal: "Fox",
+    type: "Puppet Crew",
+    color: ["Orange"],
+    eyeColor: ["Green"],
+    year: 1979,
+    img: "../../images/chars/sotm/puppet_crew/kit.png"
+  },
+  {
+    name: "Bawson",
+    animal: "Badger",
+    type: "Puppet Crew",
+    color: ["Grey"],
+    eyeColor: ["Blue"],
+    year: 1979,
+    img: "../../images/chars/sotm/puppet_crew/bawson.png"
+  },
+  {
+    name: "Renard",
+    animal: "Fox",
+    type: "Puppet Crew",
+    color: ["Orange"],
+    eyeColor: ["White"],
+    year: 1979,
+    img: "../../images/chars/sotm/puppet_crew/renard.png"
+  },
+  {
+    name: "Mr. Rocktapus",
+    animal: "Octopus",
+    type: "Puppet Crew",
+    color: ["Yellow"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "../../images/chars/sotm/puppet_crew/rocktapus.png"
+  },
+
+  // Doll Hospital / Recycling Center
+  {
+    name: "Dollie",
+    animal: "Humanoid",
+    type: "Other",
+    color: ["Black", "White", "Green"],
+    eyeColor: ["Green"],
+    year: 1979,
+    img: "../../images/chars/sotm/dollie.png"
+  },
+  {
+    name: "Molten Dollie",
+    animal: "Humanoid",
+    type: "Other",
+    color: ["Orange", "Green", "White", "Black"],
+    eyeColor: ["Green"],
+    year: 1979,
+    img: "../../images/chars/sotm/molten_dollie.png"
+  },
+
+
+  // Warehouse / Admin Wing / Basement
+  {
+    name: "Party Time Chica",
+    animal: "Chicken",
+    type: "Mascot Suit",
+    color: ["Yellow", "Pink"],
+    eyeColor: ["Pink"],
+    year: 1979,
+    img: "../../images/chars/sotm/mascot/party_time_chica.png"
+  },
+  {
+    name: "Party Time Cupcake",
+    animal: "Cupcake",
+    type: "Cupcake",
+    color: ["Yellow", "Pink"],
+    eyeColor: ["Pink"],
+    year: 1979,
+    img: "../../images/chars/sotm/mascot/party_time_cupcake.png"
+  },
+  {
+    name: "Sleepy Moon",
+    animal: "Humanoid",
+    type: "Mascot Suit",
+    color: ["White"],
+    eyeColor: ["Purple"],
+    year: 1979,
+    img: "../../images/chars/sotm/mascot/sleepy_moon.png"
+  },
+  {
+    name: "White Tiger",
+    animal: "Tiger",
+    type: "Mascot Suit",
+    color: ["White", "Black"],
+    eyeColor: ["Blue", "Green"],
+    year: 1979,
+    img: "../../images/chars/sotm/mascot/tiger_rock.png"
+  },
+
+  // R&D
+  {
+    name: "M2R&D",
+    animal: "Humanoid",
+    type: "Endo",
+    color: ["White", "Grey", "Yellow"],
+    eyeColor: ["Yellow"],
+    year: 1979,
+    img: "../../images/chars/endo/m2rnd.png"
+  },
+  {
+    name: "Prototype Fredbear",
+    animal: "Bear",
+    type: "Springlock",
+    color: ["Black"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "../../images/chars/springlock/proto_fredbear.png"
+  },
+  {
+    name: "Prototype Springbonnie",
+    animal: "Rabbit",
+    type: "Springlock",
+    color: ["Black"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "../../images/chars/springlock/proto_springbonnie.png"
+  },
+  {
+    name: "Prototype Bub",
+    animal: "Dog",
+    type: "Springlock",
+    color: ["Brown"],
+    eyeColor: ["Red"],
+    year: 1979,
+    img: "../../images/chars/springlock/proto_bub.png"
+  },
+  {
+    name: "Prototype Monty",
+    animal: "Alligator",
+    type: "Springlock",
+    color: ["Green"],
+    eyeColor: ["Brown"],
+    year: 1979,
+    img: "../../images/chars/springlock/proto_monty.png"
+  },
+  {
+    name: "Prototype Bonnie",
+    animal: "Rabbit",
+    type: "Prototype",
+    color: ["Beige"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "../../images/chars/sotm/prototype/proto_bonnie.png"
+  },
+  {
+    name: "Prototype Chica",
+    animal: "Chicken",
+    type: "Prototype",
+    color: ["Yellow"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "../../images/chars/sotm/prototype/proto_chica.png"
+  },
+  {
+    name: "Prototype Cupcake",
+    animal: "Cupcake",
+    type: "Prototype",
+    color: ["Grey"],
+    eyeColor: ["Yellow"],
+    year: 1979,
+    img: "../../images/chars/sotm/prototype/proto_cupcake.png"
+  },
+  {
+    name: "Prototype Foxy",
+    animal: "Fox",
+    type: "Prototype",
+    color: ["Grey", "Red"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "../../images/chars/sotm/prototype/proto_foxy.png"
+  },
+  {
+    name: "Prototype Freddy",
+    animal: "Bear",
+    type: "Prototype",
+    color: ["Beige"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "../../images/chars/sotm/prototype/proto_freddy.png"
+  },
+  {
+    name: "F10-N4",
+    animal: "Human",
+    type: "Other",
+    color: ["Grey"],
+    eyeColor: ["Green"],
+    year: 1979,
+    img: "../../images/chars/other/f10-n4.png"
+  },
+  {
+    name: "M1",
+    animal: "Skeleton",
+    type: "Endo",
+    color: ["Grey"],
+    eyeColor: ["Yellow"],
+    year: 1979,
+    img: "../../images/chars/endo/m1.png"
+  },
+  {
+    name: "M2",
+    animal: "Skeleton",
+    type: "Endo",
+    color: ["Grey"],
+    eyeColor: ["Yellow"],
+    year: 1979,
+    img: "../../images/chars/endo/m2_sotm.png"
+  },
+  {
+    name: "Protomimic",
+    animal: "Humanoid",
+    type: "Other",
+    color: ["Orange", "Grey", "White"],
+    eyeColor: ["Yellow"],
+    year: 1979,
+    img: "../../images/chars/sotm/protomimic.png"
+  },
+
+  // Murray family
+  {
+    name: "Edwin Murray",
+    animal: "Human",
+    type: "Other",
+    color: ["Black"],
+    eyeColor: ["Green"],
+    year: 1979,
+    img: "../../images/chars/other/edwin.png"
+  },
+  {
+    name: "David Sean Murray",
+    animal: "Human",
+    type: "Other",
+    color: ["Blue"],
+    eyeColor: ["Blue"],
+    year: 1979,
+    img: "../../images/chars/other/david_murray.png"
+  },
+  {
+    name: "Fiona Murray",
+    animal: "Human",
+    type: "Other",
+    color: ["Purple"],
+    eyeColor: ["Blue"],
+    year: 1979,
+    img: "../../images/chars/other/fiona.png"
   },
 ];
