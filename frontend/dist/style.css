@@ -1,56 +1,60 @@
 /* =====================================================
        Global Variables
        ===================================================== */
-    :root {
-      --gold:        #C88600;
-      --gold-dark:   #9e6900;
-      --bg-page:     #1d1e20;
-      --bg-card:     #222326;
-      --bg-cell:     #2a2b2e;
-      --border:      #3a3b3e;
-      --text:        #ecf0f1;
-      --text-muted:  #888;
-      --green-bg:    #1a3a1a;
-      --green-border:#2d8a2d;
-      --green-text:  #6ddd6d;
-      --red-bg:      #3a1a1a;
-      --red-border:  #8a2d2d;
-      --red-text:    #dd6d6d;
-      --yellow-bg:   #2e2a00;
-      --yellow-border:#a08800;
-      --yellow-text: #f0d060;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    @font-face {
-    font-family: 'FNaF';
-    src: url('fonts/FiveFontsatFreddy\'s-Regular.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
+:root {
+  --gold: #C88600;
+  --gold-dark: #9e6900;
+  --bg-page: #1d1e20;
+  --bg-card: #222326;
+  --bg-cell: #2a2b2e;
+  --border: #3a3b3e;
+  --text: #ecf0f1;
+  --text-muted: #888;
+  --green-bg: #1a3a1a;
+  --green-border: #2d8a2d;
+  --green-text: #6ddd6d;
+  --red-bg: #3a1a1a;
+  --red-border: #8a2d2d;
+  --red-text: #dd6d6d;
+  --yellow-bg: #2e2a00;
+  --yellow-border: #a08800;
+  --yellow-text: #f0d060;
 }
 
-    body {
-      font-family: 'FNaF', sans serif;
-      background-color: var(--bg-page);
-      color: var(--text);
-      min-height: 100vh;
-      padding: 1rem 0.5rem 3rem;
-    }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-    /* =====================================================
+@font-face {
+  font-family: 'FNaF';
+  src: url('fonts/FiveFontsatFreddy\'s-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+  font-family: 'FNaF', sans-serif;
+  background-color: var(--bg-page);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 1rem 0.5rem 3rem;
+}
+
+/* =====================================================
        Header
        ===================================================== */
-    .fnaf-header {
-      text-align: center;
-      padding: 1.5rem 0 1rem;
-    }
+.fnaf-header {
+  text-align: center;
+  padding: 1.5rem 0 1rem;
+}
 
-    .fnaf-title {
-    text-align: center;
-    }
+.fnaf-title {
+  text-align: center;
+}
 
-    .fnaf-title img {
+.fnaf-title img {
   width: 100%;
   max-width: 400px;
   height: auto;
@@ -58,315 +62,527 @@
   margin: 0 auto;
 }
 
-    .fnaf-subtitle {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      margin-top: 4px;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-    }
+.fnaf-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
 
-    /* =====================================================
+/* =====================================================
        Central Container
        ===================================================== */
-    .container {
-      background-color: var(--bg-card);
-      border-radius: 10px;
-      width: 95%;
-      max-width: 900px;   /* aumentado para acomodar 6 colunas */
-      margin: 0 auto;
-      padding: 20px;
-      box-shadow: 0 0 18px rgba(255, 208, 0, 0.15);
-    }
+.container {
+  background-color: var(--bg-card);
+  border-radius: 10px;
+  width: 95%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  box-shadow: 0 0 18px rgba(255, 208, 0, 0.15);
+}
 
-    /* =====================================================
+/* =====================================================
+       MODE SELECT
+       ===================================================== */
+.mode-select-title {
+  text-align: center;
+  font-family: 'Creepster', cursive;
+  font-size: 1.8rem;
+  color: var(--gold);
+  letter-spacing: 4px;
+  margin-bottom: 1.5rem;
+}
+
+.mode-cards {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.mode-card {
+  background: var(--bg-cell);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 24px 20px;
+  width: 200px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+
+.mode-card:hover {
+  border-color: var(--gold);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(200, 134, 0, 0.2);
+}
+
+.mode-icon {
+  font-size: 2.4rem;
+  margin-bottom: 10px;
+}
+
+.mode-name {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 2px;
+  color: var(--gold);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.mode-desc {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  letter-spacing: 0.5px;
+}
+
+/* =====================================================
+       Mode badge / back button row
+       ===================================================== */
+.mode-badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.mode-badge {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.78rem;
+  letter-spacing: 2px;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+
+.back-btn {
+  font-family: 'Oswald', sans-serif;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  padding: 6px 14px;
+  border-radius: 5px;
+  font-size: 0.78rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  margin-top: 0;
+}
+
+.back-btn:hover {
+  color: var(--text);
+  border-color: var(--gold);
+  background: transparent;
+}
+
+/* =====================================================
        LEGENDA
        ===================================================== */
-    .legend {
-      display: flex;
-      gap: 20px;
-      justify-content: center;
-      margin-bottom: 1.2rem;
-      flex-wrap: wrap;
-    }
+.legend {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 1.2rem;
+  flex-wrap: wrap;
+}
 
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      letter-spacing: 1px;
-    }
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
 
-    .legend-dot {
-      width: 12px; height: 12px;
-      border-radius: 3px;
-    }
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
 
-    .legend-dot.correct { background: var(--green-border); }
-    .legend-dot.partial { background: var(--yellow-border); }
-    .legend-dot.wrong   { background: var(--red-border); }
+.legend-dot.correct {
+  background: var(--green-border);
+}
 
-    /* =====================================================
+.legend-dot.partial {
+  background: var(--yellow-border);
+}
+
+.legend-dot.wrong {
+  background: var(--red-border);
+}
+
+/* =====================================================
        Search Bar
        ===================================================== */
-
-    .dropdown-item.selected {
+.dropdown-item.selected {
   background-color: #007bff;
   color: white;
 }
-    .search-area {
-      position: relative;
-      margin-bottom: 1.2rem;
-    }
 
-    .search-input {
-      width: 100%;
-      background: var(--bg-cell);
-      border: 1.5px solid var(--gold);
-      border-radius: 8px;
-      padding: 12px 16px;
-      font-family: 'Oswald', sans-serif;
-      font-size: 1rem;
-      color: var(--text);
-      outline: none;
-      letter-spacing: 1px;
-    }
+.search-area {
+  position: relative;
+  margin-bottom: 1.2rem;
+}
 
-    .search-input::placeholder { color: #555; }
+.search-input {
+  width: 100%;
+  background: var(--bg-cell);
+  border: 1.5px solid var(--gold);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 1rem;
+  color: var(--text);
+  outline: none;
+  letter-spacing: 1px;
+}
 
-    .search-input:focus {
-      border-color: #f0a500;
-      box-shadow: 0 0 0 2px rgba(200,134,0,0.2);
-    }
+.search-input::placeholder {
+  color: #555;
+}
 
-    /* =====================================================
+.search-input:focus {
+  border-color: #f0a500;
+  box-shadow: 0 0 0 2px rgba(200, 134, 0, 0.2);
+}
+
+/* =====================================================
        Dropdown Suggestions
        ===================================================== */
-    .dropdown {
-      position: absolute;
-      top: calc(100% + 4px);
-      left: 0; right: 0;
-      background: var(--bg-cell);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      overflow: hidden;
-      z-index: 10;
-      max-height: 220px;
-      overflow-y: auto;
-    }
+.dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--bg-cell);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  z-index: 10;
+  max-height: 220px;
+  overflow-y: auto;
+}
 
-    .dropdown-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 14px;
-      cursor: pointer;
-      border-bottom: 1px solid var(--border);
-      transition: background 0.15s;
-    }
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
 
-    .dropdown-item:last-child { border-bottom: none; }
-    .dropdown-item:hover { background: #363739; }
+.dropdown-item:last-child {
+  border-bottom: none;
+}
 
-    /* =====================================================
-       Dropdow Images
-       ===================================================== */
-    .dropdown-item img {
-      width: 38px; height: 38px;
-      border-radius: 6px;
-      object-fit: cover;
-      background: var(--bg-page);
-    }
+.dropdown-item:hover {
+  background: #363739;
+}
 
-    .dropdown-item span {
-      font-size: 0.9rem;
-      letter-spacing: 1px;
-    }
+.dropdown-item img {
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: var(--bg-page);
+}
 
-    /* =====================================================
+.dropdown-item span {
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+}
+
+/* =====================================================
        Table Header
-       grid-template-columns: img | name | animal | type | color | year
        ===================================================== */
-    .table-header,
-    .guess-row {
-      display: grid;
-      grid-template-columns: 70px 1fr 1fr 1fr 1fr 1fr 72px;
-      gap: 6px;
-      margin-bottom: 6px;
-    }
+.table-header,
+.guess-row {
+  display: grid;
+  grid-template-columns: 70px 1fr 1fr 1fr 1fr 1fr 72px;
+  gap: 6px;
+  margin-bottom: 6px;
+}
 
-    .table-header { margin-bottom: 10px; }
+.table-header {
+  margin-bottom: 10px;
+}
 
-    .col-label {
-      text-align: center;
-      font-size: 0.68rem;
-      letter-spacing: 2px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      padding: 4px 0;
-    }
+.col-label {
+  text-align: center;
+  font-size: 0.68rem;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  padding: 4px 0;
+}
 
-    /* =====================================================
+/* =====================================================
        Guess Cells
        ===================================================== */
-    .cell {
-      background: var(--bg-cell);
-      border-radius: 8px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 8px 4px;
-      text-align: center;
-      font-size: 0.78rem;
-      letter-spacing: 0.5px;
-      min-height: 66px;
-      border: 1px solid var(--border);
-    }
+.cell {
+  background: var(--bg-cell);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 4px;
+  text-align: center;
+  font-size: 0.78rem;
+  letter-spacing: 0.5px;
+  min-height: 66px;
+  border: 1px solid var(--border);
+}
 
-    .cell.correct {
-      background: var(--green-bg);
-      border-color: var(--green-border);
-      color: var(--green-text);
-    }
+.cell.correct {
+  background: var(--green-bg);
+  border-color: var(--green-border);
+  color: var(--green-text);
+}
 
-    .cell.partial {
-      background: var(--yellow-bg);
-      border-color: var(--yellow-border);
-      color: var(--yellow-text);
-    }
+.cell.partial {
+  background: var(--yellow-bg);
+  border-color: var(--yellow-border);
+  color: var(--yellow-text);
+}
 
-    .cell.wrong {
-      background: var(--red-bg);
-      border-color: var(--red-border);
-      color: var(--red-text);
-    }
+.cell.wrong {
+  background: var(--red-bg);
+  border-color: var(--red-border);
+  color: var(--red-text);
+}
 
-    /* =====================================================
+/* =====================================================
        Color Swatches
        ===================================================== */
-    .color-label {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-    }
+.color-label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
 
-    .color-swatch {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      border: 1px solid rgba(255,255,255,0.2);
-      flex-shrink: 0;
-    }
+.color-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
 
-    .color-name {
-      font-size: 0.72rem;
-      letter-spacing: 0.3px;
-      line-height: 1.2;
-    }
+.color-name {
+  font-size: 0.72rem;
+  letter-spacing: 0.3px;
+  line-height: 1.2;
+}
 
-    .color-sep {
-      font-size: 0.65rem;
-      opacity: 0.5;
-      margin: 0 1px;
-    }
+.color-sep {
+  font-size: 0.65rem;
+  opacity: 0.5;
+  margin: 0 1px;
+}
 
-    /* =====================================================
+/* =====================================================
        Images on cells
        ===================================================== */
-    .cell-img img {
-      width: 54px; height: 54px;
-      border-radius: 8px;
-      object-fit: cover;   /* muda para "contain" se preferires */
-      background: var(--bg-page);
-      display: block;
-    }
+.cell-img img {
+  width: 54px;
+  height: 54px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: var(--bg-page);
+  display: block;
+}
 
-    .cell-label {
-      font-size: 0.8rem;
-      letter-spacing: 0.5px;
-      line-height: 1.25;
-      word-break: break-word;
-    }
+.cell-label {
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+  line-height: 1.25;
+  word-break: break-word;
+}
 
-    /* =====================================================
+/* =====================================================
        Tries left
        ===================================================== */
-    .attempts-left {
-      text-align: center;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      letter-spacing: 1px;
-      margin-bottom: 0.8rem;
-    }
+.attempts-left {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  margin-bottom: 0.8rem;
+}
 
-    /* =====================================================
+/* =====================================================
        Result Banner
        ===================================================== */
-    .result-banner {
-      background: var(--green-bg);
-      border: 1.5px solid var(--green-border);
-      border-radius: 10px;
-      padding: 1.25rem;
-      text-align: center;
-      display: none;
-      margin-top: 1rem;
-    }
+.result-banner {
+  background: var(--green-bg);
+  border: 1.5px solid var(--green-border);
+  border-radius: 10px;
+  padding: 1.25rem;
+  text-align: center;
+  display: none;
+  margin-top: 1rem;
+}
 
-    .result-banner.show { display: block; }
+.result-banner.show {
+  display: block;
+}
 
-    .result-banner.lose {
-      background: var(--red-bg);
-      border-color: var(--red-border);
-    }
+.result-banner.lose {
+  background: var(--red-bg);
+  border-color: var(--red-border);
+}
 
-    .result-title {
-      font-family: 'Creepster', cursive;
-      font-size: 2rem;
-      color: var(--green-text);
-      letter-spacing: 3px;
-    }
+.result-title {
+  font-family: 'Creepster', cursive;
+  font-size: 2rem;
+  color: var(--green-text);
+  letter-spacing: 3px;
+}
 
-    .result-banner.lose .result-title { color: var(--red-text); }
+.result-banner.lose .result-title {
+  color: var(--red-text);
+}
 
-    .result-msg {
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      margin-top: 6px;
-    }
+.result-msg {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-top: 6px;
+}
 
-    /* =====================================================
+/* =====================================================
        Buttons
        ===================================================== */
-    button {
-      font-family: 'Oswald', sans-serif;
-      background-color: var(--gold);
-      color: white;
-      border: none;
-      padding: 10px 28px;
-      margin-top: 14px;
-      border-radius: 5px;
-      font-size: 1rem;
-      letter-spacing: 2px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
+button {
+  font-family: 'Oswald', sans-serif;
+  background-color: var(--gold);
+  color: white;
+  border: none;
+  padding: 10px 28px;
+  margin-top: 14px;
+  border-radius: 5px;
+  font-size: 1rem;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
 
-    button:hover { background-color: var(--gold-dark); }
+button:hover {
+  background-color: var(--gold-dark);
+}
 
-    /* =====================================================
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* =====================================================
        PLACEHOLDER SVG
        ===================================================== */
-    .placeholder-avatar {
-      width: 54px; height: 54px;
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.6rem;
-      background: var(--bg-page);
-      border: 1px solid var(--border);
-    }
+.placeholder-avatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  background: var(--bg-page);
+  border: 1px solid var(--border);
+}
+
+/* =====================================================
+       IMAGE MODE
+       ===================================================== */
+.image-mode-hint-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.mystery-image-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.4rem;
+}
+
+.mystery-image-container {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 2px solid var(--gold);
+  background: var(--bg-page);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#mystery-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform-origin: center center;
+  /* filter + transform applied by JS */
+}
+
+/* Guess list for image mode */
+#img-guesses-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 1rem;
+}
+
+.img-guess-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-cell);
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+}
+
+.img-guess-item img {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: var(--bg-page);
+}
+
+.img-guess-item span {
+  flex: 1;
+}
+
+.img-guess-icon {
+  font-size: 1.1rem;
+  flex: 0;
+}
+
+.img-guess-item.correct {
+  background: var(--green-bg);
+  border-color: var(--green-border);
+  color: var(--green-text);
+}
+
+.img-guess-item.wrong {
+  background: var(--red-bg);
+  border-color: var(--red-border);
+  color: var(--red-text);
+}

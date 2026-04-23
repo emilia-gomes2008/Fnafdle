@@ -1,43 +1,84 @@
 <!DOCTYPE html>
 <html lang="pt">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FNAFdle Reborn</title>
   <link rel="icon" type="icon/png" href="images/default.png">
-  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Oswald:wght@400;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Oswald:wght@400;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
-  
+
   <div class="fnaf-header">
     <div class="fnaf-title">
-      <img src="../../images/title/fnafdlereborn.png" alt="Fnafdle"/>
+      <img src="../../images/title/fnafdlereborn.png" alt="Fnafdle" />
     </div>
     <div class="fnaf-subtitle">Guess the animatronic</div>
   </div>
-  
-  <div class="container">
-    
-    <!-- Subtitles -->
-    <div class="legend">
-      <div class="legend-item"><div class="legend-dot correct"></div> Correct</div>
-      <div class="legend-item"><div class="legend-dot partial"></div> Partial</div>
-      <div class="legend-item"><div class="legend-dot wrong"></div> Wrong</div>
+
+  <!-- ===== MODE SELECT SCREEN ===== -->
+  <div class="container" id="mode-select-screen">
+    <div class="mode-select-title">Choose a Mode</div>
+    <div class="mode-cards">
+
+      <div class="mode-card" onclick="startMode('endless')">
+        <div class="mode-icon">♾️</div>
+        <div class="mode-name">Endless</div>
+        <div class="mode-desc">Random animatronic · 6 tries · play as many as you want</div>
+      </div>
+
+      <div class="mode-card" onclick="startMode('daily')">
+        <div class="mode-icon">📅</div>
+        <div class="mode-name">Daily</div>
+        <div class="mode-desc">1 animatronic per day · 7 tries · everyone gets the same</div>
+      </div>
+
+      <div class="mode-card" onclick="startMode('image')">
+        <div class="mode-icon">🔍</div>
+        <div class="mode-name">Image</div>
+        <div class="mode-desc">Blurred & zoomed image · reveal with each guess · 6 tries</div>
+      </div>
+
     </div>
-    
-    <!-- Search Bar -->
+  </div>
+
+  <!-- ===== CLASSIC GAME SCREEN (Daily + Endless) ===== -->
+  <div class="container" id="classic-screen" style="display:none;">
+
+    <div class="mode-badge-row">
+      <span class="mode-badge" id="classic-mode-badge"></span>
+      <button class="back-btn" onclick="goHome()">← Modos</button>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-dot correct"></div> Correct
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot partial"></div> Partial
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot wrong"></div> Wrong
+      </div>
+    </div>
+
     <div class="search-area" id="search-area">
-      <input class="search-input" id="search-input"
-      placeholder="Escreve o nome do animatronic..."
-      autocomplete="off" />
+      <input class="search-input" id="search-input" placeholder="Write an animatronic..." autocomplete="off" />
       <div class="dropdown" id="dropdown" style="display:none;"></div>
     </div>
-    
-    <!-- Tries Left -->
+
     <div class="attempts-left" id="attempts-left"></div>
-    
-    <!-- Table header -->
+
+    <!-- Hint button (shows after 3 wrong in daily/endless too) -->
+    <div id="hint-area" style="display:none; text-align:center; margin-bottom:0.8rem;">
+      <button onclick="useHint()" id="hint-btn">💡 Use Hint (first letter)</button>
+      <div id="hint-text" style="margin-top:6px; color:var(--yellow-text); font-size:0.9rem; letter-spacing:2px;"></div>
+    </div>
+
     <div class="table-header">
       <div class="col-label">Character</div>
       <div class="col-label">Name</div>
@@ -47,19 +88,64 @@
       <div class="col-label">Eye Color</div>
       <div class="col-label">Year</div>
     </div>
-    
-    <!-- Guess lines -->
+
     <div id="guesses-container"></div>
-    
-    <!-- Result Banner -->
+
     <div class="result-banner" id="result-banner">
       <div class="result-title" id="result-title"></div>
       <p class="result-msg" id="result-msg"></p>
-      <button onclick="initGame()">Try again</button>
+      <button id="play-again-btn" onclick="restartCurrent()">Play Again</button>
+      <button onclick="goHome()" style="margin-left:10px; background:var(--bg-cell); border:1px solid var(--border);">←
+        Modos</button>
     </div>
-    
-  </div><!-- /.container -->
+
+  </div>
+
+  <!-- ===== IMAGE MODE SCREEN ===== -->
+  <div class="container" id="image-screen" style="display:none;">
+
+    <div class="mode-badge-row">
+      <span class="mode-badge">🔍 Image Mode</span>
+      <button class="back-btn" onclick="goHome()">← Modos</button>
+    </div>
+
+    <div class="image-mode-hint-row">
+      <div class="attempts-left" id="img-attempts-left"></div>
+    </div>
+
+    <!-- The mystery image -->
+    <div class="mystery-image-wrap">
+      <div class="mystery-image-container" id="mystery-image-container">
+        <img id="mystery-img" src="" alt="?" />
+        <div class="mystery-overlay" id="mystery-overlay"></div>
+      </div>
+      <div id="img-hint-area" style="display:none; text-align:center; margin-top:0.6rem;">
+        <button onclick="useImageHint()" id="img-hint-btn">💡 Use Hint (first letter)</button>
+        <div id="img-hint-text" style="margin-top:6px; color:var(--yellow-text); font-size:0.9rem; letter-spacing:2px;">
+        </div>
+      </div>
+    </div>
+
+    <div class="search-area" id="img-search-area">
+      <input class="search-input" id="img-search-input" placeholder="Write an animatronic..." autocomplete="off" />
+      <div class="dropdown" id="img-dropdown" style="display:none;"></div>
+    </div>
+
+    <!-- Previous guesses list -->
+    <div id="img-guesses-list"></div>
+
+    <div class="result-banner" id="img-result-banner">
+      <div class="result-title" id="img-result-title"></div>
+      <p class="result-msg" id="img-result-msg"></p>
+      <button onclick="initImageMode()">Play Again</button>
+      <button onclick="goHome()" style="margin-left:10px; background:var(--bg-cell); border:1px solid var(--border);">←
+        Modos</button>
+    </div>
+
+  </div>
+
   <script src="database.js"></script>
   <script src="script.js"></script>
 </body>
+
 </html>
