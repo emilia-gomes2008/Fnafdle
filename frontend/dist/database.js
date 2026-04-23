@@ -953,7 +953,7 @@ const CHARS = [
     color: ["Photo-Negative"],
     eyeColor: ["Photo-Negative"],
     year: "Unconfirmed",
-    img: "images/chars/fnaf_world_enemies/%_^^&(.webp"
+    img: "images/chars/fnaf_world_enemies/1.webp"
   },
   {
     name: "_!2222",
@@ -962,7 +962,7 @@ const CHARS = [
     color: ["Photo-Negative"],
     eyeColor: ["Photo-Negative"],
     year: "Unconfirmed",
-    img: "images/chars/fnaf_world_enemies/_!2222.webp"
+    img: "images/chars/fnaf_world_enemies/2.webp"
   },
 
   // === Geist Lair ===
