@@ -2665,7 +2665,7 @@ const CHARS = [
     color: ["Brown", "Green"],
     eyeColor: ["Yellow"],
     year: 2035,
-    img: "images/chars/rockstar/carnie.png"
+    img: "images/chars/rockstar/burned_carnie.png"
   },
   {
     name: "Mystic Hippo",
