@@ -8,7 +8,7 @@
          color  → color(s)
          eyeColor → eye color(s)
          year   → origin year
-         img    → ../../images/chars/<type>/<name>.<format>
+         img    → images/chars/<type>/<name>.<format>
     ======================================================= */
 const CHARS = [
 
@@ -20,7 +20,7 @@ const CHARS = [
     color: ["Brown"],
     eyeColor: ["Blue"],
     year: 1993,
-    img: "../../images/chars/classic/freddy.png"
+    img: "images/chars/classic/freddy.png"
   },
   {
     name: "Bonnie",
@@ -29,7 +29,7 @@ const CHARS = [
     color: ["Blue"],
     eyeColor: ["Red"],
     year: 1993,
-    img: "../../images/chars/classic/bonnie.png"
+    img: "images/chars/classic/bonnie.png"
   },
   {
     name: "Chica",
@@ -38,7 +38,7 @@ const CHARS = [
     color: ["Yellow"],
     eyeColor: ["Magenta"],
     year: 1993,
-    img: "../../images/chars/classic/chica.png"
+    img: "images/chars/classic/chica.png"
   },
   {
     name: "Cupcake",
@@ -47,7 +47,7 @@ const CHARS = [
     color: ["Pink"],
     eyeColor: ["Yellow"],
     year: 1993,
-    img: "../../images/chars/classic/cupcake.png"
+    img: "images/chars/classic/cupcake.png"
   },
   {
     name: "Foxy",
@@ -56,7 +56,7 @@ const CHARS = [
     color: ["Red"],
     eyeColor: ["Yellow"],
     year: 1993,
-    img: "../../images/chars/classic/foxy.png"
+    img: "images/chars/classic/foxy.png"
   },
   {
     name: "Ralph",
@@ -65,7 +65,7 @@ const CHARS = [
     color: ["Blue"],
     eyeColor: ["Black"],
     year: "Unknown",
-    img: "../../images/chars/other/phone_guy.png"
+    img: "images/chars/other/phone_guy.png"
   },
   {
     name: "Fan",
@@ -74,7 +74,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Grey"],
     year: 1993,
-    img: "../../images/chars/other/fan.png"
+    img: "images/chars/other/fan.png"
   },
   {
     name: "Golden Freddy",
@@ -83,7 +83,7 @@ const CHARS = [
     color: ["Yellow"],
     eyeColor: ["Black"],
     year: 1993,
-    img: "../../images/chars/classic/golden_freddy.png"
+    img: "images/chars/classic/golden_freddy.png"
   },
   {
     name: "Endo-01",
@@ -92,7 +92,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Blue"],
     year: 1993,
-    img: "../../images/chars/endo/endo01.png"
+    img: "images/chars/endo/endo01.png"
   },
 
   // === Fnaf 2 ===
@@ -103,7 +103,7 @@ const CHARS = [
     color: ["Brown"],
     eyeColor: ["Blue"],
     year: 1987,
-    img: "../../images/chars/toy/toy_freddy.png"
+    img: "images/chars/toy/toy_freddy.png"
   },
   {
     name: "Toy Bonnie",
@@ -112,7 +112,7 @@ const CHARS = [
     color: ["Blue"],
     eyeColor: ["Green"],
     year: 1987,
-    img: "../../images/chars/toy/toy_bonnie.png"
+    img: "images/chars/toy/toy_bonnie.png"
   },
   {
     name: "Toy Chica",
@@ -121,7 +121,7 @@ const CHARS = [
     color: ["Yellow"],
     eyeColor: ["Blue"],
     year: 1987,
-    img: "../../images/chars/toy/toy_chica.png"
+    img: "images/chars/toy/toy_chica.png"
   },
   {
     name: "Toy Cupcake",
@@ -130,7 +130,7 @@ const CHARS = [
     color: ["Pink"],
     eyeColor: ["Blue"],
     year: 1987,
-    img: "../../images/chars/toy/toy_cupcake.png"
+    img: "images/chars/toy/toy_cupcake.png"
   },
   {
     name: "Toy Foxy",
@@ -139,7 +139,7 @@ const CHARS = [
     color: ["White", "Pink"],
     eyeColor: ["Yellow"],
     year: 1987,
-    img: "../../images/chars/toy/toy_foxy.png"
+    img: "images/chars/toy/toy_foxy.png"
   },
   {
     name: "Mangle",
@@ -148,7 +148,7 @@ const CHARS = [
     color: ["White", "Pink"],
     eyeColor: ["Yellow"],
     year: 1987,
-    img: "../../images/chars/toy/mangle.png"
+    img: "images/chars/toy/mangle.png"
   },
   {
     name: "Balloon Boy",
@@ -157,7 +157,7 @@ const CHARS = [
     color: ["Red", "Blue"],
     eyeColor: ["Blue"],
     year: 1987,
-    img: "../../images/chars/toy/bb.png"
+    img: "images/chars/toy/bb.png"
   },
   {
     name: "JJ",
@@ -166,7 +166,7 @@ const CHARS = [
     color: ["Purple", "Blue"],
     eyeColor: ["Magenta"],
     year: 1987,
-    img: "../../images/chars/toy/jj.png"
+    img: "images/chars/toy/jj.png"
   },
   {
     name: "Endo-02",
@@ -175,7 +175,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Blue"],
     year: 1987,
-    img: "../../images/chars/endo/endo02.png"
+    img: "images/chars/endo/endo02.png"
   },
   {
     name: "Puppet",
@@ -184,7 +184,7 @@ const CHARS = [
     color: ["Black"],
     eyeColor: ["Black"],
     year: 1987,
-    img: "../../images/chars/toy/puppet.png"
+    img: "images/chars/toy/puppet.png"
   },
   {
     name: "Withered Freddy",
@@ -193,7 +193,7 @@ const CHARS = [
     color: ["Brown"],
     eyeColor: ["Blue"],
     year: 1987,
-    img: "../../images/chars/withered/withered_freddy.png"
+    img: "images/chars/withered/withered_freddy.png"
   },
   {
     name: "Withered Bonnie",
@@ -202,7 +202,7 @@ const CHARS = [
     color: ["Blue"],
     eyeColor: ["Red"],
     year: 1987,
-    img: "../../images/chars/withered/withered_bonnie.png"
+    img: "images/chars/withered/withered_bonnie.png"
   },
   {
     name: "Withered Chica",
@@ -211,7 +211,7 @@ const CHARS = [
     color: ["Yellow"],
     eyeColor: ["Magenta"],
     year: 1987,
-    img: "../../images/chars/withered/withered_chica.png"
+    img: "images/chars/withered/withered_chica.png"
   },
   {
     name: "Withered Foxy",
@@ -220,7 +220,7 @@ const CHARS = [
     color: ["Red"],
     eyeColor: ["Yellow"],
     year: 1987,
-    img: "../../images/chars/withered/withered_foxy.png"
+    img: "images/chars/withered/withered_foxy.png"
   },
   {
     name: "Withered Golden Freddy",
@@ -229,7 +229,7 @@ const CHARS = [
     color: ["Yellow"],
     eyeColor: ["Black"],
     year: 1987,
-    img: "../../images/chars/withered/withered_golden.png"
+    img: "images/chars/withered/withered_golden.png"
   },
   {
     name: "Shadow Freddy",
@@ -238,7 +238,7 @@ const CHARS = [
     color: ["Purple"],
     eyeColor: ["Black"],
     year: 1987,
-    img: "../../images/chars/shadow/shadow_freddy.png"
+    img: "images/chars/shadow/shadow_freddy.png"
   },
   {
     name: "RWQFSFASXC",
@@ -247,7 +247,7 @@ const CHARS = [
     color: ["Black"],
     eyeColor: ["White"],
     year: 1987,
-    img: "../../images/chars/shadow/rxq.png"
+    img: "images/chars/shadow/rxq.png"
   },
   {
     name: "Paper Pals",
@@ -256,7 +256,7 @@ const CHARS = [
     color: ["White"],
     eyeColor: ["White"],
     year: 1987,
-    img: "../../images/chars/other/Paperpals.png"
+    img: "images/chars/other/Paperpals.png"
   },
 
   // === Fnaf 2 Minigmaes ===
@@ -267,7 +267,7 @@ const CHARS = [
     color: ["White"],
     eyeColor: ["Grey"],
     year: "Unconfirmed",
-    img: "../../images/chars/other/crying_child.png"
+    img: "images/chars/other/crying_child.png"
   },
   {
     name: "William Afton",
@@ -276,7 +276,7 @@ const CHARS = [
     color: ["Purple"],
     eyeColor: ["White"],
     year: "Unconfirmed",
-    img: "../../images/chars/other/afton.png"
+    img: "images/chars/other/afton.png"
   },
 
   // === Fnaf 3 ===
@@ -287,7 +287,7 @@ const CHARS = [
     color: ["Green"],
     eyeColor: ["Silver"],
     year: 2023,
-    img: "../../images/chars/springlock/springtrap.png"
+    img: "images/chars/springlock/springtrap.png"
   },
   {
     name: "Phone Dude",
@@ -296,7 +296,7 @@ const CHARS = [
     color: ["Green"],
     eyeColor: ["Black"],
     year: "Unknown",
-    img: "../../images/chars/other/phone_dude.png"
+    img: "images/chars/other/phone_dude.png"
   },
   {
     name: "Phantom Freddy",
@@ -305,7 +305,7 @@ const CHARS = [
     color: ["Green"],
     eyeColor: ["Black"],
     year: 2023,
-    img: "../../images/chars/phantom/p_freddy.png"
+    img: "images/chars/phantom/p_freddy.png"
   },
   {
     name: "Phantom Chica",
@@ -314,7 +314,7 @@ const CHARS = [
     color: ["Green"],
     eyeColor: ["Black"],
     year: 2023,
-    img: "../../images/chars/phantom/p_chica.png"
+    img: "images/chars/phantom/p_chica.png"
   },
   {
     name: "Shadow Cupcake",
@@ -323,7 +323,7 @@ const CHARS = [
     color: ["Black"],
     eyeColor: ["Black"],
     year: 1987,
-    img: "../../images/chars/shadow/cupcake.png"
+    img: "images/chars/shadow/cupcake.png"
   },
   {
     name: "Phantom Foxy",
@@ -332,7 +332,7 @@ const CHARS = [
     color: ["Green"],
     eyeColor: ["Black"],
     year: 2023,
-    img: "../../images/chars/phantom/p_foxy.png"
+    img: "images/chars/phantom/p_foxy.png"
   },
   {
     name: "Phantom Mangle",
@@ -341,7 +341,7 @@ const CHARS = [
     color: ["Green"],
     eyeColor: ["Black"],
     year: 2023,
-    img: "../../images/chars/phantom/p_mangle.png"
+    img: "images/chars/phantom/p_mangle.png"
   },
   {
     name: "Phantom Puppet",
@@ -350,7 +350,7 @@ const CHARS = [
     color: ["Green"],
     eyeColor: ["Black"],
     year: 2023,
-    img: "../../images/chars/phantom/p_puppet.png"
+    img: "images/chars/phantom/p_puppet.png"
   },
   {
     name: "Phantom BB",
@@ -359,7 +359,7 @@ const CHARS = [
     color: ["Green"],
     eyeColor: ["Black"],
     year: 2023,
-    img: "../../images/chars/phantom/p_bb.png"
+    img: "images/chars/phantom/p_bb.png"
   },
   {
     name: "Dark Springtrap",
@@ -368,7 +368,7 @@ const CHARS = [
     color: ["Green"],
     eyeColor: ["Silver"],
     year: 2023,
-    img: "../../images/chars/springlock/dark_springtrap.png"
+    img: "images/chars/springlock/dark_springtrap.png"
   },
 
   // === Fredbear's Family Diner ===
@@ -379,7 +379,7 @@ const CHARS = [
     color: ["Yellow"],
     eyeColor: ["Green"],
     year: 1983,
-    img: "../../images/chars/springlock/springbonnie.png"
+    img: "images/chars/springlock/springbonnie.png"
   },
   {
     name: "Fredbear",
@@ -388,7 +388,7 @@ const CHARS = [
     color: ["Yellow"],
     eyeColor: ["Blue"],
     year: 1983,
-    img: "../../images/chars/springlock/fredbear.png"
+    img: "images/chars/springlock/fredbear.png"
   },
   {
     name: "Golden Cupcake",
@@ -397,7 +397,7 @@ const CHARS = [
     color: ["Yellow"],
     eyeColor: ["Yellow"],
     year: 1983,
-    img: "../../images/chars/springlock/cupcake.png"
+    img: "images/chars/springlock/cupcake.png"
   },
 
   // === Fnaf 4 ===
@@ -408,7 +408,7 @@ const CHARS = [
     color: ["Brown"],
     eyeColor: ["Yellow"],
     year: 1983,
-    img: "../../images/chars/nightmare/nightmare_freddy.png"
+    img: "images/chars/nightmare/nightmare_freddy.png"
   },
   {
     name: "Freddles",
@@ -417,7 +417,7 @@ const CHARS = [
     color: ["Brown"],
     eyeColor: ["White"],
     year: 1983,
-    img: "../../images/chars/nightmare/freddles.png"
+    img: "images/chars/nightmare/freddles.png"
   },
   {
     name: "Nightmare Bonnie",
@@ -426,7 +426,7 @@ const CHARS = [
     color: ["Blue"],
     eyeColor: ["Magenta"],
     year: 1983,
-    img: "../../images/chars/nightmare/nightmare_bonnie.png"
+    img: "images/chars/nightmare/nightmare_bonnie.png"
   },
   {
     name: "Nightmare Chica",
@@ -435,7 +435,7 @@ const CHARS = [
     color: ["Yellow"],
     eyeColor: ["Red"],
     year: 1983,
-    img: "../../images/chars/nightmare/nightmare_chica.png"
+    img: "images/chars/nightmare/nightmare_chica.png"
   },
   {
     name: "Nightmare Cupcake",
@@ -444,7 +444,7 @@ const CHARS = [
     color: ["Pink"],
     eyeColor: ["Yellow"],
     year: 1983,
-    img: "../../images/chars/nightmare/cupcake.png"
+    img: "images/chars/nightmare/cupcake.png"
   },
   {
     name: "Nightmare Foxy",
@@ -453,7 +453,7 @@ const CHARS = [
     color: ["Red"],
     eyeColor: ["Yellow"],
     year: 1983,
-    img: "../../images/chars/nightmare/nightmare_foxy.png"
+    img: "images/chars/nightmare/nightmare_foxy.png"
   },
   {
     name: "Nightmare Fredbear",
@@ -462,7 +462,7 @@ const CHARS = [
     color: ["Yellow"],
     eyeColor: ["Yellow"],
     year: 1983,
-    img: "../../images/chars/nightmare/nightmare_fredbear.png"
+    img: "images/chars/nightmare/nightmare_fredbear.png"
   },
   {
     name: "Plushtrap",
@@ -471,7 +471,7 @@ const CHARS = [
     color: ["Green"],
     eyeColor: ["Black"],
     year: 1983,
-    img: "../../images/chars/nightmare/creonzadoruin.png"
+    img: "images/chars/nightmare/creonzadoruin.png"
   },
   {
     name: "Nightmare",
@@ -480,7 +480,7 @@ const CHARS = [
     color: ["Black"],
     eyeColor: ["Red"],
     year: 1983,
-    img: "../../images/chars/nightmare/nightmare.png"
+    img: "images/chars/nightmare/nightmare.png"
   },
 
   // === Fnaf 4 Halloween Edition ===
@@ -491,7 +491,7 @@ const CHARS = [
     color: ["Orange"],
     eyeColor: ["Orange"],
     year: 1983,
-    img: "../../images/chars/nightmare/jack-o/bonnie.png"
+    img: "images/chars/nightmare/jack-o/bonnie.png"
   },
   {
     name: "Jack-O-Chica",
@@ -500,7 +500,7 @@ const CHARS = [
     color: ["Orange"],
     eyeColor: ["Orange"],
     year: 1983,
-    img: "../../images/chars/nightmare/jack-o/chica.png"
+    img: "images/chars/nightmare/jack-o/chica.png"
   },
   {
     name: "Jack-O-Lantern",
@@ -509,7 +509,7 @@ const CHARS = [
     color: ["Orange"],
     eyeColor: ["Yellow"],
     year: 1983,
-    img: "../../images/chars/nightmare/jack-o/lantern.png"
+    img: "images/chars/nightmare/jack-o/lantern.png"
   },
   {
     name: "Nightmare Mangle",
@@ -518,7 +518,7 @@ const CHARS = [
     color: ["White", "Pink"],
     eyeColor: ["Yellow"],
     year: 1983,
-    img: "../../images/chars/nightmare/nightmare_mangle.png"
+    img: "images/chars/nightmare/nightmare_mangle.png"
   },
   {
     name: "Nightmare Balloon Boy",
@@ -527,7 +527,7 @@ const CHARS = [
     color: ["Red", "Purple"],
     eyeColor: ["Red"],
     year: 1983,
-    img: "../../images/chars/nightmare/nightmare_bb.png"
+    img: "images/chars/nightmare/nightmare_bb.png"
   },
   {
     name: "Nightmarionne",
@@ -536,7 +536,7 @@ const CHARS = [
     color: ["Black"],
     eyeColor: ["White"],
     year: 1983,
-    img: "../../images/chars/nightmare/nightmarionne.png"
+    img: "images/chars/nightmare/nightmarionne.png"
   },
   {
     name: "Crying Child",
@@ -545,7 +545,7 @@ const CHARS = [
     color: ["White"],
     eyeColor: ["Black"],
     year: "Unconfirmed",
-    img: "../../images/chars/other/david_afton.png"
+    img: "images/chars/other/david_afton.png"
   },
   {
     name: "Michael Afton",
@@ -554,7 +554,7 @@ const CHARS = [
     color: ["Purple"],
     eyeColor: ["Blue"],
     year: "Unconfirmed",
-    img: "../../images/chars/other/michael_afton.png"
+    img: "images/chars/other/michael_afton.png"
   },
 
   // === Fnaf World ===
@@ -566,7 +566,7 @@ const CHARS = [
     color: ["Pink"],
     eyeColor: ["Magenta"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/mechrab.png"
+    img: "images/chars/fnaf_world_enemies/mechrab.png"
   },
   {
     name: "Bouncepot",
@@ -575,7 +575,7 @@ const CHARS = [
     color: ["Green"],
     eyeColor: ["White"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/bouncepot.png"
+    img: "images/chars/fnaf_world_enemies/bouncepot.png"
   },
   {
     name: "Gearrat",
@@ -584,7 +584,7 @@ const CHARS = [
     color: ["Brown"],
     eyeColor: ["Blue"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/gearrat.png"
+    img: "images/chars/fnaf_world_enemies/gearrat.png"
   },
   {
     name: "Auto Chipper",
@@ -593,7 +593,7 @@ const CHARS = [
     color: ["Brown"],
     eyeColor: ["Orange"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/auto_chipper.png"
+    img: "images/chars/fnaf_world_enemies/auto_chipper.png"
   },
 
   // === Choppy's Woods ===
@@ -604,7 +604,7 @@ const CHARS = [
     color: ["Brown"],
     eyeColor: ["Yellow"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/chop_n_roll.png"
+    img: "images/chars/fnaf_world_enemies/chop_n_roll.png"
   },
   {
     name: "Totemole",
@@ -613,7 +613,7 @@ const CHARS = [
     color: ["Brown"],
     eyeColor: ["Yellow"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/totemole.png"
+    img: "images/chars/fnaf_world_enemies/totemole.png"
   },
   {
     name: "Mad Endo",
@@ -622,7 +622,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Red"],
     year: "Unconfirmed",
-    img: "../../images/chars/endo/mad_endo.png"
+    img: "images/chars/endo/mad_endo.png"
   },
 
   // === Dusting Fields ===
@@ -633,7 +633,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Yellow"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/boxbyte.png"
+    img: "images/chars/fnaf_world_enemies/boxbyte.png"
   },
   {
     name: "Chillax",
@@ -642,7 +642,7 @@ const CHARS = [
     color: ["Blue", "Orange"],
     eyeColor: ["Green"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/chillax.webp"
+    img: "images/chars/fnaf_world_enemies/chillax.webp"
   },
   {
     name: "Flan",
@@ -651,7 +651,7 @@ const CHARS = [
     color: ["Teal"],
     eyeColor: ["Yellow"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/flan.png"
+    img: "images/chars/fnaf_world_enemies/flan.png"
   },
   {
     name: "Bouncer",
@@ -660,7 +660,7 @@ const CHARS = [
     color: ["White"],
     eyeColor: ["Black", "White"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/bouncer.png"
+    img: "images/chars/fnaf_world_enemies/bouncer.png"
   },
   {
     name: "Snowcone",
@@ -669,7 +669,7 @@ const CHARS = [
     color: ["White"],
     eyeColor: ["Black", "White"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/bouncer.png"
+    img: "images/chars/fnaf_world_enemies/bouncer.png"
   },
 
   // === Lilygear Lake ===
@@ -680,7 +680,7 @@ const CHARS = [
     color: ["White"],
     eyeColor: ["Red"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/colossal.png"
+    img: "images/chars/fnaf_world_enemies/colossal.png"
   },
   {
     name: "Crabapple",
@@ -689,7 +689,7 @@ const CHARS = [
     color: ["Orange", "Red"],
     eyeColor: ["White"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/crabapple.png"
+    img: "images/chars/fnaf_world_enemies/crabapple.png"
   },
   {
     name: "Seaweed",
@@ -698,7 +698,7 @@ const CHARS = [
     color: ["Green"],
     eyeColor: ["Yellow"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/seaweed.png"
+    img: "images/chars/fnaf_world_enemies/seaweed.png"
   },
   {
     name: "Seagoon",
@@ -707,7 +707,7 @@ const CHARS = [
     color: ["Blue"],
     eyeColor: ["White"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/seagoon.png"
+    img: "images/chars/fnaf_world_enemies/seagoon.png"
   },
   {
     name: "Supergoon",
@@ -716,7 +716,7 @@ const CHARS = [
     color: ["Blue"],
     eyeColor: ["White"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/seagoon.png"
+    img: "images/chars/fnaf_world_enemies/seagoon.png"
   },
   {
     name: "Porkpatch",
@@ -725,7 +725,7 @@ const CHARS = [
     color: ["Brown", "Pink", "Green"],
     eyeColor: ["Blue"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/porkpatch.png"
+    img: "images/chars/fnaf_world_enemies/porkpatch.png"
   },
 
   // === Mysterious Mine ===
@@ -736,7 +736,7 @@ const CHARS = [
     color: ["Yellow"],
     eyeColor: ["Red"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/goldmine.png"
+    img: "images/chars/fnaf_world_enemies/goldmine.png"
   },
   {
     name: "Metalman",
@@ -745,7 +745,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Green"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/metalman.webp"
+    img: "images/chars/fnaf_world_enemies/metalman.webp"
   },
   {
     name: "Quarry",
@@ -754,7 +754,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Grey"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/quarry.png"
+    img: "images/chars/fnaf_world_enemies/quarry.png"
   },
   {
     name: "Eyesore",
@@ -763,7 +763,7 @@ const CHARS = [
     color: ["White"],
     eyeColor: ["Orange"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/eyesore.png"
+    img: "images/chars/fnaf_world_enemies/eyesore.png"
   },
   {
     name: "Chipper's Revenge",
@@ -772,7 +772,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Red"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/chippers_revenge.png"
+    img: "images/chars/fnaf_world_enemies/chippers_revenge.png"
   },
   {
     name: "Mr. Chipper",
@@ -781,7 +781,7 @@ const CHARS = [
     color: ["Brown"],
     eyeColor: ["Blue"],
     year: 2013,
-    img: "../../images/chars/other/chipper.png"
+    img: "images/chars/other/chipper.png"
   },
 
   // === Blacktomb Yard ===
@@ -792,7 +792,7 @@ const CHARS = [
     color: ["Grey", "Brown"],
     eyeColor: ["Blue"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/beartrap.png"
+    img: "images/chars/fnaf_world_enemies/beartrap.png"
   },
   {
     name: "Graveweed",
@@ -801,7 +801,7 @@ const CHARS = [
     color: ["Black"],
     eyeColor: ["White"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/graveweed.png"
+    img: "images/chars/fnaf_world_enemies/graveweed.png"
   },
   {
     name: "Prototype",
@@ -810,7 +810,7 @@ const CHARS = [
     color: ["Grey", "Brown", "Magenta"],
     eyeColor: ["Red"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/prototype.png"
+    img: "images/chars/fnaf_world_enemies/prototype.png"
   },
 
   // === Deep-Metal Mine ===
@@ -821,7 +821,7 @@ const CHARS = [
     color: ["Grey", "Black"],
     eyeColor: ["White"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/blacktrap.png"
+    img: "images/chars/fnaf_world_enemies/blacktrap.png"
   },
   {
     name: "Tombstack",
@@ -830,7 +830,7 @@ const CHARS = [
     color: ["Black", "Brown"],
     eyeColor: ["Red"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/tombstack.png"
+    img: "images/chars/fnaf_world_enemies/tombstack.png"
   },
   {
     name: "Overclock",
@@ -839,7 +839,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Red"],
     year: "Unconfirmed",
-    img: "../../images/chars/endo/overclock.png"
+    img: "images/chars/endo/overclock.png"
   },
 
   // === Pinwheel Circus ===
@@ -850,7 +850,7 @@ const CHARS = [
     color: ["Red", "Blue"],
     eyeColor: ["Blue"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/ballboy.png"
+    img: "images/chars/fnaf_world_enemies/ballboy.png"
   },
   {
     name: "Dogfight",
@@ -859,7 +859,7 @@ const CHARS = [
     color: ["Purple"],
     eyeColor: ["Blue"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/dogfight.png"
+    img: "images/chars/fnaf_world_enemies/dogfight.png"
   },
   {
     name: "Meringue",
@@ -868,7 +868,7 @@ const CHARS = [
     color: ["Brown", "Yellow"],
     eyeColor: ["Orange"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/meringue.png"
+    img: "images/chars/fnaf_world_enemies/meringue.png"
   },
   {
     name: "Browboy",
@@ -877,7 +877,7 @@ const CHARS = [
     color: ["Purple", "Black"],
     eyeColor: ["Red"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/browboy.png"
+    img: "images/chars/fnaf_world_enemies/browboy.png"
   },
   {
     name: "Security Owl",
@@ -886,7 +886,7 @@ const CHARS = [
     color: ["Grey", "Purple"],
     eyeColor: ["Red", "Green"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/security.png"
+    img: "images/chars/fnaf_world_enemies/security.png"
   },
 
   // === Pinwheel Funhouse ===
@@ -897,7 +897,7 @@ const CHARS = [
     color: ["Red"],
     eyeColor: ["White"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/redbear.png"
+    img: "images/chars/fnaf_world_enemies/redbear.png"
   },
   {
     name: "Tangle",
@@ -906,7 +906,7 @@ const CHARS = [
     color: ["White", "Green"],
     eyeColor: ["White"],
     year: "Unconfirmed",
-    img: "../../images/chars/toy/tangle.png"
+    img: "images/chars/toy/tangle.png"
   },
   {
     name: "White Rabbit",
@@ -915,7 +915,7 @@ const CHARS = [
     color: ["White"],
     eyeColor: ["Black"],
     year: "Unconfirmed",
-    img: "../../images/chars/shadow/white_rabbit.png"
+    img: "images/chars/shadow/white_rabbit.png"
   },
   {
     name: "Bubba",
@@ -924,7 +924,7 @@ const CHARS = [
     color: ["Brown"],
     eyeColor: ["Yellow"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/bubba.png"
+    img: "images/chars/fnaf_world_enemies/bubba.png"
   },
   {
     name: "Gold Endo",
@@ -933,7 +933,7 @@ const CHARS = [
     color: ["Yellow"],
     eyeColor: ["White"],
     year: "Unconfirmed",
-    img: "../../images/chars/endo/gold_endo.png"
+    img: "images/chars/endo/gold_endo.png"
   },
 
   // === &* TWRE (Glitch Area) ===
@@ -944,7 +944,7 @@ const CHARS = [
     color: ["Photo-Negative"],
     eyeColor: ["Photo-Negative"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/glitch3.webp"
+    img: "images/chars/fnaf_world_enemies/glitch3.webp"
   },
   {
     name: "%_^^&(",
@@ -953,7 +953,7 @@ const CHARS = [
     color: ["Photo-Negative"],
     eyeColor: ["Photo-Negative"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/%_^^&(.webp"
+    img: "images/chars/fnaf_world_enemies/%_^^&(.webp"
   },
   {
     name: "_!2222",
@@ -962,7 +962,7 @@ const CHARS = [
     color: ["Photo-Negative"],
     eyeColor: ["Photo-Negative"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/_!2222.webp"
+    img: "images/chars/fnaf_world_enemies/_!2222.webp"
   },
 
   // === Geist Lair ===
@@ -973,7 +973,7 @@ const CHARS = [
     color: ["Red"],
     eyeColor: ["Red"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/jangle.png"
+    img: "images/chars/fnaf_world_enemies/jangle.png"
   },
   {
     name: "Neon",
@@ -982,7 +982,7 @@ const CHARS = [
     color: ["Yellow"],
     eyeColor: ["Yellow"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/neon.png"
+    img: "images/chars/fnaf_world_enemies/neon.png"
   },
   {
     name: "P. Goon",
@@ -991,7 +991,7 @@ const CHARS = [
     color: ["Purple"],
     eyeColor: ["Purple"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/p_goon.png"
+    img: "images/chars/fnaf_world_enemies/p_goon.png"
   },
   {
     name: "PurpleGeist",
@@ -1000,7 +1000,7 @@ const CHARS = [
     color: ["Purple"],
     eyeColor: ["White"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/purpleGeist.png"
+    img: "images/chars/fnaf_world_enemies/purpleGeist.png"
   },
   {
     name: "Chica's Magic Rainbow",
@@ -1009,7 +1009,7 @@ const CHARS = [
     color: ["Rainbow"],
     eyeColor: ["Black"],
     year: "Unknown",
-    img: "../../images/chars/other/rainbow.png"
+    img: "images/chars/other/rainbow.png"
   },
 
   // === Halloween Edition Exclusives ===
@@ -1020,7 +1020,7 @@ const CHARS = [
     color: ["Orange", "Purple"],
     eyeColor: ["Black"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/mad_jack.png"
+    img: "images/chars/fnaf_world_enemies/mad_jack.png"
   },
   {
     name: "Big Jack",
@@ -1029,7 +1029,7 @@ const CHARS = [
     color: ["Red", "Blue"],
     eyeColor: ["Red"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/big_jack.png"
+    img: "images/chars/fnaf_world_enemies/big_jack.png"
   },
   {
     name: "Cheesehead",
@@ -1038,7 +1038,7 @@ const CHARS = [
     color: ["Yellow", "Red"],
     eyeColor: ["White"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/cheesehead.png"
+    img: "images/chars/fnaf_world_enemies/cheesehead.png"
   },
   {
     name: "Half-Bake",
@@ -1047,7 +1047,7 @@ const CHARS = [
     color: ["Yellow", "Pink"],
     eyeColor: ["Black"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/half-bake.png"
+    img: "images/chars/fnaf_world_enemies/half-bake.png"
   },
   {
     name: "Mudpie",
@@ -1056,7 +1056,7 @@ const CHARS = [
     color: ["Brown"],
     eyeColor: ["Black"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/mudpie.png"
+    img: "images/chars/fnaf_world_enemies/mudpie.png"
   },
   {
     name: "Xangle",
@@ -1065,7 +1065,7 @@ const CHARS = [
     color: ["Red"],
     eyeColor: ["Yellow"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/xangle.png"
+    img: "images/chars/fnaf_world_enemies/xangle.png"
   },
   {
     name: "Quad Endo",
@@ -1074,7 +1074,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Blue"],
     year: "Unconfirmed",
-    img: "../../images/chars/endo/quad_endo.png"
+    img: "images/chars/endo/quad_endo.png"
   },
   {
     name: "Party Hat A",
@@ -1083,7 +1083,7 @@ const CHARS = [
     color: ["White", "Pink"],
     eyeColor: ["Yellow"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/party_hat_a.png"
+    img: "images/chars/fnaf_world_enemies/party_hat_a.png"
   },
   {
     name: "Party Hat B",
@@ -1092,7 +1092,7 @@ const CHARS = [
     color: ["Red", "Orange"],
     eyeColor: ["Green"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/party_hat_b.webp"
+    img: "images/chars/fnaf_world_enemies/party_hat_b.webp"
   },
   {
     name: "Mini P",
@@ -1101,7 +1101,7 @@ const CHARS = [
     color: ["Purple"],
     eyeColor: ["Orange"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/mini_p.png"
+    img: "images/chars/fnaf_world_enemies/mini_p.png"
   },
   {
     name: "Security",
@@ -1110,7 +1110,7 @@ const CHARS = [
     color: ["Grey", "Red"],
     eyeColor: ["Yellow"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/security_halloween.png"
+    img: "images/chars/fnaf_world_enemies/security_halloween.png"
   },
 
   // === NPCs / Other ===
@@ -1121,7 +1121,7 @@ const CHARS = [
     color: ["Green"],
     eyeColor: ["Green"],
     year: "Unconfirmed",
-    img: "../../images/chars/fnaf_world_enemies/virtua_freddy.png"
+    img: "images/chars/fnaf_world_enemies/virtua_freddy.png"
   },
   {
     name: "Mendo",
@@ -1130,7 +1130,7 @@ const CHARS = [
     color: ["Blue"],
     eyeColor: ["Yellow"],
     year: "Unconfirmed",
-    img: "../../images/chars/endo/mendo.png"
+    img: "images/chars/endo/mendo.png"
   },
   {
     name: "Dee Dee",
@@ -1139,7 +1139,7 @@ const CHARS = [
     color: ["Purple", "Yellow"],
     eyeColor: ["Green"],
     year: "Unconfirmed",
-    img: "../../images/chars/other/dee_dee.png"
+    img: "images/chars/other/dee_dee.png"
   },
   {
     name: "Old Man Consequences",
@@ -1148,7 +1148,7 @@ const CHARS = [
     color: ["Red"],
     eyeColor: ["Red"],
     year: "Unconfirmed",
-    img: "../../images/chars/other/omc.png"
+    img: "images/chars/other/omc.png"
   },
   {
     name: "8-Bit Fredbear",
@@ -1157,7 +1157,7 @@ const CHARS = [
     color: ["Yellow"],
     eyeColor: ["Yellow"],
     year: "Unconfirmed",
-    img: "../../images/chars/springlock/8-bit_fredbear.png"
+    img: "images/chars/springlock/8-bit_fredbear.png"
   },
   {
     name: "Souldozer",
@@ -1166,7 +1166,7 @@ const CHARS = [
     color: ["Grey", "Yellow"],
     eyeColor: ["Yellow"],
     year: 2011,
-    img: "../../images/chars/fnaf_world_enemies/souldozer.png"
+    img: "images/chars/fnaf_world_enemies/souldozer.png"
   },
   {
     name: "Desk Man",
@@ -1175,7 +1175,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Grey"],
     year: "Unconfirmed",
-    img: "../../images/chars/other/desk_man.png"
+    img: "images/chars/other/desk_man.png"
   },
   {
     name: "Endo Plush",
@@ -1184,7 +1184,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Green"],
     year: "Unconfirmed",
-    img: "../../images/chars/endo/plush.png"
+    img: "images/chars/endo/plush.png"
   },
   {
     name: "Animdude",
@@ -1193,7 +1193,7 @@ const CHARS = [
     color: ["Blue"],
     eyeColor: ["White"],
     year: 1978,
-    img: "../../images/chars/other/Animdude.png"
+    img: "images/chars/other/Animdude.png"
   },
   {
     name: "Coffee",
@@ -1202,7 +1202,7 @@ const CHARS = [
     color: ["Brown"],
     eyeColor: ["Yellow"],
     year: 2012,
-    img: "../../images/chars/other/coffee.png"
+    img: "images/chars/other/coffee.png"
   },
 
   // === Trophies ===
@@ -1213,7 +1213,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Grey"],
     year: 2016,
-    img: "../../images/chars/trophy/security_trophy.png"
+    img: "images/chars/trophy/security_trophy.png"
   },
   {
     name: "Scott Trophy",
@@ -1222,7 +1222,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Grey"],
     year: 2016,
-    img: "../../images/chars/trophy/scott_trophy.png"
+    img: "images/chars/trophy/scott_trophy.png"
   },
   {
     name: "Chipper's Revenge Trophy",
@@ -1231,7 +1231,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Grey"],
     year: 2016,
-    img: "../../images/chars/trophy/chipper_trophy.png"
+    img: "images/chars/trophy/chipper_trophy.png"
   },
   {
     name: "Chica's Magic Rainbow Trophy",
@@ -1240,7 +1240,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Grey"],
     year: 2016,
-    img: "../../images/chars/trophy/rainbow_trophy.png"
+    img: "images/chars/trophy/rainbow_trophy.png"
   },
   {
     name: "Fredbear Legs Trophy",
@@ -1249,7 +1249,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Grey"],
     year: 2016,
-    img: "../../images/chars/trophy/fredbear_trophy.png"
+    img: "images/chars/trophy/fredbear_trophy.png"
   },
   {
     name: "Crying Child Trophy",
@@ -1258,7 +1258,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Grey"],
     year: 2016,
-    img: "../../images/chars/trophy/crying_child_trophy.png"
+    img: "images/chars/trophy/crying_child_trophy.png"
   },
   {
     name: "Shiny Pearl Trophy",
@@ -1267,7 +1267,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Grey"],
     year: 2016,
-    img: "../../images/chars/trophy/pearl_tropy.png"
+    img: "images/chars/trophy/pearl_tropy.png"
   },
   {
     name: "The Fan Trophy",
@@ -1276,7 +1276,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Grey"],
     year: 2016,
-    img: "../../images/chars/trophy/fan_trophy.png"
+    img: "images/chars/trophy/fan_trophy.png"
   },
 
   // === Sister Location ===
@@ -1287,7 +1287,7 @@ const CHARS = [
     color: ["White", "Magenta"],
     eyeColor: ["Blue"],
     year: "Unconfirmed",
-    img: "../../images/chars/funtime/funtime_freddy.png"
+    img: "images/chars/funtime/funtime_freddy.png"
   },
   {
     name: "Funtime Foxy",
@@ -1296,7 +1296,7 @@ const CHARS = [
     color: ["White", "Pink"],
     eyeColor: ["Yellow"],
     year: "Unconfirmed",
-    img: "../../images/chars/funtime/funtime_foxy.png"
+    img: "images/chars/funtime/funtime_foxy.png"
   },
   {
     name: "Bon-Bon",
@@ -1305,7 +1305,7 @@ const CHARS = [
     color: ["Blue"],
     eyeColor: ["Magenta"],
     year: "Unconfirmed",
-    img: "../../images/chars/funtime/bon-bon.png"
+    img: "images/chars/funtime/bon-bon.png"
   },
   {
     name: "Bonnet",
@@ -1314,7 +1314,7 @@ const CHARS = [
     color: ["Pink"],
     eyeColor: ["Blue"],
     year: "Unconfirmed",
-    img: "../../images/chars/funtime/bonnet.png"
+    img: "images/chars/funtime/bonnet.png"
   },
   {
     name: "Circus Baby",
@@ -1323,7 +1323,7 @@ const CHARS = [
     color: ["White", "Red"],
     eyeColor: ["Green"],
     year: "Unconfirmed",
-    img: "../../images/chars/funtime/baby.png"
+    img: "images/chars/funtime/baby.png"
   },
   {
     name: "Bidybab",
@@ -1332,7 +1332,7 @@ const CHARS = [
     color: ["White", "Beige"],
     eyeColor: ["Magenta"],
     year: "Unconfirmed",
-    img: "../../images/chars/funtime/bidybab.png"
+    img: "images/chars/funtime/bidybab.png"
   },
   {
     name: "Electrobab",
@@ -1341,7 +1341,7 @@ const CHARS = [
     color: ["White", "Beige"],
     eyeColor: ["Yellow"],
     year: "Unconfirmed",
-    img: "../../images/chars/funtime/electrobab.png"
+    img: "images/chars/funtime/electrobab.png"
   },
   {
     name: "Ballora",
@@ -1350,7 +1350,7 @@ const CHARS = [
     color: ["White", "Purple"],
     eyeColor: ["Magenta"],
     year: "Unconfirmed",
-    img: "../../images/chars/funtime/ballora.png"
+    img: "images/chars/funtime/ballora.png"
   },
   {
     name: "Minireena",
@@ -1359,7 +1359,7 @@ const CHARS = [
     color: ["White", "Beige"],
     eyeColor: ["Black"],
     year: "Unconfirmed",
-    img: "../../images/chars/funtime/minireena.png"
+    img: "images/chars/funtime/minireena.png"
   },
   {
     name: "Lolbit",
@@ -1368,7 +1368,7 @@ const CHARS = [
     color: ["White", "Orange"],
     eyeColor: ["White"],
     year: "Unconfirmed",
-    img: "../../images/chars/funtime/lolbit.png"
+    img: "images/chars/funtime/lolbit.png"
   },
   {
     name: "Yenndo",
@@ -1377,7 +1377,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Yellow"],
     year: "Unconfirmed",
-    img: "../../images/chars/endo/yenndo.png"
+    img: "images/chars/endo/yenndo.png"
   },
   {
     name: "Ennard",
@@ -1386,7 +1386,7 @@ const CHARS = [
     color: ["White", "Grey"],
     eyeColor: ["Blue"],
     year: "Unconfirmed",
-    img: "../../images/chars/endo/ennard.png"
+    img: "images/chars/endo/ennard.png"
   },
   {
     name: "HandUnit",
@@ -1395,7 +1395,7 @@ const CHARS = [
     color: ["Yellow"],
     eyeColor: ["Black"],
     year: "Unconfirmed",
-    img: "../../images/chars/other/handunit.png"
+    img: "images/chars/other/handunit.png"
   },
   {
     name: "Module Heads",
@@ -1404,7 +1404,7 @@ const CHARS = [
     color: ["White"],
     eyeColor: ["Yellow"],
     year: "Unconfirmed",
-    img: "../../images/chars/other/module_heads.png"
+    img: "images/chars/other/module_heads.png"
   },
 
   // === Immortal and the Restless ===
@@ -1415,7 +1415,7 @@ const CHARS = [
     color: ["White", "Green"],
     eyeColor: ["Black"],
     year: "Unconfirmed",
-    img: "../../images/chars/other/clara.png"
+    img: "images/chars/other/clara.png"
   },
   {
     name: "Vlad",
@@ -1424,7 +1424,7 @@ const CHARS = [
     color: ["Blue"],
     eyeColor: ["Black"],
     year: "Unconfirmed",
-    img: "../../images/chars/other/vlad.png"
+    img: "images/chars/other/vlad.png"
   },
   {
     name: "Vlad's Son",
@@ -1433,7 +1433,7 @@ const CHARS = [
     color: ["Blue"],
     eyeColor: ["Black"],
     year: "Unconfirmed",
-    img: "../../images/chars/other/VladsSon.png"
+    img: "images/chars/other/VladsSon.png"
   },
 
   // === Sister Location Minigames ===
@@ -1444,7 +1444,7 @@ const CHARS = [
     color: ["White", "Pink"],
     eyeColor: ["Green"],
     year: "Unconfirmed",
-    img: "../../images/chars/other/elizabeth_afton.png"
+    img: "images/chars/other/elizabeth_afton.png"
   },
 
   // === Pizza Sim Fakeout ===
@@ -1455,7 +1455,7 @@ const CHARS = [
     color: ["Brown"],
     eyeColor: ["Black"],
     year: 2023,
-    img: "../../images/chars/other/minigame_freddy.png"
+    img: "images/chars/other/minigame_freddy.png"
   },
   {
     name: "Minigame Grey Freddy",
@@ -1464,7 +1464,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Black"],
     year: 2023,
-    img: "../../images/chars/other/minigame_grey_freddy.png"
+    img: "images/chars/other/minigame_grey_freddy.png"
   },
 
   // === Freddy Fazbear's Pizzeria Simulator Night Sections ===
@@ -1475,7 +1475,7 @@ const CHARS = [
     color: ["Green"],
     eyeColor: ["Silver"],
     year: 2023,
-    img: "../../images/chars/springlock/scraptrap.png"
+    img: "images/chars/springlock/scraptrap.png"
   },
   {
     name: "Scrap Baby",
@@ -1484,7 +1484,7 @@ const CHARS = [
     color: ["Grey", "Orange"],
     eyeColor: ["Green"],
     year: 2023,
-    img: "../../images/chars/funtime/scrap_baby.png"
+    img: "images/chars/funtime/scrap_baby.png"
   },
   {
     name: "Lefty",
@@ -1493,7 +1493,7 @@ const CHARS = [
     color: ["Black"],
     eyeColor: ["Yellow"],
     year: 2023,
-    img: "../../images/chars/rockstar/lefty.png"
+    img: "images/chars/rockstar/lefty.png"
   },
   {
     name: "Molten Freddy",
@@ -1502,7 +1502,7 @@ const CHARS = [
     color: ["Grey", "Brown"],
     eyeColor: ["Yellow"],
     year: 2023,
-    img: "../../images/chars/endo/molten_freddy.png"
+    img: "images/chars/endo/molten_freddy.png"
   },
   {
     name: "Helpy",
@@ -1511,7 +1511,7 @@ const CHARS = [
     color: ["White", "Magenta"],
     eyeColor: ["Blue"],
     year: 2023,
-    img: "../../images/chars/other/helpy.gif"
+    img: "images/chars/other/helpy.gif"
   },
   {
     name: "Henry Emily",
@@ -1520,7 +1520,7 @@ const CHARS = [
     color: ["White", "Orange"],
     eyeColor: ["Green"],
     year: "1980s",
-    img: "../../images/chars/other/henry.png"
+    img: "images/chars/other/henry.png"
   },
   {
     name: "Ad Crew",
@@ -1529,7 +1529,7 @@ const CHARS = [
     color: ["Colorful"],
     eyeColor: ["Black"],
     year: 2023,
-    img: "../../images/chars/other/ads.png"
+    img: "images/chars/other/ads.png"
   },
 
   // === FFPS Buyables ===
@@ -1541,7 +1541,7 @@ const CHARS = [
     color: ["Purple"],
     eyeColor: ["Blue"],
     year: 2023,
-    img: "../../images/chars/mediocre_melodies/mr_hippo.png"
+    img: "images/chars/mediocre_melodies/mr_hippo.png"
   },
   {
     name: "Orville Elephant",
@@ -1550,7 +1550,7 @@ const CHARS = [
     color: ["Orange"],
     eyeColor: ["Blue"],
     year: 2023,
-    img: "../../images/chars/mediocre_melodies/orville_elephant.png"
+    img: "images/chars/mediocre_melodies/orville_elephant.png"
   },
   {
     name: "Happy Frog",
@@ -1559,7 +1559,7 @@ const CHARS = [
     color: ["Green"],
     eyeColor: ["Magenta"],
     year: 2023,
-    img: "../../images/chars/mediocre_melodies/happy_frog.png"
+    img: "images/chars/mediocre_melodies/happy_frog.png"
   },
   {
     name: "Pigpatch",
@@ -1568,7 +1568,7 @@ const CHARS = [
     color: ["Pink"],
     eyeColor: ["Blue", "Green"],
     year: 2023,
-    img: "../../images/chars/mediocre_melodies/pigpatch.png"
+    img: "images/chars/mediocre_melodies/pigpatch.png"
   },
   {
     name: "Nedd Bear",
@@ -1577,7 +1577,7 @@ const CHARS = [
     color: ["Brown"],
     eyeColor: ["Green"],
     year: 2023,
-    img: "../../images/chars/mediocre_melodies/nedd_bear.png"
+    img: "images/chars/mediocre_melodies/nedd_bear.png"
   },
 
   // === Rockstars ===
@@ -1588,7 +1588,7 @@ const CHARS = [
     color: ["Brown"],
     eyeColor: ["Blue"],
     year: 2023,
-    img: "../../images/chars/rockstar/rockstar_freddy.png"
+    img: "images/chars/rockstar/rockstar_freddy.png"
   },
   {
     name: "Rockstar Bonnie",
@@ -1597,7 +1597,7 @@ const CHARS = [
     color: ["Blue"],
     eyeColor: ["Green"],
     year: 2023,
-    img: "../../images/chars/rockstar/rockstar_bonnie.png"
+    img: "images/chars/rockstar/rockstar_bonnie.png"
   },
   {
     name: "Rockstar Chica",
@@ -1606,7 +1606,7 @@ const CHARS = [
     color: ["Yellow"],
     eyeColor: ["Magenta"],
     year: 2023,
-    img: "../../images/chars/rockstar/rockstar_chica.png"
+    img: "images/chars/rockstar/rockstar_chica.png"
   },
   {
     name: "Rockstar Foxy",
@@ -1615,7 +1615,7 @@ const CHARS = [
     color: ["Red"],
     eyeColor: ["Yellow"],
     year: 2023,
-    img: "../../images/chars/rockstar/rockstar_foxy.png"
+    img: "images/chars/rockstar/rockstar_foxy.png"
   },
 
   // === Other Buyables ===
@@ -1626,7 +1626,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Colorful"],
     year: 2023,
-    img: "../../images/chars/other/candy_cadet.png"
+    img: "images/chars/other/candy_cadet.png"
   },
   {
     name: "Egg Baby",
@@ -1635,7 +1635,7 @@ const CHARS = [
     color: ["Beige"],
     eyeColor: ["Black"],
     year: 2023,
-    img: "../../images/chars/other/egg_baby.png"
+    img: "images/chars/other/egg_baby.png"
   },
   {
     name: "El Chip",
@@ -1644,7 +1644,7 @@ const CHARS = [
     color: ["Brown"],
     eyeColor: ["Green"],
     year: 2023,
-    img: "../../images/chars/other/el_chip.png"
+    img: "images/chars/other/el_chip.png"
   },
   {
     name: "Funtime Chica",
@@ -1653,7 +1653,7 @@ const CHARS = [
     color: ["White", "Pink"],
     eyeColor: ["Magenta"],
     year: "Unnknown",
-    img: "../../images/chars/funtime/funtime_chica.png"
+    img: "images/chars/funtime/funtime_chica.png"
   },
   {
     name: "Funtime Cupcake",
@@ -1662,7 +1662,7 @@ const CHARS = [
     color: ["Pink"],
     eyeColor: ["Blue"],
     year: "Unnknown",
-    img: "../../images/chars/funtime/cupcake.png"
+    img: "images/chars/funtime/cupcake.png"
   },
   {
     name: "Lemonade Clown",
@@ -1671,7 +1671,7 @@ const CHARS = [
     color: ["White", "Orange"],
     eyeColor: ["Blue"],
     year: 2023,
-    img: "../../images/chars/other/lemonade_clown.png"
+    img: "images/chars/other/lemonade_clown.png"
   },
   {
     name: "Fruit Punch Clown",
@@ -1680,7 +1680,7 @@ const CHARS = [
     color: ["White", "Red"],
     eyeColor: ["Green"],
     year: 2023,
-    img: "../../images/chars/other/fruit_punch_clown.png"
+    img: "images/chars/other/fruit_punch_clown.png"
   },
   {
     name: "Music Man",
@@ -1689,7 +1689,7 @@ const CHARS = [
     color: ["White", "Magenta"],
     eyeColor: ["Black"],
     year: 2023,
-    img: "../../images/chars/other/music_man.png"
+    img: "images/chars/other/music_man.png"
   },
   {
     name: "Neon Jukebox",
@@ -1698,7 +1698,7 @@ const CHARS = [
     color: ["Rainbow"],
     eyeColor: ["Black"],
     year: 2023,
-    img: "../../images/chars/other/neon_jukebox.png"
+    img: "images/chars/other/neon_jukebox.png"
   },
   {
     name: "Disco Pizza Light",
@@ -1707,7 +1707,7 @@ const CHARS = [
     color: ["Black"],
     eyeColor: ["Colorful"],
     year: 2023,
-    img: "../../images/chars/other/disco_pizza_light.png"
+    img: "images/chars/other/disco_pizza_light.png"
   },
   {
     name: "Prize King",
@@ -1716,7 +1716,7 @@ const CHARS = [
     color: ["Yellow"],
     eyeColor: ["Green"],
     year: 2023,
-    img: "../../images/chars/other/prize_king.png"
+    img: "images/chars/other/prize_king.png"
   },
   {
     name: "Security Puppet",
@@ -1725,7 +1725,7 @@ const CHARS = [
     color: ["White"],
     eyeColor: ["Yellow"],
     year: 2023,
-    img: "../../images/chars/other/security_puppet.png"
+    img: "images/chars/other/security_puppet.png"
   },
   {
     name: "Pickles",
@@ -1734,7 +1734,7 @@ const CHARS = [
     color: ["Green"],
     eyeColor: ["Green"],
     year: 2023,
-    img: "../../images/chars/other/pickles.png"
+    img: "images/chars/other/pickles.png"
   },
   {
     name: "Tutorial Unit",
@@ -1743,7 +1743,7 @@ const CHARS = [
     color: ["White"],
     eyeColor: ["Black"],
     year: 2023,
-    img: "../../images/chars/other/tutorial_unit.png"
+    img: "images/chars/other/tutorial_unit.png"
   },
   {
     name: "Winking Sign",
@@ -1752,7 +1752,7 @@ const CHARS = [
     color: ["Brown"],
     eyeColor: ["Black"],
     year: 2023,
-    img: "../../images/chars/other/winking_sign.png"
+    img: "images/chars/other/winking_sign.png"
   },
   {
     name: "Gumball Swivelhands",
@@ -1761,7 +1761,7 @@ const CHARS = [
     color: ["Red", "Colorful"],
     eyeColor: ["Black"],
     year: 2023,
-    img: "../../images/chars/other/gumball_swivelhands.png"
+    img: "images/chars/other/gumball_swivelhands.png"
   },
   {
     name: "Ballpit Tower",
@@ -1770,7 +1770,7 @@ const CHARS = [
     color: ["Yellow", "Colorful"],
     eyeColor: ["Black"],
     year: 2023,
-    img: "../../images/chars/other/ballpit_tower.png"
+    img: "images/chars/other/ballpit_tower.png"
   },
 
   // === Trash & the Gang ===
@@ -1781,7 +1781,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Black"],
     year: 2023,
-    img: "../../images/chars/trash/pan_stan.png"
+    img: "images/chars/trash/pan_stan.png"
   },
   {
     name: "Bucket Bob",
@@ -1790,7 +1790,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Black"],
     year: 2023,
-    img: "../../images/chars/trash/bucket_bob.png"
+    img: "images/chars/trash/bucket_bob.png"
   },
   {
     name: "No. 1 Crate",
@@ -1799,7 +1799,7 @@ const CHARS = [
     color: ["Blue"],
     eyeColor: ["Black"],
     year: 2023,
-    img: "../../images/chars/trash/no_1_crate.png"
+    img: "images/chars/trash/no_1_crate.png"
   },
   {
     name: "Mr. Can-Do",
@@ -1808,7 +1808,7 @@ const CHARS = [
     color: ["Red"],
     eyeColor: ["Black"],
     year: 2023,
-    img: "../../images/chars/trash/mr_can-do.png"
+    img: "images/chars/trash/mr_can-do.png"
   },
   {
     name: "Mr. Hugs",
@@ -1817,7 +1817,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Black"],
     year: 2023,
-    img: "../../images/chars/trash/mr_hugs.png"
+    img: "images/chars/trash/mr_hugs.png"
   },
 
   // === Ultimate Custom Night Plushies ===
@@ -1828,7 +1828,7 @@ const CHARS = [
     color: ["Brown"],
     eyeColor: ["Blue"],
     year: 2023,
-    img: "../../images/chars/plush/freddy.png"
+    img: "images/chars/plush/freddy.png"
   },
   {
     name: "Plush Bonnie",
@@ -1837,7 +1837,7 @@ const CHARS = [
     color: ["Blue"],
     eyeColor: ["Red"],
     year: 2023,
-    img: "../../images/chars/plush/bonnie.png"
+    img: "images/chars/plush/bonnie.png"
   },
   {
     name: "Plush Chica",
@@ -1846,7 +1846,7 @@ const CHARS = [
     color: ["Yellow"],
     eyeColor: ["Magenta"],
     year: 2023,
-    img: "../../images/chars/plush/chica.png"
+    img: "images/chars/plush/chica.png"
   },
   {
     name: "Plush Foxy",
@@ -1855,7 +1855,7 @@ const CHARS = [
     color: ["Red"],
     eyeColor: ["Yellow"],
     year: 2023,
-    img: "../../images/chars/plush/foxy.png"
+    img: "images/chars/plush/foxy.png"
   },
   {
     name: "Plush Balloon Boy",
@@ -1864,7 +1864,7 @@ const CHARS = [
     color: ["Red", "Blue"],
     eyeColor: ["Blue"],
     year: 2023,
-    img: "../../images/chars/plush/bb.png"
+    img: "images/chars/plush/bb.png"
   },
   {
     name: "Plush Golden Freddy",
@@ -1873,7 +1873,7 @@ const CHARS = [
     color: ["Yellow"],
     eyeColor: ["Black"],
     year: 2023,
-    img: "../../images/chars/plush/golden_freddy.png"
+    img: "images/chars/plush/golden_freddy.png"
   },
   {
     name: "Plush Mangle",
@@ -1882,7 +1882,7 @@ const CHARS = [
     color: ["White", "Pink"],
     eyeColor: ["Yellow"],
     year: 2023,
-    img: "../../images/chars/plush/mangle.png"
+    img: "images/chars/plush/mangle.png"
   },
   {
     name: "Plush Fredbear",
@@ -1891,7 +1891,7 @@ const CHARS = [
     color: ["Yellow"],
     eyeColor: ["White"],
     year: 2023,
-    img: "../../images/chars/plush/fredbear.png"
+    img: "images/chars/plush/fredbear.png"
   },
   {
     name: "Plush Circus Baby",
@@ -1900,7 +1900,7 @@ const CHARS = [
     color: ["White", "Red"],
     eyeColor: ["Green"],
     year: 2023,
-    img: "../../images/chars/plush/baby.png"
+    img: "images/chars/plush/baby.png"
   },
 
   // === Ultimate Custom Night Extras ===
@@ -1911,7 +1911,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Black"],
     year: 2023,
-    img: "../../images/chars/withered/loading_freddy.png"
+    img: "images/chars/withered/loading_freddy.png"
   },
   {
     name: "XOR",
@@ -1920,7 +1920,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Black"],
     year: 2023,
-    img: "../../images/chars/other/xor.png"
+    img: "images/chars/other/xor.png"
   },
 
   // === Ultimate Custom Night Trophies ===
@@ -1931,7 +1931,7 @@ const CHARS = [
     color: ["Brown"],
     eyeColor: ["Brown"],
     year: 2023,
-    img: "../../images/chars/trophy/bronze.png"
+    img: "images/chars/trophy/bronze.png"
   },
   {
     name: "Books Freddy",
@@ -1940,7 +1940,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Grey"],
     year: 2023,
-    img: "../../images/chars/trophy/books_freddy.png"
+    img: "images/chars/trophy/books_freddy.png"
   },
   {
     name: "Games Freddy",
@@ -1949,7 +1949,7 @@ const CHARS = [
     color: ["Yellow"],
     eyeColor: ["Yellow"],
     year: 2023,
-    img: "../../images/chars/trophy/games_freddy.png"
+    img: "images/chars/trophy/games_freddy.png"
   },
 
   // === Help Wanted ===
@@ -1961,7 +1961,7 @@ const CHARS = [
     color: ["Black"],
     eyeColor: ["White"],
     year: "Unconfirmed",
-    img: "../../images/chars/classic/dark_freddy.png"
+    img: "images/chars/classic/dark_freddy.png"
   },
   {
     name: "Party Freddy",
@@ -1970,7 +1970,7 @@ const CHARS = [
     color: ["Black"],
     eyeColor: ["Red"],
     year: "Unconfirmed",
-    img: "../../images/chars/classic/party_freddy.png"
+    img: "images/chars/classic/party_freddy.png"
   },
   {
     name: "Neon Bonnie",
@@ -1979,7 +1979,7 @@ const CHARS = [
     color: ["Black"],
     eyeColor: ["Blue", "White"],
     year: "Unconfirmed",
-    img: "../../images/chars/classic/neon_bonnie.png"
+    img: "images/chars/classic/neon_bonnie.png"
   },
   {
     name: "Neon Chica",
@@ -1988,7 +1988,7 @@ const CHARS = [
     color: ["Black"],
     eyeColor: ["Yellow", "White"],
     year: "Unconfirmed",
-    img: "../../images/chars/classic/neon_chica.png"
+    img: "images/chars/classic/neon_chica.png"
   },
   {
     name: "Burnt Foxy",
@@ -1997,7 +1997,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Orange"],
     year: "Unconfirmed",
-    img: "../../images/chars/classic/burnt_foxy.png"
+    img: "images/chars/classic/burnt_foxy.png"
   },
   {
     name: "Dark Foxy",
@@ -2006,7 +2006,7 @@ const CHARS = [
     color: ["Black"],
     eyeColor: ["White"],
     year: "Unconfirmed",
-    img: "../../images/chars/classic/dark_foxy.png"
+    img: "images/chars/classic/dark_foxy.png"
   },
   {
     name: "Shadow Mangle",
@@ -2015,7 +2015,7 @@ const CHARS = [
     color: ["Black"],
     eyeColor: ["Purple"],
     year: "Unconfirmed",
-    img: "../../images/chars/shadow/shadow_mangle.png"
+    img: "images/chars/shadow/shadow_mangle.png"
   },
 
   // === Variants ===
@@ -2026,7 +2026,7 @@ const CHARS = [
     color: ["Red", "Blue"],
     eyeColor: ["Yellow"],
     year: "Unconfirmed",
-    img: "../../images/chars/classic/captain_foxy.png"
+    img: "images/chars/classic/captain_foxy.png"
   },
   {
     name: "Plushbaby",
@@ -2035,7 +2035,7 @@ const CHARS = [
     color: ["White", "Red"],
     eyeColor: ["Green"],
     year: "Unconfirmed",
-    img: "../../images/chars/plush/plushbaby.png"
+    img: "images/chars/plush/plushbaby.png"
   },
   {
     name: "Scrap Plushbaby",
@@ -2044,7 +2044,7 @@ const CHARS = [
     color: ["Grey", "Orange"],
     eyeColor: ["Green"],
     year: "Unconfirmed",
-    img: "../../images/chars/plush/scrap_plushbaby.png"
+    img: "images/chars/plush/scrap_plushbaby.png"
   },
 
   // === Endos ===
@@ -2055,7 +2055,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Red"],
     year: "Unconfirmed",
-    img: "../../images/chars/endo/ghetto_endo.png"
+    img: "images/chars/endo/ghetto_endo.png"
   },
   {
     name: "Nightmare Endo",
@@ -2064,7 +2064,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Red"],
     year: "Unconfirmed",
-    img: "../../images/chars/endo/nightmare_endo.png"
+    img: "images/chars/endo/nightmare_endo.png"
   },
 
   // === Others ===
@@ -2075,7 +2075,7 @@ const CHARS = [
     color: ["White"],
     eyeColor: ["Green"],
     year: "Unconfirmed",
-    img: "../../images/chars/other/tape_girl.png"
+    img: "images/chars/other/tape_girl.png"
   },
   {
     name: "Glitchtrap",
@@ -2084,7 +2084,7 @@ const CHARS = [
     color: ["Yellow", "Purple"],
     eyeColor: ["Purple"],
     year: "Unconfirmed",
-    img: "../../images/chars/springlock/Glitchtrap.png"
+    img: "images/chars/springlock/Glitchtrap.png"
   },
 
   // === Curse of Dreadbear ===
@@ -2095,7 +2095,7 @@ const CHARS = [
     color: ["Green"],
     eyeColor: ["Yellow"],
     year: "Unconfirmed",
-    img: "../../images/chars/nightmare/dreadbear.png"
+    img: "images/chars/nightmare/dreadbear.png"
   },
   {
     name: "Grimm Foxy",
@@ -2104,7 +2104,7 @@ const CHARS = [
     color: ["Orange"],
     eyeColor: ["Yellow"],
     year: "Unconfirmed",
-    img: "../../images/chars/nightmare/grimm_foxy.png"
+    img: "images/chars/nightmare/grimm_foxy.png"
   },
   {
     name: "Ghost Helpy",
@@ -2113,7 +2113,7 @@ const CHARS = [
     color: ["White"],
     eyeColor: ["Purple"],
     year: "Unconfirmed",
-    img: "../../images/chars/other/ghost_helpy.png"
+    img: "images/chars/other/ghost_helpy.png"
   },
 
   // === Security Breach ===
@@ -2124,7 +2124,7 @@ const CHARS = [
     color: ["Orange"],
     eyeColor: ["Blue"],
     year: 2035,
-    img: "../../images/chars/glamrock/freddy.png"
+    img: "images/chars/glamrock/freddy.png"
   },
   {
     name: "Shattered Glamrock Freddy",
@@ -2133,7 +2133,7 @@ const CHARS = [
     color: ["Orange"],
     eyeColor: ["Yellow"],
     year: 2035,
-    img: "../../images/chars/glamrock/shatter/freddy.png"
+    img: "images/chars/glamrock/shatter/freddy.png"
   },
   {
     name: "Glamrock Chica",
@@ -2142,7 +2142,7 @@ const CHARS = [
     color: ["White"],
     eyeColor: ["Purple"],
     year: 2035,
-    img: "../../images/chars/glamrock/chica.png"
+    img: "images/chars/glamrock/chica.png"
   },
   {
     name: "Shattered Glamrock Chica",
@@ -2151,7 +2151,7 @@ const CHARS = [
     color: ["White"],
     eyeColor: ["Purple"],
     year: 2035,
-    img: "../../images/chars/glamrock/shatter/chica.png"
+    img: "images/chars/glamrock/shatter/chica.png"
   },
   {
     name: "Montegomery Gator",
@@ -2160,7 +2160,7 @@ const CHARS = [
     color: ["Green"],
     eyeColor: ["Orange"],
     year: 2035,
-    img: "../../images/chars/glamrock/monty.png"
+    img: "images/chars/glamrock/monty.png"
   },
   {
     name: "Shattered Montegomery Gator",
@@ -2169,7 +2169,7 @@ const CHARS = [
     color: ["Green"],
     eyeColor: ["Orange"],
     year: 2035,
-    img: "../../images/chars/glamrock/shatter/monty.png"
+    img: "images/chars/glamrock/shatter/monty.png"
   },
   {
     name: "Roxane Wolf",
@@ -2178,7 +2178,7 @@ const CHARS = [
     color: ["Grey", "Red"],
     eyeColor: ["Yellow"],
     year: 2035,
-    img: "../../images/chars/glamrock/roxy.png"
+    img: "images/chars/glamrock/roxy.png"
   },
   {
     name: "Shattered Roxane Wolf",
@@ -2187,7 +2187,7 @@ const CHARS = [
     color: ["Grey", "Red"],
     eyeColor: ["Yellow"],
     year: 2035,
-    img: "../../images/chars/glamrock/shatter/roxy.png"
+    img: "images/chars/glamrock/shatter/roxy.png"
   },
   {
     name: "Glamrock Mr. Hippo",
@@ -2196,7 +2196,7 @@ const CHARS = [
     color: ["Grey", "Newspaper"],
     eyeColor: ["Grey", "Newspaper"],
     year: 2035,
-    img: "../../images/chars/glamrock/hippo.png"
+    img: "images/chars/glamrock/hippo.png"
   },
   {
     name: "Glamrock Endo",
@@ -2205,7 +2205,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Black"],
     year: 2035,
-    img: "../../images/chars/endo/glamrock.png"
+    img: "images/chars/endo/glamrock.png"
   },
   {
     name: "Wind Up Music Man",
@@ -2214,7 +2214,7 @@ const CHARS = [
     color: ["White", "Pink"],
     eyeColor: ["Black"],
     year: 2035,
-    img: "../../images/chars/other/lil_music.png"
+    img: "images/chars/other/lil_music.png"
   },
   {
     name: "DJ Music Man",
@@ -2223,7 +2223,7 @@ const CHARS = [
     color: ["White", "Pink"],
     eyeColor: ["Black"],
     year: 2035,
-    img: "../../images/chars/other/dj_music_man.png"
+    img: "images/chars/other/dj_music_man.png"
   },
   {
     name: "Sun",
@@ -2232,7 +2232,7 @@ const CHARS = [
     color: ["Yellow"],
     eyeColor: ["White"],
     year: 2035,
-    img: "../../images/chars/other/sun.png"
+    img: "images/chars/other/sun.png"
   },
 
   // === STAFF Bots ===
@@ -2243,7 +2243,7 @@ const CHARS = [
     color: ["White", "Grey"],
     eyeColor: ["Black"],
     year: 2035,
-    img: "../../images/chars/staff_bot/instructor.png"
+    img: "images/chars/staff_bot/instructor.png"
   },
   {
     name: "Comedy Bot",
@@ -2252,7 +2252,7 @@ const CHARS = [
     color: ["White", "Grey"],
     eyeColor: ["Black"],
     year: 2035,
-    img: "../../images/chars/staff_bot/comedy.png"
+    img: "images/chars/staff_bot/comedy.png"
   },
   {
     name: "Magician Bot",
@@ -2261,7 +2261,7 @@ const CHARS = [
     color: ["White", "Black"],
     eyeColor: ["Black"],
     year: 2035,
-    img: "../../images/chars/staff_bot/magician.png"
+    img: "images/chars/staff_bot/magician.png"
   },
   {
     name: "Map Bot",
@@ -2270,7 +2270,7 @@ const CHARS = [
     color: ["White", "Yellow"],
     eyeColor: ["Black"],
     year: 2035,
-    img: "../../images/chars/staff_bot/map.png"
+    img: "images/chars/staff_bot/map.png"
   },
   {
     name: "Mop Bot",
@@ -2279,7 +2279,7 @@ const CHARS = [
     color: ["White"],
     eyeColor: ["Black"],
     year: 2035,
-    img: "../../images/chars/staff_bot/mop.png"
+    img: "images/chars/staff_bot/mop.png"
   },
   {
     name: "Nightmare S.T.A.F.F. Bot",
@@ -2288,7 +2288,7 @@ const CHARS = [
     color: ["White", "Black"],
     eyeColor: ["White"],
     year: 2035,
-    img: "../../images/chars/staff_bot/nightmare.png"
+    img: "images/chars/staff_bot/nightmare.png"
   },
   {
     name: "Party Bot",
@@ -2297,7 +2297,7 @@ const CHARS = [
     color: ["White", "Purple"],
     eyeColor: ["Black"],
     year: 2035,
-    img: "../../images/chars/staff_bot/party.png"
+    img: "images/chars/staff_bot/party.png"
   },
   {
     name: "Sewer Bot",
@@ -2306,7 +2306,7 @@ const CHARS = [
     color: ["White", "Green"],
     eyeColor: ["Black"],
     year: 2035,
-    img: "../../images/chars/staff_bot/sewer.png"
+    img: "images/chars/staff_bot/sewer.png"
   },
   {
     name: "Chef Bot",
@@ -2315,7 +2315,7 @@ const CHARS = [
     color: ["White", "Pink"],
     eyeColor: ["Black"],
     year: 2035,
-    img: "../../images/chars/staff_bot/pizza.png"
+    img: "images/chars/staff_bot/pizza.png"
   },
   {
     name: "Security Bot",
@@ -2324,7 +2324,7 @@ const CHARS = [
     color: ["White", "Black"],
     eyeColor: ["Black"],
     year: 2035,
-    img: "../../images/chars/staff_bot/security.png"
+    img: "images/chars/staff_bot/security.png"
   },
   {
     name: "Attendant Bot",
@@ -2333,7 +2333,7 @@ const CHARS = [
     color: ["White", "Red"],
     eyeColor: ["Black"],
     year: 2035,
-    img: "../../images/chars/staff_bot/attendant.png"
+    img: "images/chars/staff_bot/attendant.png"
   },
   {
     name: "Alien Bot",
@@ -2342,7 +2342,7 @@ const CHARS = [
     color: ["White", "Green"],
     eyeColor: ["Black"],
     year: 2035,
-    img: "../../images/chars/staff_bot/alien.png"
+    img: "images/chars/staff_bot/alien.png"
   },
   {
     name: "S.T.A.F.F. Bot",
@@ -2351,7 +2351,7 @@ const CHARS = [
     color: ["White"],
     eyeColor: ["Black"],
     year: 2035,
-    img: "../../images/chars/staff_bot/staff.png"
+    img: "images/chars/staff_bot/staff.png"
   },
   {
     name: "Wet Floor Bot",
@@ -2360,7 +2360,7 @@ const CHARS = [
     color: ["Yellow", "Black"],
     eyeColor: ["Yellow"],
     year: 2035,
-    img: "../../images/chars/other/wet.png"
+    img: "images/chars/other/wet.png"
   },
 
   // === Princess Quest ===
@@ -2371,7 +2371,7 @@ const CHARS = [
     color: ["Yellow"],
     eyeColor: ["Yellow"],
     year: 2035,
-    img: "../../images/chars/princess_quest/princess.png"
+    img: "images/chars/princess_quest/princess.png"
   },
   {
     name: "Rabbit Head",
@@ -2380,7 +2380,7 @@ const CHARS = [
     color: ["Black", "Green"],
     eyeColor: ["Green"],
     year: 2035,
-    img: "../../images/chars/princess_quest/rabbit_head.png"
+    img: "images/chars/princess_quest/rabbit_head.png"
   },
   {
     name: "Glitchtrap Chaser",
@@ -2389,7 +2389,7 @@ const CHARS = [
     color: ["Black", "Green"],
     eyeColor: ["Green"],
     year: 2035,
-    img: "../../images/chars/princess_quest/glitchtrap_chaser.png"
+    img: "images/chars/princess_quest/glitchtrap_chaser.png"
   },
   {
     name: "Bunny Sentry",
@@ -2398,7 +2398,7 @@ const CHARS = [
     color: ["Black", "White"],
     eyeColor: ["White"],
     year: 2035,
-    img: "../../images/chars/princess_quest/bunny_sentry.png"
+    img: "images/chars/princess_quest/bunny_sentry.png"
   },
   {
     name: "Amalgam Glitchtrap",
@@ -2407,7 +2407,7 @@ const CHARS = [
     color: ["Purple", "Black"],
     eyeColor: ["Purple"],
     year: 2035,
-    img: "../../images/chars/princess_quest/amalgamtrap.png"
+    img: "images/chars/princess_quest/amalgamtrap.png"
   },
   {
     name: "Princess Quest Grimm Foxy",
@@ -2416,7 +2416,7 @@ const CHARS = [
     color: ["Red", "Orange"],
     eyeColor: ["Orange"],
     year: 2035,
-    img: "../../images/chars/princess_quest/grimm_foxy.png"
+    img: "images/chars/princess_quest/grimm_foxy.png"
   },
 
   // === The Rest ===
@@ -2427,7 +2427,7 @@ const CHARS = [
     color: ["Green"],
     eyeColor: ["Purple"],
     year: 2035,
-    img: "../../images/chars/springlock/burntrap.png"
+    img: "images/chars/springlock/burntrap.png"
   },
   {
     name: "Gregory",
@@ -2436,7 +2436,7 @@ const CHARS = [
     color: ["White", "Blue"],
     eyeColor: ["Brown"],
     year: 2035,
-    img: "../../images/chars/other/ggy.png"
+    img: "images/chars/other/ggy.png"
   },
   {
     name: "Vanessa",
@@ -2445,7 +2445,7 @@ const CHARS = [
     color: ["White", "Yellow"],
     eyeColor: ["Green"],
     year: 2012,
-    img: "../../images/chars/other/vanessa.png"
+    img: "images/chars/other/vanessa.png"
   },
   {
     name: "Vanny",
@@ -2454,7 +2454,7 @@ const CHARS = [
     color: ["White"],
     eyeColor: ["Red"],
     year: 2035,
-    img: "../../images/chars/other/vanny.png"
+    img: "images/chars/other/vanny.png"
   },
   {
     name: "Tangle Blob",
@@ -2463,7 +2463,7 @@ const CHARS = [
     color: ["Black", "White"],
     eyeColor: ["Red"],
     year: 2035,
-    img: "../../images/chars/endo/blob.png"
+    img: "images/chars/endo/blob.png"
   },
 
   // === RUIN ===
@@ -2474,7 +2474,7 @@ const CHARS = [
     color: ["Orange"],
     eyeColor: ["Blue"],
     year: 2035,
-    img: "../../images/chars/ruined/freddy.png"
+    img: "images/chars/ruined/freddy.png"
   },
   {
     name: "Glamrock Bonnie",
@@ -2483,7 +2483,7 @@ const CHARS = [
     color: ["Blue"],
     eyeColor: ["White"],
     year: 2035,
-    img: "../../images/chars/ruined/glamrock_bonnie.png"
+    img: "images/chars/ruined/glamrock_bonnie.png"
   },
   {
     name: "Ruined Chica",
@@ -2492,7 +2492,7 @@ const CHARS = [
     color: ["White", "Pink"],
     eyeColor: ["Purple"],
     year: 2035,
-    img: "../../images/chars/ruined/chica.png"
+    img: "images/chars/ruined/chica.png"
   },
   {
     name: "Ruined Monty",
@@ -2501,7 +2501,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Red"],
     year: 2035,
-    img: "../../images/chars/ruined/monty.png"
+    img: "images/chars/ruined/monty.png"
   },
   {
     name: "Ruined Roxy",
@@ -2510,7 +2510,7 @@ const CHARS = [
     color: ["Grey", "Red"],
     eyeColor: ["Grey"],
     year: 2035,
-    img: "../../images/chars/ruined/roxy.png"
+    img: "images/chars/ruined/roxy.png"
   },
   {
     name: "Ruined Sun",
@@ -2519,7 +2519,7 @@ const CHARS = [
     color: ["Yellow", "Orange"],
     eyeColor: ["White"],
     year: 2035,
-    img: "../../images/chars/ruined/ruined_sun.png"
+    img: "images/chars/ruined/ruined_sun.png"
   },
   {
     name: "Ruined Moon",
@@ -2528,7 +2528,7 @@ const CHARS = [
     color: ["Blue", "White"],
     eyeColor: ["Red"],
     year: 2035,
-    img: "../../images/chars/ruined/ruined_moon.png"
+    img: "images/chars/ruined/ruined_moon.png"
   },
   {
     name: "Eclipse",
@@ -2537,7 +2537,7 @@ const CHARS = [
     color: ["Yellow"],
     eyeColor: ["Orange", "Red"],
     year: 2035,
-    img: "../../images/chars/ruined/eclipse.png"
+    img: "images/chars/ruined/eclipse.png"
   },
   {
     name: "Ruined Wind Up Music Man",
@@ -2546,7 +2546,7 @@ const CHARS = [
     color: ["White", "Pink"],
     eyeColor: ["Black"],
     year: 2035,
-    img: "../../images/chars/ruined/ruin_lil_music.png"
+    img: "images/chars/ruined/ruin_lil_music.png"
   },
   {
     name: "Damaged Plush Baby",
@@ -2555,7 +2555,7 @@ const CHARS = [
     color: ["White", "Red"],
     eyeColor: ["Green"],
     year: 2035,
-    img: "../../images/chars/plush/damaged_plushbabies.png"
+    img: "images/chars/plush/damaged_plushbabies.png"
   },
   {
     name: "Helpi",
@@ -2564,7 +2564,7 @@ const CHARS = [
     color: ["White"],
     eyeColor: ["Blue"],
     year: 2035,
-    img: "../../images/chars/other/Helpi.png"
+    img: "images/chars/other/Helpi.png"
   },
   {
     name: "Elephant Mascot Suit",
@@ -2573,7 +2573,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["White"],
     year: 2035,
-    img: "../../images/chars/other/elephant_mascot_suit.png"
+    img: "images/chars/other/elephant_mascot_suit.png"
   },
   {
     name: "Penguin Mascot Suit",
@@ -2582,7 +2582,7 @@ const CHARS = [
     color: ["Blue"],
     eyeColor: ["White"],
     year: 2035,
-    img: "../../images/chars/other/penguin_mascot_suit.png"
+    img: "images/chars/other/penguin_mascot_suit.png"
   },
   {
     name: "Ruin Mechanical X-Form Experimental Storage",
@@ -2591,7 +2591,7 @@ const CHARS = [
     color: ["Blue"],
     eyeColor: ["Black"],
     year: 2035,
-    img: "../../images/chars/ruined/mxes.png"
+    img: "images/chars/ruined/mxes.png"
   },
   {
     name: "Ruined M2",
@@ -2600,7 +2600,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Orange"],
     year: 2035,
-    img: "../../images/chars/endo/m2_ruin.png"
+    img: "images/chars/endo/m2_ruin.png"
   },
   {
     name: "Costumed M2",
@@ -2609,7 +2609,7 @@ const CHARS = [
     color: ["Brown", "Blue"],
     eyeColor: ["Blue"],
     year: 2035,
-    img: "../../images/chars/endo/costumed_mimic.png"
+    img: "images/chars/endo/costumed_mimic.png"
   },
   {
     name: "Cassie",
@@ -2618,7 +2618,7 @@ const CHARS = [
     color: ["Brown", "Red"],
     eyeColor: ["Brown"],
     year: 2035,
-    img: "../../images/chars/other/cassie.png"
+    img: "images/chars/other/cassie.png"
   },
   {
     name: "Mask Bot",
@@ -2627,7 +2627,7 @@ const CHARS = [
     color: ["White"],
     eyeColor: ["Black"],
     year: 2035,
-    img: "../../images/chars/staff_bot/mask_bot.png"
+    img: "images/chars/staff_bot/mask_bot.png"
   },
   {
     name: "Giant Glamrock Endo",
@@ -2636,7 +2636,7 @@ const CHARS = [
     color: ["Grey", "Purple"],
     eyeColor: ["Purple"],
     year: 2035,
-    img: "../../images/chars/endo/giant_glamrock_endo.png"
+    img: "images/chars/endo/giant_glamrock_endo.png"
   },
 
   // === HELP WANTED 2 ===
@@ -2647,7 +2647,7 @@ const CHARS = [
     color: ["White", "Pink"],
     eyeColor: ["Black"],
     year: 2035,
-    img: "../../images/chars/ruined/ruined_dj_music_man.png"
+    img: "images/chars/ruined/ruined_dj_music_man.png"
   },
   {
     name: "Carnie",
@@ -2656,7 +2656,7 @@ const CHARS = [
     color: ["Brown", "Green"],
     eyeColor: ["Yellow"],
     year: 2035,
-    img: "../../images/chars/rockstar/carnie.png"
+    img: "images/chars/rockstar/carnie.png"
   },
   {
     name: "Burned Carnie",
@@ -2665,7 +2665,7 @@ const CHARS = [
     color: ["Brown", "Green"],
     eyeColor: ["Yellow"],
     year: 2035,
-    img: "../../images/chars/rockstar/carnie.png"
+    img: "images/chars/rockstar/carnie.png"
   },
   {
     name: "Mystic Hippo",
@@ -2674,7 +2674,7 @@ const CHARS = [
     color: ["Purple"],
     eyeColor: ["Blue"],
     year: 2035,
-    img: "../../images/chars/sotm/mystic_hippo.png"
+    img: "images/chars/sotm/mystic_hippo.png"
   },
   {
     name: "Jack-O-Moon",
@@ -2683,7 +2683,7 @@ const CHARS = [
     color: ["Orange", "Black"],
     eyeColor: ["Orange"],
     year: 2035,
-    img: "../../images/chars/other/jack_o_moon.png"
+    img: "images/chars/other/jack_o_moon.png"
   },
   {
     name: "Head Chef Bot",
@@ -2692,7 +2692,7 @@ const CHARS = [
     color: ["White", "Yellow", "Red"],
     eyeColor: ["Black"],
     year: 2035,
-    img: "../../images/chars/staff_bot/head_chef_bot.png"
+    img: "images/chars/staff_bot/head_chef_bot.png"
   },
   {
     name: "VR Endo",
@@ -2701,7 +2701,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Black"],
     year: 2035,
-    img: "../../images/chars/endo/vr_endo.png"
+    img: "images/chars/endo/vr_endo.png"
   },
 
   // === Secret of the Mimic ===
@@ -2714,7 +2714,7 @@ const CHARS = [
     color: ["Beige"],
     eyeColor: ["Black"],
     year: 1979,
-    img: "../../images/chars/other/arnold.png"
+    img: "images/chars/other/arnold.png"
   },
   {
     name: "Dispatch",
@@ -2723,7 +2723,7 @@ const CHARS = [
     color: ["Beige"],
     eyeColor: ["Black"],
     year: 1979,
-    img: "../../images/chars/other/dispatch.png"
+    img: "images/chars/other/dispatch.png"
   },
   {
     name: "Mr. Helpful",
@@ -2732,7 +2732,7 @@ const CHARS = [
     color: ["White", "Purple"],
     eyeColor: ["Black"],
     year: 1979,
-    img: "../../images/chars/sotm/mr_helpful.png"
+    img: "images/chars/sotm/mr_helpful.png"
   },
   {
     name: "Mrs. Helpful",
@@ -2741,7 +2741,7 @@ const CHARS = [
     color: ["White", "Purple"],
     eyeColor: ["Black"],
     year: 1979,
-    img: "../../images/chars/sotm/mrs_helpful.png"
+    img: "images/chars/sotm/mrs_helpful.png"
   },
 
   // First encounter
@@ -2752,7 +2752,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Black"],
     year: 1979,
-    img: "../../images/chars/sotm/mascot/elephant.png"
+    img: "images/chars/sotm/mascot/elephant.png"
   },
 
   // Jackie in the Box
@@ -2763,7 +2763,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Black"],
     year: 1979,
-    img: "../../images/chars/sotm/clean_o_vac.png"
+    img: "images/chars/sotm/clean_o_vac.png"
   },
   {
     name: "Jackie",
@@ -2772,7 +2772,7 @@ const CHARS = [
     color: ["White", "Red"],
     eyeColor: ["Green"],
     year: 1979,
-    img: "../../images/chars/sotm/jackie.png"
+    img: "images/chars/sotm/jackie.png"
   },
   {
     name: "Digi-Typer",
@@ -2781,7 +2781,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["White"],
     year: 1979,
-    img: "../../images/chars/sotm/digi-typer.png"
+    img: "images/chars/sotm/digi-typer.png"
   },
 
   // Roaming Mascots
@@ -2792,7 +2792,7 @@ const CHARS = [
     color: ["Blue"],
     eyeColor: ["Brown"],
     year: 1979,
-    img: "../../images/chars/sotm/mascot/hudgie.png"
+    img: "images/chars/sotm/mascot/hudgie.png"
   },
   {
     name: "Lyrical Lemur",
@@ -2801,7 +2801,7 @@ const CHARS = [
     color: ["Green"],
     eyeColor: ["Yellow"],
     year: 1979,
-    img: "../../images/chars/sotm/mascot/lemur.png"
+    img: "images/chars/sotm/mascot/lemur.png"
   },
   {
     name: "Swing Bee",
@@ -2810,7 +2810,7 @@ const CHARS = [
     color: ["Yellow", "Brown"],
     eyeColor: ["Black"],
     year: 1979,
-    img: "../../images/chars/sotm/mascot/swing_bee.png"
+    img: "images/chars/sotm/mascot/swing_bee.png"
   },
   {
     name: "Penguin",
@@ -2819,7 +2819,7 @@ const CHARS = [
     color: ["Blue"],
     eyeColor: ["Black"],
     year: 1979,
-    img: "../../images/chars/sotm/mascot/linux.png"
+    img: "images/chars/sotm/mascot/linux.png"
   },
   {
     name: "Lion",
@@ -2828,7 +2828,7 @@ const CHARS = [
     color: ["Brown"],
     eyeColor: ["Grey"],
     year: 1979,
-    img: "../../images/chars/sotm/mascot/lion.png"
+    img: "images/chars/sotm/mascot/lion.png"
   },
   {
     name: "Sharpay",
@@ -2837,7 +2837,7 @@ const CHARS = [
     color: ["White", "Pink"],
     eyeColor: ["Black"],
     year: 1979,
-    img: "../../images/chars/sotm/mascot/sharpay.png"
+    img: "images/chars/sotm/mascot/sharpay.png"
   },
 
   // Big Top Showroom
@@ -2848,7 +2848,7 @@ const CHARS = [
     color: ["Red", "White"],
     eyeColor: ["White"],
     year: 1979,
-    img: "../../images/chars/sotm/big_top.png"
+    img: "images/chars/sotm/big_top.png"
   },
   {
     name: "Mycellium Man",
@@ -2857,7 +2857,7 @@ const CHARS = [
     color: ["Beige", "Blue"],
     eyeColor: ["Yellow"],
     year: 1979,
-    img: "../../images/chars/sotm/mascot/mycellium_man.png"
+    img: "images/chars/sotm/mascot/mycellium_man.png"
   },
 
   // Pirate Show
@@ -2868,7 +2868,7 @@ const CHARS = [
     color: ["Brown", "Blue"],
     eyeColor: ["Black"],
     year: 1979,
-    img: "../../images/chars/springlock/captain_springlock.png"
+    img: "images/chars/springlock/captain_springlock.png"
   },
   {
     name: "Puppet Foxy",
@@ -2877,7 +2877,7 @@ const CHARS = [
     color: ["Red"],
     eyeColor: ["Yellow"],
     year: 1979,
-    img: "../../images/chars/sotm/puppet_crew/puppet_foxy.png"
+    img: "images/chars/sotm/puppet_crew/puppet_foxy.png"
   },
   {
     name: "Puppet Roxy",
@@ -2886,7 +2886,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Black"],
     year: 1979,
-    img: "../../images/chars/sotm/puppet_crew/puppet_roxy.png"
+    img: "images/chars/sotm/puppet_crew/puppet_roxy.png"
   },
   {
     name: "Kit",
@@ -2895,7 +2895,7 @@ const CHARS = [
     color: ["Orange"],
     eyeColor: ["Green"],
     year: 1979,
-    img: "../../images/chars/sotm/puppet_crew/kit.png"
+    img: "images/chars/sotm/puppet_crew/kit.png"
   },
   {
     name: "Bawson",
@@ -2904,7 +2904,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Blue"],
     year: 1979,
-    img: "../../images/chars/sotm/puppet_crew/bawson.png"
+    img: "images/chars/sotm/puppet_crew/bawson.png"
   },
   {
     name: "Renard",
@@ -2913,7 +2913,7 @@ const CHARS = [
     color: ["Orange"],
     eyeColor: ["White"],
     year: 1979,
-    img: "../../images/chars/sotm/puppet_crew/renard.png"
+    img: "images/chars/sotm/puppet_crew/renard.png"
   },
   {
     name: "Mr. Rocktapus",
@@ -2922,7 +2922,7 @@ const CHARS = [
     color: ["Yellow"],
     eyeColor: ["Black"],
     year: 1979,
-    img: "../../images/chars/sotm/puppet_crew/rocktapus.png"
+    img: "images/chars/sotm/puppet_crew/rocktapus.png"
   },
 
   // Doll Hospital / Recycling Center
@@ -2933,7 +2933,7 @@ const CHARS = [
     color: ["Black", "White", "Green"],
     eyeColor: ["Green"],
     year: 1979,
-    img: "../../images/chars/sotm/dollie.png"
+    img: "images/chars/sotm/dollie.png"
   },
   {
     name: "Molten Dollie",
@@ -2942,7 +2942,7 @@ const CHARS = [
     color: ["Orange", "Green", "White", "Black"],
     eyeColor: ["Green"],
     year: 1979,
-    img: "../../images/chars/sotm/molten_dollie.png"
+    img: "images/chars/sotm/molten_dollie.png"
   },
 
 
@@ -2954,7 +2954,7 @@ const CHARS = [
     color: ["Yellow", "Pink"],
     eyeColor: ["Pink"],
     year: 1979,
-    img: "../../images/chars/sotm/mascot/party_time_chica.png"
+    img: "images/chars/sotm/mascot/party_time_chica.png"
   },
   {
     name: "Party Time Cupcake",
@@ -2963,7 +2963,7 @@ const CHARS = [
     color: ["Yellow", "Pink"],
     eyeColor: ["Pink"],
     year: 1979,
-    img: "../../images/chars/sotm/mascot/party_time_cupcake.png"
+    img: "images/chars/sotm/mascot/party_time_cupcake.png"
   },
   {
     name: "Sleepy Moon",
@@ -2972,7 +2972,7 @@ const CHARS = [
     color: ["White"],
     eyeColor: ["Purple"],
     year: 1979,
-    img: "../../images/chars/sotm/mascot/sleepy_moon.png"
+    img: "images/chars/sotm/mascot/sleepy_moon.png"
   },
   {
     name: "White Tiger",
@@ -2981,7 +2981,7 @@ const CHARS = [
     color: ["White", "Black"],
     eyeColor: ["Blue", "Green"],
     year: 1979,
-    img: "../../images/chars/sotm/mascot/tiger_rock.png"
+    img: "images/chars/sotm/mascot/tiger_rock.png"
   },
 
   // R&D
@@ -2992,7 +2992,7 @@ const CHARS = [
     color: ["White", "Grey", "Yellow"],
     eyeColor: ["Yellow"],
     year: 1979,
-    img: "../../images/chars/endo/m2rnd.png"
+    img: "images/chars/endo/m2rnd.png"
   },
   {
     name: "Prototype Fredbear",
@@ -3001,7 +3001,7 @@ const CHARS = [
     color: ["Black"],
     eyeColor: ["Black"],
     year: 1979,
-    img: "../../images/chars/springlock/proto_fredbear.png"
+    img: "images/chars/springlock/proto_fredbear.png"
   },
   {
     name: "Prototype Springbonnie",
@@ -3010,7 +3010,7 @@ const CHARS = [
     color: ["Black"],
     eyeColor: ["Black"],
     year: 1979,
-    img: "../../images/chars/springlock/proto_springbonnie.png"
+    img: "images/chars/springlock/proto_springbonnie.png"
   },
   {
     name: "Prototype Bub",
@@ -3019,7 +3019,7 @@ const CHARS = [
     color: ["Brown"],
     eyeColor: ["Red"],
     year: 1979,
-    img: "../../images/chars/springlock/proto_bub.png"
+    img: "images/chars/springlock/proto_bub.png"
   },
   {
     name: "Prototype Monty",
@@ -3028,7 +3028,7 @@ const CHARS = [
     color: ["Green"],
     eyeColor: ["Brown"],
     year: 1979,
-    img: "../../images/chars/springlock/proto_monty.png"
+    img: "images/chars/springlock/proto_monty.png"
   },
   {
     name: "Prototype Bonnie",
@@ -3037,7 +3037,7 @@ const CHARS = [
     color: ["Beige"],
     eyeColor: ["Black"],
     year: 1979,
-    img: "../../images/chars/sotm/prototype/proto_bonnie.png"
+    img: "images/chars/sotm/prototype/proto_bonnie.png"
   },
   {
     name: "Prototype Chica",
@@ -3046,7 +3046,7 @@ const CHARS = [
     color: ["Yellow"],
     eyeColor: ["Black"],
     year: 1979,
-    img: "../../images/chars/sotm/prototype/proto_chica.png"
+    img: "images/chars/sotm/prototype/proto_chica.png"
   },
   {
     name: "Prototype Cupcake",
@@ -3055,7 +3055,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Yellow"],
     year: 1979,
-    img: "../../images/chars/sotm/prototype/proto_cupcake.png"
+    img: "images/chars/sotm/prototype/proto_cupcake.png"
   },
   {
     name: "Prototype Foxy",
@@ -3064,7 +3064,7 @@ const CHARS = [
     color: ["Grey", "Red"],
     eyeColor: ["Black"],
     year: 1979,
-    img: "../../images/chars/sotm/prototype/proto_foxy.png"
+    img: "images/chars/sotm/prototype/proto_foxy.png"
   },
   {
     name: "Prototype Freddy",
@@ -3073,7 +3073,7 @@ const CHARS = [
     color: ["Beige"],
     eyeColor: ["Black"],
     year: 1979,
-    img: "../../images/chars/sotm/prototype/proto_freddy.png"
+    img: "images/chars/sotm/prototype/proto_freddy.png"
   },
   {
     name: "F10-N4",
@@ -3082,7 +3082,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Green"],
     year: 1979,
-    img: "../../images/chars/other/f10-n4.png"
+    img: "images/chars/other/f10-n4.png"
   },
   {
     name: "M1",
@@ -3091,7 +3091,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Yellow"],
     year: 1979,
-    img: "../../images/chars/endo/m1.png"
+    img: "images/chars/endo/m1.png"
   },
   {
     name: "M2",
@@ -3100,7 +3100,7 @@ const CHARS = [
     color: ["Grey"],
     eyeColor: ["Yellow"],
     year: 1979,
-    img: "../../images/chars/endo/m2_sotm.png"
+    img: "images/chars/endo/m2_sotm.png"
   },
   {
     name: "Protomimic",
@@ -3109,7 +3109,7 @@ const CHARS = [
     color: ["Orange", "Grey", "White"],
     eyeColor: ["Yellow"],
     year: 1979,
-    img: "../../images/chars/sotm/protomimic.png"
+    img: "images/chars/sotm/protomimic.png"
   },
 
   // Murray family
@@ -3120,7 +3120,7 @@ const CHARS = [
     color: ["Black"],
     eyeColor: ["Green"],
     year: 1979,
-    img: "../../images/chars/other/edwin.png"
+    img: "images/chars/other/edwin.png"
   },
   {
     name: "David Sean Murray",
@@ -3129,7 +3129,7 @@ const CHARS = [
     color: ["Blue"],
     eyeColor: ["Blue"],
     year: 1979,
-    img: "../../images/chars/other/david_murray.png"
+    img: "images/chars/other/david_murray.png"
   },
   {
     name: "Fiona Murray",
@@ -3138,6 +3138,6 @@ const CHARS = [
     color: ["Purple"],
     eyeColor: ["Blue"],
     year: 1979,
-    img: "../../images/chars/other/fiona.png"
+    img: "images/chars/other/fiona.png"
   },
 ];
