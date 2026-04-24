@@ -321,9 +321,78 @@ function submitGuess(char) {
   }
 
   if (char.name === target.name) endGame(true);
-  else if (guesses.length >= MAX_GUESSES) endGame(false);
+  else if (guesses.length >= MAX_GUESSES) {
+    if (currentMode === 'daily') {
+      triggerFreddyJumpscare(() => endGame(false));
+    } else {
+      endGame(false);
+    }
+  }
 
   updateAttemptsLeft();
+}
+
+function triggerFreddyJumpscare(callback) {
+  // Create overlay
+  const overlay = document.createElement('div');
+  overlay.id = 'freddy-jumpscare';
+  overlay.style.cssText = `
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  `;
+
+  const gif = document.createElement('img');
+  gif.src = 'images/jumpscare/freddy.gif';
+  gif.alt = 'FREDDY';
+  gif.style.cssText = `
+    max-width: 100vw;
+    max-height: 100vh;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    animation: freddyPop 0.08s ease-out;
+  `;
+
+  // Inject keyframe animation
+  if (!document.getElementById('freddy-keyframes')) {
+    const style = document.createElement('style');
+    style.id = 'freddy-keyframes';
+    style.textContent = `
+      @keyframes freddyPop {
+        0%   { transform: scale(0.4); opacity: 0; }
+        60%  { transform: scale(1.08); opacity: 1; }
+        100% { transform: scale(1); opacity: 1; }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  overlay.appendChild(gif);
+  document.body.appendChild(overlay);
+
+  // Play scary sound if browser allows
+  // Play scary sound from file
+  try {
+    const audio = new Audio('images/jumpscare/jumpscare.mp3');
+    audio.volume = 1.0;
+    audio.play();
+  } catch (e) { /* silently ignore if audio unavailable */ }
+
+  // Dismiss after 2s or on click
+  const dismiss = () => {
+    if (!document.body.contains(overlay)) return;
+    document.body.removeChild(overlay);
+    callback();
+  };
+
+  overlay.addEventListener('click', dismiss);
+  setTimeout(dismiss, 2000);
 }
 
 function endGame(won) {
