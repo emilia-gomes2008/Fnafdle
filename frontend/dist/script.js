@@ -35,15 +35,29 @@ function restartCurrent() {
        Daily seed helper
 ======================================================= */
 function getDailyIndex() {
-  // Deterministic index from today's date
   const now = new Date();
   const seed = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
-  // simple LCG-style hash
   let h = seed ^ 0xdeadbeef;
   h = Math.imul(h ^ (h >>> 16), 0x45d9f3b);
   h = Math.imul(h ^ (h >>> 16), 0x45d9f3b);
   h ^= h >>> 16;
   return Math.abs(h) % CHARS.length;
+}
+
+/* =======================================================
+       Daily lock (localStorage)
+======================================================= */
+function getDailyKey() {
+  const now = new Date();
+  return `fnaf_daily_${now.getFullYear()}_${now.getMonth() + 1}_${now.getDate()}`;
+}
+
+function getDailyResult() {
+  try { return JSON.parse(localStorage.getItem(getDailyKey())); } catch { return null; }
+}
+
+function saveDailyResult(won, targetName, guessCount) {
+  localStorage.setItem(getDailyKey(), JSON.stringify({ won, targetName, guessCount }));
 }
 
 /* =======================================================
@@ -61,6 +75,28 @@ function initGame(mode) {
   if (mode === 'daily') {
     MAX_GUESSES = 7;
     target = CHARS[getDailyIndex()];
+
+    const previous = getDailyResult();
+    if (previous) {
+      guesses = [];
+      gameOver = true;
+      document.getElementById('guesses-container').innerHTML = '';
+      input.disabled = true;
+      document.getElementById('search-area').style.display = 'none';
+      document.getElementById('hint-area').style.display = 'none';
+      document.getElementById('attempts-left').textContent = '';
+
+      const banner = document.getElementById('result-banner');
+      banner.classList.remove('lose');
+      banner.classList.add('show');
+      if (!previous.won) banner.classList.add('lose');
+      document.getElementById('play-again-btn').style.display = 'none';
+      document.getElementById('result-title').textContent = previous.won ? '🎉 Já jogaste hoje!' : '💀 Já jogaste hoje!';
+      document.getElementById('result-msg').textContent = previous.won
+        ? `Era ${previous.targetName}! Adivinhaste em ${previous.guessCount} tentativas.`
+        : `Era ${previous.targetName}. Tenta amanhã!`;
+      return;
+    }
   } else {
     MAX_GUESSES = 6;
     target = CHARS[Math.floor(Math.random() * CHARS.length)];
@@ -228,12 +264,30 @@ function renderGuess(char) {
       matchClass = String(char[f.key]) === String(target[f.key]) ? 'correct' : 'wrong';
     }
     cell.classList.add(matchClass);
+
     if (f.isColor) {
       cell.appendChild(makeColorLabel(char[f.key]));
     } else {
       const label = document.createElement('div');
       label.className = 'cell-label';
-      label.textContent = char[f.key];
+
+      if (f.key === 'year' && matchClass !== 'correct') {
+        const gYear = Number(char[f.key]);
+        const tYear = Number(target[f.key]);
+        if (
+          char[f.key] !== undefined && char[f.key] !== null &&
+          target[f.key] !== undefined && target[f.key] !== null &&
+          !isNaN(gYear) && !isNaN(tYear)
+        ) {
+          const arrow = gYear < tYear ? ' ↑' : ' ↓';
+          label.textContent = char[f.key] + arrow;
+        } else {
+          label.textContent = char[f.key];
+        }
+      } else {
+        label.textContent = char[f.key];
+      }
+
       cell.appendChild(label);
     }
     row.appendChild(cell);
@@ -261,7 +315,6 @@ function submitGuess(char) {
   dropdown.style.display = 'none';
   selectedIndex = -1;
 
-  // Show hint after every 3 wrong guesses
   const wrongCount = guesses.filter(g => g.name !== target.name).length;
   if (wrongCount > 0 && wrongCount % 3 === 0 && !hintUsed) {
     document.getElementById('hint-area').style.display = '';
@@ -278,6 +331,10 @@ function endGame(won) {
   input.disabled = true;
   document.getElementById('search-area').style.display = 'none';
   document.getElementById('hint-area').style.display = 'none';
+
+  if (currentMode === 'daily') {
+    saveDailyResult(won, target.name, guesses.length);
+  }
 
   const banner = document.getElementById('result-banner');
   banner.classList.add('show');
@@ -369,7 +426,6 @@ document.addEventListener('click', e => {
        IMAGE MODE
 ======================================================= */
 
-// Filter: only chars with images
 const CHARS_WITH_IMG = CHARS.filter(c => c.img);
 
 let imgTarget, imgGuesses, imgGameOver;
@@ -377,16 +433,14 @@ const IMG_MAX_GUESSES = 6;
 let imgSelectedIndex = -1;
 let imgHintUsed = false;
 
-// Blur/zoom steps per wrong guess (index 0 = start, last = revealed)
-// Start: heavy blur + zoom. Each wrong guess: less blur, less zoom.
 const IMG_STEPS = [
-  { blur: 18, scale: 2.4, grayscale: 1 },  // 0 guesses wrong
-  { blur: 14, scale: 2.1, grayscale: 1 },  // 1 wrong
-  { blur: 10, scale: 1.8, grayscale: 1 },  // 2 wrong
-  { blur: 6, scale: 1.5, grayscale: 0.7 }, // 3 wrong
-  { blur: 3, scale: 1.25, grayscale: 0.4 },// 4 wrong
-  { blur: 1, scale: 1.08, grayscale: 0.15 },// 5 wrong
-  { blur: 0, scale: 1, grayscale: 0 },  // revealed / won
+  { blur: 18, scale: 2.4, grayscale: 1 },
+  { blur: 14, scale: 2.1, grayscale: 1 },
+  { blur: 10, scale: 1.8, grayscale: 1 },
+  { blur: 6,  scale: 1.5, grayscale: 0.7 },
+  { blur: 3,  scale: 1.25, grayscale: 0.4 },
+  { blur: 1,  scale: 1.08, grayscale: 0.15 },
+  { blur: 0,  scale: 1,   grayscale: 0 },
 ];
 
 const imgInput = document.getElementById('img-search-input');
@@ -479,7 +533,6 @@ function submitImgGuess(char) {
   } else {
     applyImageFilter(wrongCount);
 
-    // Show hint after every 3 wrong guesses
     if (wrongCount > 0 && wrongCount % 3 === 0 && !imgHintUsed) {
       document.getElementById('img-hint-area').style.display = '';
     }

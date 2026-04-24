@@ -152,7 +152,7 @@ const CHARS = [
   },
   {
     name: "Balloon Boy",
-    animal: "Hunanoid",
+    animal: "Humanoid",
     type: "Toy",
     color: ["Red", "Blue"],
     eyeColor: ["Blue"],
@@ -179,7 +179,7 @@ const CHARS = [
   },
   {
     name: "Puppet",
-    animal: "Hunanoid",
+    animal: "Humanoid",
     type: "Toy",
     color: ["Black"],
     eyeColor: ["Black"],
