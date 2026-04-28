@@ -2,10 +2,14 @@
        BOOK MODE
        ===================================================== */
 .book-table-header, .book-guess-row {
+  color: #888888;
   display: grid;
   grid-template-columns: 56px 2fr 1fr 72px 72px;
   gap: 6px;
   margin-bottom: 6px;
+}
+.col-label {
+  color: inherit;
 }
 
 .book-cover-cell {
