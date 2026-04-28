@@ -41,6 +41,35 @@
         <div class="mode-desc">Blurred & zoomed image · reveal with each guess · 6 tries</div>
       </div>
 
+      <div class="divider"></div>
+      <div class="mode-card" onclick="startMode('book_endless')">
+        <div class="mode-icon">📖</div>
+        <div class="mode-name">Books</div>
+        <div class="mode-desc">Guess the FNaF novel · series, year, edition number · 6 tries</div>
+      </div>
+
+      <div class="mode-card" onclick="startMode('book_daily')">
+        <div class="mode-icon">📅📖</div>
+        <div class="mode-name">Books Daily</div>
+        <div class="mode-desc">1 book per day · 7 tries · everyone gets the same</div>
+      </div>
+
+      <div class="mode-card" onclick="startMode('encyclopedia')">
+        <div class="mode-icon">📚</div>
+        <div class="mode-name">Who is this?</div>
+        <div class="mode-desc">Browse all animatronics · search & filter · tap to see details</div>
+      </div>
+
+    </div>
+
+    <!-- Stats buttons row -->
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:1.4rem;flex-wrap:wrap;">
+      <button onclick="showStatsModal('animatronic')" style="background:var(--bg-cell);border:1px solid var(--border);font-size:0.8rem;padding:8px 18px;letter-spacing:1px;">
+        📊 Animatronic Stats
+      </button>
+      <button onclick="showStatsModal('book')" style="background:var(--bg-cell);border:1px solid var(--border);font-size:0.8rem;padding:8px 18px;letter-spacing:1px;">
+        📊 Books Stats
+      </button>
     </div>
   </div>
 
@@ -71,7 +100,6 @@
 
     <div class="attempts-left" id="attempts-left"></div>
 
-    <!-- Hint button (shows after 3 wrong in daily/endless too) -->
     <div id="hint-area" style="display:none; text-align:center; margin-bottom:0.8rem;">
       <button onclick="useHint()" id="hint-btn">💡 Use Hint (first letter)</button>
       <div id="hint-text" style="margin-top:6px; color:var(--yellow-text); font-size:0.9rem; letter-spacing:2px;"></div>
@@ -93,8 +121,7 @@
       <div class="result-title" id="result-title"></div>
       <p class="result-msg" id="result-msg"></p>
       <button id="play-again-btn" onclick="restartCurrent()">Play Again</button>
-      <button onclick="goHome()" style="margin-left:10px; background:var(--bg-cell); border:1px solid var(--border);">←
-        Modos</button>
+      <button onclick="goHome()" style="margin-left:10px; background:var(--bg-cell); border:1px solid var(--border);">← Modos</button>
     </div>
 
   </div>
@@ -111,7 +138,6 @@
       <div class="attempts-left" id="img-attempts-left"></div>
     </div>
 
-    <!-- The mystery image -->
     <div class="mystery-image-wrap">
       <div class="mystery-image-container" id="mystery-image-container">
         <img id="mystery-img" src="" alt="?" />
@@ -119,8 +145,7 @@
       </div>
       <div id="img-hint-area" style="display:none; text-align:center; margin-top:0.6rem;">
         <button onclick="useImageHint()" id="img-hint-btn">💡 Use Hint (first letter)</button>
-        <div id="img-hint-text" style="margin-top:6px; color:var(--yellow-text); font-size:0.9rem; letter-spacing:2px;">
-        </div>
+        <div id="img-hint-text" style="margin-top:6px; color:var(--yellow-text); font-size:0.9rem; letter-spacing:2px;"></div>
       </div>
     </div>
 
@@ -129,20 +154,77 @@
       <div class="dropdown" id="img-dropdown" style="display:none;"></div>
     </div>
 
-    <!-- Previous guesses list -->
     <div id="img-guesses-list"></div>
 
     <div class="result-banner" id="img-result-banner">
       <div class="result-title" id="img-result-title"></div>
       <p class="result-msg" id="img-result-msg"></p>
       <button onclick="initImageMode()">Play Again</button>
-      <button onclick="goHome()" style="margin-left:10px; background:var(--bg-cell); border:1px solid var(--border);">←
-        Modos</button>
+      <button onclick="goHome()" style="margin-left:10px; background:var(--bg-cell); border:1px solid var(--border);">← Modos</button>
     </div>
 
   </div>
 
+  <!-- ===== BOOK MODE SCREEN ===== -->
+  <div class="container" id="book-screen" style="display:none;">
+
+    <div class="mode-badge-row">
+      <span class="mode-badge" id="book-mode-badge"></span>
+      <button class="back-btn" onclick="goHome()">← Modos</button>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot correct"></div> Correct</div>
+      <div class="legend-item"><div class="legend-dot wrong"></div> Wrong</div>
+    </div>
+
+    <div class="search-area" id="book-search-area">
+      <input class="search-input" id="book-search-input" placeholder="Write a book title..." autocomplete="off" />
+      <div class="dropdown" id="book-dropdown" style="display:none;"></div>
+    </div>
+
+    <div class="attempts-left" id="book-attempts-left"></div>
+
+    <div class="book-table-header">
+      <div class="col-label">Cover</div>
+      <div class="col-label">Title</div>
+      <div class="col-label">Series</div>
+      <div class="col-label">Year</div>
+      <div class="col-label">Edition #</div>
+    </div>
+
+    <div id="book-guesses-container"></div>
+
+    <div class="result-banner" id="book-result-banner">
+      <div class="result-title" id="book-result-title"></div>
+      <p class="result-msg" id="book-result-msg"></p>
+      <button id="book-play-again-btn" onclick="restartCurrent()">Play Again</button>
+      <button onclick="goHome()" style="margin-left:10px; background:var(--bg-cell); border:1px solid var(--border);">← Modos</button>
+    </div>
+
+  </div>
+
+  <!-- ===== ENCYCLOPEDIA SCREEN ===== -->
+  <div class="container" id="encyclopedia-screen" style="display:none;">
+
+    <div class="mode-badge-row">
+      <span class="mode-badge">📚 Who is this?</span>
+      <button class="back-btn" onclick="goHome()">← Modos</button>
+    </div>
+
+    <div class="enc-controls">
+      <input class="search-input enc-search" id="enc-search" placeholder="Search animatronic..." autocomplete="off" oninput="renderEncyclopedia()" />
+      <select class="enc-type-select" id="enc-type-filter" onchange="renderEncyclopedia()">
+        <option value="">All Types</option>
+      </select>
+    </div>
+
+    <div id="enc-grid" class="enc-grid"></div>
+
+  </div>
+
   <script src="frontend/dist/database.js"></script>
+  <script src="frontend/dist/books_database.js"></script>
   <script src="frontend/dist/script.js"></script>
 </body>
 

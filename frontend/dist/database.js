@@ -2959,7 +2959,7 @@ const CHARS = [
   {
     name: "Party Time Cupcake",
     animal: "Cupcake",
-    type: "Cupcake",
+    type: "Mascot Suit",
     color: ["Yellow", "Pink"],
     eyeColor: ["Pink"],
     year: 1979,
