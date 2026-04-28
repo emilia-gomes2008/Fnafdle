@@ -52,9 +52,14 @@
 
     <div class="result-banner" id="img-result-banner">
       <div class="result-title" id="img-result-title"></div>
-      <p class="result-msg" id="img-result-msg"></p>
-      <button onclick="initImageMode()">Play Again</button>
-      <button onclick="goHome()" style="margin-left:10px; background:var(--bg-cell); border:1px solid var(--border);">← Modos</button>
+      <div class="result-content">
+        <div id="img-result-char-container"></div>
+        <p class="result-msg" id="img-result-msg"></p>
+      </div>
+      <div class="result-buttons">
+        <button onclick="initImageMode()">Play Again</button>
+        <button onclick="goHome()" style="margin-left:10px; background:var(--bg-cell); border:1px solid var(--border);">← Modos</button>
+      </div>
     </div>
 
   </div>

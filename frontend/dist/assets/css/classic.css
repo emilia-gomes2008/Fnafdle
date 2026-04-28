@@ -53,3 +53,9 @@
   object-fit: cover;
 }
 
+@media (max-width: 650px) {
+  .table-header, .guess-row {
+    min-width: 620px;
+  }
+}
+

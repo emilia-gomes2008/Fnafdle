@@ -34,6 +34,19 @@ function initBookGame(mode) {
         ? `Era "${previous.targetTitle}"! Adivinhaste em ${previous.guessCount} tentativas.`
         : `Era "${previous.targetTitle}". Tenta amanhã!`;
       
+      // Inject book image
+      const book = BOOKS.find(b => b.title === previous.targetTitle) || bookTarget;
+      const imgCont = document.getElementById('book-result-img-container');
+      imgCont.innerHTML = '';
+      if (book.img) {
+        const resImg = document.createElement('img');
+        resImg.className = 'result-char-img';
+        resImg.style.height = '120px';
+        resImg.style.width = '85px';
+        resImg.src = '../assets/' + book.img;
+        imgCont.appendChild(resImg);
+      }
+
       const statsBtn = document.createElement('button');
       statsBtn.textContent = '📊 Stats';
       statsBtn.style.cssText = 'margin-left:10px;background:var(--bg-cell);border:1px solid var(--border);';
@@ -173,6 +186,17 @@ function endBookGame(won) {
   document.getElementById('book-result-msg').textContent = won
     ? `It was "${bookTarget.title}"! Guessed in ${bookGuesses.length} tries.`
     : `It was "${bookTarget.title}". Better luck next time!`;
+
+  const imgCont = document.getElementById('book-result-img-container');
+  imgCont.innerHTML = '';
+  if (bookTarget.img) {
+    const resImg = document.createElement('img');
+    resImg.className = 'result-char-img';
+    resImg.style.height = '120px';
+    resImg.style.width = '85px';
+    resImg.src = '../assets/' + bookTarget.img;
+    imgCont.appendChild(resImg);
+  }
 
   if (currentMode === 'book_daily') {
     const statsBtn = document.createElement('button');

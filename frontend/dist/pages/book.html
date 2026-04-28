@@ -36,14 +36,28 @@
     </div>
 
     <div class="attempts-left" id="book-attempts-left"></div>
-    <div id="book-guesses-container"></div>
+    
+    <div class="table-wrapper">
+      <div class="book-table-header">
+        <div class="col-label">Cover</div>
+        <div class="col-label">Title</div>
+        <div class="col-label">Series</div>
+        <div class="col-label">Year</div>
+        <div class="col-label">No.</div>
+      </div>
+      <div id="book-guesses-container"></div>
+    </div>
 
     <div class="result-banner" id="book-result-banner">
       <div class="result-title" id="book-result-title"></div>
-      <p class="result-msg" id="book-result-msg"></p>
-      <button id="book-play-again-btn" onclick="restartCurrent()">Play Again</button>
-      <button onclick="goHome()" style="margin-left:10px; background:var(--bg-cell); border:1px solid var(--border);">←
-        Modos</button>
+      <div class="result-content">
+        <div id="book-result-img-container"></div>
+        <p class="result-msg" id="book-result-msg"></p>
+      </div>
+      <div class="result-buttons">
+        <button id="book-play-again-btn" onclick="restartCurrent()">Play Again</button>
+        <button onclick="goHome()" style="margin-left:10px; background:var(--bg-cell); border:1px solid var(--border);">← Modos</button>
+      </div>
     </div>
 
   </div>

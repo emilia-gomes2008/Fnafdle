@@ -155,6 +155,13 @@ function endImgGame(won) {
   document.getElementById('img-result-msg').textContent = won
     ? `It was ${imgTarget.name}! Guessed in ${imgGuesses.length} tries.`
     : `It was ${imgTarget.name}. Better luck next time!`;
+
+  const imgCont = document.getElementById('img-result-char-container');
+  imgCont.innerHTML = '';
+  const resImg = document.createElement('img');
+  resImg.className = 'result-char-img';
+  resImg.src = '../assets/' + imgTarget.img;
+  imgCont.appendChild(resImg);
 }
 
 function renderImgDropdown() {
@@ -203,7 +210,7 @@ imgInput.addEventListener('keydown', e => {
     case 'Escape': imgDropdown.style.display = 'none'; imgSelectedIndex = -1; break;
   }
   items.forEach((el, i) => el.classList.toggle('selected', i === imgSelectedIndex));
-  if (imgSelectedIndex >= 0) items[selectedIndex].scrollIntoView({ block: 'nearest' });
+  if (imgSelectedIndex >= 0) items[imgSelectedIndex].scrollIntoView({ block: 'nearest' });
 });
 
 document.addEventListener('click', e => {

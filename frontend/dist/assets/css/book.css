@@ -14,3 +14,9 @@
   justify-content: center;
   min-height: 64px;
 }
+
+@media (max-width: 600px) {
+  .book-table-header, .book-guess-row {
+    min-width: 500px;
+  }
+}

@@ -37,6 +37,15 @@ function initGame(mode) {
         ? `Era ${previous.targetName}! Adivinhaste em ${previous.guessCount} tentativas.`
         : `Era ${previous.targetName}. Tenta amanhã!`;
       
+      // Inject character image
+      const char = CHARS.find(c => c.name === previous.targetName) || target;
+      const imgCont = document.getElementById('result-char-container');
+      imgCont.innerHTML = '';
+      const resImg = document.createElement('img');
+      resImg.className = 'result-char-img';
+      resImg.src = '../assets/' + (char.img || 'images/default.png');
+      imgCont.appendChild(resImg);
+
       const statsBtn = document.createElement('button');
       statsBtn.textContent = '📊 Stats';
       statsBtn.style.cssText = 'margin-left:10px;background:var(--bg-cell);border:1px solid var(--border);';
@@ -246,6 +255,13 @@ function endGame(won) {
   document.getElementById('result-msg').textContent = won
     ? `It was ${target.name}! You guessed it in ${guesses.length} tries.`
     : `It was ${target.name}. Better luck next time!`;
+
+  const imgCont = document.getElementById('result-char-container');
+  imgCont.innerHTML = '';
+  const resImg = document.createElement('img');
+  resImg.className = 'result-char-img';
+  resImg.src = '../assets/' + (target.img || 'images/default.png');
+  imgCont.appendChild(resImg);
 
   if (currentMode === 'daily') {
     const statsBtn = document.createElement('button');
