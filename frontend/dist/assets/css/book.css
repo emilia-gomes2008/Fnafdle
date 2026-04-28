@@ -1,0 +1,16 @@
+/* =====================================================
+       BOOK MODE
+       ===================================================== */
+.book-table-header, .book-guess-row {
+  display: grid;
+  grid-template-columns: 56px 2fr 1fr 72px 72px;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.book-cover-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 64px;
+}

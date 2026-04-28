@@ -1,0 +1,214 @@
+/* =======================================================
+       Core / Common Functions
+======================================================= */
+
+let currentMode = null;
+
+function goHome() {
+  window.location.href = '../../../index.html';
+}
+
+/* =======================================================
+       Daily seed helpers
+======================================================= */
+function getDailyIndex() {
+  const now = new Date();
+  const seed = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
+  let h = seed ^ 0xdeadbeef;
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b);
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b);
+  h ^= h >>> 16;
+  return Math.abs(h) % CHARS.length;
+}
+
+function getDailyBookIndex() {
+  const now = new Date();
+  const seed = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate() + 7777;
+  let h = seed ^ 0xdeadbeef;
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b);
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b);
+  h ^= h >>> 16;
+  return Math.abs(h) % BOOKS.length;
+}
+
+/* =======================================================
+       Daily lock (localStorage)
+======================================================= */
+function getDailyKey() {
+  const now = new Date();
+  return `fnaf_daily_${now.getFullYear()}_${now.getMonth() + 1}_${now.getDate()}`;
+}
+
+function getDailyBookKey() {
+  const now = new Date();
+  return `fnaf_book_daily_${now.getFullYear()}_${now.getMonth() + 1}_${now.getDate()}`;
+}
+
+function getDailyResult() {
+  try { return JSON.parse(localStorage.getItem(getDailyKey())); } catch { return null; }
+}
+
+function getDailyBookResult() {
+  try { return JSON.parse(localStorage.getItem(getDailyBookKey())); } catch { return null; }
+}
+
+function saveDailyResult(won, targetName, guessCount) {
+  localStorage.setItem(getDailyKey(), JSON.stringify({ won, targetName, guessCount }));
+  updateStats('animatronic', won, guessCount);
+}
+
+function saveDailyBookResult(won, targetTitle, guessCount) {
+  localStorage.setItem(getDailyBookKey(), JSON.stringify({ won, targetTitle, guessCount }));
+  updateStats('book', won, guessCount);
+}
+
+/* =======================================================
+       Stats & Streak
+======================================================= */
+function getStats(key) {
+  try {
+    return JSON.parse(localStorage.getItem('fnaf_stats_' + key)) || {
+      played: 0, won: 0, streak: 0, maxStreak: 0, lastWonDate: null,
+      distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 }
+    };
+  } catch {
+    return { played: 0, won: 0, streak: 0, maxStreak: 0, lastWonDate: null,
+      distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 } };
+  }
+}
+
+function saveStats(key, stats) {
+  localStorage.setItem('fnaf_stats_' + key, JSON.stringify(stats));
+}
+
+function getTodayStr() {
+  const now = new Date();
+  return `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+}
+
+function getYesterdayStr() {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
+
+function updateStats(key, won, guessCount) {
+  const stats = getStats(key);
+  stats.played++;
+  const today = getTodayStr();
+  if (won) {
+    stats.won++;
+    if (stats.lastWonDate === getYesterdayStr()) {
+      stats.streak++;
+    } else if (stats.lastWonDate !== today) {
+      stats.streak = 1;
+    }
+    stats.maxStreak = Math.max(stats.maxStreak, stats.streak);
+    stats.lastWonDate = today;
+    const bin = Math.min(guessCount, 7);
+    stats.distribution[bin] = (stats.distribution[bin] || 0) + 1;
+  } else {
+    if (stats.lastWonDate !== today) stats.streak = 0;
+  }
+  saveStats(key, stats);
+}
+
+function showStatsModal(key) {
+  const stats = getStats(key);
+  const winPct = stats.played > 0 ? Math.round((stats.won / stats.played) * 100) : 0;
+  const maxDist = Math.max(...Object.values(stats.distribution), 1);
+  const label = key === 'animatronic' ? 'Animatronic' : 'Books';
+
+  let distHTML = '';
+  for (let i = 1; i <= 7; i++) {
+    const val = stats.distribution[i] || 0;
+    const pct = Math.round((val / maxDist) * 100);
+    distHTML += `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+        <span style="min-width:14px;font-size:0.8rem;color:var(--text-muted)">${i}</span>
+        <div style="flex:1;background:var(--bg-page);border-radius:4px;height:22px;position:relative;">
+          <div style="width:${pct}%;background:var(--gold);height:100%;border-radius:4px;min-width:${val > 0 ? '24px' : '0'};transition:width 0.4s;"></div>
+          <span style="position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:0.75rem;color:var(--text)">${val}</span>
+        </div>
+      </div>`;
+  }
+
+  const modal = document.createElement('div');
+  modal.id = 'stats-modal-overlay';
+  modal.style.cssText = `position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;padding:1rem;`;
+  modal.innerHTML = `
+    <div style="background:var(--bg-card);border:1.5px solid var(--gold);border-radius:14px;padding:28px 24px;max-width:380px;width:100%;position:relative;">
+      <button onclick="document.getElementById('stats-modal-overlay').remove()" style="position:absolute;top:10px;right:14px;background:transparent;border:none;color:var(--text-muted);font-size:1.3rem;padding:0;margin:0;cursor:pointer;">✕</button>
+      <div style="font-family:'Creepster',cursive;font-size:1.5rem;color:var(--gold);letter-spacing:3px;text-align:center;margin-bottom:18px;">📊 ${label} Stats</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;margin-bottom:22px;">
+        <div><div style="font-size:1.8rem;font-family:'Oswald',sans-serif;color:var(--text)">${stats.played}</div><div style="font-size:0.65rem;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;">Played</div></div>
+        <div><div style="font-size:1.8rem;font-family:'Oswald',sans-serif;color:var(--text)">${winPct}%</div><div style="font-size:0.65rem;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;">Win %</div></div>
+        <div><div style="font-size:1.8rem;font-family:'Oswald',sans-serif;color:var(--gold)">${stats.streak}🔥</div><div style="font-size:0.65rem;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;">Streak</div></div>
+        <div><div style="font-size:1.8rem;font-family:'Oswald',sans-serif;color:var(--text)">${stats.maxStreak}</div><div style="font-size:0.65rem;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;">Best</div></div>
+      </div>
+      <div style="font-size:0.72rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;margin-bottom:10px;">Guess Distribution</div>
+      ${distHTML}
+    </div>`;
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+
+/* =======================================================
+       Color Comparison Helpers
+======================================================= */
+function toArr(val) {
+  if (Array.isArray(val)) return val;
+  return val !== undefined && val !== null ? [String(val)] : [];
+}
+
+function colorMatch(guessVal, targetVal) {
+  const g = toArr(guessVal).map(v => v.toLowerCase());
+  const t = toArr(targetVal).map(v => v.toLowerCase());
+  const gSorted = [...g].sort().join(',');
+  const tSorted = [...t].sort().join(',');
+  if (gSorted === tSorted) return 'correct';
+  if (g.some(v => t.includes(v))) return 'partial';
+  return 'wrong';
+}
+
+const COLOR_HEX = {
+  red: '#e05555', blue: '#5580e0', yellow: '#e0c935', green: '#3db55a',
+  purple: '#8b55e0', pink: '#e055a8', white: '#e8e8e8', black: '#333',
+  grey: '#888', gray: '#888', brown: '#8b5e3c', orange: '#e07830',
+  magenta: '#cc44aa', silver: '#aaa', beige: '#d4b896',
+  rainbow: 'linear-gradient(90deg,#e05555,#e0c935,#3db55a,#5580e0,#8b55e0)',
+  colorful: 'linear-gradient(90deg,#e05555,#e0c935,#3db55a,#5580e0)',
+};
+
+/* =======================================================
+       Freddy Jumpscare
+======================================================= */
+function triggerFreddyJumpscare(callback) {
+  const overlay = document.createElement('div');
+  overlay.id = 'freddy-jumpscare';
+  overlay.style.cssText = `position:fixed;inset:0;z-index:99999;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;`;
+
+  const gif = document.createElement('img');
+  gif.src = '../assets/images/jumpscare/freddy.gif';
+  gif.alt = 'FREDDY';
+  gif.style.cssText = `max-width:100vw;max-height:100vh;width:100%;height:100%;object-fit:cover;animation:freddyPop 0.08s ease-out;`;
+
+  if (!document.getElementById('freddy-keyframes')) {
+    const style = document.createElement('style');
+    style.id = 'freddy-keyframes';
+    style.textContent = `@keyframes freddyPop{0%{transform:scale(0.4);opacity:0}60%{transform:scale(1.08);opacity:1}100%{transform:scale(1);opacity:1}}`;
+    document.head.appendChild(style);
+  }
+
+  overlay.appendChild(gif);
+  document.body.appendChild(overlay);
+
+  try { const a = new Audio('../assets/images/jumpscare/jumpscare.mp3'); a.volume = 1.0; a.play(); } catch(e) {}
+
+  const dismiss = () => {
+    if (document.body.contains(overlay)) document.body.removeChild(overlay);
+    callback();
+  };
+  overlay.addEventListener('click', dismiss);
+  setTimeout(dismiss, 2000);
+}

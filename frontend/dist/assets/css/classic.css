@@ -1,0 +1,55 @@
+/* =====================================================
+       LEGENDA
+       ===================================================== */
+.legend {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 1.2rem;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.legend-dot.correct { background: var(--green-border); }
+.legend-dot.partial { background: var(--yellow-border); }
+.legend-dot.wrong { background: var(--red-border); }
+
+/* =====================================================
+       Table & Cells
+       ===================================================== */
+.table-header, .guess-row {
+  display: grid;
+  grid-template-columns: 70px 1fr 1fr 1fr 1fr 1fr 72px;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.col-label {
+  text-align: center;
+  font-size: 0.68rem;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.cell-img img {
+  width: 54px;
+  height: 54px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+

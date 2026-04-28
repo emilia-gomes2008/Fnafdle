@@ -1131,7 +1131,7 @@ function showEncBookCard(book) {
       <div style="font-family:'Creepster',cursive;font-size:1.4rem;color:var(--gold);letter-spacing:2px;margin-bottom:4px;">${book.title}</div>
       <div style="font-size:0.7rem;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:18px;">${book.series}</div>
       <table style="width:100%;border-collapse:collapse;text-align:left;font-size:0.82rem;">
-        <tr style="border-bottom:1px solid var(--border);">
+        <tr style="border-bottom:1px solid var(--border);">z
           <td style="padding:7px 8px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-size:0.68rem;width:40%;">Year</td>
           <td style="padding:7px 8px;color:var(--text);">${book.year}</td>
         </tr>

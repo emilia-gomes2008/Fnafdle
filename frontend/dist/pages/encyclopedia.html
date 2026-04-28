@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FNAFdle Reborn</title>
+  <link rel="icon" type="icon/png" href="../assets/images/default.png">
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Oswald:wght@400;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/global.css" />
+  <link rel="stylesheet" href="../assets/css/encyclopedia.css" />
+</head>
+
+<body>
+
+  <div class="fnaf-header">
+    <div class="fnaf-title">
+      <img src="../assets/images/title/fnafdlereborn.png" alt="Fnafdle" />
+    </div>
+    <div class="fnaf-subtitle">Guess the animatronic</div>
+  </div>
+
+  <!-- ===== ENCYCLOPEDIA SCREEN ===== -->
+  <div class="container" id="encyclopedia-screen" style="display:none;">
+
+    <div class="mode-badge-row">
+      <span class="mode-badge">📚 Who is this?</span>
+      <button class="back-btn" onclick="goHome()">← Modos</button>
+    </div>
+
+    <div class="enc-controls">
+      <input class="search-input enc-search" id="enc-search" placeholder="Search animatronic..." autocomplete="off" oninput="renderEncyclopedia()" />
+      <select class="enc-type-select" id="enc-type-filter" onchange="renderEncyclopedia()">
+        <option value="">All Types</option>
+      </select>
+    </div>
+
+    <div id="enc-grid" class="enc-grid"></div>
+
+  </div>
+
+  <script src="../../../backend/src/db/database.js"></script>
+  <script src="../../../backend/src/db/books_database.js"></script>
+  <script src="../assets/js/core.js"></script>
+  <script src="../assets/js/encyclopedia.js"></script>
+</body>
+
+</html>

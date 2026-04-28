@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FNAFdle Reborn</title>
+  <link rel="icon" type="icon/png" href="../assets/images/default.png">
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Oswald:wght@400;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/global.css" />
+  <link rel="stylesheet" href="../assets/css/book.css" />
+
+</head>
+
+<body>
+
+  <div class="fnaf-header">
+    <div class="fnaf-title">
+      <img src="../assets/images/title/fnafdlereborn.png" alt="Fnafdle" />
+    </div>
+    <div class="fnaf-subtitle">Guess the animatronic</div>
+  </div>
+
+
+  <!-- ===== BOOK MODE SCREEN ===== -->
+  <div class="container" id="book-screen" style="display:none;">
+
+    <div class="mode-badge-row">
+      <span class="mode-badge" id="book-mode-badge"></span>
+      <button class="back-btn" onclick="goHome()">← Modos</button>
+    </div>
+
+    <div class="search-area" id="book-search-area">
+      <input class="search-input" id="book-search-input" placeholder="Write a book title..." autocomplete="off" />
+      <div class="dropdown" id="book-dropdown" style="display:none;"></div>
+    </div>
+
+    <div class="attempts-left" id="book-attempts-left"></div>
+    <div id="book-guesses-container"></div>
+
+    <div class="result-banner" id="book-result-banner">
+      <div class="result-title" id="book-result-title"></div>
+      <p class="result-msg" id="book-result-msg"></p>
+      <button id="book-play-again-btn" onclick="restartCurrent()">Play Again</button>
+      <button onclick="goHome()" style="margin-left:10px; background:var(--bg-cell); border:1px solid var(--border);">←
+        Modos</button>
+    </div>
+
+  </div>
+
+  <script src="../../../backend/src/db/database.js"></script>
+  <script src="../../../backend/src/db/books_database.js"></script>
+  <script src="../assets/js/core.js"></script>
+  <script src="../assets/js/book.js"></script>
+</body>
+
+</html>

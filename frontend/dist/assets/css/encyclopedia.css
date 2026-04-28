@@ -1,0 +1,91 @@
+/* =====================================================
+       ENCYCLOPEDIA
+       ===================================================== */
+.enc-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 1.2rem;
+  flex-wrap: wrap;
+}
+
+.enc-search {
+  flex: 1;
+  min-width: 160px;
+}
+
+.enc-type-select {
+  background: var(--bg-cell);
+  border: 1.5px solid var(--gold);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.9rem;
+  color: var(--text);
+  outline: none;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+
+.enc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 12px;
+  max-height: 540px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.enc-card {
+  background: var(--bg-cell);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 8px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.12s, box-shadow 0.15s;
+  text-align: center;
+}
+
+.enc-card:hover {
+  border-color: var(--gold);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(200, 134, 0, 0.18);
+}
+
+.enc-card img {
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: var(--bg-page);
+}
+
+.enc-card-placeholder {
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  background: var(--bg-page);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+}
+
+.enc-card-name {
+  font-size: 0.72rem;
+  letter-spacing: 0.5px;
+  color: var(--text);
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.enc-card-type {
+  font-size: 0.62rem;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
