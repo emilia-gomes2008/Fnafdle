@@ -64,7 +64,7 @@ const CHARS = [
     type: "Other",
     color: ["Blue"],
     eyeColor: ["Black"],
-    year: "Unknown",
+    year: "Unconfirmed",
     img: "images/chars/other/phone_guy.png"
   },
   {
@@ -258,6 +258,15 @@ const CHARS = [
     year: 1987,
     img: "images/chars/other/Paperpals.png"
   },
+  {
+    name: "Jeremy Fitzgerald",
+    animal: "Human",
+    type: "Other",
+    color: ["White"],
+    eyeColor: ["White"],
+    year: "Unconfirmed",
+    img: "images/chars/other/jeremy_fitzgerald.png"
+  },
 
   // === Fnaf 2 Minigmaes ===
   {
@@ -295,7 +304,7 @@ const CHARS = [
     type: "Other",
     color: ["Green"],
     eyeColor: ["Black"],
-    year: "Unknown",
+    year: "Unconfirmed",
     img: "images/chars/other/phone_dude.png"
   },
   {
@@ -1008,7 +1017,7 @@ const CHARS = [
     type: "Other",
     color: ["Rainbow"],
     eyeColor: ["Black"],
-    year: "Unknown",
+    year: "Unconfirmed",
     img: "images/chars/other/rainbow.png"
   },
 
@@ -1905,6 +1914,15 @@ const CHARS = [
 
   // === Ultimate Custom Night Extras ===
   {
+    name: "The One You Should Not Have Killed",
+    animal: "Human",
+    type: "Other",
+    color: ["Yellow"],
+    eyeColor: ["Black"],
+    year: 2023,
+    img: "images/chars/other/toysnhk.png"
+  },
+  {
     name: "Loading Freddy",
     animal: "Bear",
     type: "Withered",
@@ -2233,6 +2251,15 @@ const CHARS = [
     eyeColor: ["White"],
     year: 2035,
     img: "images/chars/other/sun.png"
+  },
+  {
+    name: "Moon",
+    animal: "Humanoid",
+    type: "Other",
+    color: ["White", "Blue"],
+    eyeColor: ["Red"],
+    year: 2035,
+    img: "images/chars/other/moon.png"
   },
 
   // === STAFF Bots ===
@@ -2686,6 +2713,15 @@ const CHARS = [
     img: "images/chars/other/jack_o_moon.png"
   },
   {
+    name: "Tilt",
+    animal: "Rabbit",
+    type: "Springlock",
+    color: ["Yellow"],
+    eyeColor: ["Purple"],
+    year: 2035,
+    img: "images/chars/springlock/tilt.png"
+  },
+  {
     name: "Head Chef Bot",
     animal: "Humanoid",
     type: "S.T.A.F.F. Bot",
@@ -2742,6 +2778,96 @@ const CHARS = [
     eyeColor: ["Black"],
     year: 1979,
     img: "images/chars/sotm/mrs_helpful.png"
+  },
+  {
+    name: "Mr. Rocktapus",
+    animal: "Octopus",
+    type: "Welcome Show",
+    color: ["Yellow"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "images/chars/sotm/jugband/rocktapus.png"
+  },
+  {
+    name: "Jugband Hippo",
+    animal: "Hippo",
+    type: "Welcome Show",
+    color: ["Purple"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "images/chars/sotm/jugband/hippo.png"
+  },
+  {
+    name: "Jugband Monty",
+    animal: "Alligator",
+    type: "Welcome Show",
+    color: ["Green"],
+    eyeColor: ["Yellow"],
+    year: 1979,
+    img: "images/chars/sotm/jugband/monty.png"
+  },
+  {
+    name: "Jugband Frogs",
+    animal: "Frog",
+    type: "Welcome Show",
+    color: ["Green"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "images/chars/sotm/jugband/frogs.png"
+  },
+  {
+    name: "Lasso Pig",
+    animal: "Pig",
+    type: "Welcome Show",
+    color: ["Pink"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "images/chars/sotm/jugband/lasso_pig.png"
+  },
+  {
+    name: "Swing Bee",
+    animal: "Bee",
+    type: "Welcome Show",
+    color: ["Yellow", "Brown"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "images/chars/sotm/jugband/swing_bee.png"
+  },
+    {
+    name: "Birthday Puppy",
+    animal: "Dog",
+    type: "Welcome Show",
+    color: ["Yellow", "Magenta"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "images/chars/sotm/jugband/birthday_puppy.png"
+  },
+    {
+    name: "Juggling Duck",
+    animal: "Duck",
+    type: "Welcome Show",
+    color: ["White"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "images/chars/sotm/jugband/juggling_duck.png"
+  },
+  {
+    name: "Diving Seal",
+    animal: "Seal",
+    type: "Welcome Show",
+    color: ["Blue"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "images/chars/sotm/jugband/diving_seal.png"
+  },
+  {
+    name: "Birthday Hats",
+    animal: "Humanoid",
+    type: "Welcome Show",
+    color: ["White", "Colorful"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "images/chars/sotm/jugband/party_hats.png"
   },
 
   // First encounter
@@ -2802,15 +2928,6 @@ const CHARS = [
     eyeColor: ["Yellow"],
     year: 1979,
     img: "images/chars/sotm/mascot/lemur.png"
-  },
-  {
-    name: "Swing Bee",
-    animal: "Bee",
-    type: "Mascot Suit",
-    color: ["Yellow", "Brown"],
-    eyeColor: ["Black"],
-    year: 1979,
-    img: "images/chars/sotm/mascot/swing_bee.png"
   },
   {
     name: "Penguin",
@@ -2914,15 +3031,6 @@ const CHARS = [
     eyeColor: ["White"],
     year: 1979,
     img: "images/chars/sotm/puppet_crew/renard.png"
-  },
-  {
-    name: "Mr. Rocktapus",
-    animal: "Octopus",
-    type: "Puppet Crew",
-    color: ["Yellow"],
-    eyeColor: ["Black"],
-    year: 1979,
-    img: "images/chars/sotm/puppet_crew/rocktapus.png"
   },
 
   // Doll Hospital / Recycling Center
