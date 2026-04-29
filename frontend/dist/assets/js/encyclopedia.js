@@ -145,7 +145,7 @@ function showEncCard(char) {
     return arr.map(c => {
       const hex = COLOR_HEX[c.toLowerCase()] || '#666';
       const bg = hex.startsWith('linear') ? `background-image:${hex}` : `background:${hex}`;
-      return `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;border:1px solid rgba(255,255,255,0.2);${bg};margin-right:4px;vertical-align:middle;" title="${c}"></span>${c}`;
+      return `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;border:1px solid rgba(255,255,255,0.2);${bg};margin-right:4px;vertical-align:middle; transform: translateY(-6px);" title="${c}"></span>${c}`;
     }).join(' / ');
   }
 
