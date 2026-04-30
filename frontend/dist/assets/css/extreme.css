@@ -623,104 +623,166 @@ button:hover { background-color: var(--ex-red-dk) !important; }
 ══════════════════════════════════════════════════════ */
 @media (max-width: 720px) {
 
-  /* Page */
+  /* ── Page ── */
   body.fnaf-night {
-    padding-bottom: 78px; /* room for fixed door button */
-    padding-left: 0;
-    padding-right: 0;
+    padding: 0;
+    padding-bottom: 86px; /* space for fixed door bar */
   }
 
-  /* Container */
+  /* ── Container ── */
   .container {
-    padding: 10px 8px !important;
-    margin-top: 6px;
-    border-radius: 6px;
+    padding: 8px 8px !important;
+    margin-top: 0;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    box-shadow: none !important;
   }
 
   /* ── Topbar ── */
   .office-topbar {
-    gap: 6px;
-    padding: 5px 10px;
-    flex-wrap: nowrap;   /* single line */
+    gap: 8px;
+    padding: 6px 12px;
+    flex-wrap: nowrap;
   }
 
-  .night-label  { display: none; }    /* save space */
-  .power-label  { display: none; }    /* redundant on small screens */
-  .power-bar-wrap { width: 56px; }
-  .power-pct    { font-size: 0.65rem; min-width: 26px; }
-  .night-clock  { font-size: 0.88rem; letter-spacing: 2px; }
-  .back-btn     { padding: 5px 10px !important; font-size: 0.7rem !important; }
+  /* Keep night label visible but shrink it */
+  .night-label {
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    flex: 1;
+    text-align: center;
+  }
 
-  /* ── Layout: camera above, game below ── */
+  .power-label  { display: none; }
+  .power-section {
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .power-bar-wrap { width: 52px; }
+  .power-pct    { font-size: 0.62rem; min-width: 28px; text-align: right; }
+  .night-clock  { font-size: 0.85rem; letter-spacing: 2px; min-width: 44px; }
+  .back-btn     { padding: 6px 10px !important; font-size: 0.68rem !important; flex-shrink: 0; }
+
+  /* ── Layout: camera panel above, game panel below ── */
   .fnaf-layout {
     flex-direction: column;
-    gap: 6px;
+    gap: 0;
   }
 
   .camera-panel-wrap {
     width: 100%;
     flex: none;
+    padding: 8px 8px 0;
   }
 
-  /* ── Main camera: 16:9 on mobile (less vertical space) ── */
+  .game-panel {
+    padding: 8px 8px 0;
+  }
+
+  /* ── Main camera ── */
+  .main-cam-bezel {
+    margin-bottom: 5px;
+    border-radius: 6px;
+  }
+
   .main-cam-screen { aspect-ratio: 16 / 9; }
 
-  /* ── Camera grid: 3 columns, tiles are tap-friendly ── */
+  /* ── Camera grid: 3 cols, tap-friendly height ── */
   .cam-grid {
-    gap: 3px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
     margin-bottom: 5px;
   }
 
-  /* Hide room text — too small to read anyway */
+  .cam-tile {
+    aspect-ratio: 5 / 3; /* slightly taller for easier tapping */
+    border-radius: 4px;
+  }
+
   .cam-tile-room  { display: none; }
-  .cam-tile-hud   { padding: 1px 3px; }
-  .cam-tile-id    { font-size: 0.44rem; letter-spacing: 0.8px; }
+  .cam-tile-hud   { padding: 2px 3px; }
+  .cam-tile-id    { font-size: 0.5rem; letter-spacing: 0.6px; }
 
   /* ── Opp timer ── */
-  .opp-timer { margin-bottom: 4px; }
+  .opp-timer { margin-bottom: 5px; }
 
-  /* ── Door button: fixed at bottom of screen ── */
+  .opp-label, .opp-countdown {
+    font-size: 0.48rem;
+  }
+
+  /* ── Door button: fixed bar at bottom ── */
   .door-section {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     z-index: 200;
-    background: rgba(9, 9, 11, 0.96);
-    border-top: 1px solid #1c1c20;
-    padding: 8px 14px;
+    background: rgba(8, 8, 10, 0.97);
+    border-top: 1px solid #1e1e22;
+    padding: 8px 16px;
     padding-bottom: max(8px, env(safe-area-inset-bottom));
     margin: 0;
-    backdrop-filter: blur(6px);
+    gap: 0;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
 
   .door-btn {
-    padding: 14px 20px !important;
-    font-size: 0.95rem !important;
+    padding: 13px 20px !important;
+    font-size: 0.9rem !important;
     letter-spacing: 2px !important;
     width: 100%;
+    border-radius: 6px !important;
   }
 
-  .door-hint { display: none; }  /* not enough space */
+  .door-hint { display: none; }
 
-  /* ── Game panel ── */
-  .mode-badge-row { display: none; }    /* badge already in topbar */
+  /* ── Game panel elements ── */
+  .mode-badge-row { display: none; }
 
   .extreme-warning {
-    font-size: 0.67rem;
-    padding: 7px 10px;
-    margin-bottom: 0.6rem;
+    font-size: 0.65rem;
+    padding: 6px 10px;
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
   }
 
-  .legend { gap: 10px; margin-bottom: 0.6rem; }
-  .legend-item { font-size: 0.68rem; }
+  .legend {
+    gap: 12px;
+    margin-bottom: 0.5rem;
+    justify-content: center;
+  }
 
-  .attempts-left { font-size: 0.75rem; margin-bottom: 0.6rem; }
+  .legend-item { font-size: 0.68rem; gap: 5px; }
 
-  /* ── Guess table: horizontal scroll ── */
-  .table-header, .guess-row { min-width: 540px; }
+  /* ── Search input ── */
+  .search-input {
+    font-size: 0.9rem !important;
+    padding: 11px 14px !important;
+  }
 
-  /* ── Result banner: stacked buttons ── */
+  .search-area { margin-bottom: 0.8rem; }
+
+  .attempts-left { font-size: 0.75rem; margin-bottom: 0.5rem; }
+
+  /* ── Guess table: scrollable ── */
+  .table-wrapper { margin: 0 -8px 1rem; padding: 0 8px 8px; }
+  .table-header, .guess-row {
+    min-width: 500px;
+    gap: 4px;
+  }
+
+  .cell { min-height: 58px; padding: 6px 3px; font-size: 0.72rem; }
+  .cell-img img { width: 46px; height: 46px; }
+  .placeholder-avatar { width: 46px; height: 46px; font-size: 1.3rem; }
+
+  .col-label { font-size: 0.6rem; letter-spacing: 1px; }
+
+  /* ── Result banner ── */
+  .result-banner { padding: 1.2rem 1rem; }
+
   .result-buttons {
     display: flex;
     flex-direction: column;
@@ -732,20 +794,38 @@ button:hover { background-color: var(--ex-red-dk) !important; }
   .result-buttons .btn-back-result {
     width: 100%;
     margin: 0 !important;
-    padding: 12px 20px !important;
+    padding: 12px 16px !important;
   }
 }
 
-/* ── Very small phones (< 400px) ── */
-@media (max-width: 400px) {
-  .office-topbar  { padding: 4px 8px; }
-  .container      { padding: 8px 6px !important; }
+/* ── Medium phones (max 480px) ── */
+@media (max-width: 480px) {
+  .night-label { display: none; } /* hide on very narrow screens */
 
-  /* Even shorter main cam */
+  .cam-grid { gap: 3px; }
+  .cam-tile { aspect-ratio: 4 / 3; }
+
+  .table-header, .guess-row { min-width: 460px; }
+  .col-label { font-size: 0.55rem; }
+}
+
+/* ── Very small phones (< 380px) ── */
+@media (max-width: 380px) {
+  .office-topbar { padding: 5px 8px; gap: 6px; }
+  .night-clock   { font-size: 0.78rem; }
+  .power-bar-wrap { width: 40px; }
+
   .main-cam-screen { aspect-ratio: 2 / 1; }
 
-  .power-bar-wrap { width: 44px; }
-  .cam-grid       { gap: 2px; }
+  .cam-grid { gap: 2px; }
+  .cam-tile-id { font-size: 0.44rem; }
 
-  .extreme-warning { font-size: 0.62rem; padding: 5px 8px; }
+  .extreme-warning { font-size: 0.6rem; padding: 5px 8px; }
+  .search-input { font-size: 0.85rem !important; padding: 10px 12px !important; }
+
+  .table-header, .guess-row { min-width: 420px; }
+  .cell-img img { width: 40px; height: 40px; }
+  .placeholder-avatar { width: 40px; height: 40px; }
+
+  .door-btn { padding: 12px 16px !important; font-size: 0.85rem !important; }
 }

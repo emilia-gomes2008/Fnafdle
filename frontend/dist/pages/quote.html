@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FNAFdle — Quote Guesser</title>
+  <link rel="icon" type="icon/png" href="../assets/images/default.png">
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Oswald:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/global.css" />
+  <link rel="stylesheet" href="../assets/css/quote.css" />
+</head>
+
+<body>
+
+  <div class="fnaf-header">
+    <div class="fnaf-title">
+      <img src="../assets/images/title/fnafdlereborn.png" alt="Fnafdle" />
+    </div>
+    <div class="fnaf-subtitle">Guess who said it</div>
+  </div>
+
+  <div class="container" id="quote-screen" style="display:none;">
+
+    <div class="mode-badge-row">
+      <span class="mode-badge" id="quote-mode-badge">🎭 Quote Guesser</span>
+      <button class="back-btn" onclick="goHome()">← Modes</button>
+    </div>
+
+    <!-- Quote display -->
+    <div class="quote-box">
+      <div class="quote-marks">"</div>
+      <div class="quote-text" id="quote-text"></div>
+      <div class="quote-prompt">- Who said this?</div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-area" id="search-area">
+      <input class="search-input" id="search-input" placeholder="Search for a character..." autocomplete="off" />
+      <div class="dropdown" id="dropdown" style="display:none;"></div>
+    </div>
+
+    <div class="attempts-left" id="attempts-left"></div>
+
+    <!-- Guess list -->
+    <div class="quote-guess-list" id="guesses-list"></div>
+
+    <!-- Result banner -->
+    <div class="result-banner" id="result-banner">
+      <div class="result-title" id="result-title"></div>
+      <div class="result-content">
+        <div id="result-char-container"></div>
+        <p class="result-msg" id="result-msg"></p>
+      </div>
+      <div class="result-buttons">
+        <button id="play-again-btn" onclick="restartQuote()">Play Again</button>
+        <button onclick="goHome()" style="margin-left:10px; background:var(--bg-cell); border:1px solid var(--border);">← Modes</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="../../../backend/src/db/database.js"></script>
+  <script src="../../../backend/src/db/books_database.js"></script>
+  <script src="../../../backend/src/db/quotes.js"></script>
+  <script src="../assets/js/core.js"></script>
+  <script src="../assets/js/quote.js"></script>
+</body>
+</html>

@@ -205,8 +205,20 @@ imgInput.addEventListener('keydown', e => {
   switch (e.key) {
     case 'ArrowDown': e.preventDefault(); imgSelectedIndex = Math.min(imgSelectedIndex + 1, items.length - 1); break;
     case 'ArrowUp': e.preventDefault(); imgSelectedIndex = Math.max(imgSelectedIndex - 1, 0); break;
-    case 'Enter': case 'Tab':
+    case 'Enter':
       if (imgSelectedIndex >= 0) { items[imgSelectedIndex].click(); e.preventDefault(); } break;
+    case 'Tab':
+      if (imgDropdown.style.display !== 'none') {
+        e.preventDefault();
+        if (imgSelectedIndex >= 0) {
+          items[imgSelectedIndex].click();
+        } else {
+          imgSelectedIndex = 0;
+          items.forEach((el, i) => el.classList.toggle('selected', i === 0));
+          items[0].scrollIntoView({ block: 'nearest' });
+        }
+      }
+      break;
     case 'Escape': imgDropdown.style.display = 'none'; imgSelectedIndex = -1; break;
   }
   items.forEach((el, i) => el.classList.toggle('selected', i === imgSelectedIndex));

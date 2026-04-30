@@ -2,7 +2,8 @@
        Extreme Mode — FNAF Night Watch
        Progressive nights · AI-based movement opportunities
        3 guesses · no year arrows · no partial colors
-       1 corrupted feed · door · battery
+       Real-time clock: 4m30s per night, 45s per hour (12AM→6AM)
+       Night 6: 6 animatronics, 2 corrupted fields, 2× power drain
 ======================================================= */
 
 // ─── Night configuration ─────────────────────────────────
@@ -16,37 +17,29 @@ const NIGHT_CONFIGS = [
   },
   { // Night 2
     targetAI: 8,
-    threats: [
-      { ai: 6, startCam: 3 }, // CAM 2A
-    ],
+    threats: [{ ai: 6 }],
   },
   { // Night 3
     targetAI: 11,
-    threats: [
-      { ai: 9, startCam: 2 }, // CAM 1C
-      { ai: 7, startCam: 5 }, // CAM 4A
-    ],
+    threats: [{ ai: 9 }, { ai: 7 }],
   },
   { // Night 4
     targetAI: 14,
-    threats: [
-      { ai: 12, startCam: 1 }, // CAM 1B
-      { ai: 10, startCam: 3 }, // CAM 2A
-      { ai: 8,  startCam: 5 }, // CAM 4A
-    ],
+    threats: [{ ai: 12 }, { ai: 10 }, { ai: 8 }],
   },
   { // Night 5 — max difficulty
     targetAI: 17,
-    threats: [
-      { ai: 15, startCam: 1 }, // CAM 1B
-      { ai: 13, startCam: 2 }, // CAM 1C
-      { ai: 11, startCam: 4 }, // CAM 2B
-      { ai: 9,  startCam: 6 }, // CAM 4B
-    ],
+    threats: [{ ai: 15 }, { ai: 13 }, { ai: 11 }, { ai: 9 }],
+  },
+  { // Night 6 — EXTRA nightmare (all AI 20, 2 corrupted fields, 2× power drain)
+    targetAI: 20,
+    threats: [{ ai: 20 }, { ai: 20 }, { ai: 20 }, { ai: 20 }, { ai: 20 }],
+    hiddenCount: 2,
+    powerMult:   2,
   },
 ];
 
-const MAX_NIGHTS  = 5;
+const MAX_NIGHTS  = 6;
 const MAX_GUESSES = 3;
 
 // ─── Camera data ─────────────────────────────────────────
@@ -62,21 +55,24 @@ const CAM_ROOMS = [
   { id: 'CAM 5',  room: 'Backstage'      },
   { id: 'CAM 7',  room: 'Restrooms'      },
 ];
-const LAST_CAM = CAM_ROOMS.length - 1; // 8 = CAM 7
+const LAST_CAM = CAM_ROOMS.length - 1;
 
 // ─── Game constants ───────────────────────────────────────
 
-const MOVE_OPP_MS    = 10000; // movement opportunity fires every 10 s
-const PASSIVE_DRAIN  = 0.10;  // %/s baseline battery drain
-const MOVE_COST      = 2.0;   // % per camera move
-const DOOR_DRAIN_0   = 0.5;   // %/s when door first closes
-const DOOR_RAMP      = 0.018; // extra %/s per second door stays closed
-const DOOR_DRAIN_MAX = 2.8;   // %/s cap
-const ENTRY_MS       = 4000;  // ms before entity enters office (door open at CAM 7)
+const MOVE_OPP_MS    = 10000;
+const PASSIVE_DRAIN  = 0.10;
+const MOVE_COST      = 2.0;
+const DOOR_DRAIN_0   = 0.5;
+const DOOR_RAMP      = 0.018;
+const DOOR_DRAIN_MAX = 2.8;
+const ENTRY_MS       = 4000;
 const RETREAT_MIN_MS = 2500;
 const RETREAT_MAX_MS = 7000;
 
-const HOURS = ['12 AM', '1 AM', '2 AM', '3 AM'];
+// Night timing: 4m30s total, 45s per hour, 6 hours (12AM–5AM), death at 6AM
+const NIGHT_TOTAL_MS = 270000;
+const HOUR_MS        = 45000;
+const HOUR_LABELS    = ['12 AM', '1 AM', '2 AM', '3 AM', '4 AM', '5 AM'];
 
 const HIDEABLE_FIELDS = ['animal', 'type', 'color', 'eyeColor', 'year'];
 const HEADER_IDS = {
@@ -90,13 +86,9 @@ const HEADER_LABELS = {
 
 // ─── Character pool helpers ───────────────────────────────
 
-// Pick n distinct characters that share the same animal type.
-// Best-effort: also tries to match year (60% chance if a same-year pool exists).
-// Falls back to fully random if no animal has enough characters.
 function pickSameAnimalChars(n) {
   if (n <= 1) return [...CHARS].sort(() => Math.random() - 0.5).slice(0, n);
 
-  // Group by animal
   const byAnimal = {};
   CHARS.forEach(c => {
     const key = (c.animal || 'unknown').toLowerCase();
@@ -104,11 +96,9 @@ function pickSameAnimalChars(n) {
     byAnimal[key].push(c);
   });
 
-  // Only consider pools with enough distinct characters
   const eligible = Object.values(byAnimal).filter(pool => pool.length >= n);
   if (!eligible.length) return [...CHARS].sort(() => Math.random() - 0.5).slice(0, n);
 
-  // Weighted random: larger pools are more likely (more variety)
   const total = eligible.reduce((s, p) => s + p.length, 0);
   let r = Math.random() * total;
   let chosenPool = eligible[eligible.length - 1];
@@ -117,7 +107,6 @@ function pickSameAnimalChars(n) {
     if (r <= 0) { chosenPool = pool; break; }
   }
 
-  // Best-effort same year (60% chance when possible)
   const byYear = {};
   chosenPool.forEach(c => {
     const y = String(c.year);
@@ -136,23 +125,24 @@ function pickSameAnimalChars(n) {
 // ─── Runtime state ────────────────────────────────────────
 
 let currentNight = loadNight();
+let currentCfg   = null;
 
 let target, guesses, gameOver;
-let hiddenField  = null;
+let hiddenFields = [];   // array — 1 field normally, 2 on Night 6
 let wrongCount   = 0;
-let selIdx       = -1;   // dropdown
-let selCamIdx    = 0;    // viewed camera
+let selIdx       = -1;
+let selCamIdx    = 0;
 
 let battery      = 99;
 let doorClosed   = false;
-let doorHeldFor  = 0;    // seconds door continuously closed
+let doorHeldFor  = 0;
+
+let nightElapsedMs = 0;  // real-time night clock (0 → NIGHT_TOTAL_MS)
 
 let gameLoopId   = null;
 let lastTickMs   = 0;
-let movOppTimer  = MOVE_OPP_MS; // ms until next movement opportunity
+let movOppTimer  = MOVE_OPP_MS;
 
-// Entities: { char, camIdx, ai, state, nextMs }
-// state: 'active' | 'entering' | 'blocked'
 let targetEntity   = null;
 let threatEntities = [];
 
@@ -173,40 +163,54 @@ function loadNight() {
 // ─── Init ─────────────────────────────────────────────────
 
 function initGame() {
-  const cfg = NIGHT_CONFIGS[currentNight];
+  const cfg    = NIGHT_CONFIGS[currentNight];
+  currentCfg   = cfg;
 
-  // All characters share the same animal type (and possibly same year)
-  const chars = pickSameAnimalChars(1 + cfg.threats.length);
-  target      = chars[0];
+  const chars  = pickSameAnimalChars(1 + cfg.threats.length);
+  target       = chars[0];
 
-  // Animal is the corrupted field 75% of the time — knowing the animal narrows it down a lot
-  const otherFields = HIDEABLE_FIELDS.filter(f => f !== 'animal');
-  hiddenField = Math.random() < 0.75
-    ? 'animal'
-    : otherFields[Math.floor(Math.random() * otherFields.length)];
-  wrongCount  = 0;
-  battery     = 99;
-  doorClosed  = false;
-  doorHeldFor = 0;
-  movOppTimer = MOVE_OPP_MS;
+  // Determine hidden fields
+  const hiddenCount    = cfg.hiddenCount || 1;
+  const otherFields    = HIDEABLE_FIELDS.filter(f => f !== 'animal');
+  hiddenFields         = [];
 
-  // Target starts at a random early camera not occupied by any threat
-  const threatStarts  = cfg.threats.map(t => t.startCam);
-  const targetOptions = [0, 1, 2, 3].filter(c => !threatStarts.includes(c));
-  const targetStart   = targetOptions[Math.floor(Math.random() * targetOptions.length)];
+  if (hiddenCount >= 1) {
+    hiddenFields.push(
+      Math.random() < 0.75
+        ? 'animal'
+        : otherFields[Math.floor(Math.random() * otherFields.length)]
+    );
+  }
+  if (hiddenCount >= 2) {
+    const remaining = HIDEABLE_FIELDS.filter(f => !hiddenFields.includes(f));
+    hiddenFields.push(remaining[Math.floor(Math.random() * remaining.length)]);
+  }
 
-  // Create entities
-  targetEntity   = makeEntity(chars[0], targetStart, cfg.targetAI);
-  threatEntities = cfg.threats.map((t, i) => makeEntity(chars[i + 1], t.startCam, t.ai));
+  wrongCount      = 0;
+  battery         = 99;
+  doorClosed      = false;
+  doorHeldFor     = 0;
+  movOppTimer     = MOVE_OPP_MS;
+  nightElapsedMs  = 0;
 
-  // Always start watching CAM 1A
+  // Randomise distinct start cameras for all entities, never spawning at the last camera
+  const totalEntities = 1 + cfg.threats.length;
+  const validCams     = Array.from({ length: LAST_CAM }, (_, i) => i); // [0 … LAST_CAM-1]
+  for (let i = validCams.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [validCams[i], validCams[j]] = [validCams[j], validCams[i]];
+  }
+  const startCams = validCams.slice(0, totalEntities);
+
+  targetEntity   = makeEntity(chars[0], startCams[0], cfg.targetAI);
+  threatEntities = cfg.threats.map((t, i) => makeEntity(chars[i + 1], startCams[i + 1], t.ai));
+
   selCamIdx = 0;
 
-  // UI reset
   setupHeaders();
-  guesses     = [];
-  gameOver    = false;
-  selIdx      = -1;
+  guesses  = [];
+  gameOver = false;
+  selIdx   = -1;
 
   document.getElementById('guesses-container').innerHTML = '';
   document.getElementById('result-banner').classList.remove('show', 'lose');
@@ -240,7 +244,7 @@ function setupHeaders() {
   Object.entries(HEADER_IDS).forEach(([field, id]) => {
     const el = document.getElementById(id);
     if (!el) return;
-    if (field === hiddenField) {
+    if (hiddenFields.includes(field)) {
       el.textContent = '???';
       el.classList.add('hidden-col');
     } else {
@@ -252,15 +256,26 @@ function setupHeaders() {
 
 function updateNightLabel() {
   const el = document.getElementById('night-label');
-  if (el) el.textContent = `☆ NIGHT ${currentNight} ☆`;
+  if (!el) return;
+  if (currentNight === 6) {
+    el.textContent = '☠ NIGHT 6 ☠';
+    el.style.color = '#cc1a1a';
+  } else {
+    el.textContent = `☆ NIGHT ${currentNight} ☆`;
+    el.style.color = '';
+  }
 }
 
 function updateNightWarning(cfg) {
-  const aiList = [cfg.targetAI, ...cfg.threats.map(t => t.ai)].join(' / ');
-  const count  = 1 + cfg.threats.length;
-  const el = document.getElementById('extreme-warning');
+  const aiList      = [cfg.targetAI, ...cfg.threats.map(t => t.ai)].join(' / ');
+  const count       = 1 + cfg.threats.length;
+  const hiddenCount = cfg.hiddenCount || 1;
+  const powerMult   = cfg.powerMult   || 1;
+  const el          = document.getElementById('extreme-warning');
   if (!el) return;
-  el.innerHTML = `<strong>NIGHT ${currentNight}</strong> · <strong>${count}</strong> animatronic${count > 1 ? 's' : ''} active · AI: <strong>${aiList}</strong> · No year arrows · 1 field <strong>corrupted</strong>`;
+  let extra = '';
+  if (powerMult > 1) extra += ` · ⚡ <strong>${powerMult}× power drain</strong>`;
+  el.innerHTML = `<strong>NIGHT ${currentNight}</strong> · <strong>${count}</strong> animatronic${count > 1 ? 's' : ''} active · AI: <strong>${aiList}</strong> · No year arrows · <strong>${hiddenCount}</strong> field${hiddenCount > 1 ? 's' : ''} <strong>corrupted</strong>${extra}`;
 }
 
 // ─── Game Loop ────────────────────────────────────────────
@@ -271,14 +286,27 @@ function tick() {
   const dt  = (now - lastTickMs) / 1000;
   lastTickMs = now;
 
-  // Battery drain
-  battery -= PASSIVE_DRAIN * dt;
+  // Battery drain (Night 6 applies 2× multiplier)
+  const mult = currentCfg?.powerMult ?? 1;
+  battery -= PASSIVE_DRAIN * mult * dt;
   if (doorClosed) {
     doorHeldFor += dt;
-    const rate = Math.min(DOOR_DRAIN_0 + DOOR_RAMP * doorHeldFor, DOOR_DRAIN_MAX);
+    const rate = Math.min(
+      (DOOR_DRAIN_0 + DOOR_RAMP * doorHeldFor) * mult,
+      DOOR_DRAIN_MAX * mult
+    );
     battery -= rate * dt;
   }
   battery = Math.max(0, battery);
+
+  // Real-time night clock: 270 seconds total → 6 AM = death
+  nightElapsedMs += dt * 1000;
+  if (nightElapsedMs >= NIGHT_TOTAL_MS) {
+    nightElapsedMs = NIGHT_TOTAL_MS;
+    stopLoop();
+    triggerFreddyJumpscare(() => endGame(false, 'time'));
+    return;
+  }
 
   // Movement opportunity countdown
   movOppTimer -= dt * 1000;
@@ -289,7 +317,7 @@ function tick() {
     if (gameOver) return;
   }
 
-  // Process entering/blocked state timers
+  // Entity state timers
   for (const e of [targetEntity, ...threatEntities]) {
     processEntityTimer(e, now);
     if (gameOver) return;
@@ -299,10 +327,11 @@ function tick() {
     battery = 0;
     stopLoop();
     updatePower();
-    triggerFreddyJumpscare(() => endGame(false));
+    triggerFreddyJumpscare(() => endGame(false, 'battery'));
     return;
   }
 
+  updateClock();
   updatePower();
   updateOppBar();
   refreshCamGrid();
@@ -315,8 +344,8 @@ function fireMovementOpportunity(now) {
   for (const e of [targetEntity, ...threatEntities]) {
     if (e.state !== 'active') continue;
 
-    const roll = Math.ceil(Math.random() * 20); // 1–20
-    if (roll > e.ai) continue; // didn't move this opportunity
+    const roll = Math.ceil(Math.random() * 20);
+    if (roll > e.ai) continue;
 
     if (e.camIdx < LAST_CAM) {
       const prev = e.camIdx;
@@ -325,7 +354,6 @@ function fireMovementOpportunity(now) {
       flashTile(prev);
       flashTile(e.camIdx);
     } else {
-      // At CAM 7 — try to enter office
       if (doorClosed) {
         e.state  = 'blocked';
         e.nextMs = now + rand(RETREAT_MIN_MS, RETREAT_MAX_MS);
@@ -344,20 +372,17 @@ function fireMovementOpportunity(now) {
 function processEntityTimer(e, now) {
   if (e.state === 'entering') {
     if (doorClosed) {
-      // Door closed in time
       e.state  = 'blocked';
       e.nextMs = now + rand(RETREAT_MIN_MS, RETREAT_MAX_MS);
     } else if (now >= e.nextMs) {
       stopLoop();
-      triggerFreddyJumpscare(() => endGame(false));
+      triggerFreddyJumpscare(() => endGame(false, 'entry'));
     }
   } else if (e.state === 'blocked') {
     if (!doorClosed) {
-      // Door opened — start entering again
       e.state  = 'entering';
       e.nextMs = now + ENTRY_MS;
     } else if (now >= e.nextMs) {
-      // Retreated back to CAM 1A
       e.camIdx = 0;
       e.state  = 'active';
     }
@@ -401,7 +426,6 @@ function buildCamGrid() {
   refreshCamGrid();
 }
 
-// Returns all entities at a camera index, target first
 function entitiesAt(camIdx) {
   const list = [];
   if (targetEntity.camIdx === camIdx) list.push({ e: targetEntity, isTarget: true });
@@ -415,26 +439,18 @@ function refreshCamGrid() {
     if (!tile) return;
 
     const at          = entitiesAt(i);
-    const tgtHere     = at.some(x => x.isTarget);
-    const thrHere     = at.filter(x => !x.isTarget);
-    const anyHere     = at.length > 0;
-    const atLast      = i === LAST_CAM;
     const anyEntering = at.some(x => x.e.state === 'entering');
 
-    // Only glow red when something is about to enter — no other location hints
     tile.className = 'cam-tile'
       + (selCamIdx === i ? ' cam-selected' : '')
       + (anyEntering     ? ' cam-entering' : '');
 
-    // No images in tiles and no dots — player must flip cameras to find animatronics
-    const imgWrap = tile.querySelector('.cam-tile-img-wrap');
-    imgWrap.innerHTML = '';
+    tile.querySelector('.cam-tile-img-wrap').innerHTML = '';
     tile.querySelector('.cam-tile-dots').innerHTML = '';
   });
 }
 
 function flashTile(camIdx) {
-  // Only glitch the main camera if movement happens on the currently watched camera
   if (selCamIdx === camIdx) glitchMainCam();
 }
 
@@ -453,13 +469,12 @@ function renderMainCam() {
 
   const cam         = CAM_ROOMS[selCamIdx];
   const at          = entitiesAt(selCamIdx);
-  const primary     = at[0] ?? null; // first entity (target has priority)
+  const primary     = at[0] ?? null;
   const anyEntering = at.some(x => x.e.state === 'entering');
 
   labelId.textContent = cam.id;
   labelRm.textContent = cam.room.toUpperCase();
 
-  // Show whichever animatronic is in the selected camera
   if (primary && primary.e.char.img) {
     img.src   = '../assets/' + primary.e.char.img;
     img.style.display = '';
@@ -514,10 +529,12 @@ function updateDoorBtn() {
 // ─── HUD ──────────────────────────────────────────────────
 
 function updateClock() {
-  const el = document.getElementById('night-clock');
-  el.textContent = HOURS[wrongCount] ?? '3 AM';
+  const hourIdx = Math.min(Math.floor(nightElapsedMs / HOUR_MS), HOUR_LABELS.length - 1);
+  const el      = document.getElementById('night-clock');
+  if (!el) return;
+  el.textContent = HOUR_LABELS[hourIdx];
   el.className   = 'night-clock'
-    + (wrongCount >= 2 ? ' danger' : wrongCount >= 1 ? ' warning' : '');
+    + (hourIdx >= 4 ? ' danger' : hourIdx >= 2 ? ' warning' : '');
 }
 
 function updatePower() {
@@ -530,7 +547,7 @@ function updatePower() {
 }
 
 function updateAttemptsLeft() {
-  const el = document.getElementById('attempts-left');
+  const el  = document.getElementById('attempts-left');
   const rem = MAX_GUESSES - guesses.length;
   if (gameOver) { el.textContent = ''; return; }
   el.textContent = `Attempts: ${rem} / ${MAX_GUESSES}`;
@@ -546,7 +563,7 @@ function colorMatchExtreme(gVal, tVal) {
 }
 
 function makeSwatch(colorName) {
-  const s  = document.createElement('span');
+  const s    = document.createElement('span');
   s.className = 'color-swatch';
   const fill = COLOR_HEX[colorName.toLowerCase()] || '#666';
   if (fill.startsWith('linear')) s.style.backgroundImage = fill;
@@ -614,7 +631,7 @@ function renderGuess(char) {
     const cell = document.createElement('div');
     cell.className = 'cell';
 
-    if (f.key !== 'name' && f.key === hiddenField) {
+    if (f.key !== 'name' && hiddenFields.includes(f.key)) {
       cell.classList.add('hidden-cell');
       const lbl = document.createElement('div');
       lbl.className   = 'cell-label hidden-label';
@@ -634,7 +651,7 @@ function renderGuess(char) {
     } else {
       const lbl = document.createElement('div');
       lbl.className   = 'cell-label';
-      lbl.textContent = char[f.key]; // no year arrows in extreme
+      lbl.textContent = char[f.key];
       cell.appendChild(lbl);
     }
     row.appendChild(cell);
@@ -665,11 +682,10 @@ function submitGuess(char) {
     endGame(true);
   } else {
     wrongCount++;
-    updateClock();
     glitchMainCam();
     if (guesses.length >= MAX_GUESSES) {
       stopLoop();
-      triggerFreddyJumpscare(() => endGame(false));
+      triggerFreddyJumpscare(() => endGame(false, 'guesses'));
     }
   }
   updateAttemptsLeft();
@@ -677,22 +693,27 @@ function submitGuess(char) {
 
 // ─── End game ─────────────────────────────────────────────
 
-function endGame(won) {
+function endGame(won, loseReason) {
   gameOver = true;
   input.disabled = true;
   document.getElementById('search-area').style.display = 'none';
   document.getElementById('door-btn').disabled = true;
 
-  // Reveal target on camera
+  // If time ran out, show 6 AM on clock
+  if (!won && loseReason === 'time') {
+    const cl = document.getElementById('night-clock');
+    if (cl) { cl.textContent = '6 AM'; cl.className = 'night-clock danger'; }
+  }
+
   selCamIdx = targetEntity.camIdx;
   document.getElementById('main-cam-screen').classList.add('revealed');
   renderMainCam();
   refreshCamGrid();
 
-  const banner       = document.getElementById('result-banner');
-  const titleEl      = document.getElementById('result-title');
-  const msgEl        = document.getElementById('result-msg');
-  const playAgainBtn = document.getElementById('play-again-btn');
+  const banner        = document.getElementById('result-banner');
+  const titleEl       = document.getElementById('result-title');
+  const msgEl         = document.getElementById('result-msg');
+  const playAgainBtn  = document.getElementById('play-again-btn');
   const nightJustDone = currentNight;
 
   banner.classList.add('show');
@@ -700,25 +721,32 @@ function endGame(won) {
   if (won) {
     banner.classList.remove('lose');
     if (nightJustDone >= MAX_NIGHTS) {
-      titleEl.textContent      = '🏆 All 5 Nights Complete!';
-      msgEl.textContent        = `It was ${target.name}! You survived every night. Legend.`;
+      titleEl.textContent      = '🏆 All 6 Nights Complete!';
+      msgEl.textContent        = `It was ${target.name}! You survived every night, even Night 6. Legend.`;
       playAgainBtn.textContent = '↩ Restart (Night 1)';
       currentNight = 1;
       saveNight();
     } else {
       const next = nightJustDone + 1;
+      const teaser = next === 6
+        ? `Night 6 is the ultimate test. Good luck.`
+        : `Night ${next} will be more intense...`;
       titleEl.textContent      = `🌙 Night ${nightJustDone} Survived!`;
-      msgEl.textContent        = `It was ${target.name}! Night ${next} will be more intense...`;
+      msgEl.textContent        = `It was ${target.name}! ${teaser}`;
       playAgainBtn.textContent = `▶ Continue — Night ${next}`;
       currentNight = next;
       saveNight();
     }
   } else {
     banner.classList.add('lose');
-    titleEl.textContent      = '💀 6 AM — Game Over';
+    const reason = loseReason === 'time'
+      ? '⏰ 6 AM — time ran out!'
+      : loseReason === 'battery'
+        ? '🔦 Power outage — Freddy got you!'
+        : '💀 Out of attempts!';
+    titleEl.textContent      = reason;
     msgEl.textContent        = `It was ${target.name}. Try Night ${nightJustDone} again.`;
     playAgainBtn.textContent = `↩ Retry Night ${nightJustDone}`;
-    // currentNight unchanged on loss
   }
 
   const imgCont = document.getElementById('result-char-container');
@@ -770,14 +798,38 @@ input.addEventListener('keydown', e => {
   const items = Array.from(dropdown.querySelectorAll('.dropdown-item'));
   if (!items.length) return;
   switch (e.key) {
-    case 'ArrowDown': e.preventDefault(); selIdx = Math.min(selIdx + 1, items.length - 1); break;
-    case 'ArrowUp':   e.preventDefault(); selIdx = Math.max(selIdx - 1, 0); break;
-    case 'Enter': case 'Tab':
-      if (selIdx >= 0) { items[selIdx].click(); e.preventDefault(); } break;
-    case 'Escape': dropdown.style.display = 'none'; selIdx = -1; break;
+    case 'ArrowDown':
+      e.preventDefault();
+      selIdx = Math.min(selIdx + 1, items.length - 1);
+      break;
+    case 'ArrowUp':
+      e.preventDefault();
+      selIdx = Math.max(selIdx - 1, 0);
+      break;
+    case 'Enter':
+      if (selIdx >= 0) { items[selIdx].click(); e.preventDefault(); }
+      break;
+    case 'Tab':
+      if (dropdown.style.display !== 'none') {
+        e.preventDefault();
+        if (selIdx >= 0) {
+          items[selIdx].click();
+        } else {
+          selIdx = 0;
+          items.forEach((el, i) => el.classList.toggle('selected', i === 0));
+          items[0].scrollIntoView({ block: 'nearest' });
+        }
+      }
+      break;
+    case 'Escape':
+      dropdown.style.display = 'none';
+      selIdx = -1;
+      break;
   }
-  items.forEach((el, i) => el.classList.toggle('selected', i === selIdx));
-  if (selIdx >= 0) items[selIdx].scrollIntoView({ block: 'nearest' });
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    items.forEach((el, i) => el.classList.toggle('selected', i === selIdx));
+    if (selIdx >= 0) items[selIdx].scrollIntoView({ block: 'nearest' });
+  }
 });
 
 document.addEventListener('click', e => {

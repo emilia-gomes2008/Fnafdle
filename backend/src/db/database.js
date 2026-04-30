@@ -1661,7 +1661,7 @@ const CHARS = [
     type: "Funtime",
     color: ["White", "Pink"],
     eyeColor: ["Magenta"],
-    year: "Unnknown",
+    year: "Unconfirmed",
     img: "images/chars/funtime/funtime_chica.png"
   },
   {
@@ -1670,7 +1670,7 @@ const CHARS = [
     type: "Funtime",
     color: ["Pink"],
     eyeColor: ["Blue"],
-    year: "Unnknown",
+    year: "Unconfirmed",
     img: "images/chars/funtime/cupcake.png"
   },
   {
@@ -3249,3 +3249,4 @@ const CHARS = [
     img: "images/chars/other/fiona.png"
   },
 ];
+

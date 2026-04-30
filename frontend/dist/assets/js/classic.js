@@ -318,8 +318,20 @@ input.addEventListener('keydown', e => {
   switch (e.key) {
     case 'ArrowDown': e.preventDefault(); selectedIndex = Math.min(selectedIndex + 1, items.length - 1); break;
     case 'ArrowUp': e.preventDefault(); selectedIndex = Math.max(selectedIndex - 1, 0); break;
-    case 'Enter': case 'Tab':
+    case 'Enter':
       if (selectedIndex >= 0) { items[selectedIndex].click(); e.preventDefault(); } break;
+    case 'Tab':
+      if (dropdown.style.display !== 'none') {
+        e.preventDefault();
+        if (selectedIndex >= 0) {
+          items[selectedIndex].click();
+        } else {
+          selectedIndex = 0;
+          items.forEach((el, i) => el.classList.toggle('selected', i === 0));
+          items[0].scrollIntoView({ block: 'nearest' });
+        }
+      }
+      break;
     case 'Escape': dropdown.style.display = 'none'; selectedIndex = -1; break;
   }
   items.forEach((el, i) => el.classList.toggle('selected', i === selectedIndex));

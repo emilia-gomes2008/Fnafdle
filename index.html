@@ -25,48 +25,61 @@
     <div class="mode-select-title">Choose a Mode</div>
     <div class="mode-cards">
 
+      
+      <div class="mode-card" onclick="window.location.href='frontend/dist/pages/image.html'">
+        <div class="mode-icon">🔍</div>
+        <div class="mode-name">Image</div>
+        <div class="mode-desc">Blurred & zoomed image · reveal with each guess · 6 tries</div>
+      </div>
+      <div class="mode-card" onclick="window.location.href='frontend/dist/pages/classic.html?mode=daily'">
+        <div class="mode-icon">📅</div>
+        <div class="mode-name">Daily</div>
+        <div class="mode-desc">1 animatronic per day · 7 tries · everyone gets the same</div>
+      </div>
       <div class="mode-card" onclick="window.location.href='frontend/dist/pages/classic.html?mode=endless'">
         <div class="mode-icon">♾️</div>
         <div class="mode-name">Endless</div>
         <div class="mode-desc">Random animatronic · 6 tries · play as many as you want</div>
       </div>
 
-      <div class="mode-card" onclick="window.location.href='frontend/dist/pages/classic.html?mode=daily'">
-        <div class="mode-icon">📅</div>
-        <div class="mode-name">Daily</div>
-        <div class="mode-desc">1 animatronic per day · 7 tries · everyone gets the same</div>
-      </div>
 
-      <div class="mode-card" onclick="window.location.href='frontend/dist/pages/image.html'">
-        <div class="mode-icon">🔍</div>
-        <div class="mode-name">Image</div>
-        <div class="mode-desc">Blurred & zoomed image · reveal with each guess · 6 tries</div>
-      </div>
-
+      <div class="divider"></div>
       <div class="mode-card mode-card-extreme" onclick="window.location.href='frontend/dist/pages/extreme.html'">
         <div class="mode-icon">☠️</div>
         <div class="mode-name">Extreme</div>
-        <div class="mode-desc">5 progressive nights · animatronics patrol cameras · AI movement · manage the door · 3 attempts</div>
+        <div class="mode-desc">6 progressive nights · real-time clock · AI movement · manage the door · 3 attempts · Night 6: 6 animatronics, 2× power drain</div>
       </div>
-
+      
+      <div class="mode-card" onclick="window.location.href='frontend/dist/pages/quote.html?mode=daily'">
+        <div class="mode-icon">📅🎭</div>
+        <div class="mode-name">Quote Daily</div>
+        <div class="mode-desc">1 quote per day · 6 tries · everyone gets the same</div>
+      </div>
+      
+            <div class="mode-card" onclick="window.location.href='frontend/dist/pages/quote.html?mode=endless'">
+              <div class="mode-icon">🎭</div>
+              <div class="mode-name">Quote Guesser</div>
+              <div class="mode-desc">A quote appears — guess which FNAF character said it · 6 tries</div>
+            </div>
+      
       <div class="divider"></div>
-      <div class="mode-card" onclick="window.location.href='frontend/dist/pages/book.html?mode=book_endless'">
-        <div class="mode-icon">📖</div>
-        <div class="mode-name">Books</div>
-        <div class="mode-desc">Guess the FNaF novel · series, year, edition number · 6 tries</div>
-      </div>
-
-      <div class="mode-card" onclick="window.location.href='frontend/dist/pages/book.html?mode=book_daily'">
-        <div class="mode-icon">📅📖</div>
-        <div class="mode-name">Books Daily</div>
-        <div class="mode-desc">1 book per day · 7 tries · everyone gets the same</div>
-      </div>
-
-      <div class="mode-card" onclick="window.location.href='frontend/dist/pages/encyclopedia.html'">
-        <div class="mode-icon">📚</div>
-        <div class="mode-name">Who is this?</div>
-        <div class="mode-desc">Browse all animatronics · search & filter · tap to see details</div>
-      </div>
+      
+            <div class="mode-card" onclick="window.location.href='frontend/dist/pages/encyclopedia.html'">
+              <div class="mode-icon">📚</div>
+              <div class="mode-name">Who is this?</div>
+              <div class="mode-desc">Browse all animatronics · search & filter · tap to see details</div>
+            </div>
+            
+            <div class="mode-card" onclick="window.location.href='frontend/dist/pages/book.html?mode=book_daily'">
+              <div class="mode-icon">📅📖</div>
+              <div class="mode-name">Books Daily</div>
+              <div class="mode-desc">1 book per day · 7 tries · everyone gets the same</div>
+            </div>
+            <div class="mode-card" onclick="window.location.href='frontend/dist/pages/book.html?mode=book_endless'">
+              <div class="mode-icon">📖</div>
+              <div class="mode-name">Books</div>
+              <div class="mode-desc">Guess the FNaF novel · series, year, edition number · 6 tries</div>
+            </div>
 
     </div>
 
