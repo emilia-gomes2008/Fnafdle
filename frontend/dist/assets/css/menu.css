@@ -58,3 +58,17 @@
   line-height: 1.5;
   letter-spacing: 0.5px;
 }
+
+.mode-card-extreme {
+  border-color: rgba(180, 20, 20, 0.4);
+  background: linear-gradient(135deg, var(--bg-cell), #1e1010);
+}
+
+.mode-card-extreme:hover {
+  border-color: #cc1a1a;
+  box-shadow: 0 6px 20px rgba(180, 20, 20, 0.3);
+}
+
+.mode-card-extreme .mode-name {
+  color: #cc1a1a;
+}

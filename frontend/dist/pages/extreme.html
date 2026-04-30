@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FNAFdle — Extreme Night</title>
+  <link rel="icon" type="icon/png" href="../assets/images/default.png">
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Oswald:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/global.css" />
+  <link rel="stylesheet" href="../assets/css/extreme.css" />
+</head>
+
+<body class="fnaf-night">
+
+  <!-- Office top bar -->
+  <div class="office-topbar">
+    <button class="back-btn office-back" onclick="goHome()">← Modes</button>
+    <div class="night-label" id="night-label">☆ NIGHT 1 ☆</div>
+    <div class="night-clock" id="night-clock">12 AM</div>
+    <div class="power-section">
+      <span class="power-label">Power:</span>
+      <div class="power-bar-wrap"><div class="power-fill" id="power-fill" style="width:99%"></div></div>
+      <span class="power-pct" id="power-pct">99%</span>
+    </div>
+  </div>
+
+  <!-- Main layout -->
+  <div class="container" id="extreme-screen" style="display:none;">
+    <div class="fnaf-layout">
+
+      <!-- LEFT: Camera panel -->
+      <div class="camera-panel-wrap">
+
+        <!-- Main camera view -->
+        <div class="main-cam-bezel">
+          <div class="main-cam-screen" id="main-cam-screen">
+            <img class="main-cam-img" id="main-cam-img" src="" alt="" />
+            <div class="cam-green-tint" id="cam-tint"></div>
+            <div class="scanlines"></div>
+            <div class="cam-hud">
+              <div class="cam-id-label" id="main-cam-id">CAM 1A</div>
+              <div class="cam-room-label" id="main-cam-room">SHOW STAGE</div>
+              <div class="rec-indicator">● REC</div>
+            </div>
+            <div class="cam-no-signal">NO SIGNAL</div>
+          </div>
+        </div>
+
+        <!-- 3×3 camera grid -->
+        <div class="cam-grid" id="cam-grid"></div>
+
+        <!-- Movement opportunity timer -->
+        <div class="opp-timer">
+          <div class="opp-label-row">
+            <span class="opp-label">MOVEMENT OPP</span>
+            <span class="opp-countdown" id="opp-countdown">10s</span>
+          </div>
+          <div class="opp-bar-wrap">
+            <div class="opp-bar-fill" id="opp-fill" style="width:100%"></div>
+          </div>
+        </div>
+
+        <!-- Door button -->
+        <div class="door-section">
+          <button class="door-btn door-open" id="door-btn" onclick="toggleDoor()">
+            🚪 CLOSE DOOR
+          </button>
+          <div class="door-hint">Close the door to block animatronics · drains battery faster over time</div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: Game UI -->
+      <div class="game-panel">
+
+        <div class="mode-badge-row" style="margin-bottom:0.8rem;">
+          <span class="extreme-badge">☠ Extreme</span>
+        </div>
+
+        <div class="extreme-warning" id="extreme-warning">
+          <strong>⚠ EXTREME</strong> · <strong>3 attempts</strong> · No year arrows · Colors correct/wrong only · 1 <strong>corrupted</strong> feed
+        </div>
+
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot correct"></div> Correct</div>
+          <div class="legend-item"><div class="legend-dot wrong"></div> Wrong</div>
+          <div class="legend-item"><div class="legend-dot hidden-dot"></div> Corrupted</div>
+        </div>
+
+        <div class="search-area" id="search-area">
+          <input class="search-input" id="search-input" placeholder="Identify the animatronic on camera..." autocomplete="off" />
+          <div class="dropdown" id="dropdown" style="display:none;"></div>
+        </div>
+
+        <div class="attempts-left" id="attempts-left"></div>
+
+        <div class="table-wrapper">
+          <div class="table-header">
+            <div class="col-label">Character</div>
+            <div class="col-label">Name</div>
+            <div class="col-label" id="header-animal">Animal</div>
+            <div class="col-label" id="header-type">Type</div>
+            <div class="col-label" id="header-color">Color</div>
+            <div class="col-label" id="header-eyecolor">Eye Color</div>
+            <div class="col-label" id="header-year">Year</div>
+          </div>
+          <div id="guesses-container"></div>
+        </div>
+
+        <div class="result-banner" id="result-banner">
+          <div class="result-title" id="result-title"></div>
+          <div class="result-content">
+            <div id="result-char-container"></div>
+            <p class="result-msg" id="result-msg"></p>
+          </div>
+          <div class="result-buttons">
+            <button id="play-again-btn" onclick="restartCurrent()">Next Night</button>
+            <button onclick="goHome()" class="btn-back-result">← Modes</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="../../../backend/src/db/database.js"></script>
+  <script src="../../../backend/src/db/books_database.js"></script>
+  <script src="../assets/js/core.js"></script>
+  <script src="../assets/js/extreme.js"></script>
+</body>
+</html>

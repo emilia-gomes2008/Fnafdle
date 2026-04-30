@@ -2190,7 +2190,7 @@ const CHARS = [
     img: "images/chars/glamrock/shatter/monty.png"
   },
   {
-    name: "Roxane Wolf",
+    name: "Roxanne Wolf",
     animal: "Wolf",
     type: "Glamrock",
     color: ["Grey", "Red"],
@@ -2199,7 +2199,7 @@ const CHARS = [
     img: "images/chars/glamrock/roxy.png"
   },
   {
-    name: "Shattered Roxane Wolf",
+    name: "Shattered Roxanne Wolf",
     animal: "Wolf",
     type: "Glamrock",
     color: ["Grey", "Red"],

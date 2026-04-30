@@ -1,0 +1,751 @@
+/* =====================================================
+       Extreme Mode — FNAF Security Office
+===================================================== */
+
+:root {
+  --ex-red:     #cc1a1a;
+  --ex-red-dk:  #8a0000;
+  --ex-red-gl:  rgba(180, 20, 20, 0.3);
+  --cam-green:  rgba(30, 200, 90, 0.12);
+  --hid-bg:     #110820;
+  --hid-bdr:    #5a2a70;
+  --hid-txt:    #9966cc;
+  --cam-dark:   #060608;
+}
+
+/* ── Body / page ── */
+body.fnaf-night {
+  background: #0b0b0d;
+  padding-top: 0;
+}
+
+/* ── Office top bar ── */
+.office-topbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 7px 14px;
+  background: #080809;
+  border-bottom: 1px solid #161618;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.office-back {
+  margin-top: 0 !important;
+  flex-shrink: 0;
+}
+
+.night-label {
+  font-family: 'Creepster', cursive;
+  color: #775511;
+  font-size: 0.85rem;
+  letter-spacing: 4px;
+  flex: 1;
+  text-align: center;
+}
+
+.night-clock {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 3px;
+  color: #999;
+  min-width: 48px;
+  text-align: right;
+  transition: color 0.4s;
+}
+
+.night-clock.warning { color: #ccaa22; }
+.night-clock.danger  {
+  color: var(--ex-red);
+  animation: pulse 0.6s ease-in-out infinite;
+}
+
+.power-section {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.power-label { font-size: 0.66rem; color: #666; letter-spacing: 1px; }
+
+.power-bar-wrap {
+  width: 80px;
+  height: 8px;
+  background: #181818;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid #2a2a2a;
+}
+
+.power-fill {
+  height: 100%;
+  background: #2e9a44;
+  border-radius: 4px;
+  transition: width 0.3s, background 0.5s;
+}
+
+.power-fill.low      { background: #aaaa22; }
+.power-fill.critical { background: var(--ex-red); animation: pulse 0.5s ease-in-out infinite; }
+
+.power-pct { font-size: 0.7rem; color: #777; min-width: 32px; }
+
+/* ── Container ── */
+.container {
+  box-shadow: 0 0 30px rgba(150, 0, 0, 0.12) !important;
+  border: 1px solid rgba(100, 0, 0, 0.2);
+  margin-top: 12px;
+}
+
+/* ── Side-by-side layout ── */
+.fnaf-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.camera-panel-wrap {
+  flex: 0 0 300px;
+  width: 300px;
+}
+
+.game-panel {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Main camera (large) ── */
+.main-cam-bezel {
+  background: #050506;
+  border: 2px solid #1a1a1e;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 7px;
+  box-shadow: 0 0 24px rgba(30, 200, 80, 0.05), inset 0 0 12px rgba(0,0,0,0.9);
+}
+
+.main-cam-screen {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: var(--cam-dark);
+  overflow: hidden;
+}
+
+.main-cam-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: brightness(0.5) contrast(1.4) saturate(0);
+  transition: filter 1.2s ease;
+}
+
+.main-cam-screen.revealed .main-cam-img {
+  filter: brightness(0.9) contrast(1.1) saturate(0.35);
+}
+
+.cam-green-tint {
+  position: absolute;
+  inset: 0;
+  background: var(--cam-green);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 1;
+  transition: background 0.3s;
+}
+
+.cam-green-tint.tint-alert {
+  background: rgba(200, 30, 30, 0.22);
+  animation: alertTint 0.4s ease-in-out infinite;
+}
+
+@keyframes alertTint {
+  0%, 100% { background: rgba(200, 30, 30, 0.18); }
+  50%       { background: rgba(200, 30, 30, 0.38); }
+}
+
+.scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0, transparent 2px,
+    rgba(0,0,0,0.16) 2px, rgba(0,0,0,0.16) 4px
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* HUD overlay in main cam */
+.cam-hud {
+  position: absolute;
+  inset: 0;
+  padding: 7px 8px;
+  z-index: 3;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.cam-id-label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.68rem;
+  letter-spacing: 2px;
+  color: rgba(70, 210, 110, 0.8);
+}
+
+.cam-room-label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.58rem;
+  letter-spacing: 2px;
+  color: rgba(70, 210, 110, 0.5);
+}
+
+.rec-indicator {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.58rem;
+  letter-spacing: 2px;
+  color: rgba(220, 60, 60, 0.85);
+  align-self: flex-end;
+  animation: recBlink 1.2s step-start infinite;
+}
+
+@keyframes recBlink {
+  0%, 49%   { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.cam-no-signal {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 3px;
+  color: rgba(80, 80, 80, 0.5);
+  z-index: 4;
+}
+
+.main-cam-screen.cam-empty .cam-no-signal { display: flex; }
+
+/* Main cam glitch animation */
+@keyframes camGlitch {
+  0%   { filter: brightness(0.5) contrast(1.4) saturate(0); transform: none; }
+  10%  { filter: brightness(3.5) contrast(3)   saturate(0); transform: translateX(7px); }
+  20%  { filter: brightness(0.1) contrast(1)   saturate(0); transform: translateX(-5px); }
+  35%  { filter: brightness(2.5) contrast(4)   saturate(0); transform: scaleY(1.06); }
+  50%  { filter: brightness(0.5) contrast(1.4) saturate(0); transform: translateX(4px); }
+  65%  { filter: brightness(0.15) contrast(2)  saturate(0); transform: translateX(-3px); }
+  80%  { filter: brightness(0.5) contrast(1.4) saturate(0); transform: none; }
+  100% { filter: brightness(0.5) contrast(1.4) saturate(0); transform: none; }
+}
+
+.main-cam-screen.glitch .main-cam-img {
+  animation: camGlitch 0.6s steps(2) forwards;
+}
+
+/* ── Camera 3×3 grid ── */
+.cam-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.cam-tile {
+  aspect-ratio: 4 / 3;
+  background: var(--cam-dark);
+  border: 1.5px solid #181818;
+  border-radius: 3px;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.cam-tile:hover { border-color: #2a2a2e; }
+
+.cam-tile.has-target {
+  border-color: #7a5000 !important;
+  box-shadow: 0 0 7px rgba(160, 100, 0, 0.25);
+}
+
+.cam-tile.cam-selected {
+  border-color: rgba(60, 180, 100, 0.55) !important;
+  box-shadow: 0 0 8px rgba(40, 160, 70, 0.2) !important;
+}
+
+.cam-tile.has-threat {
+  box-shadow: inset 0 0 5px rgba(180, 0, 0, 0.18);
+}
+
+.cam-tile.cam-danger {
+  animation: tileAlarm 0.55s ease-in-out infinite;
+}
+
+.cam-tile.cam-entering {
+  animation: tileAlarmFast 0.25s ease-in-out infinite;
+}
+
+@keyframes tileAlarm {
+  0%, 100% { box-shadow: inset 0 0 6px rgba(200, 0, 0, 0.3); }
+  50%       { box-shadow: inset 0 0 14px rgba(200, 0, 0, 0.7); }
+}
+
+@keyframes tileAlarmFast {
+  0%, 100% { box-shadow: inset 0 0 10px rgba(255, 0, 0, 0.5); }
+  50%       { box-shadow: inset 0 0 18px rgba(255, 0, 0, 0.9); }
+}
+
+/* Flash on movement */
+.cam-tile.cam-flash {
+  animation: tileFlash 0.3s ease-out forwards;
+}
+
+@keyframes tileFlash {
+  0%   { background: rgba(80, 200, 100, 0.15); }
+  100% { background: var(--cam-dark); }
+}
+
+.cam-tile-img-wrap {
+  position: absolute;
+  inset: 0;
+}
+
+.cam-tile-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: brightness(0.35) contrast(1.5) saturate(0);
+}
+
+.cam-tile-scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0, transparent 1px,
+    rgba(0,0,0,0.2) 1px, rgba(0,0,0,0.2) 2px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.cam-tile-hud {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 2px 4px;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  z-index: 2;
+}
+
+.cam-tile-id {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.48rem;
+  letter-spacing: 1px;
+  color: rgba(70, 200, 100, 0.75);
+}
+
+.cam-tile-room {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.4rem;
+  letter-spacing: 0.8px;
+  color: rgba(70, 200, 100, 0.45);
+}
+
+/* Threat dots */
+.cam-tile-dots {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-end;
+  z-index: 3;
+}
+
+.threat-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(200, 50, 50, 0.85);
+}
+
+.threat-dot.dot-target  { background: rgba(190, 130, 0, 0.9); }
+.threat-dot.dot-blocked { background: rgba(200, 130, 0, 0.85); }
+
+.threat-dot.dot-entering {
+  background: #ff2222;
+  box-shadow: 0 0 5px rgba(255, 0, 0, 0.9);
+  animation: dotPulse 0.25s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.6); }
+}
+
+/* ── Movement opportunity bar ── */
+.opp-timer {
+  margin-bottom: 7px;
+  padding: 0 1px;
+}
+
+.opp-label-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 3px;
+}
+
+.opp-label, .opp-countdown {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.52rem;
+  letter-spacing: 1.5px;
+  color: rgba(60, 190, 90, 0.45);
+  text-transform: uppercase;
+}
+
+.opp-bar-wrap {
+  height: 3px;
+  background: #0e0e10;
+  border-radius: 2px;
+  overflow: hidden;
+  border: 1px solid #1a1a1c;
+}
+
+.opp-bar-fill {
+  height: 100%;
+  background: rgba(50, 170, 70, 0.45);
+  border-radius: 2px;
+  transition: width 0.1s linear, background 0.1s;
+}
+
+/* ── Door button ── */
+.door-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 0.5rem;
+}
+
+.door-btn {
+  font-family: 'Oswald', sans-serif !important;
+  font-size: 0.9rem !important;
+  letter-spacing: 2px !important;
+  padding: 12px 20px !important;
+  border-radius: 5px !important;
+  margin-top: 0 !important;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid transparent !important;
+}
+
+.door-btn.door-open {
+  background: #131318 !important;
+  color: #aa5555 !important;
+  border-color: rgba(150, 30, 30, 0.35) !important;
+}
+
+.door-btn.door-open:hover {
+  background: #1e1010 !important;
+  border-color: rgba(200, 50, 50, 0.5) !important;
+}
+
+.door-btn.door-closed {
+  background: rgba(150, 20, 20, 0.25) !important;
+  color: var(--ex-red) !important;
+  border-color: var(--ex-red) !important;
+  box-shadow: 0 0 16px rgba(160, 20, 20, 0.35) !important;
+  animation: doorGlow 1s ease-in-out infinite;
+}
+
+@keyframes doorGlow {
+  0%, 100% { box-shadow: 0 0 16px rgba(160, 20, 20, 0.35) !important; }
+  50%       { box-shadow: 0 0 28px rgba(200, 20, 20, 0.6) !important; }
+}
+
+.door-hint {
+  font-size: 0.6rem;
+  color: #444;
+  letter-spacing: 0.8px;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* ── Game panel (right side) ── */
+.extreme-badge {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 3px;
+  color: var(--ex-red);
+  text-transform: uppercase;
+}
+
+.extreme-warning {
+  background: rgba(110, 0, 0, 0.1);
+  border: 1px solid rgba(140, 0, 0, 0.22);
+  border-radius: 7px;
+  padding: 8px 12px;
+  margin-bottom: 1rem;
+  font-size: 0.72rem;
+  color: #cc7777;
+  letter-spacing: 0.8px;
+  line-height: 1.6;
+}
+
+.extreme-warning strong { color: var(--ex-red); }
+
+/* Buttons */
+button { background-color: var(--ex-red) !important; }
+button:hover { background-color: var(--ex-red-dk) !important; }
+
+.btn-back-result {
+  margin-left: 10px;
+  background: var(--bg-cell) !important;
+  border: 1px solid var(--border) !important;
+}
+.btn-back-result:hover { background: #363739 !important; }
+
+/* Search */
+.search-input { border-color: var(--ex-red) !important; }
+.search-input:focus {
+  border-color: #ff4444 !important;
+  box-shadow: 0 0 0 2px rgba(200, 0, 0, 0.18) !important;
+}
+
+/* Legend */
+.legend {
+  display: flex;
+  gap: 16px;
+  justify-content: flex-start;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
+
+.legend-dot            { width: 12px; height: 12px; border-radius: 3px; }
+.legend-dot.correct    { background: var(--green-border); }
+.legend-dot.wrong      { background: var(--red-border); }
+.legend-dot.hidden-dot { background: var(--hid-bdr); }
+
+/* Table */
+.table-header, .guess-row {
+  display: grid;
+  grid-template-columns: 70px 1fr 1fr 1fr 1fr 1fr 72px;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.col-label {
+  text-align: center;
+  font-size: 0.66rem;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.col-label.hidden-col {
+  color: var(--hid-txt);
+  animation: hiddenPulse 2s ease-in-out infinite;
+}
+
+@keyframes hiddenPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+.cell-img img {
+  width: 54px;
+  height: 54px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.cell.hidden-cell {
+  background: var(--hid-bg) !important;
+  border-color: var(--hid-bdr) !important;
+}
+
+.hidden-label {
+  color: var(--hid-txt);
+  letter-spacing: 4px;
+  font-size: 0.85rem;
+}
+
+/* Attempts */
+.attempts-left {
+  text-align: left;
+  font-size: 0.78rem;
+  color: #cc7777;
+  margin-bottom: 0.8rem;
+  letter-spacing: 1px;
+}
+
+.attempts-left.danger {
+  color: var(--ex-red);
+  font-weight: bold;
+  animation: pulse 0.7s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+
+/* ══════════════════════════════════════════════════════
+       MOBILE — stacked layout, fixed door button
+══════════════════════════════════════════════════════ */
+@media (max-width: 720px) {
+
+  /* Page */
+  body.fnaf-night {
+    padding-bottom: 78px; /* room for fixed door button */
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  /* Container */
+  .container {
+    padding: 10px 8px !important;
+    margin-top: 6px;
+    border-radius: 6px;
+  }
+
+  /* ── Topbar ── */
+  .office-topbar {
+    gap: 6px;
+    padding: 5px 10px;
+    flex-wrap: nowrap;   /* single line */
+  }
+
+  .night-label  { display: none; }    /* save space */
+  .power-label  { display: none; }    /* redundant on small screens */
+  .power-bar-wrap { width: 56px; }
+  .power-pct    { font-size: 0.65rem; min-width: 26px; }
+  .night-clock  { font-size: 0.88rem; letter-spacing: 2px; }
+  .back-btn     { padding: 5px 10px !important; font-size: 0.7rem !important; }
+
+  /* ── Layout: camera above, game below ── */
+  .fnaf-layout {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .camera-panel-wrap {
+    width: 100%;
+    flex: none;
+  }
+
+  /* ── Main camera: 16:9 on mobile (less vertical space) ── */
+  .main-cam-screen { aspect-ratio: 16 / 9; }
+
+  /* ── Camera grid: 3 columns, tiles are tap-friendly ── */
+  .cam-grid {
+    gap: 3px;
+    margin-bottom: 5px;
+  }
+
+  /* Hide room text — too small to read anyway */
+  .cam-tile-room  { display: none; }
+  .cam-tile-hud   { padding: 1px 3px; }
+  .cam-tile-id    { font-size: 0.44rem; letter-spacing: 0.8px; }
+
+  /* ── Opp timer ── */
+  .opp-timer { margin-bottom: 4px; }
+
+  /* ── Door button: fixed at bottom of screen ── */
+  .door-section {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
+    background: rgba(9, 9, 11, 0.96);
+    border-top: 1px solid #1c1c20;
+    padding: 8px 14px;
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+    margin: 0;
+    backdrop-filter: blur(6px);
+  }
+
+  .door-btn {
+    padding: 14px 20px !important;
+    font-size: 0.95rem !important;
+    letter-spacing: 2px !important;
+    width: 100%;
+  }
+
+  .door-hint { display: none; }  /* not enough space */
+
+  /* ── Game panel ── */
+  .mode-badge-row { display: none; }    /* badge already in topbar */
+
+  .extreme-warning {
+    font-size: 0.67rem;
+    padding: 7px 10px;
+    margin-bottom: 0.6rem;
+  }
+
+  .legend { gap: 10px; margin-bottom: 0.6rem; }
+  .legend-item { font-size: 0.68rem; }
+
+  .attempts-left { font-size: 0.75rem; margin-bottom: 0.6rem; }
+
+  /* ── Guess table: horizontal scroll ── */
+  .table-header, .guess-row { min-width: 540px; }
+
+  /* ── Result banner: stacked buttons ── */
+  .result-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .result-buttons button,
+  .result-buttons .btn-back-result {
+    width: 100%;
+    margin: 0 !important;
+    padding: 12px 20px !important;
+  }
+}
+
+/* ── Very small phones (< 400px) ── */
+@media (max-width: 400px) {
+  .office-topbar  { padding: 4px 8px; }
+  .container      { padding: 8px 6px !important; }
+
+  /* Even shorter main cam */
+  .main-cam-screen { aspect-ratio: 2 / 1; }
+
+  .power-bar-wrap { width: 44px; }
+  .cam-grid       { gap: 2px; }
+
+  .extreme-warning { font-size: 0.62rem; padding: 5px 8px; }
+}
