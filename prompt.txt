@@ -1,0 +1,4 @@
+quero que apareça todos os animatronics da database como opções de guess (tipo o menu dropdown que tem nos outros modos)
+as perguntas respostas são predefinidas, passam 1 pergunta-resposta por turno, aí passa pro próximo player, as perguntas devem ser dos campos que estão no modo clássico e o oponente pode mentir parcialmente (tipo, se perguntar a cor, o user tem de abrir um color wheel e escolher a cor do personagem, se perguntar do ano pode dizer que não sabe pq tem de selecionar num calendário, os tipos têm a escolha entre todos, tal como os animais só pra confundir mais)
+não tenha a telinha do lado com as 3 opções do oponente (assim fica fácil), mas que seja todos os animatronics (e aí vai eliminando)
+faz o css colocar as imagens do mesmo tamanho, adiciona um botão de jogar na mesma sala com a mesma pessoa tmb (tipo um rematch)

@@ -4,7 +4,7 @@ const QUOTES =[
     said: "Henry Emily"
 },
 {
-    quote: "I'M SORRY BUT THERE WAS NEVER ENOUGHT ROOM FOR BOTH OF US",
+    quote: "I'M SORRY BUT THERE WAS NEVER ENOUGH ROOM FOR BOTH OF US",
     said: "Funtime Foxy"
 },
 {

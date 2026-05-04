@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FNAFdle Reborn — Multiplayer</title>
+  <link rel="icon" type="icon/png" href="../assets/images/default.png">
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Oswald:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/global.css" />
+  <link rel="stylesheet" href="../assets/css/multiplayer.css" />
+</head>
+<body>
+
+  <div class="fnaf-header">
+    <div class="fnaf-title">
+      <img src="../assets/images/title/fnafdlereborn.png" alt="Fnafdle" />
+    </div>
+    <div class="fnaf-subtitle">Guess the animatronic</div>
+  </div>
+
+  <div class="container" id="multiplayer-screen" style="display:none">
+    <div class="mode-badge-row">
+      <span class="mode-badge">🎮 Multiplayer</span>
+      <button class="back-btn" onclick="goHome()">← Modes</button>
+    </div>
+
+    <!-- ── LOBBY ──────────────────────────────────────────── -->
+    <div id="screen-lobby">
+      <div class="mp-card">
+        <h2 class="mp-title">Guess Who? — FNAF</h2>
+        <p class="mp-sub">Each player secretly picks an animatronic. Receive predefined questions every turn — answer honestly or lie to confuse your opponent!</p>
+        <input id="lobby-name" class="mp-input" type="text" placeholder="Your name..." maxlength="20" />
+        <div class="lobby-buttons">
+          <button class="mp-btn primary" id="create-room-btn">Create Room</button>
+          <div class="join-row">
+            <input id="lobby-code" class="mp-input code-input" type="text" placeholder="Room code..." maxlength="6" />
+            <button class="mp-btn" id="join-room-btn">Join</button>
+          </div>
+        </div>
+        <p id="lobby-error" class="mp-error"></p>
+      </div>
+    </div>
+
+    <!-- ── WAITING ────────────────────────────────────────── -->
+    <div id="screen-waiting" style="display:none">
+      <div class="mp-card">
+        <h2 class="mp-title">Waiting for opponent...</h2>
+        <p class="mp-sub">Share this code with your friend:</p>
+        <div class="room-code-display" id="waiting-code"></div>
+        <button class="mp-btn" id="copy-code-btn">Copy Code</button>
+        <div class="waiting-dots"><span>.</span><span>.</span><span>.</span></div>
+      </div>
+    </div>
+
+    <!-- ── CHARACTER SELECTION ────────────────────────────── -->
+    <div id="screen-selection" style="display:none">
+      <div class="mp-card selection-card-full">
+        <h2 class="mp-title">Choose your secret character</h2>
+        <p class="mp-sub">Your opponent won't know who you picked! Browse or search all animatronics.</p>
+        <input id="selection-search" class="mp-input selection-search" type="text" placeholder="🔍 Search animatronics..." autocomplete="off" />
+        <div id="selection-grid" class="selection-grid-full"></div>
+        <div class="selection-footer">
+          <div id="selection-chosen" class="selection-chosen" style="display:none">
+            <img id="selection-chosen-img" src="" alt="" />
+            <span id="selection-chosen-name"></span>
+          </div>
+          <p id="selection-status" class="mp-sub"></p>
+          <button class="mp-btn primary" id="confirm-selection-btn" disabled>Confirm Choice ✓</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── GAME ───────────────────────────────────────────── -->
+    <div id="screen-game" style="display:none">
+
+      <!-- Turn indicator + my char badge -->
+      <div class="game-header-row">
+        <div id="turn-indicator" class="turn-indicator opponent-turn">Loading...</div>
+        <div class="my-char-badge" id="my-char-badge" style="display:none">
+          <img id="my-char-badge-img" src="" alt="" />
+          <span id="my-char-badge-name"></span>
+        </div>
+      </div>
+
+      <div class="game-layout-new">
+
+        <!-- Left: Q&A + controls + chat log -->
+        <div class="qa-panel">
+
+          <!-- ASK PANEL: asker chooses a question to ask -->
+          <div id="ask-panel" class="acting-panel" style="display:none">
+            <div class="qa-label">❓ Choose a question to ask:</div>
+            <div id="ask-questions-list" class="list-picker-grid" style="margin-top:10px;"></div>
+          </div>
+
+          <!-- ACTING PANEL: asker sees question + answer, can guess or pass -->
+          <div id="acting-panel" class="acting-panel" style="display:none">
+            <div class="qa-display">
+              <div class="qa-label">📋 This turn's question</div>
+              <div class="qa-question-text" id="acting-question-text"></div>
+              <div class="qa-answer-display" id="acting-answer-display"></div>
+            </div>
+            <div class="acting-actions">
+              <div class="guess-input-wrap">
+                <input id="guess-input" class="mp-input" type="text" placeholder="Type character name to guess..." maxlength="60" autocomplete="off" />
+                <div id="guess-dropdown" class="dropdown" style="display:none"></div>
+              </div>
+              <div class="acting-btns">
+                <button class="mp-btn primary small" id="send-guess-btn">🎯 Guess!</button>
+                <button class="mp-btn accent small" id="pass-btn">⏭ Pass</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ANSWER PANEL: answerer picks a response (can lie!) -->
+          <div id="answer-panel" class="answer-panel" style="display:none">
+            <div class="answer-question-text" id="answer-question-text"></div>
+            <p class="answer-note">⚠️ You can answer honestly or mislead your opponent!</p>
+
+            <!-- Color picker (color / eyeColor questions) -->
+            <div id="answer-color-picker" class="answer-picker" style="display:none">
+              <label for="answer-color-input">Pick a color:</label>
+              <div style="display:flex; gap:10px; align-items:center;">
+                <input type="color" id="answer-color-input" value="#ff0000" style="width:60px; height:40px; cursor:pointer; background:none; border:none; padding:0;" />
+                <button class="mp-btn accent" id="answer-color-idk">I don't know</button>
+              </div>
+            </div>
+
+            <!-- List picker (animal / type questions) -->
+            <div id="answer-list-picker" class="answer-picker" style="display:none">
+              <div id="answer-list-items" class="list-picker-grid"></div>
+              <button class="mp-btn accent" id="answer-list-idk" style="margin-top:8px;">I don't know</button>
+            </div>
+
+            <!-- Year picker -->
+            <div id="answer-year-picker" class="answer-picker" style="display:none">
+              <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                <input type="number" id="answer-year-input" class="mp-input" placeholder="e.g. 1987" style="width:120px;" />
+                <button class="mp-btn" id="answer-year-unconfirmed">Unconfirmed</button>
+                <button class="mp-btn accent" id="answer-year-idk">I don't know</button>
+              </div>
+            </div>
+
+            <div class="answer-submit-row">
+              <span id="answer-chosen-preview" class="answer-chosen-preview"></span>
+              <button class="mp-btn primary" id="submit-answer-btn" disabled>Submit Answer</button>
+            </div>
+          </div>
+
+          <!-- WAITING STATE: not your turn to answer -->
+          <div id="waiting-panel" class="waiting-panel" style="display:none">
+            <div class="waiting-dots"><span>.</span><span>.</span><span>.</span></div>
+            <p id="waiting-panel-text" class="mp-sub">Waiting for opponent...</p>
+          </div>
+
+          <!-- Chat log -->
+          <div id="chat-log" class="chat-log">
+            <div class="chat-msg msg-system">Game started! Player 1 goes first.</div>
+          </div>
+        </div>
+
+        <!-- Right: Elimination board (all chars) -->
+        <div class="elim-panel">
+          <div class="elim-header">
+            <span class="panel-label">🔍 Elimination Board</span>
+            <input id="elim-search" class="mp-input elim-search" type="text" placeholder="Filter..." autocomplete="off" />
+          </div>
+          <div id="elim-grid" class="elim-grid"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── RESULT ──────────────────────────────────────────── -->
+    <div id="screen-result" style="display:none">
+      <div class="result-banner" id="mp-result-banner">
+        <div class="result-title" id="result-title"></div>
+        <div class="result-content">
+          <div id="result-chars" class="result-chars"></div>
+          <p class="result-msg" id="result-msg"></p>
+        </div>
+        <div class="result-buttons">
+          <button class="mp-btn primary" id="rematch-btn">🔄 Rematch</button>
+          <button class="mp-btn" onclick="location.reload()">🆕 New Room</button>
+          <button class="mp-btn" onclick="goHome()">← Modes</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="../assets/js/config.js"></script>
+  <script src="../../../backend/src/db/database.js"></script>
+  <script src="../assets/js/core.js"></script>
+  <script src="../assets/js/multiplayer.js"></script>
+</body>
+</html>
