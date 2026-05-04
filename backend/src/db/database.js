@@ -1470,7 +1470,7 @@ const CHARS = [
     name: "Minigame Freddy",
     animal: "Bear",
     type: "Other",
-    color: ["Brown"],
+    color: ["Yellow"],
     eyeColor: ["Black"],
     year: 2023,
     img: "images/chars/other/minigame_freddy.png"
