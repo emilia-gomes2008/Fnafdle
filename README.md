@@ -1,62 +1,104 @@
 # FNAFdle Reborn
 
-A browser-based FNAF guessing game collection inspired by Wordle and the Five Nights at Freddy's universe. Multiple game modes, all running locally without a server.
+A browser-based guessing game collection set in the Five Nights at Freddy's universe. Inspired by Wordle, FNAFdle Reborn offers multiple game modes — from daily challenges to a fully simulated security office and online multiplayer.
+
+No build tools. No install. Open `index.html` and play.
 
 ---
 
-## Modes
+## Game Modes
 
-### Endless / Daily (Classic)
-Guess the secret animatronic using attribute clues — animal type, variant, color, eye color, and year. Each guess reveals which fields match (green), partially match (yellow), or are wrong (red). Year hints show ↑/↓ arrows when wrong. 6 tries in Endless, 7 in Daily (same animatronic for everyone each day).
+### Classic
+Guess the secret animatronic using attribute clues. Each guess reveals how close you were:
 
-### Image
-A blurred and zoomed image of a random animatronic is revealed progressively with each wrong guess. 6 tries.
+| Color | Meaning |
+|-------|---------|
+| 🟩 Green | Exact match |
+| 🟨 Yellow | Partial match (shared value in a list field) |
+| 🟥 Red | No match |
 
-### Extreme
-A full FNAF security office simulation across 6 progressive nights:
-- **Animatronics patrol** 9 cameras with AI-based movement (roll 1–20 every 10 s; if roll ≤ AI level, the entity advances toward the office).
-- **3 guesses** to identify the target on camera. No year arrows. Colors are correct/wrong only (no partial).
-- **1 field is corrupted** (hidden, shown as `???`) — usually the animal type.
-- **Real-time clock**: each night lasts **4 minutes 30 seconds** (270 s total). Each in-game hour = 45 s. If you don't identify the animatronic by **6 AM**, you die.
-- **Door mechanic**: close the door to block animatronics entering the office, but it drains battery faster the longer it stays closed.
-- **Battery**: drains passively and when entities move. Reaching 0% triggers a jumpscare.
-- Completing a night unlocks the next. Progress is saved in localStorage.
+Attributes checked: Animal, Type, Main Color, Eye Color, Year of origin. Year guesses also show a ↑ / ↓ arrow when wrong.
 
-| Night | Animatronics | AI levels | Notes |
-|-------|-------------|-----------|-------|
-| 1 | 1 | 4 | Tutorial |
-| 2 | 2 | 8 / 6 | |
-| 3 | 3 | 11 / 9 / 7 | |
-| 4 | 4 | 14 / 12 / 10 / 8 | |
-| 5 | 5 | 17 / 15 / 13 / 11 / 9 | Max difficulty |
-| 6 ⚠️ | **6** | **20 / 20 / 20 / 20 / 20 / 20** | **2 corrupted fields · 2× power drain** · Extra night |
+- **Endless** — 6 tries, new random animatronic every round. Win streak tracked.
+- **Daily** — 7 tries, same animatronic for all players on a given day. Shareable result.
+
+---
+
+### Image Mode
+A blurred, zoomed-in image of an animatronic is progressively revealed with each wrong guess. Identify it before it comes into focus. 6 tries. Win streak tracked.
+
+---
+
+### Extreme Mode
+A full FNAF security office simulation split across 6 progressive nights.
+
+- **4 minutes 30 seconds** per night — survive until 6 AM
+- Animatronics move across 9 cameras autonomously — AI rolls a D20 every 10 seconds; if the roll is at or below the AI level, the entity advances
+- Close the door to block them, but it drains power faster while held
+- **3 guesses per night** to identify which animatronic is targeting you
+- One (or more) attributes are **corrupted** and shown as `???`
+- Night 6 features **6 animatronics simultaneously** with double power drain
+- Progress is saved — you can continue from your last completed night
+
+| Night | Animatronics | AI Level | Power/sec | Corrupted Fields |
+|-------|-------------|----------|-----------|-----------------|
+| 1 | 1 | 4 | 0.8% | 1 |
+| 2 | 2 | 8 / 6 | 1.0% | 1 |
+| 3 | 3 | 11 / 9 / 7 | 1.2% | 2 |
+| 4 | 4 | 14 / 12 / 10 / 8 | 1.5% | 2 |
+| 5 | 5 | 17 / 15 / 13 / 11 / 9 | 1.8% | 3 |
+| 6 ⚠️ | **6** | **20 / 20 / 20 / 20 / 20 / 20** | **3.6%** | **3** |
+
+---
 
 ### Quote Guesser
-A quote from the FNAF universe is displayed. Guess which character said it using the character dropdown. Only characters with quotes in the database appear as options. 6 tries.
+A quote from the FNAF universe is displayed with the speaker's name censored. Guess which character said it from the dropdown. 6 tries.
 
-### Books / Books Daily
-Guess the FNaF novel by series, year, and edition number. Works like Classic mode.
+- **Endless** — new quote every round. Win streak tracked.
+- **Daily** — one quote per day. Shareable result.
 
-### Who is this? (Encyclopedia)
-Browse and search all animatronics in the database. Tap any card for full details.
+---
+
+### Books
+Guess the FNAF novel using attribute clues about its series, year, and edition number. Same color-coded feedback system as Classic. 6 tries.
+
+- **Endless** — win streak tracked
+- **Daily** — one book per day
+
+---
+
+### Encyclopedia
+Browse and search all animatronics in the database with their full stats, colors, and images. Tap any card to see complete details. Not a game mode — a reference tool.
+
+---
+
+### Multiplayer — Guess Who?
+Online 2-player mode powered by Supabase real-time.
+
+1. One player creates a room and shares the 6-character code
+2. Both players secretly pick an animatronic
+3. Players take turns asking predefined questions (animal type, color, year, etc.)
+4. The answerer can respond **honestly or lie** to mislead their opponent
+5. After seeing the answer, the asker can **guess** the opponent's character (from the dropdown — instantly submitted) or **pass**
+6. Use the elimination board on the right to mark characters as ruled out
+7. First to guess correctly wins
+8. Rematch requires **both players** to agree
 
 ---
 
 ## How to Play
 
-1. Open `index.html` in a web browser (no server needed — all files are local).
-2. Choose a mode from the menu.
-3. Use the search dropdown to pick an animatronic (or character, for Quote mode).
-4. Read the color-coded feedback and narrow down your guess.
-5. Try to identify the target within the allowed number of attempts.
+1. Open `index.html` in any modern browser — no server needed for most modes
+2. Choose a game mode from the menu
+3. Type in the search field and pick from the dropdown, or use keyboard navigation:
 
-### Keyboard shortcuts (all dropdowns)
 | Key | Action |
 |-----|--------|
-| ↑ / ↓ | Navigate dropdown items |
-| Tab | Select first item (if none highlighted) or submit highlighted item |
-| Enter | Submit highlighted item |
-| Escape | Close dropdown |
+| `↑` / `↓` | Navigate dropdown items |
+| `Enter` | Submit highlighted item (or submit the typed guess if nothing is highlighted) |
+| `Escape` | Close dropdown |
+
+Daily mode results are locked per day and stored locally. Stats (win rate, current streak, best streak, guess distribution) are tracked separately per mode.
 
 ---
 
@@ -64,78 +106,81 @@ Browse and search all animatronics in the database. Tap any card for full detail
 
 ```
 FnafdleReborn/
-├── index.html                        ← Mode selection menu
-├── README.md
-├── backend/
-│   └── src/db/
-│       ├── database.js               ← CHARS array (all animatronics)
-│       ├── books_database.js         ← BOOKS array (FNaF novels)
-│       └── quotes.js                 ← QUOTES array (character quotes)
+├── index.html                    ← Main menu
+├── backend/src/db/
+│   ├── database.js               ← CHARS array (100+ animatronics)
+│   ├── books_database.js         ← BOOKS array (FNaF novels)
+│   └── quotes.js                 ← QUOTES array (character quotes)
 └── frontend/dist/
     ├── pages/
-    │   ├── classic.html              ← Endless / Daily mode
-    │   ├── image.html                ← Image mode
-    │   ├── extreme.html              ← Extreme mode (Night 1–6)
-    │   ├── book.html                 ← Books mode
-    │   ├── encyclopedia.html         ← Who is this? browser
-    │   └── quote.html                ← Quote Guesser mode
+    │   ├── classic.html
+    │   ├── image.html
+    │   ├── extreme.html
+    │   ├── quote.html
+    │   ├── book.html
+    │   ├── encyclopedia.html
+    │   └── multiplayer.html
     └── assets/
-        ├── css/
-        │   ├── global.css            ← Shared variables, buttons, dropdown, cells
-        │   ├── classic.css           ← Classic mode table styles
-        │   ├── extreme.css           ← Extreme mode office UI + mobile layout
-        │   ├── book.css
-        │   ├── image.css
-        │   ├── encyclopedia.css
-        │   ├── menu.css
-        │   └── quote.css             ← Quote Guesser styles
+        ├── css/                  ← Per-mode stylesheets + global.css
         ├── js/
-        │   ├── core.js               ← Shared helpers (daily seed, stats, jumpscare, colors)
-        │   ├── classic.js
-        │   ├── extreme.js
-        │   ├── image.js
-        │   ├── book.js
-        │   ├── encyclopedia.js
-        │   └── quote.js              ← Quote Guesser logic
-        ├── images/                   ← Animatronic artwork, title, jumpscare
-        └── fonts/
+        │   ├── core.js           ← Shared utilities (daily seed, stats, streaks, jumpscare)
+        │   ├── config.js         ← Supabase credentials (git-ignored)
+        │   └── *.js              ← One file per mode
+        └── images/               ← Character images, book covers, jumpscare assets
 ```
 
 ---
 
-## Adding Characters
+## Adding Content
 
-Edit `backend/src/db/database.js` and add an entry to the `CHARS` array:
-
+### New Animatronic — `backend/src/db/database.js`
 ```js
 {
   name:     "Character Name",
-  animal:   "Bear",           // Bear, Rabbit, Fox, Chicken, Humanoid, ...
-  type:     "Classic",        // Classic, Toy, Withered, Nightmare, Glamrock, ...
-  color:    ["Brown"],        // array of color strings
+  animal:   "Bear",              // Bear, Rabbit, Fox, Chicken, Humanoid, ...
+  type:     "Classic",           // Classic, Toy, Withered, Nightmare, Glamrock, ...
+  color:    ["Brown"],           // array of color strings
   eyeColor: ["Blue"],
-  year:     1993,             // number or "Unconfirmed"
-  img:      "images/chars/classic/example.png"
+  year:     1987,                // number or "Unconfirmed"
+  img:      "images/chars/type/character_name.png"
 }
 ```
 
-## Adding Quotes
-
-Edit `backend/src/db/quotes.js` and add an entry to the `QUOTES` array. The `said` field must **exactly match** a `name` in `CHARS` for it to appear in Quote Guesser mode:
-
+### New Quote — `backend/src/db/quotes.js`
 ```js
-{ quote: "Your quote here.", said: "Character Name" }
+{ quote: "The quote text here.", said: "Character Name" }
 ```
+The `said` field must exactly match a `name` in the CHARS array.
 
 ---
 
-## Technical Notes
+## Tech Stack
 
-- All game state is stored in `localStorage` (daily lock, night progress, stats).
-- No build system, no dependencies — open `index.html` directly in any modern browser.
-- Character images use relative paths from the `pages/` subdirectory (`../assets/...`).
-- The daily seed is computed from the current date so all players get the same target.
+- **Vanilla JS / HTML / CSS** — no framework, no build step
+- **Supabase** — real-time database for multiplayer rooms and events (loaded via CDN, multiplayer only)
+- **localStorage** — all single-player progress, stats, and streaks
+- **Google Fonts** — Creepster, Oswald
+- **Custom font** — Five Fonts at Freddy's
 
-## License
+Daily challenges use a deterministic hash of the current date, ensuring every player gets the same target.
 
-Personal project — all rights reserved. Help and contributions welcome; please don't redistribute without permission.
+---
+
+## Setup Notes
+
+**Single-player modes** work by opening `index.html` directly — no configuration needed.
+
+**Multiplayer** requires a Supabase project. Create `frontend/dist/assets/js/config.js` (it is git-ignored):
+
+```js
+window.FNAF_CONFIG = {
+  SUPABASE_URL: "https://your-project.supabase.co",
+  SUPABASE_ANON_KEY: "your-anon-key"
+};
+```
+
+Multiplayer also requires the page to be served over HTTPS or `localhost` for the clipboard API to work.
+
+---
+
+*Personal project — all rights reserved. Contributions welcome; please don't redistribute without permission.*
