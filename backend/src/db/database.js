@@ -2171,6 +2171,24 @@ const CHARS = [
     year: 2035,
     img: "images/chars/glamrock/shatter/chica.png"
   },
+    {
+    name: "Glamrock Cupcake",
+    animal: "Cupcake",
+    type: "Glamrock",
+    color: ["Pink", "Blue"],
+    eyeColor: ["Brown"],
+    year: 2035,
+    img: "images/chars/glamrock/glam_cupcake.png"
+  },
+  {
+    name: "Giant Cupcake",
+    animal: "Cupcake",
+    type: "Glamrock",
+    color: ["Pink"],
+    eyeColor: ["Black"],
+    year: 2035,
+    img: "images/chars/glamrock/giant_cupcake.png"
+  },
   {
     name: "Montegomery Gator",
     animal: "Alligator",
@@ -3068,10 +3086,37 @@ const CHARS = [
     name: "Party Time Cupcake",
     animal: "Cupcake",
     type: "Mascot Suit",
-    color: ["Yellow", "Pink"],
-    eyeColor: ["Pink"],
+    color: ["Pink"],
+    eyeColor: ["Yellow"],
     year: 1979,
     img: "images/chars/sotm/mascot/party_time_cupcake.png"
+  },
+  {
+    name: "Mr. Chicken",
+    animal: "Cupcake",
+    type: "Mascot Suit",
+    color: ["Brown", "White", "Red"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "images/chars/sotm/mascot/mr_chicken.png"
+  },
+  {
+    name: "Ms. Burger",
+    animal: "Cupcake",
+    type: "Mascot Suit",
+    color: ["Brown"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "images/chars/sotm/mascot/ms_burger.png"
+  },
+  {
+    name: "Ms. Shake",
+    animal: "Cupcake",
+    type: "Mascot Suit",
+    color: ["Pink"],
+    eyeColor: ["Black"],
+    year: 1979,
+    img: "images/chars/sotm/mascot/ms_shake.png"
   },
   {
     name: "Sleepy Moon",
