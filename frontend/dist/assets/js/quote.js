@@ -63,9 +63,15 @@ function saveDailyQuoteResult(won, saidName, guessCount) {
 
 function censorQuoteText(quoteText, characterName) {
   if (!characterName) return quoteText;
-  const escaped = characterName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const regex = new RegExp(escaped, 'gi');
-  return quoteText.replace(regex, match => '*'.repeat(match.length));
+  // Censor full name + each individual word (e.g. "Glamrock Freddy" → also censor "Glamrock" and "Freddy")
+  const parts = [characterName, ...characterName.split(/\s+/).filter(p => p.length >= 3)];
+  let result = quoteText;
+  for (const part of parts) {
+    const escaped = part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(escaped, 'gi');
+    result = result.replace(regex, match => '*'.repeat(match.length));
+  }
+  return result;
 }
 
 // ─── Init ─────────────────────────────────────────────────
