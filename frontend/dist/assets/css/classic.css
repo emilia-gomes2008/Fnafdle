@@ -53,9 +53,46 @@
   object-fit: cover;
 }
 
-@media (max-width: 650px) {
+/* ── 360px standard phones ── */
+@media (max-width: 480px) {
+  /* grid: 40px + 5×1fr + 40px, gap 2px
+     @ 360px (10px container padding) each 1fr ≈ 48px  */
   .table-header, .guess-row {
-    min-width: 620px;
+    min-width: 0;
+    grid-template-columns: 40px 1fr 1fr 1fr 1fr 1fr 40px;
+    gap: 2px;
   }
+
+  .col-label {
+    font-size: 0.52rem;
+    letter-spacing: 0.5px;
+  }
+
+  .cell {
+    min-height: 50px;
+    padding: 4px 2px;
+    font-size: 0.6rem;
+  }
+
+  .cell-label {
+    font-size: 0.58rem;
+    word-break: break-word;
+    hyphens: auto;
+    line-height: 1.2;
+  }
+
+  .cell-img img       { width: 36px; height: 36px; }
+  .placeholder-avatar { width: 36px; height: 36px; font-size: 1.1rem; }
+
+  .color-swatch { width: 9px; height: 9px; }
+  .color-name   { font-size: 0.56rem; }
+}
+
+@media (max-width: 380px) {
+  .table-header, .guess-row {
+    grid-template-columns: 36px 1fr 1fr 1fr 1fr 1fr 36px;
+  }
+  .cell-img img       { width: 32px; height: 32px; border-radius: 5px; }
+  .placeholder-avatar { width: 32px; height: 32px; }
 }
 

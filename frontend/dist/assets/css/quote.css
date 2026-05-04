@@ -102,6 +102,17 @@
 
 /* ─── Mobile ────────────────────────────────────── */
 @media (max-width: 600px) {
-  .quote-box { padding: 1rem 1.1rem; }
+  .quote-box  { padding: 1rem 1.1rem; }
   .quote-text { font-size: 0.87rem; max-height: 200px; }
+
+  .quote-guess-item {
+    padding: 11px 12px;
+    min-height: 48px;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .quote-text { font-size: 0.82rem; max-height: 160px; }
+  .quote-marks { font-size: 2.2rem; }
 }

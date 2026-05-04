@@ -626,12 +626,14 @@ button:hover { background-color: var(--ex-red-dk) !important; }
   /* ── Page ── */
   body.fnaf-night {
     padding: 0;
-    padding-bottom: 86px; /* space for fixed door bar */
+    padding-bottom: 86px;
+    overflow-x: hidden;
   }
 
   /* ── Container ── */
   .container {
-    padding: 8px 8px !important;
+    width: 100% !important;
+    padding: 0 !important;
     margin-top: 0;
     border-radius: 0;
     border-left: none;
@@ -646,7 +648,6 @@ button:hover { background-color: var(--ex-red-dk) !important; }
     flex-wrap: nowrap;
   }
 
-  /* Keep night label visible but shrink it */
   .night-label {
     display: block;
     font-size: 0.7rem;
@@ -674,11 +675,11 @@ button:hover { background-color: var(--ex-red-dk) !important; }
   .camera-panel-wrap {
     width: 100%;
     flex: none;
-    padding: 8px 8px 0;
+    padding: 10px 12px 0;
   }
 
   .game-panel {
-    padding: 8px 8px 0;
+    padding: 10px 12px 0;
   }
 
   /* ── Main camera ── */
@@ -689,7 +690,7 @@ button:hover { background-color: var(--ex-red-dk) !important; }
 
   .main-cam-screen { aspect-ratio: 16 / 9; }
 
-  /* ── Camera grid: 3 cols, tap-friendly height ── */
+  /* ── Camera grid: 3 cols, tap-friendly ── */
   .cam-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 4px;
@@ -697,8 +698,9 @@ button:hover { background-color: var(--ex-red-dk) !important; }
   }
 
   .cam-tile {
-    aspect-ratio: 5 / 3; /* slightly taller for easier tapping */
+    aspect-ratio: 5 / 3;
     border-radius: 4px;
+    min-height: 44px;
   }
 
   .cam-tile-room  { display: none; }
@@ -730,11 +732,12 @@ button:hover { background-color: var(--ex-red-dk) !important; }
   }
 
   .door-btn {
-    padding: 13px 20px !important;
-    font-size: 0.9rem !important;
+    padding: 14px 20px !important;
+    font-size: 0.95rem !important;
     letter-spacing: 2px !important;
     width: 100%;
     border-radius: 6px !important;
+    min-height: 48px;
   }
 
   .door-hint { display: none; }
@@ -744,33 +747,51 @@ button:hover { background-color: var(--ex-red-dk) !important; }
 
   .extreme-warning {
     font-size: 0.65rem;
-    padding: 6px 10px;
-    margin-bottom: 0.5rem;
-    line-height: 1.5;
+    padding: 7px 10px;
+    margin-bottom: 0.6rem;
+    line-height: 1.6;
   }
 
   .legend {
     gap: 12px;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.6rem;
     justify-content: center;
+    flex-wrap: wrap;
   }
 
   .legend-item { font-size: 0.68rem; gap: 5px; }
 
   /* ── Search input ── */
   .search-input {
-    font-size: 0.9rem !important;
-    padding: 11px 14px !important;
+    font-size: 1rem !important;
+    padding: 13px 14px !important;
+    min-height: 48px;
+  }
+
+  .dropdown {
+    max-height: 180px;
+    font-size: 0.9rem;
+  }
+
+  .dropdown-item {
+    padding: 11px 14px;
+    min-height: 48px;
   }
 
   .search-area { margin-bottom: 0.8rem; }
 
-  .attempts-left { font-size: 0.75rem; margin-bottom: 0.5rem; }
+  .attempts-left { font-size: 0.78rem; margin-bottom: 0.6rem; }
 
   /* ── Guess table: scrollable ── */
-  .table-wrapper { margin: 0 -8px 1rem; padding: 0 8px 8px; }
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -12px 1rem;
+    padding: 0 12px 8px;
+  }
+
   .table-header, .guess-row {
-    min-width: 500px;
+    min-width: 480px;
     gap: 4px;
   }
 
@@ -781,7 +802,9 @@ button:hover { background-color: var(--ex-red-dk) !important; }
   .col-label { font-size: 0.6rem; letter-spacing: 1px; }
 
   /* ── Result banner ── */
-  .result-banner { padding: 1.2rem 1rem; }
+  .result-banner { padding: 1.2rem 1rem; margin: 0.5rem 0; }
+
+  .result-title { font-size: 1.8rem; }
 
   .result-buttons {
     display: flex;
@@ -794,38 +817,89 @@ button:hover { background-color: var(--ex-red-dk) !important; }
   .result-buttons .btn-back-result {
     width: 100%;
     margin: 0 !important;
-    padding: 12px 16px !important;
+    padding: 14px 16px !important;
+    min-height: 48px;
   }
 }
 
-/* ── Medium phones (max 480px) ── */
+/* ── 360px standard phones (max 480px) ── */
 @media (max-width: 480px) {
-  .night-label { display: none; } /* hide on very narrow screens */
+  .night-label { display: none; }
+
+  /* tighten padding to maximise usable width */
+  .camera-panel-wrap,
+  .game-panel { padding: 8px 8px 0; }
 
   .cam-grid { gap: 3px; }
   .cam-tile { aspect-ratio: 4 / 3; }
 
-  .table-header, .guess-row { min-width: 460px; }
-  .col-label { font-size: 0.55rem; }
+  .extreme-warning { font-size: 0.62rem; }
+
+  /* ── Table: fit on 360px without horizontal scroll ──
+     Content width at 360px: 360 - 8 - 8 = 344px
+     Grid: 40px + 5×1fr + 40px + 6×2px gaps
+     → each 1fr ≈ (344 - 80 - 12) / 5 = 50px  */
+  .table-wrapper {
+    overflow-x: auto; /* fallback if content somehow overflows */
+    margin: 0 -8px 1rem;
+    padding: 0 8px 8px;
+  }
+
+  .table-header, .guess-row {
+    min-width: 0;
+    grid-template-columns: 40px 1fr 1fr 1fr 1fr 1fr 40px;
+    gap: 2px;
+  }
+
+  .col-label {
+    font-size: 0.52rem;
+    letter-spacing: 0.5px;
+  }
+
+  .cell {
+    min-height: 50px;
+    padding: 4px 2px;
+    font-size: 0.6rem;
+  }
+
+  .cell-label {
+    font-size: 0.58rem;
+    word-break: break-word;
+    hyphens: auto;
+    line-height: 1.2;
+  }
+
+  .cell-img img { width: 36px; height: 36px; }
+  .placeholder-avatar { width: 36px; height: 36px; font-size: 1.1rem; }
+
+  .color-swatch { width: 9px; height: 9px; }
+  .color-name   { font-size: 0.56rem; }
 }
 
 /* ── Very small phones (< 380px) ── */
 @media (max-width: 380px) {
-  .office-topbar { padding: 5px 8px; gap: 6px; }
-  .night-clock   { font-size: 0.78rem; }
+  .office-topbar  { padding: 5px 8px; gap: 6px; }
+  .night-clock    { font-size: 0.78rem; }
   .power-bar-wrap { width: 40px; }
+
+  .camera-panel-wrap,
+  .game-panel { padding: 6px 8px 0; }
 
   .main-cam-screen { aspect-ratio: 2 / 1; }
 
-  .cam-grid { gap: 2px; }
+  .cam-grid    { gap: 2px; }
   .cam-tile-id { font-size: 0.44rem; }
 
-  .extreme-warning { font-size: 0.6rem; padding: 5px 8px; }
-  .search-input { font-size: 0.85rem !important; padding: 10px 12px !important; }
+  .extreme-warning { font-size: 0.58rem; padding: 5px 8px; }
+  .search-input    { font-size: 0.9rem !important; padding: 11px 10px !important; }
 
-  .table-header, .guess-row { min-width: 420px; }
-  .cell-img img { width: 40px; height: 40px; }
-  .placeholder-avatar { width: 40px; height: 40px; }
+  /* grid: 36px fixed columns so each 1fr ≈ (344 - 72 - 12) / 5 = 52px */
+  .table-header, .guess-row {
+    grid-template-columns: 36px 1fr 1fr 1fr 1fr 1fr 36px;
+  }
 
-  .door-btn { padding: 12px 16px !important; font-size: 0.85rem !important; }
+  .cell-img img       { width: 32px; height: 32px; border-radius: 5px; }
+  .placeholder-avatar { width: 32px; height: 32px; }
+
+  .door-btn { padding: 12px 16px !important; font-size: 0.88rem !important; }
 }

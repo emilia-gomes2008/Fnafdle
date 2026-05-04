@@ -89,3 +89,28 @@
   color: var(--text-muted);
   text-transform: uppercase;
 }
+
+/* ── Mobile ── */
+@media (max-width: 480px) {
+  .enc-controls { gap: 8px; }
+
+  /* select full-width so it doesn't overflow */
+  .enc-type-select {
+    width: 100%;
+    font-size: 0.85rem;
+    padding: 10px;
+  }
+
+  /* 3 cols at ~100px each on 360px */
+  .enc-grid {
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 8px;
+    max-height: 420px;
+  }
+
+  .enc-card img,
+  .enc-card-placeholder { width: 60px; height: 60px; }
+
+  .enc-card-placeholder { font-size: 1.5rem; }
+  .enc-card-name  { font-size: 0.68rem; }
+}

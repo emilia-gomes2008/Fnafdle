@@ -66,3 +66,18 @@
 
 .img-guess-item.correct { background: var(--green-bg); border-color: var(--green-border); color: var(--green-text); }
 .img-guess-item.wrong { background: var(--red-bg); border-color: var(--red-border); color: var(--red-text); }
+
+/* ── Mobile ── */
+@media (max-width: 480px) {
+  /* scale image down so it doesn't overflow on very small screens */
+  .mystery-image-container {
+    width: min(220px, calc(100vw - 48px));
+    height: min(220px, calc(100vw - 48px));
+  }
+
+  .img-guess-item {
+    padding: 10px 12px;
+    min-height: 48px;
+    font-size: 0.85rem;
+  }
+}
