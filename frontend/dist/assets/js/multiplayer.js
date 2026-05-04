@@ -66,6 +66,11 @@ function lobbyError(msg) { document.getElementById('lobby-error').textContent = 
 function genCode() { return Math.random().toString(36).slice(2, 8).toUpperCase(); }
 function other(slot) { return slot === 'player1' ? 'player2' : 'player1'; }
 function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function colorSwatch(val) {
+  if (/^#[0-9a-f]{6}$/i.test(val))
+    return `<span style="display:inline-block;width:14px;height:14px;background:${val};border-radius:3px;border:1px solid rgba(255,255,255,0.3);vertical-align:middle;margin-right:5px;flex-shrink:0;"></span>`;
+  return '';
+}
 
 // ── Create / Join ─────────────────────────────────────────────────────────────
 async function createRoom() {
@@ -142,11 +147,16 @@ function handleRoomUpdate(room) {
 // ── Copy code ─────────────────────────────────────────────────────────────────
 document.getElementById('copy-code-btn').addEventListener('click', () => {
   const code = document.getElementById('waiting-code').textContent;
-  navigator.clipboard.writeText(code).then(() => {
-    const btn = document.getElementById('copy-code-btn');
-    btn.textContent = 'Copied!';
-    setTimeout(() => { btn.textContent = 'Copy Code'; }, 2000);
-  });
+  const btn = document.getElementById('copy-code-btn');
+  const confirm = () => { btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = 'Copy Code'; }, 2000); };
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(code).then(confirm);
+  } else {
+    const el = document.createElement('textarea');
+    el.value = code; el.style.position = 'fixed'; el.style.opacity = '0';
+    document.body.appendChild(el); el.select(); document.execCommand('copy');
+    document.body.removeChild(el); confirm();
+  }
 });
 
 // ── Selection screen ──────────────────────────────────────────────────────────
@@ -362,7 +372,7 @@ function renderAnswerUI(q) {
     
     colorInput.oninput = () => {
       pendingAnswer = colorInput.value;
-      document.getElementById('answer-chosen-preview').textContent = `Selected: ${pendingAnswer}`;
+      document.getElementById('answer-chosen-preview').innerHTML = `${colorSwatch(pendingAnswer)}Selected: ${pendingAnswer}`;
       document.getElementById('submit-answer-btn').disabled = false;
     };
     
@@ -447,8 +457,10 @@ document.getElementById('submit-answer-btn').addEventListener('click', async () 
 // ── Guess dropdown ────────────────────────────────────────────────────────────
 const guessInput    = document.getElementById('guess-input');
 const guessDropdown = document.getElementById('guess-dropdown');
+let guessSelectedIndex = -1;
 
 function renderGuessDropdown() {
+  guessSelectedIndex = -1;
   const q = guessInput.value.trim().toLowerCase();
   guessDropdown.innerHTML = '';
   const hits = CHARS.filter(c => c.img && (!q || c.name.toLowerCase().includes(q))).slice(0, 10);
@@ -464,6 +476,8 @@ function renderGuessDropdown() {
     item.addEventListener('click', () => {
       guessInput.value = char.name;
       guessDropdown.style.display = 'none';
+      guessSelectedIndex = -1;
+      sendGuess();
     });
     guessDropdown.appendChild(item);
   });
@@ -474,12 +488,37 @@ guessInput.addEventListener('input', renderGuessDropdown);
 guessInput.addEventListener('focus', renderGuessDropdown);
 
 document.addEventListener('click', e => {
-  if (!guessInput.contains(e.target) && !guessDropdown.contains(e.target))
+  if (!guessInput.contains(e.target) && !guessDropdown.contains(e.target)) {
     guessDropdown.style.display = 'none';
+    guessSelectedIndex = -1;
+  }
 });
 
 document.getElementById('send-guess-btn').addEventListener('click', sendGuess);
-guessInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendGuess(); });
+guessInput.addEventListener('keydown', e => {
+  const items = Array.from(guessDropdown.querySelectorAll('.dropdown-item'));
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    guessSelectedIndex = Math.min(guessSelectedIndex + 1, items.length - 1);
+    items.forEach((item, i) => item.classList.toggle('selected', i === guessSelectedIndex));
+    if (items[guessSelectedIndex]) items[guessSelectedIndex].scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    guessSelectedIndex = Math.max(guessSelectedIndex - 1, -1);
+    items.forEach((item, i) => item.classList.toggle('selected', i === guessSelectedIndex));
+  } else if (e.key === 'Enter') {
+    if (guessSelectedIndex >= 0 && items[guessSelectedIndex]) {
+      guessInput.value = items[guessSelectedIndex].querySelector('span').textContent;
+      guessDropdown.style.display = 'none';
+      guessSelectedIndex = -1;
+    } else {
+      sendGuess();
+    }
+  } else if (e.key === 'Escape') {
+    guessDropdown.style.display = 'none';
+    guessSelectedIndex = -1;
+  }
+});
 
 async function sendGuess() {
   const name = guessInput.value.trim();
@@ -540,21 +579,31 @@ function renderEvent(ev) {
   } else if (ev.type === 'answer') {
     let parsed; try { parsed = JSON.parse(ev.content); } catch { parsed = { question: '?', value: ev.content }; }
     msg.className = `chat-msg ${isMe ? 'msg-me' : 'msg-opponent'}`;
+    const val = parsed.value || '';
     msg.innerHTML =
       `<span class="msg-sender">${sender}</span> answered:<br>` +
       `<em class="qa-q-text">${escHtml(parsed.question || '')}</em><br>` +
-      `<strong class="qa-a-text">${escHtml(parsed.value || '')}</strong>`;
+      `<strong class="qa-a-text" style="display:inline-flex;align-items:center;">${colorSwatch(val)}${escHtml(val)}</strong>`;
 
     // Also populate acting panel if it's my acting turn
     if (!isMe) {
       document.getElementById('acting-question-text').textContent = parsed.question || '';
       const ansDisp = document.getElementById('acting-answer-display');
-      ansDisp.innerHTML = `<span class="qa-a-badge">${escHtml(parsed.value || '')}</span>`;
+      ansDisp.innerHTML = `<span class="qa-a-badge" style="display:inline-flex;align-items:center;gap:6px;">${colorSwatch(val)}${escHtml(val)}</span>`;
     }
   } else if (ev.type === 'guess') {
     msg.className = 'chat-msg msg-system';
     const icon = ev.correct ? '✅' : '❌';
     msg.textContent = `${sender} guessed "${ev.content}" ${icon}`;
+  } else if (ev.type === 'rematch_vote') {
+    rematchVotes.add(ev.player);
+    if (rematchVotes.size >= 2) {
+      triggerRematch();
+    } else {
+      const btn = document.getElementById('rematch-btn');
+      if (btn && !btn.disabled) btn.textContent = '🔄 Rematch (opponent ready!)';
+    }
+    return;
   }
 
   log.appendChild(msg);
@@ -563,6 +612,10 @@ function renderEvent(ev) {
 
 // ── Result screen ─────────────────────────────────────────────────────────────
 function renderResultScreen(room) {
+  rematchVotes.clear();
+  const rematchBtn = document.getElementById('rematch-btn');
+  rematchBtn.disabled = false;
+  rematchBtn.textContent = '🔄 Rematch';
   showScreen('result');
   const isWinner   = room.winner === playerSlot;
   const myCharName = room[`${playerSlot}_char`];
@@ -598,8 +651,10 @@ function renderResultScreen(room) {
 }
 
 // ── Rematch ───────────────────────────────────────────────────────────────────
-document.getElementById('rematch-btn').addEventListener('click', async () => {
-  document.getElementById('rematch-btn').disabled = true;
+const rematchVotes = new Set();
+
+async function triggerRematch() {
+  rematchVotes.clear();
   gameInit = false; myChar = null; selectionShown = false;
   await db.from('mp_rooms').update({
     state: 'selecting',
@@ -607,9 +662,19 @@ document.getElementById('rematch-btn').addEventListener('click', async () => {
     player1_ready: false, player2_ready: false,
     current_question: null, phase: null, winner: null,
   }).eq('id', roomId);
-  // Supabase won't echo back to this client; show selection directly
   selectionShown = true;
   showSelectionScreen();
+}
+
+document.getElementById('rematch-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('rematch-btn');
+  btn.disabled = true;
+  rematchVotes.add(playerSlot);
+  if (rematchVotes.size >= 2) { triggerRematch(); return; }
+  btn.textContent = '⏳ Waiting for opponent... (1/2)';
+  await db.from('mp_events').insert({
+    room_id: roomId, player: playerSlot, type: 'rematch_vote', content: 'yes',
+  });
 });
 
 // ── Init ──────────────────────────────────────────────────────────────────────
