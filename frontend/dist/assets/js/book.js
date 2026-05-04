@@ -74,6 +74,7 @@ function initBookGame(mode) {
   bookDropdown.style.display = 'none';
 
   updateBookAttemptsLeft();
+  if (currentMode === 'book_endless') showStreakWidget('book');
 }
 
 function updateBookAttemptsLeft() {
@@ -175,6 +176,9 @@ function endBookGame(won) {
 
   if (currentMode === 'book_daily') {
     saveDailyBookResult(won, bookTarget.title, bookGuesses.length);
+  } else {
+    updateStreak('book', won);
+    _renderStreakNums('book');
   }
 
   const banner = document.getElementById('book-result-banner');

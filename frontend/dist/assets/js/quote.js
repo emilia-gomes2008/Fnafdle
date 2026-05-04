@@ -127,6 +127,7 @@ function initQuote(mode) {
   qDropdown.style.display = 'none';
 
   updateQuoteAttemptsLeft();
+  if (quoteMode === 'endless') showStreakWidget('quote');
 }
 
 // ─── Attempts display ─────────────────────────────────────
@@ -250,6 +251,9 @@ function endQuoteGame(won) {
 
   if (quoteMode === 'daily') {
     saveDailyQuoteResult(won, quoteTarget.said, quoteGuesses.length);
+  } else {
+    updateStreak('quote', won);
+    _renderStreakNums('quote');
   }
 
   const banner   = document.getElementById('result-banner');

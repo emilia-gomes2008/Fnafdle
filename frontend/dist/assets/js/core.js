@@ -181,6 +181,36 @@ const COLOR_HEX = {
 };
 
 /* =======================================================
+       Streak
+======================================================= */
+function getStreak(key) {
+  return JSON.parse(localStorage.getItem('streak_' + key) || '{"current":0,"best":0}');
+}
+
+function updateStreak(key, won) {
+  const s = getStreak(key);
+  if (won) { s.current++; if (s.current > s.best) s.best = s.current; }
+  else { s.current = 0; }
+  localStorage.setItem('streak_' + key, JSON.stringify(s));
+  return s;
+}
+
+function _renderStreakNums(key) {
+  const s = getStreak(key);
+  const cur = document.getElementById('streak-current');
+  const best = document.getElementById('streak-best');
+  if (cur) cur.textContent = s.current;
+  if (best) best.textContent = s.best;
+}
+
+function showStreakWidget(key) {
+  const el = document.getElementById('streak-widget');
+  if (!el) return;
+  el.style.display = 'flex';
+  _renderStreakNums(key);
+}
+
+/* =======================================================
        Freddy Jumpscare
 ======================================================= */
 function triggerFreddyJumpscare(callback) {

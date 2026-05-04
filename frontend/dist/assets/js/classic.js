@@ -79,6 +79,7 @@ function initGame(mode) {
   document.getElementById('hint-btn').textContent = '💡 Use Hint (first letter)';
 
   updateAttemptsLeft();
+  if (currentMode === 'endless') showStreakWidget('classic');
 }
 
 function updateAttemptsLeft() {
@@ -244,6 +245,9 @@ function endGame(won) {
 
   if (currentMode === 'daily') {
     saveDailyResult(won, target.name, guesses.length);
+  } else {
+    updateStreak('classic', won);
+    _renderStreakNums('classic');
   }
 
   const banner = document.getElementById('result-banner');

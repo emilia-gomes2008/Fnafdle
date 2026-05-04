@@ -49,6 +49,7 @@ function initImageMode() {
   document.getElementById('img-hint-btn').textContent = '💡 Use Hint (first letter)';
 
   updateImgAttemptsLeft();
+  showStreakWidget('image');
 }
 
 function applyImageFilter(wrongCount) {
@@ -146,6 +147,9 @@ function endImgGame(won) {
   imgInput.disabled = true;
   document.getElementById('img-search-area').style.display = 'none';
   document.getElementById('img-hint-area').style.display = 'none';
+
+  updateStreak('image', won);
+  _renderStreakNums('image');
 
   const banner = document.getElementById('img-result-banner');
   banner.classList.add('show');
