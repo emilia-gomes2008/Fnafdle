@@ -20,18 +20,19 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Inject Supabase config
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
           printf 'window.FNAF_CONFIG = {\n  SUPABASE_URL: "%s",\n  SUPABASE_ANON_KEY: "%s"\n};\n' \
             "$SUPABASE_URL" "$SUPABASE_ANON_KEY" \
             > frontend/dist/assets/js/config.js
+          echo "Config written. URL set: $([ -n "$SUPABASE_URL" ] && echo yes || echo NO - secret missing)"
 
       - uses: actions/configure-pages@v4
 
