@@ -1,4 +1,0 @@
-window.FNAF_CONFIG = {
-  SUPABASE_URL = URL,
-  SUPABASE_ANON_KEY = KEY
-};
