@@ -915,7 +915,7 @@ const CHARS = [
     color: ["White", "Green"],
     eyeColor: ["White"],
     year: "Unconfirmed",
-    img: "images/chars/toy/tangle.png"
+    img: "images/chars/fnaf_world_enemies/tangle.png"
   },
   {
     name: "White Rabbit",
@@ -1259,6 +1259,15 @@ const CHARS = [
     eyeColor: ["Grey"],
     year: 2016,
     img: "images/chars/trophy/fredbear_trophy.png"
+  },
+  {
+    name: "Glitch Freddy Trophy",
+    animal: "Bear",
+    type: "Trophy",
+    color: ["Grey"],
+    eyeColor: ["Grey"],
+    year: 2016,
+    img: "images/chars/trophy/glitch_freddy_trophy.png"
   },
   {
     name: "Crying Child Trophy",
@@ -2171,7 +2180,7 @@ const CHARS = [
     year: 2035,
     img: "images/chars/glamrock/shatter/chica.png"
   },
-    {
+  {
     name: "Glamrock Cupcake",
     animal: "Cupcake",
     type: "Glamrock",
@@ -2851,7 +2860,7 @@ const CHARS = [
     year: 1979,
     img: "images/chars/sotm/jugband/swing_bee.png"
   },
-    {
+  {
     name: "Birthday Puppy",
     animal: "Dog",
     type: "Welcome Show",
@@ -2860,7 +2869,7 @@ const CHARS = [
     year: 1979,
     img: "images/chars/sotm/jugband/birthday_puppy.png"
   },
-    {
+  {
     name: "Juggling Duck",
     animal: "Duck",
     type: "Welcome Show",
@@ -3294,4 +3303,3 @@ const CHARS = [
     img: "images/chars/other/fiona.png"
   },
 ];
-
