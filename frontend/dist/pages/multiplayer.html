@@ -30,6 +30,22 @@
         <h2 class="mp-title">Guess Who? — FNAF</h2>
         <p class="mp-sub">Each player secretly picks an animatronic. Receive predefined questions every turn — answer honestly or lie to confuse your opponent!</p>
         <input id="lobby-name" class="mp-input" type="text" placeholder="Your name..." maxlength="20" />
+
+        <div class="lobby-filter">
+          <div class="lobby-filter-header">
+            <span class="lobby-filter-label">🎮 Characters</span>
+            <label class="filter-all-wrap">
+              <input type="checkbox" id="filter-all" checked />
+              <span>All games</span>
+            </label>
+          </div>
+          <div class="lobby-filter-range" id="filter-range" style="display:none">
+            <select id="filter-from" class="mp-input filter-select"></select>
+            <span class="filter-to-label">to</span>
+            <select id="filter-to" class="mp-input filter-select"></select>
+          </div>
+        </div>
+
         <div class="lobby-buttons">
           <button class="mp-btn primary" id="create-room-btn">Create Room</button>
           <div class="join-row">
@@ -48,6 +64,7 @@
         <p class="mp-sub">Share this code with your friend:</p>
         <div class="room-code-display" id="waiting-code"></div>
         <button class="mp-btn" id="copy-code-btn">Copy Code</button>
+        <p class="mp-sub" id="waiting-filter-label" style="font-size:.75rem;opacity:.6;margin-top:-4px;"></p>
         <div class="waiting-dots"><span>.</span><span>.</span><span>.</span></div>
       </div>
     </div>

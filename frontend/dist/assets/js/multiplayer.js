@@ -24,6 +24,44 @@ let myChar          = null;
 let gameInit        = false;
 let selectionShown  = false;  // prevents showSelectionScreen resetting on every room update
 
+// ── Game filter ───────────────────────────────────────────────────────────────
+const GAMES = [
+  { name: "Five Nights at Freddy's",             start: 0,   end: 8   },
+  { name: "Five Nights at Freddy's 2",             start: 9,   end: 29  },
+  { name: "Five Nights at Freddy's 3",             start: 30,  end: 39  },
+  { name: "Five Nights at Freddy's 4",             start: 40,  end: 59  },
+  { name: 'FNAF World',         start: 60,  end: 137 },
+  { name: "Five Nights at Freddy's: Sister Location",    start: 138, end: 155 },
+  { name: "Freddy Fazbear's Pizzeria Simulator", start: 156, end: 195 },
+  { name: 'Ultimate Custom Night',                start: 196, end: 210 },
+  { name: "Five Nights at Freddy's: Help Wanted",        start: 211, end: 227 },
+  { name: "Five Nights at Freddy's: Security Breach",    start: 228, end: 268 },
+  { name: "Five Nights at Freddy's: Security Breach - RUIN",               start: 269, end: 287 },
+  { name: "Five Nights at Freddy's: Help Wanted 2",      start: 288, end: 295 },
+  { name: "Five Nights at Freddy's: Secret of the Mimic",               start: 296, end: 352 },
+];
+
+function getFilteredChars() {
+  const filter = roomData && roomData.game_filter;
+  if (!filter) return CHARS;
+  const [from, to] = filter.split('-').map(Number);
+  const s = GAMES[from].start, e = GAMES[to].end;
+  return CHARS.filter((_, i) => i >= s && i <= e);
+}
+
+function getFilterVal() {
+  if (document.getElementById('filter-all').checked) return null;
+  const from = parseInt(document.getElementById('filter-from').value);
+  const to   = parseInt(document.getElementById('filter-to').value);
+  return `${Math.min(from, to)}-${Math.max(from, to)}`;
+}
+
+function filterLabel(filter) {
+  if (!filter) return 'All games';
+  const [from, to] = filter.split('-').map(Number);
+  return from === to ? GAMES[from].name : `${GAMES[from].name} → ${GAMES[to].name}`;
+}
+
 // ── Predefined questions ──────────────────────────────────────────────────────
 const QUESTIONS = [
   { field: 'animal',   text: '🐾 What animal is this animatronic?',              uiType: 'list'  },
@@ -80,11 +118,13 @@ async function createRoom() {
   const { data, error } = await db.from('mp_rooms').insert({
     room_code: genCode(), state: 'waiting',
     player1_id: playerId, player1_name: name,
+    game_filter: getFilterVal(),
   }).select().single();
 
   if (error) return lobbyError('Could not create room. Try again.');
   roomId = data.id; playerSlot = 'player1'; roomData = data;
   document.getElementById('waiting-code').textContent = data.room_code;
+  document.getElementById('waiting-filter-label').textContent = '\u{1F3AE} ' + filterLabel(data.game_filter);
   showScreen('waiting');
   subscribeRoom();
 }
@@ -161,7 +201,7 @@ document.getElementById('copy-code-btn').addEventListener('click', () => {
 
 // ── Selection screen ──────────────────────────────────────────────────────────
 function buildCharGrid(containerEl, onSelect, allowMultiple = false) {
-  const pool = CHARS.filter(c => c.img);
+  const pool = getFilteredChars().filter(c => c.img);
   containerEl.innerHTML = '';
   pool.forEach(char => {
     const card = document.createElement('div');
@@ -494,7 +534,7 @@ function renderGuessDropdown() {
   guessSelectedIndex = -1;
   const q = guessInput.value.trim().toLowerCase();
   guessDropdown.innerHTML = '';
-  const hits = CHARS.filter(c => c.img && (!q || c.name.toLowerCase().includes(q))).slice(0, 10);
+  const hits = getFilteredChars().filter(c => c.img && (!q || c.name.toLowerCase().includes(q))).slice(0, 10);
   hits.forEach(char => {
     const item = document.createElement('div');
     item.className = 'dropdown-item';
@@ -714,6 +754,26 @@ document.getElementById('rematch-btn').addEventListener('click', async () => {
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('multiplayer-screen').style.display = 'block';
   showScreen('lobby');
+  // Filter dropdowns init
+  const fromSel = document.getElementById('filter-from');
+  const toSel   = document.getElementById('filter-to');
+  if (fromSel && toSel) {
+    GAMES.forEach((g, i) => {
+      fromSel.add(new Option(g.name, i));
+      toSel.add(new Option(g.name, i));
+    });
+    toSel.value = GAMES.length - 1;
+    const filterAllEl = document.getElementById('filter-all');
+    const filterRangeEl = document.getElementById('filter-range');
+    filterAllEl.checked = true;
+    filterRangeEl.style.display = 'none';
+    filterAllEl.addEventListener('change', function() {
+      filterRangeEl.style.display = this.checked ? 'none' : 'flex';
+    });
+    fromSel.addEventListener('change', () => {
+      if (parseInt(toSel.value) < parseInt(fromSel.value)) toSel.value = fromSel.value;
+    });
+  }
   document.getElementById('create-room-btn').addEventListener('click', createRoom);
   document.getElementById('join-room-btn').addEventListener('click', joinRoom);
   document.getElementById('lobby-code').addEventListener('keydown', e => { if (e.key === 'Enter') joinRoom(); });
