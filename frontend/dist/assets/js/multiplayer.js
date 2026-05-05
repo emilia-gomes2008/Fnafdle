@@ -238,10 +238,41 @@ document.getElementById('confirm-selection-btn').addEventListener('click', async
   }
 });
 
+// ── Periodic sync ─────────────────────────────────────────────────────────────
+let _syncTimer = null;
+
+function startPeriodicSync() {
+  stopPeriodicSync();
+  _syncTimer = setInterval(async () => {
+    if (!roomId || !roomData) return;
+    const { data } = await db.from('mp_rooms').select('*').eq('id', roomId).single();
+    if (!data) return;
+    if (data.phase !== roomData.phase ||
+        data.state !== roomData.state ||
+        data.current_question !== roomData.current_question) {
+      handleRoomUpdate(data);
+    }
+  }, 7000);
+}
+
+function stopPeriodicSync() {
+  if (_syncTimer) { clearInterval(_syncTimer); _syncTimer = null; }
+}
+
+async function resyncGameState() {
+  if (!roomId) return;
+  const btn = document.getElementById('resync-btn');
+  if (btn) { btn.textContent = '⟳ ...'; btn.disabled = true; }
+  const { data } = await db.from('mp_rooms').select('*').eq('id', roomId).single();
+  if (data) handleRoomUpdate(data);
+  if (btn) { btn.textContent = '⟳ Sync'; btn.disabled = false; }
+}
+
 // ── Game screen ───────────────────────────────────────────────────────────────
 function renderGameScreen(room) {
   if (gameInit) return;
   gameInit = true;
+  startPeriodicSync();
   showScreen('game');
 
   // My char badge
@@ -612,6 +643,7 @@ function renderEvent(ev) {
 
 // ── Result screen ─────────────────────────────────────────────────────────────
 function renderResultScreen(room) {
+  stopPeriodicSync();
   rematchVotes.clear();
   const rematchBtn = document.getElementById('rematch-btn');
   rematchBtn.disabled = false;
@@ -654,6 +686,7 @@ function renderResultScreen(room) {
 const rematchVotes = new Set();
 
 async function triggerRematch() {
+  stopPeriodicSync();
   rematchVotes.clear();
   gameInit = false; myChar = null; selectionShown = false;
   await db.from('mp_rooms').update({
