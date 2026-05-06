@@ -29,10 +29,10 @@ function initBookGame(mode) {
       banner.classList.add('show');
       if (!previous.won) banner.classList.add('lose');
       document.getElementById('book-play-again-btn').style.display = 'none';
-      document.getElementById('book-result-title').textContent = previous.won ? '🎉 Já jogaste hoje!' : '💀 Já jogaste hoje!';
+      document.getElementById('book-result-title').textContent = previous.won ? '🎉 Already played today!' : '💀 Already played today!';
       document.getElementById('book-result-msg').textContent = previous.won
-        ? `Era "${previous.targetTitle}"! Adivinhaste em ${previous.guessCount} tentativas.`
-        : `Era "${previous.targetTitle}". Tenta amanhã!`;
+        ? `It was "${previous.targetTitle}"! Got it in ${previous.guessCount} tries.`
+        : `It was "${previous.targetTitle}". Try again tomorrow!`;
       
       // Inject book image
       const book = BOOKS.find(b => b.title === previous.targetTitle) || bookTarget;
@@ -84,6 +84,15 @@ function updateBookAttemptsLeft() {
 }
 
 function renderBookGuess(book) {
+  // April Fools: keep img, scramble all other fields from random book + shuffle order
+  let displayBook = book;
+  if (_isAprilFools()) {
+    const others = BOOKS.filter(b => b.title !== book.title);
+    const rnd = others[Math.floor(Math.random() * others.length)] || book;
+    displayBook = { img: book.img, title: rnd.title, series: rnd.series,
+      year: rnd.year, number: rnd.number };
+  }
+
   const row = document.createElement('div');
   row.className = 'book-guess-row';
 
@@ -108,30 +117,36 @@ function renderBookGuess(book) {
     { key: 'year' },
     { key: 'number' },
   ];
+  if (_isAprilFools()) {
+    for (let i = fields.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [fields[i], fields[j]] = [fields[j], fields[i]];
+    }
+  }
 
   fields.forEach(f => {
     const cell = document.createElement('div');
     cell.className = 'cell';
 
     const isNum = f.key === 'number' || f.key === 'year';
-    const matchClass = book[f.key] === bookTarget[f.key] ? 'correct' : 'wrong';
+    const matchClass = displayBook[f.key] === bookTarget[f.key] ? 'correct' : 'wrong';
     cell.classList.add(matchClass);
 
     const label = document.createElement('div');
     label.className = 'cell-label';
 
     if (isNum && matchClass !== 'correct') {
-      const gVal = parseInt(book[f.key]);
+      const gVal = parseInt(displayBook[f.key]);
       const tVal = parseInt(bookTarget[f.key]);
       if (!isNaN(gVal) && !isNaN(tVal)) {
         const arrow = gVal < tVal ? '↑' : '↓';
-        const valTxt = f.key === 'number' ? `#${book[f.key]}` : book[f.key];
+        const valTxt = f.key === 'number' ? `#${displayBook[f.key]}` : displayBook[f.key];
         label.innerHTML = `${valTxt} <span class="year-arrow">${arrow}</span>`;
       } else {
-        label.textContent = f.key === 'number' ? `#${book[f.key]}` : book[f.key];
+        label.textContent = f.key === 'number' ? `#${displayBook[f.key]}` : displayBook[f.key];
       }
     } else {
-      label.textContent = f.key === 'number' ? `#${book[f.key]}` : book[f.key];
+      label.textContent = f.key === 'number' ? `#${displayBook[f.key]}` : displayBook[f.key];
     }
 
     cell.appendChild(label);

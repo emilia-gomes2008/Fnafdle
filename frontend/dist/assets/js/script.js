@@ -219,10 +219,10 @@ function initGame(mode) {
       banner.classList.add('show');
       if (!previous.won) banner.classList.add('lose');
       document.getElementById('play-again-btn').style.display = 'none';
-      document.getElementById('result-title').textContent = previous.won ? '🎉 Já jogaste hoje!' : '💀 Já jogaste hoje!';
+      document.getElementById('result-title').textContent = previous.won ? '🎉 Already played today!' : '💀 Already played today!';
       document.getElementById('result-msg').textContent = previous.won
-        ? `Era ${previous.targetName}! Adivinhaste em ${previous.guessCount} tentativas.`
-        : `Era ${previous.targetName}. Tenta amanhã!`;
+        ? `It was ${previous.targetName}! Got it in ${previous.guessCount} tries.`
+        : `It was ${previous.targetName}. Try again tomorrow!`;
       return;
     }
   } else {
@@ -810,10 +810,10 @@ function initBookGame(mode) {
       banner.classList.add('show');
       if (!previous.won) banner.classList.add('lose');
       document.getElementById('book-play-again-btn').style.display = 'none';
-      document.getElementById('book-result-title').textContent = previous.won ? '🎉 Já jogaste hoje!' : '💀 Já jogaste hoje!';
+      document.getElementById('book-result-title').textContent = previous.won ? '🎉 Already played today!' : '💀 Already played today!';
       document.getElementById('book-result-msg').textContent = previous.won
-        ? `Era "${previous.targetTitle}"! Adivinhaste em ${previous.guessCount} tentativas.`
-        : `Era "${previous.targetTitle}". Tenta amanhã!`;
+        ? `It was "${previous.targetTitle}"! Got it in ${previous.guessCount} tries.`
+        : `It was "${previous.targetTitle}". Try again tomorrow!`;
       return;
     }
   } else {

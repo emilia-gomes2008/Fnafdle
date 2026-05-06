@@ -105,7 +105,9 @@ function initQuote(mode) {
         : `It was ${previous.saidName}. Try again tomorrow!`;
 
       renderResultChar(quoteChar);
-      document.getElementById('quote-text').textContent = censorQuoteText(quoteTarget.quote, quoteTarget.said);
+      document.getElementById('quote-text').textContent = (function(t) {
+    return _isAprilFools() ? t.split('').map(function(c){return (c===' '||c==='\n')?c:(Math.random()<0.95?'█':c);}).join('') : t;
+  })(censorQuoteText(quoteTarget.quote, quoteTarget.said));
       return;
     }
   } else {
@@ -115,7 +117,9 @@ function initQuote(mode) {
 
   quoteChar = CHARS.find(c => c.name === quoteTarget.said) || null;
 
-  document.getElementById('quote-text').textContent = censorQuoteText(quoteTarget.quote, quoteTarget.said);
+  document.getElementById('quote-text').textContent = (function(t) {
+    return _isAprilFools() ? t.split('').map(function(c){return (c===' '||c==='\n')?c:(Math.random()<0.95?'█':c);}).join('') : t;
+  })(censorQuoteText(quoteTarget.quote, quoteTarget.said));
   document.getElementById('guesses-list').innerHTML = '';
   document.getElementById('result-banner').classList.remove('show', 'lose');
   document.getElementById('attempts-left').textContent = '';
@@ -260,6 +264,8 @@ function endQuoteGame(won) {
   const titleEl  = document.getElementById('result-title');
   const msgEl    = document.getElementById('result-msg');
   const againBtn = document.getElementById('play-again-btn');
+
+  if (!won) triggerFreddyJumpscare(() => {});
 
   banner.classList.add('show');
   if (!won) banner.classList.add('lose');

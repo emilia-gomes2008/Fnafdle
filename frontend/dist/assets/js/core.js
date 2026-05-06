@@ -213,15 +213,77 @@ function showStreakWidget(key) {
 /* =======================================================
        Freddy Jumpscare
 ======================================================= */
-function triggerFreddyJumpscare(callback) {
+const _JUMPSCARE_POOL = [
+  'freddy','bonnie','chica','foxy','golden_freddy',
+  'withered_bonnie','withered_chica','withered_foxy','withered_golden_freddy'
+];
+
+// ── Animation duration parsers ────────────────────────────────────────────
+const _gifDurCache = {};
+
+function _parseGif(b) {
+  var ms = 0, p = 13;
+  if (b[10] >> 7) p += 3 * (2 << (b[10] & 7)); // skip global color table
+  while (p < b.length) {
+    if (b[p] === 0x3B) break;
+    if (b[p] === 0x21) {
+      var isGCE = b[p + 1] === 0xF9;
+      p += 2;
+      while (b[p]) {
+        if (isGCE) {
+          var cs = b[p + 2] | (b[p + 3] << 8); // centiseconds
+          ms += (cs <= 2 ? 10 : cs) * 10;       // browsers enforce ≥20ms min; use 100ms for ≤20ms
+        }
+        p += b[p] + 1;
+      }
+      p++;
+    } else if (b[p] === 0x2C) {
+      p += 9; // skip 0x2C + left(2) + top(2) + width(2) + height(2)
+      var pk = b[p - 1];
+      if (pk >> 7) p += 3 * (2 << (pk & 7)); // local color table
+      p += 2; // LZW min code size + first sub-block check
+      while (b[p - 1]) p += b[p - 1] + 1;    // image data sub-blocks
+    } else { p++; }
+  }
+  return ms;
+}
+
+function _parseWebP(b) {
+  // Animated WebP: sum ANMF frame durations (stored as 24-bit LE, in ms)
+  var ms = 0, p = 12;
+  while (p + 8 <= b.length) {
+    var id = String.fromCharCode(b[p], b[p+1], b[p+2], b[p+3]);
+    var sz = b[p+4] | (b[p+5] << 8) | (b[p+6] << 16) | (b[p+7] << 24);
+    p += 8;
+    if (id === 'ANMF') ms += b[p+12] | (b[p+13] << 8) | (b[p+14] << 16);
+    p += sz + (sz & 1);
+  }
+  return ms;
+}
+
+async function _getGifDurationMs(src) {
+  if (_gifDurCache[src]) return _gifDurCache[src];
+  try {
+    var b = new Uint8Array(await fetch(src).then(function(r) { return r.arrayBuffer(); }));
+    var ms = 0;
+    if (b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46) ms = _parseGif(b);   // GIF
+    else if (b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46) ms = _parseWebP(b); // RIFF/WebP
+    _gifDurCache[src] = ms > 50 ? ms : 1000;
+  } catch(e) { _gifDurCache[src] = 1000; }
+  return _gifDurCache[src];
+}
+
+function triggerJumpscare(gifName, callback) {
+  const src = `../assets/images/jumpscare/${gifName}.gif`;
+
   const overlay = document.createElement('div');
   overlay.id = 'freddy-jumpscare';
   overlay.style.cssText = `position:fixed;inset:0;z-index:99999;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;`;
 
-  const gif = document.createElement('img');
-  gif.src = '../assets/images/jumpscare/freddy.gif';
-  gif.alt = 'FREDDY';
-  gif.style.cssText = `max-width:100vw;max-height:100vh;width:100%;height:100%;object-fit:cover;animation:freddyPop 0.08s ease-out;`;
+  const img = document.createElement('img');
+  img.src = src;
+  img.alt = gifName.toUpperCase();
+  img.style.cssText = `max-width:100vw;max-height:100vh;width:100%;height:100%;object-fit:cover;animation:freddyPop 0.08s ease-out;`;
 
   if (!document.getElementById('freddy-keyframes')) {
     const style = document.createElement('style');
@@ -230,15 +292,67 @@ function triggerFreddyJumpscare(callback) {
     document.head.appendChild(style);
   }
 
-  overlay.appendChild(gif);
+  overlay.appendChild(img);
   document.body.appendChild(overlay);
+  try { var a = new Audio('../assets/images/jumpscare/jumpscare.mp3'); a.volume = 1.0; a.play(); } catch(e) {}
 
-  try { const a = new Audio('../assets/images/jumpscare/jumpscare.mp3'); a.volume = 1.0; a.play(); } catch(e) {}
-
-  const dismiss = () => {
+  var gone = false;
+  var fallbackTimer = null;
+  var dismiss = function() {
+    if (gone) return;
+    gone = true;
+    clearTimeout(fallbackTimer);
     if (document.body.contains(overlay)) document.body.removeChild(overlay);
     callback();
   };
+
+  // Safe fallback — always dismisses after 3 s even if GIF parse fails
+  fallbackTimer = setTimeout(dismiss, 3000);
+
   overlay.addEventListener('click', dismiss);
-  setTimeout(dismiss, 2000);
+
+  // Override fallback once we know the real GIF duration
+  _getGifDurationMs(src).then(function(ms) {
+    if (!gone) {
+      clearTimeout(fallbackTimer);
+      fallbackTimer = setTimeout(dismiss, ms);
+    }
+  });
 }
+
+function _isAprilFools() {
+  if (localStorage.getItem('_af') === '1') return true;
+  var d = new _REAL_DATE();
+  return d.getMonth() === 3 && d.getDate() === 1;
+}
+
+function triggerFreddyJumpscare(callback) {
+  if (_isAprilFools()) { triggerJumpscare('withered_foxy_meme', callback); return; }
+  var pool = [..._JUMPSCARE_POOL];
+  triggerJumpscare(pool[Math.floor(Math.random() * pool.length)], callback);
+}
+
+// ── April Fools test helpers (console) ───────────────────────────────────────
+const _REAL_DATE = Date;
+
+function _applyAprilFools() {
+  window.Date = class extends _REAL_DATE {
+    constructor(...a) { super(...(a.length ? a : [2026, 3, 1])); }
+    static now() { return new _REAL_DATE(2026, 3, 1).getTime(); }
+  };
+}
+
+// Auto-apply on load if flag is set (survives refresh)
+if (localStorage.getItem('_af') === '1') _applyAprilFools();
+
+window._testAprilFools = function () {
+  localStorage.setItem('_af', '1');
+  _applyAprilFools();
+  console.log('%c🎪 April Fools mode ON (persists on refresh)', 'color:orange;font-size:15px;font-weight:bold');
+  console.log('Restore with: _resetDate()');
+};
+window._resetDate = function () {
+  localStorage.removeItem('_af');
+  window.Date = _REAL_DATE;
+  console.log('%c✅ Date restored', 'color:green;font-size:15px');
+};

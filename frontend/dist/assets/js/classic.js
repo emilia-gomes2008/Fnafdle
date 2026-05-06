@@ -32,10 +32,10 @@ function initGame(mode) {
       banner.classList.add('show');
       if (!previous.won) banner.classList.add('lose');
       document.getElementById('play-again-btn').style.display = 'none';
-      document.getElementById('result-title').textContent = previous.won ? '🎉 Já jogaste hoje!' : '💀 Já jogaste hoje!';
+      document.getElementById('result-title').textContent = previous.won ? '🎉 Already played today!' : '💀 Already played today!';
       document.getElementById('result-msg').textContent = previous.won
-        ? `Era ${previous.targetName}! Adivinhaste em ${previous.guessCount} tentativas.`
-        : `Era ${previous.targetName}. Tenta amanhã!`;
+        ? `It was ${previous.targetName}! Got it in ${previous.guessCount} tries.`
+        : `It was ${previous.targetName}. Try again tomorrow!`;
       
       // Inject character image
       const char = CHARS.find(c => c.name === previous.targetName) || target;
@@ -132,6 +132,15 @@ function makeColorLabel(colors) {
 }
 
 function renderGuess(char) {
+  // April Fools: keep name+img, swap all other data from a random char, shuffle field order
+  let displayChar = char;
+  if (_isAprilFools()) {
+    const others = CHARS.filter(c => c.name !== char.name);
+    const rnd = others[Math.floor(Math.random() * others.length)];
+    displayChar = { name: char.name, img: char.img, emoji: char.emoji,
+      animal: rnd.animal, type: rnd.type, color: rnd.color,
+      eyeColor: rnd.eyeColor, year: rnd.year };
+  }
   const fields = [
     { key: 'name', isColor: false },
     { key: 'animal', isColor: false },
@@ -140,6 +149,14 @@ function renderGuess(char) {
     { key: 'eyeColor', isColor: true },
     { key: 'year', isColor: false },
   ];
+  if (_isAprilFools()) {
+    const shufflable = fields.slice(1);
+    for (let i = shufflable.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shufflable[i], shufflable[j]] = [shufflable[j], shufflable[i]];
+    }
+    fields.splice(1, shufflable.length, ...shufflable);
+  }
 
   const row = document.createElement('div');
   row.className = 'guess-row';
@@ -173,28 +190,28 @@ function renderGuess(char) {
     cell.className = 'cell';
     let matchClass;
     if (f.isColor) {
-      matchClass = colorMatch(char[f.key], target[f.key]);
+      matchClass = colorMatch(displayChar[f.key], target[f.key]);
     } else {
-      matchClass = String(char[f.key]) === String(target[f.key]) ? 'correct' : 'wrong';
+      matchClass = String(displayChar[f.key]) === String(target[f.key]) ? 'correct' : 'wrong';
     }
     cell.classList.add(matchClass);
 
     if (f.isColor) {
-      cell.appendChild(makeColorLabel(char[f.key]));
+      cell.appendChild(makeColorLabel(displayChar[f.key]));
     } else {
       const label = document.createElement('div');
       label.className = 'cell-label';
       if (f.key === 'year' && matchClass !== 'correct') {
-        const gYear = parseInt(char[f.key]);
+        const gYear = parseInt(displayChar[f.key]);
         const tYear = parseInt(target[f.key]);
         if (!isNaN(gYear) && !isNaN(tYear)) {
           const arrow = gYear < tYear ? '↑' : '↓';
-          label.innerHTML = `${char[f.key]} <span class="year-arrow">${arrow}</span>`;
+          label.innerHTML = `${displayChar[f.key]} <span class="year-arrow">${arrow}</span>`;
         } else {
-          label.textContent = char[f.key];
+          label.textContent = displayChar[f.key];
         }
       } else {
-        label.textContent = char[f.key];
+        label.textContent = displayChar[f.key];
       }
       cell.appendChild(label);
     }

@@ -104,6 +104,26 @@
 
   <script src="backend/src/db/database.js"></script>
   <script src="backend/src/db/books_database.js"></script>
-  <script src="frontend/dist/assets/js/core.js"></script>
+  <script src="frontend/dist/assets/js/core.js?v=2"></script>
+  <script>
+    (function() {
+      var d = new Date();
+      if (d.getMonth() !== 3 || d.getDate() !== 1) return;
+      function shuffleCards() {
+        var container = document.querySelector('.mode-cards');
+        if (!container) return;
+        var children = Array.from(container.children);
+        for (var i = children.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var tmp = children[i]; children[i] = children[j]; children[j] = tmp;
+        }
+        children.forEach(function(c) { container.appendChild(c); });
+      }
+      document.addEventListener('DOMContentLoaded', function() {
+        shuffleCards();
+        setInterval(shuffleCards, 1500);
+      });
+    })();
+  </script>
 </body>
 </html> 

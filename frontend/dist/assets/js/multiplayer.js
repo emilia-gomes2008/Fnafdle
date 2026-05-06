@@ -22,7 +22,55 @@ let playerSlot      = null;
 let roomData        = null;
 let myChar          = null;
 let gameInit        = false;
-let selectionShown  = false;  // prevents showSelectionScreen resetting on every room update
+let selectionShown  = false;
+let currentAskTarget  = null; // target chosen in multi-player ask phase
+let activeElimTarget  = null; // which opponent's elimination board is shown
+let elimFilterState   = {};   // per-opponent filter values { slot: { search, type, animal, year } }
+
+// ── Multi-player helpers ──────────────────────────────────────────────────────
+function getPlayerCount() { return (roomData && roomData.player_count) || 2; }
+function allSlots(n) { return ['player1','player2','player3','player4'].slice(0, n !== undefined ? n : getPlayerCount()); }
+function otherSlots() { return allSlots().filter(s => s !== playerSlot); }
+function parsePhase(phase) {
+  if (!phase) return { action: null, asker: null, target: null };
+  const parts = phase.split(':');
+  return { action: parts[0] || null, asker: parts[1] || null, target: parts[2] || null };
+}
+function getGuessedChars() { try { return JSON.parse(roomData.guessed_chars) || {}; } catch { return {}; } }
+function getTurnOrder() { try { return JSON.parse(roomData.turn_order) || allSlots(); } catch { return allSlots(); } }
+function nextAskerSlot(cur) {
+  const order = getTurnOrder();
+  const idx = order.indexOf(cur);
+  return order[(idx + 1) % order.length];
+}
+function checkWin(slot) {
+  const g = getGuessedChars();
+  return g[slot] && g[slot].length >= getPlayerCount() - 1;
+}
+function getRankings() { try { return JSON.parse(roomData.rankings) || []; } catch { return []; } }
+function ordinal(n) { return n === 1 ? '🥇 1st' : n === 2 ? '🥈 2nd' : n === 3 ? '🥉 3rd' : `${n}th`; }
+function rankMedal(slot) {
+  const r = getRankings();
+  const i = r.indexOf(slot);
+  return ['🥇','🥈','🥉','4️⃣'][i] ?? '';
+}
+function updateWaitingPlayerList(room) {
+  const pc = room.player_count || 2;
+  const listEl = document.getElementById('waiting-players');
+  if (!listEl) return;
+  listEl.innerHTML = '';
+  allSlots(pc).forEach((s, i) => {
+    const name = room[`${s}_name`];
+    const li = document.createElement('div');
+    li.className = 'waiting-player-row';
+    li.textContent = name ? `✅ ${name}` : `⏳ Player ${i + 1}...`;
+    li.style.color = name ? 'var(--green-text)' : 'var(--text-muted)';
+    listEl.appendChild(li);
+  });
+  const joined = allSlots(pc).filter(s => room[`${s}_name`]).length;
+  const titleEl = document.getElementById('waiting-title');
+  if (titleEl) titleEl.textContent = joined >= pc ? 'All players joined!' : `Waiting for players... (${joined}/${pc})`;
+}
 
 // ── Game filter ───────────────────────────────────────────────────────────────
 const GAMES = [
@@ -41,9 +89,45 @@ const GAMES = [
   { name: "Five Nights at Freddy's: Secret of the Mimic",               start: 296, end: 352 },
 ];
 
+// Dee Dee (121) and Old Man Consequences (122) are FNAF World chars that also appear in UCN
+const WORLD_UCN_CHARS = [121, 122];
+const GAME_IDX_WORLD = 4;
+const GAME_IDX_UCN   = 7;
+
 function getFilteredChars() {
   const filter = roomData && roomData.game_filter;
   if (!filter) return CHARS;
+
+  // Rich format: { games:[...], gameTypes:{gi:[types]} }
+  if (filter.startsWith('{')) {
+    const { games, gameTypes } = JSON.parse(filter);
+    const hasUCN   = games.includes(GAME_IDX_UCN);
+    const hasWorld = games.includes(GAME_IDX_WORLD);
+    return CHARS.filter((c, i) => {
+      const matched = games.find(gi => i >= GAMES[gi].start && i <= GAMES[gi].end);
+      if (matched === undefined) {
+        if (hasUCN && !hasWorld && WORLD_UCN_CHARS.includes(i)) return true;
+        return false;
+      }
+      if (gameTypes && gameTypes[matched] && gameTypes[matched].length > 0)
+        return gameTypes[matched].includes(c.type);
+      return true;
+    });
+  }
+
+  // Simple array format: [0,1,2,...]
+  if (filter.startsWith('[')) {
+    const included = JSON.parse(filter);
+    const hasUCN   = included.includes(GAME_IDX_UCN);
+    const hasWorld = included.includes(GAME_IDX_WORLD);
+    return CHARS.filter((_, i) => {
+      if (included.some(gi => i >= GAMES[gi].start && i <= GAMES[gi].end)) return true;
+      if (hasUCN && !hasWorld && WORLD_UCN_CHARS.includes(i)) return true;
+      return false;
+    });
+  }
+
+  // Legacy "from-to" range
   const [from, to] = filter.split('-').map(Number);
   const s = GAMES[from].start, e = GAMES[to].end;
   return CHARS.filter((_, i) => i >= s && i <= e);
@@ -51,15 +135,48 @@ function getFilteredChars() {
 
 function getFilterVal() {
   if (document.getElementById('filter-all').checked) return null;
-  const from = parseInt(document.getElementById('filter-from').value);
-  const to   = parseInt(document.getElementById('filter-to').value);
-  return `${Math.min(from, to)}-${Math.max(from, to)}`;
+  const includedGames = [];
+  const gameTypes = {};
+
+  document.querySelectorAll('.filter-game-checkbox').forEach(cb => {
+    if (!cb.checked) return;
+    const gi = parseInt(cb.value);
+    includedGames.push(gi);
+    const allSubs  = document.querySelectorAll(`.filter-subtype-checkbox[data-game="${gi}"]`);
+    if (allSubs.length === 0) return;
+    const checked  = [...document.querySelectorAll(`.filter-subtype-checkbox[data-game="${gi}"]:checked`)].map(c => c.value);
+    if (checked.length < allSubs.length) gameTypes[gi] = checked;
+  });
+
+  if (includedGames.length === GAMES.length && Object.keys(gameTypes).length === 0) return null;
+  if (Object.keys(gameTypes).length === 0) return JSON.stringify(includedGames);
+  return JSON.stringify({ games: includedGames, gameTypes });
 }
 
 function filterLabel(filter) {
   if (!filter) return 'All games';
-  const [from, to] = filter.split('-').map(Number);
-  return from === to ? GAMES[from].name : `${GAMES[from].name} → ${GAMES[to].name}`;
+
+  let games;
+  let hasCustomTypes = false;
+  if (filter.startsWith('{')) {
+    const parsed = JSON.parse(filter);
+    games = parsed.games || [];
+    hasCustomTypes = parsed.gameTypes && Object.keys(parsed.gameTypes).length > 0;
+  } else if (filter.startsWith('[')) {
+    games = JSON.parse(filter);
+  } else {
+    const [from, to] = filter.split('-').map(Number);
+    return from === to ? GAMES[from].name : `${GAMES[from].name} → ${GAMES[to].name}`;
+  }
+
+  if (games.length === 0) return 'No games';
+  const sorted = [...games].sort((a, b) => a - b);
+  if (sorted.length === 1) return GAMES[sorted[0]].name + (hasCustomTypes ? ' ✦' : '');
+  const isConsec = sorted.every((v, i) => i === 0 || v === sorted[i - 1] + 1);
+  let label = `${GAMES[sorted[0]].name} → ${GAMES[sorted[sorted.length - 1]].name}`;
+  if (!isConsec) label += ` (${sorted.length} games)`;
+  if (hasCustomTypes) label += ' ✦';
+  return label;
 }
 
 // ── Predefined questions ──────────────────────────────────────────────────────
@@ -114,17 +231,19 @@ function colorSwatch(val) {
 async function createRoom() {
   const name = document.getElementById('lobby-name').value.trim();
   if (!name) return lobbyError('Enter your name first.');
+  const pc = parseInt(document.querySelector('input[name="player-count"]:checked')?.value || '2');
 
   const { data, error } = await db.from('mp_rooms').insert({
     room_code: genCode(), state: 'waiting',
     player1_id: playerId, player1_name: name,
-    game_filter: getFilterVal(),
+    game_filter: getFilterVal(), player_count: pc,
   }).select().single();
 
-  if (error) return lobbyError('Could not create room. Try again.');
+  if (error) { console.error('[createRoom]', error); return lobbyError(`Could not create room: ${error.message || error.code || 'unknown error'}`); }
   roomId = data.id; playerSlot = 'player1'; roomData = data;
   document.getElementById('waiting-code').textContent = data.room_code;
-  document.getElementById('waiting-filter-label').textContent = '\u{1F3AE} ' + filterLabel(data.game_filter);
+  document.getElementById('waiting-filter-label').textContent = '🎮 ' + filterLabel(data.game_filter);
+  updateWaitingPlayerList(data);
   showScreen('waiting');
   subscribeRoom();
 }
@@ -138,15 +257,35 @@ async function joinRoom() {
   const { data: room, error } = await db.from('mp_rooms').select('*').eq('room_code', code).eq('state', 'waiting').single();
   if (error || !room) return lobbyError('Room not found or already started.');
 
-  const { data, error: err2 } = await db.from('mp_rooms').update({
-    state: 'selecting', player2_id: playerId, player2_name: name,
-  }).eq('id', room.id).select().single();
+  const pc = room.player_count || 2;
+  let slot;
+  if (!room.player2_id) slot = 'player2';
+  else if (pc >= 3 && !room.player3_id) slot = 'player3';
+  else if (pc >= 4 && !room.player4_id) slot = 'player4';
+  else return lobbyError('Room is full.');
 
+  const isLast = slot === `player${pc}`;
+  const update = {
+    [`${slot}_id`]: playerId, [`${slot}_name`]: name,
+    ...(isLast ? { state: 'selecting' } : {}),
+  };
+
+  const { data, error: err2 } = await db.from('mp_rooms').update(update).eq('id', room.id).select().single();
   if (err2) return lobbyError('Could not join. Try again.');
-  roomId = room.id; playerSlot = 'player2'; roomData = data;
+
+  roomId = room.id; playerSlot = slot; roomData = data;
   subscribeRoom(); subscribeEvents();
-  selectionShown = true;
-  showSelectionScreen();
+
+  if (isLast) {
+    selectionShown = true;
+    showSelectionScreen();
+  } else {
+    document.getElementById('waiting-code').textContent = room.room_code;
+    document.getElementById('waiting-filter-label').textContent = '🎮 ' + filterLabel(room.game_filter);
+    updateWaitingPlayerList(data);
+    showScreen('waiting');
+    selectionShown = false;
+  }
 }
 
 // ── Subscriptions ─────────────────────────────────────────────────────────────
@@ -164,14 +303,37 @@ function subscribeEvents() {
     .subscribe();
 }
 
+function announceNewRankings(oldRoom, newRoom) {
+  if (!gameInit) return;
+  const chatLog = document.getElementById('chat-log');
+  if (!chatLog) return;
+  let oldR = []; try { oldR = JSON.parse(oldRoom?.rankings) || []; } catch {}
+  let newR = []; try { newR = JSON.parse(newRoom?.rankings) || []; } catch {}
+  newR.forEach((slot, idx) => {
+    if (oldR.includes(slot)) return;
+    const pName = newRoom[`${slot}_name`] || slot;
+    const msg = document.createElement('div');
+    msg.className = 'chat-msg msg-system';
+    msg.style.fontWeight = 'bold';
+    msg.textContent = `🏆 ${pName} finished in ${ordinal(idx + 1)}!`;
+    chatLog.appendChild(msg);
+    chatLog.scrollTop = chatLog.scrollHeight;
+  });
+}
+
 function handleRoomUpdate(room) {
   const prevState = roomData ? roomData.state : null;
+  const prevRoom  = roomData;
+  announceNewRankings(prevRoom, room);
   roomData = room;
-  if (room.state === 'selecting') {
-    if (prevState === 'finished' || prevState === 'playing') {
-      gameInit = false; myChar = null; selectionShown = true;
-      showSelectionScreen();
-    } else if (!selectionShown) {
+
+  if (room.state === 'waiting') {
+    updateWaitingPlayerList(room);
+  } else if (room.state === 'selecting') {
+    if (prevState === 'finished' || prevState === 'playing' || prevState === 'waiting') {
+      gameInit = false; myChar = null;
+    }
+    if (!selectionShown) {
       if (playerSlot === 'player1') subscribeEvents();
       selectionShown = true;
       showSelectionScreen();
@@ -206,7 +368,10 @@ function buildCharGrid(containerEl, onSelect, allowMultiple = false) {
   pool.forEach(char => {
     const card = document.createElement('div');
     card.className = 'char-grid-card';
-    card.dataset.name = char.name;
+    card.dataset.name   = char.name;
+    card.dataset.animal = char.animal || '';
+    card.dataset.type   = char.type   || '';
+    card.dataset.year   = String(char.year ?? '');
     const img = document.createElement('img');
     img.src = '../assets/' + char.img;
     img.alt = char.name;
@@ -245,36 +410,91 @@ function showSelectionScreen() {
   search.oninput = () => filterCharGrid(grid, search.value);
 }
 
-function filterCharGrid(grid, q) {
-  const lq = q.toLowerCase();
+function filterCharGrid(grid, q, opts = {}) {
+  const lq   = q ? q.toLowerCase() : '';
+  const fAni = opts.animal ? opts.animal.toLowerCase() : '';
+  const fTyp = opts.type   ? opts.type.toLowerCase()   : '';
+  const fYr  = opts.year   ? String(opts.year)          : '';
   grid.querySelectorAll('.char-grid-card').forEach(card => {
-    const match = !lq || card.dataset.name.toLowerCase().includes(lq);
-    card.style.display = match ? '' : 'none';
+    const ok = (!lq   || card.dataset.name.toLowerCase().includes(lq))
+            && (!fAni || card.dataset.animal.toLowerCase() === fAni)
+            && (!fTyp || card.dataset.type.toLowerCase()   === fTyp)
+            && (!fYr  || card.dataset.year === fYr);
+    card.style.display = ok ? '' : 'none';
   });
+}
+
+function getActiveElimGrid() {
+  const id = activeElimTarget ? `elim-grid-${activeElimTarget}` : 'elim-grid';
+  return document.getElementById(id) || document.getElementById('elim-grid');
+}
+
+function saveElimFilterState() {
+  if (!activeElimTarget) return;
+  elimFilterState[activeElimTarget] = {
+    search: document.getElementById('elim-search').value,
+    type:   document.getElementById('elim-type').value,
+    animal: document.getElementById('elim-animal').value,
+    year:   document.getElementById('elim-year').value,
+  };
+}
+
+function restoreElimFilterState(slot) {
+  const s = elimFilterState[slot] || {};
+  document.getElementById('elim-search').value = s.search || '';
+  document.getElementById('elim-type').value   = s.type   || '';
+  document.getElementById('elim-animal').value = s.animal || '';
+  document.getElementById('elim-year').value   = s.year   || '';
+}
+
+function applyElimFilters() {
+  filterCharGrid(
+    getActiveElimGrid(),
+    document.getElementById('elim-search').value,
+    {
+      animal: document.getElementById('elim-animal').value,
+      type:   document.getElementById('elim-type').value,
+      year:   document.getElementById('elim-year').value,
+    }
+  );
 }
 
 document.getElementById('confirm-selection-btn').addEventListener('click', async () => {
   if (!myChar) return;
   document.getElementById('confirm-selection-btn').disabled = true;
-  document.getElementById('selection-status').textContent = 'Waiting for opponent to choose...';
+  document.getElementById('selection-status').textContent = 'Waiting for others to choose...';
 
   const update = { [`${playerSlot}_char`]: myChar.name, [`${playerSlot}_ready`]: true };
   const { data } = await db.from('mp_rooms').update(update).eq('id', roomId).select().single();
   roomData = data;
 
-  if (data[`${other(playerSlot)}_ready`]) {
-    // Coinflip: p1_turn_ask or p2_turn_ask
-    const firstPhase = Math.random() < 0.5 ? 'p2_turn_ask' : 'p1_turn_ask';
-    const firstAskerSlot = firstPhase === 'p2_turn_ask' ? 'player2' : 'player1';
+  const pc = data.player_count || 2;
+  const slots = allSlots(pc);
+  const allReady = slots.every(s => data[`${s}_ready`]);
+
+  if (allReady) {
+    // Dice roll: each player gets a random score, highest goes first
+    const rolls = {};
+    slots.forEach(s => { rolls[s] = Math.random(); });
+    const turnOrder = [...slots].sort((a, b) => rolls[b] - rolls[a]);
+
+    const guessedChars = {};
+    slots.forEach(s => { guessedChars[s] = []; });
+
+    const rollMsg = turnOrder.map((s, i) =>
+      `${data[`${s}_name`] || s}: ${(rolls[s] * 100 | 0)}`).join(', ');
+
     const { data: gameData } = await db.from('mp_rooms').update({
-      state: 'playing', phase: firstPhase,
+      state: 'playing',
+      phase: `ask:${turnOrder[0]}`,
       current_question: null,
-      first_asker: firstAskerSlot,
+      first_asker: turnOrder[0],
+      turn_order: JSON.stringify(turnOrder),
+      guessed_chars: JSON.stringify(guessedChars),
     }).eq('id', roomId).select().single();
-    // Supabase won't echo this back to the client that made the change,
-    // so we render the game screen directly for the triggering player.
+
     roomData = gameData;
-    renderGameScreen(gameData);
+    renderGameScreen(gameData, rollMsg);
   }
 });
 
@@ -309,11 +529,18 @@ async function resyncGameState() {
 }
 
 // ── Game screen ───────────────────────────────────────────────────────────────
-function renderGameScreen(room) {
+function renderGameScreen(room, rollMsg) {
   if (gameInit) return;
   gameInit = true;
   startPeriodicSync();
   showScreen('game');
+
+  // Clear leftovers from previous game
+  guessInput.value = '';
+  guessDropdown.style.display = 'none';
+  guessSelectedIndex = -1;
+  document.getElementById('ask-questions-list').innerHTML = '';
+  currentAskTarget = null;
 
   // My char badge
   const badge = document.getElementById('my-char-badge');
@@ -322,46 +549,148 @@ function renderGameScreen(room) {
   bImg.src = '../assets/' + myChar.img;
   document.getElementById('my-char-badge-name').textContent = myChar.name;
 
-  // Coinflip result system message
+  // Dice roll result
   const firstAsker = room.first_asker || 'player1';
   const firstName = room[`${firstAsker}_name`] || 'Player 1';
   const chatLog = document.getElementById('chat-log');
-  chatLog.innerHTML = `<div class="chat-msg msg-system">🪙 Coin flip! <strong>${firstName}</strong> goes first.</div>`;
+  const diceMsg = rollMsg
+    ? `🎲 Dice roll! (${rollMsg}) — <strong>${firstName}</strong> goes first.`
+    : `🪙 Coin flip! <strong>${firstName}</strong> goes first.`;
+  chatLog.innerHTML = `<div class="chat-msg msg-system">${diceMsg}</div>`;
 
-  // Build elimination grid
-  const elimGrid = document.getElementById('elim-grid');
-  buildCharGrid(elimGrid, (char, card) => {
-    card.classList.toggle('eliminated');
+  // Build one elimination grid per opponent
+  const opponents   = otherSlots();
+  const gridContainer = document.getElementById('elim-grid-container');
+  const tabsEl      = document.getElementById('elim-player-tabs');
+  gridContainer.innerHTML = '';
+  tabsEl.innerHTML = '';
+  activeElimTarget = opponents[0] || null;
+  elimFilterState  = {};
+  opponents.forEach(s => { elimFilterState[s] = { search:'', type:'', animal:'', year:'' }; });
+
+  opponents.forEach((slot, i) => {
+    const grid = document.createElement('div');
+    grid.id = `elim-grid-${slot}`;
+    grid.className = 'elim-grid';
+    grid.style.display = i === 0 ? '' : 'none';
+    buildCharGrid(grid, (char, card) => { card.classList.toggle('eliminated'); });
+    gridContainer.appendChild(grid);
   });
 
-  // Elim search
-  document.getElementById('elim-search').oninput = function() {
-    filterCharGrid(elimGrid, this.value);
+  // Keep legacy #elim-grid pointing to first grid for compatibility
+  if (!document.getElementById('elim-grid')) {
+    const alias = document.createElement('div');
+    alias.id = 'elim-grid';
+    alias.style.display = 'none';
+    gridContainer.appendChild(alias);
+  }
+
+  // Player tabs (only for 3+ players)
+  if (opponents.length > 1) {
+    tabsEl.style.display = '';
+    opponents.forEach((slot, i) => {
+      const tab = document.createElement('button');
+      tab.className = 'elim-player-tab' + (i === 0 ? ' active' : '');
+      tab.textContent = roomData[`${slot}_name`] || slot;
+      tab.addEventListener('click', () => {
+        saveElimFilterState();
+        opponents.forEach(s => {
+          const g = document.getElementById(`elim-grid-${s}`);
+          if (g) g.style.display = s === slot ? '' : 'none';
+        });
+        tabsEl.querySelectorAll('.elim-player-tab').forEach((t, j) => t.classList.toggle('active', j === i));
+        activeElimTarget = slot;
+        restoreElimFilterState(slot);
+        applyElimFilters();
+      });
+      tabsEl.appendChild(tab);
+    });
+  } else {
+    tabsEl.style.display = 'none';
+  }
+
+  // Populate advanced filter selects from the active character pool
+  const pool    = getFilteredChars().filter(c => c.img);
+  const types   = [...new Set(pool.map(c => c.type).filter(Boolean))].sort();
+  const animals = [...new Set(pool.map(c => c.animal).filter(Boolean))].sort();
+  const typeEl   = document.getElementById('elim-type');
+  const animalEl = document.getElementById('elim-animal');
+  typeEl.innerHTML   = '<option value="">All types</option>';
+  animalEl.innerHTML = '<option value="">All animals</option>';
+  types.forEach(t => typeEl.add(new Option(t, t)));
+  animals.forEach(a => animalEl.add(new Option(a, a)));
+
+  // Elim search + advanced filters
+  document.getElementById('elim-search').oninput   = applyElimFilters;
+  document.getElementById('elim-type').onchange    = applyElimFilters;
+  document.getElementById('elim-animal').onchange  = applyElimFilters;
+  document.getElementById('elim-year').oninput     = applyElimFilters;
+  document.getElementById('elim-adv-btn').onclick  = () => {
+    const adv = document.getElementById('elim-advanced');
+    adv.style.display = adv.style.display === 'none' ? '' : 'none';
+  };
+  document.getElementById('elim-clear-filters').onclick = () => {
+    if (activeElimTarget) elimFilterState[activeElimTarget] = {};
+    document.getElementById('elim-search').value = '';
+    document.getElementById('elim-type').value   = '';
+    document.getElementById('elim-animal').value = '';
+    document.getElementById('elim-year').value   = '';
+    applyElimFilters();
   };
 
   updateTurnUI(room.phase, room.current_question);
 }
 
 function buildAskUI() {
-  const container = document.getElementById('ask-questions-list');
-  if (container.innerHTML !== '') return;
+  const container  = document.getElementById('ask-questions-list');
+  const targetRow  = document.getElementById('ask-target-row');
+  const targetBtns = document.getElementById('ask-target-btns');
+  container.innerHTML = '';
+  currentAskTarget = null;
+
+  const pc = getPlayerCount();
+
+  if (pc > 2) {
+    // Show target selector; questions are disabled until a target is chosen
+    targetRow.style.display = '';
+    targetBtns.innerHTML = '';
+    otherSlots().forEach(slot => {
+      const name = roomData[`${slot}_name`] || slot;
+      const btn = document.createElement('button');
+      btn.className = 'list-pick-btn';
+      btn.textContent = name;
+      btn.addEventListener('click', () => {
+        targetBtns.querySelectorAll('.list-pick-btn').forEach(b => b.classList.remove('chosen'));
+        btn.classList.add('chosen');
+        currentAskTarget = slot;
+        container.querySelectorAll('button').forEach(b => { b.disabled = false; });
+      });
+      targetBtns.appendChild(btn);
+    });
+  } else {
+    targetRow.style.display = 'none';
+    currentAskTarget = otherSlots()[0];
+  }
+
   QUESTIONS.forEach(q => {
     const btn = document.createElement('button');
     btn.className = 'list-pick-btn';
     btn.style.textAlign = 'left';
     btn.textContent = q.text;
+    btn.disabled = pc > 2; // disabled until target chosen (for multi-player)
     btn.addEventListener('click', async () => {
+      if (!currentAskTarget) return;
       container.querySelectorAll('button').forEach(b => b.disabled = true);
-      const nextPhase = playerSlot === 'player1' ? 'p2_turn_answer' : 'p1_turn_answer';
+      targetBtns?.querySelectorAll('button').forEach(b => b.disabled = true);
+      const nextPhase = `answer:${playerSlot}:${currentAskTarget}`;
       await db.from('mp_events').insert({
         room_id: roomId, player: playerSlot, type: 'question',
-        content: JSON.stringify({ question: q.text }),
+        content: JSON.stringify({ question: q.text, target: currentAskTarget }),
       });
-      const { data } = await db.from('mp_rooms').update({ 
-        phase: nextPhase, current_question: q.field 
+      const { data } = await db.from('mp_rooms').update({
+        phase: nextPhase, current_question: q.field,
       }).eq('id', roomId).select().single();
       roomData = data;
-      container.querySelectorAll('button').forEach(b => b.disabled = false);
       updateTurnUI(nextPhase, q.field);
     });
     container.appendChild(btn);
@@ -369,12 +698,12 @@ function buildAskUI() {
 }
 
 // ── Turn UI ───────────────────────────────────────────────────────────────────
-function updateTurnUI(phase, questionField) {
-  const indicator   = document.getElementById('turn-indicator');
-  const actingPanel = document.getElementById('acting-panel');
-  const answerPanel = document.getElementById('answer-panel');
+async function updateTurnUI(phase, questionField) {
+  const indicator    = document.getElementById('turn-indicator');
+  const actingPanel  = document.getElementById('acting-panel');
+  const answerPanel  = document.getElementById('answer-panel');
   const waitingPanel = document.getElementById('waiting-panel');
-  const askPanel    = document.getElementById('ask-panel');
+  const askPanel     = document.getElementById('ask-panel');
 
   actingPanel.style.display  = 'none';
   answerPanel.style.display  = 'none';
@@ -382,42 +711,59 @@ function updateTurnUI(phase, questionField) {
   if (askPanel) askPanel.style.display = 'none';
 
   const q = questionField ? getQuestion(questionField) : null;
+  const { action, asker, target } = parsePhase(phase);
+  const name = s => `${rankMedal(s) ? rankMedal(s) + ' ' : ''}${(roomData && roomData[`${s}_name`]) || s}`;
 
-  const myAsking    = (playerSlot === 'player1' && phase === 'p1_turn_ask') || (playerSlot === 'player2' && phase === 'p2_turn_ask');
-  const myActing    = (playerSlot === 'player1' && phase === 'p1_turn_act') || (playerSlot === 'player2' && phase === 'p2_turn_act');
-  const myAnswering = (playerSlot === 'player1' && phase === 'p1_turn_answer') || (playerSlot === 'player2' && phase === 'p2_turn_answer');
-  const iAsked      = (playerSlot === 'player1' && phase === 'p2_turn_answer') || (playerSlot === 'player2' && phase === 'p1_turn_answer');
+  const isMyAsk    = action === 'ask'    && asker  === playerSlot;
+  const isMyAct    = action === 'act'    && asker  === playerSlot;
+  const isMyAnswer = action === 'answer' && target === playerSlot;
+  const iAsked     = action === 'answer' && asker  === playerSlot;
 
-  if (myAsking) {
-    indicator.className = 'turn-indicator my-turn';
-    indicator.textContent = 'Your turn — choose a question to ask!';
-    if (askPanel) {
-      buildAskUI();
-      askPanel.style.display = '';
+  if (isMyAsk) {
+    const myRank = getRankings().indexOf(playerSlot);
+    if (myRank !== -1) {
+      // Already ranked — skip ask, show waiting
+      indicator.className = 'turn-indicator opponent-turn';
+      indicator.textContent = `${ordinal(myRank + 1)} — Waiting for others to finish...`;
+      document.getElementById('waiting-panel-text').textContent = 'You already guessed everyone!';
+      waitingPanel.style.display = '';
+      // Automatically pass the turn to the next non-ranked player
+      await startNewRound();
+      return;
     }
-  } else if (myActing) {
     indicator.className = 'turn-indicator my-turn';
-    indicator.textContent = 'Your turn — review the answer and guess or pass!';
+    indicator.textContent = getPlayerCount() > 2
+      ? 'Your turn — choose who and what to ask!'
+      : 'Your turn — choose a question to ask!';
+    buildAskUI();
+    if (askPanel) askPanel.style.display = '';
+  } else if (isMyAct) {
+    indicator.className = 'turn-indicator my-turn';
+    indicator.textContent = `Your turn — guess ${name(target)}'s character or pass!`;
     if (q) document.getElementById('acting-question-text').textContent = q.text;
+    const tl = document.getElementById('acting-target-label');
+    if (tl) tl.textContent = getPlayerCount() > 2 ? `🎯 Guessing: ${name(target)}` : '';
     actingPanel.style.display = '';
-  } else if (myAnswering) {
+  } else if (isMyAnswer) {
     indicator.className = 'turn-indicator answer-turn';
-    indicator.textContent = 'Answer your opponent\'s question!';
+    indicator.textContent = `${name(asker)} is asking you — answer honestly or lie!`;
     if (q) renderAnswerUI(q);
     answerPanel.style.display = '';
   } else if (iAsked) {
     indicator.className = 'turn-indicator opponent-turn';
-    indicator.textContent = 'Waiting for opponent to answer...';
-    document.getElementById('waiting-panel-text').innerHTML = q ? 
-      `Waiting for opponent to answer:<br><em class="qa-q-text">${q.text}</em>` : 'Waiting for opponent to answer...';
+    indicator.textContent = `Waiting for ${name(target)} to answer...`;
+    document.getElementById('waiting-panel-text').innerHTML = q
+      ? `Waiting for <strong>${name(target)}</strong> to answer:<br><em class="qa-q-text">${q.text}</em>`
+      : `Waiting for ${name(target)} to answer...`;
     waitingPanel.style.display = '';
   } else {
     indicator.className = 'turn-indicator opponent-turn';
-    indicator.textContent = 'Waiting for opponent...';
-    document.getElementById('waiting-panel-text').textContent = 
-      (phase === 'p1_turn_ask' || phase === 'p2_turn_ask') 
-        ? 'Waiting for opponent to choose a question...' 
-        : 'Waiting for opponent to act...';
+    let waitText = 'Waiting...';
+    if (action === 'ask')    waitText = `${name(asker)} is choosing who to ask...`;
+    if (action === 'answer') waitText = `${name(target)} is answering ${name(asker)}'s question...`;
+    if (action === 'act')    waitText = `${name(asker)} is deciding...`;
+    indicator.textContent = waitText;
+    document.getElementById('waiting-panel-text').textContent = waitText;
     waitingPanel.style.display = '';
   }
 }
@@ -440,13 +786,18 @@ function renderAnswerUI(q) {
     colorPicker.style.display = '';
     const colorInput = document.getElementById('answer-color-input');
     const colorIdk = document.getElementById('answer-color-idk');
-    
+
+    // Pre-enable with whatever color is currently in the picker
+    pendingAnswer = colorInput.value;
+    document.getElementById('answer-chosen-preview').innerHTML = `${colorSwatch(pendingAnswer)}Selected: ${pendingAnswer}`;
+    document.getElementById('submit-answer-btn').disabled = false;
+
     colorInput.oninput = () => {
       pendingAnswer = colorInput.value;
       document.getElementById('answer-chosen-preview').innerHTML = `${colorSwatch(pendingAnswer)}Selected: ${pendingAnswer}`;
       document.getElementById('submit-answer-btn').disabled = false;
     };
-    
+
     colorIdk.onclick = () => {
       pendingAnswer = "I don't know";
       document.getElementById('answer-chosen-preview').textContent = `Selected: I don't know`;
@@ -515,10 +866,9 @@ document.getElementById('submit-answer-btn').addEventListener('click', async () 
     content: JSON.stringify({ field: q.field, value: pendingAnswer, question: q.text }),
   });
 
-  // Advance phase: answerer's acting phase → other player's acting phase
-  let nextPhase;
-  if (playerSlot === 'player2') nextPhase = 'p1_turn_act';   // P2 answered P1's Q → P1 acts
-  else                          nextPhase = 'p2_turn_act';   // P1 answered P2's Q → P2 acts
+  // answer:target:asker → act:asker:target
+  const { asker, target } = parsePhase(roomData.phase);
+  const nextPhase = `act:${asker}:${target}`;
 
   const { data } = await db.from('mp_rooms').update({ phase: nextPhase }).eq('id', roomId).select().single();
   roomData = data;
@@ -596,15 +946,69 @@ async function sendGuess() {
   const char = CHARS.find(c => c.name.toLowerCase() === name.toLowerCase());
   if (!char) return;
 
-  const opponentChar = roomData[`${other(playerSlot)}_char`];
+  const { asker, target } = parsePhase(roomData.phase);
+  if (asker !== playerSlot) return;
+  const opponentChar = roomData[`${target}_char`];
   const correct = char.name === opponentChar;
 
   await db.from('mp_events').insert({
-    room_id: roomId, player: playerSlot, type: 'guess', content: char.name, correct,
+    room_id: roomId, player: playerSlot, type: 'guess',
+    content: JSON.stringify({ char: char.name, target }),
+    correct,
   });
 
   if (correct) {
-    await db.from('mp_rooms').update({ state: 'finished', winner: playerSlot }).eq('id', roomId);
+    // 1. Update guessed_chars locally and write to DB
+    const guessedChars = getGuessedChars();
+    if (!guessedChars[playerSlot]) guessedChars[playerSlot] = [];
+    if (!guessedChars[playerSlot].includes(target)) guessedChars[playerSlot].push(target);
+
+    const pc = getPlayerCount();
+    const finished = guessedChars[playerSlot].length >= pc - 1;
+
+    await db.from('mp_rooms').update({ guessed_chars: JSON.stringify(guessedChars) }).eq('id', roomId);
+
+    if (finished) {
+      // 2. Re-fetch FRESH rankings from DB (avoids race condition with multiple players finishing)
+      const { data: fresh } = await db.from('mp_rooms').select('rankings,guessed_chars').eq('id', roomId).single();
+      let rankings = [];
+      try { rankings = JSON.parse(fresh?.rankings) || []; } catch {}
+
+      if (!rankings.includes(playerSlot)) rankings.push(playerSlot);
+
+      const gameOver = rankings.length >= pc - 1;
+      const updatePayload = {
+        rankings: JSON.stringify(rankings),
+        ...(gameOver ? { state: 'finished', winner: rankings[0] } : {}),
+      };
+      await db.from('mp_rooms').update(updatePayload).eq('id', roomId);
+
+      // Announce locally (Supabase won't echo this update back to the triggering client)
+      const chatLog = document.getElementById('chat-log');
+      if (chatLog) {
+        const ann = document.createElement('div');
+        ann.className = 'chat-msg msg-system';
+        ann.style.fontWeight = 'bold';
+        ann.textContent = `🏆 You finished in ${ordinal(rankings.length)}!`;
+        chatLog.appendChild(ann);
+        chatLog.scrollTop = chatLog.scrollHeight;
+      }
+
+      // Update local roomData and render result directly (Supabase won't echo back to us)
+      roomData = { ...roomData, ...updatePayload };
+
+      if (gameOver) {
+        renderResultScreen(roomData);
+      } else {
+        guessInput.value = '';
+        guessDropdown.style.display = 'none';
+        await startNewRound();
+      }
+    } else {
+      guessInput.value = '';
+      guessDropdown.style.display = 'none';
+      await startNewRound();
+    }
   } else {
     guessInput.value = '';
     guessDropdown.style.display = 'none';
@@ -617,13 +1021,24 @@ async function passRound() {
 }
 
 async function startNewRound() {
-  let nextPhase;
-  if (playerSlot === 'player1' && roomData.phase === 'p1_turn_act')
-    nextPhase = 'p2_turn_ask';
-  else if (playerSlot === 'player2' && roomData.phase === 'p2_turn_act')
-    nextPhase = 'p1_turn_ask';
-  else return;
+  const { action, asker, target } = parsePhase(roomData.phase);
+  if (action !== 'act' || asker !== playerSlot) return;
 
+  // Next to ask = whoever was just interrogated, but skip already-ranked players
+  const rankings = getRankings();
+  const slots = allSlots();
+  let next = target;
+  for (let i = 0; i < slots.length; i++) {
+    if (!rankings.includes(next)) break;
+    // This player is ranked → move to the next slot in the cycle
+    const idx = slots.indexOf(next);
+    next = slots[(idx + 1) % slots.length];
+  }
+
+  // Safety: if all-but-one are ranked, game should already be over — bail out
+  if (rankings.length >= getPlayerCount() - 1) return;
+
+  const nextPhase = `ask:${next}`;
   const { data } = await db.from('mp_rooms').update({ phase: nextPhase, current_question: null }).eq('id', roomId).select().single();
   roomData = data;
   updateTurnUI(nextPhase, null);
@@ -663,17 +1078,33 @@ function renderEvent(ev) {
       ansDisp.innerHTML = `<span class="qa-a-badge" style="display:inline-flex;align-items:center;gap:6px;">${colorSwatch(val)}${escHtml(val)}</span>`;
     }
   } else if (ev.type === 'guess') {
+    let guessedChar = ev.content, targetSlot = null;
+    try { const p = JSON.parse(ev.content); guessedChar = p.char || ev.content; targetSlot = p.target; } catch {}
+    const involvedInGuess = isMe || playerSlot === targetSlot;
     msg.className = 'chat-msg msg-system';
-    const icon = ev.correct ? '✅' : '❌';
-    msg.textContent = `${sender} guessed "${ev.content}" ${icon}`;
+    if (ev.correct) {
+      if (involvedInGuess) {
+        const tLabel = targetSlot && roomData ? ` (${roomData[`${targetSlot}_name`] || targetSlot}'s char)` : '';
+        msg.textContent = `${sender} guessed "${guessedChar}"${tLabel} ✅`;
+      } else {
+        msg.textContent = `${sender} got one right! 🎉`;
+      }
+    } else {
+      const tLabel = targetSlot && roomData ? ` (${roomData[`${targetSlot}_name`] || targetSlot}'s char)` : '';
+      msg.textContent = `${sender} guessed "${guessedChar}"${tLabel} ❌`;
+    }
   } else if (ev.type === 'rematch_vote') {
     rematchVotes.add(ev.player);
-    if (rematchVotes.size >= 2) {
+    const pc = getPlayerCount();
+    if (rematchVotes.size >= pc) {
       triggerRematch();
     } else {
       const btn = document.getElementById('rematch-btn');
-      if (btn && !btn.disabled) btn.textContent = '🔄 Rematch (opponent ready!)';
+      if (btn && !btn.disabled) btn.textContent = `🔄 Rematch (${rematchVotes.size}/${pc} ready)`;
     }
+    return;
+  } else if (ev.type === 'jumpscare') {
+    if (!isMe) triggerJumpscare(ev.content || 'freddy', () => {});
     return;
   }
 
@@ -689,38 +1120,103 @@ function renderResultScreen(room) {
   rematchBtn.disabled = false;
   rematchBtn.textContent = '🔄 Rematch';
   showScreen('result');
-  const isWinner   = room.winner === playerSlot;
-  const myCharName = room[`${playerSlot}_char`];
-  const opCharName = room[`${other(playerSlot)}_char`];
+  const pc = room.player_count || 2;
+  let rankings = [];
+  try { rankings = JSON.parse(room.rankings) || []; } catch {}
+  // Last place = whoever isn't in rankings
+  const lastPlace = allSlots(pc).find(s => !rankings.includes(s));
+  if (lastPlace && !rankings.includes(lastPlace)) rankings = [...rankings, lastPlace];
+
+  const myRank = rankings.indexOf(playerSlot) + 1; // 1-based
+  const isWinner = myRank === 1;
 
   const banner = document.getElementById('mp-result-banner');
-  banner.classList.add('show');
+  banner.className = 'result-banner show';
   if (!isWinner) banner.classList.add('lose');
 
-  document.getElementById('result-title').textContent = isWinner ? '🎉 You Won!' : '💀 You Lost!';
-  document.getElementById('result-msg').textContent = isWinner
-    ? `You correctly guessed ${opCharName}!`
-    : `Your opponent guessed ${myCharName}!`;
+  // Jumpscare button: only for 1st place
+  const jumpscareBtn = document.getElementById('jumpscare-btn');
+  const jumpscarePicker = document.getElementById('jumpscare-picker');
+  jumpscareBtn.style.display = isWinner ? '' : 'none';
+  jumpscareBtn.disabled = false;
+  jumpscareBtn.textContent = '🎃 Jumpscare!';
+  jumpscarePicker.style.display = 'none';
+  if (isWinner) buildJumpscarePicker();
+
+  const placeLabel = myRank > 0 ? ordinal(myRank) : '?';
+  document.getElementById('result-title').textContent =
+    isWinner ? `🎉 You Won! (${placeLabel})` : `${placeLabel} Place`;
+  document.getElementById('result-msg').textContent =
+    isWinner ? `You guessed all opponents' animatronics!` : '';
 
   const container = document.getElementById('result-chars');
   container.innerHTML = '';
-  [{ label: 'Your character', name: myCharName }, { label: "Opponent's character", name: opCharName }]
-    .forEach(({ label, name }) => {
-      const char = CHARS.find(c => c.name === name);
-      const div  = document.createElement('div');
-      div.className = 'result-char';
-      if (char && char.img) {
-        const img = document.createElement('img');
-        img.src = '../assets/' + char.img;
-        img.alt = name;
-        div.appendChild(img);
-      }
-      const lbl = document.createElement('div'); lbl.className = 'result-char-label'; lbl.textContent = label;
-      const nm  = document.createElement('div'); nm.className  = 'result-char-name';  nm.textContent  = name || '???';
-      div.append(lbl, nm);
-      container.appendChild(div);
-    });
+  allSlots(pc).forEach(slot => {
+    const pName    = room[`${slot}_name`];
+    const charName = room[`${slot}_char`];
+    if (!pName) return;
+    const char = CHARS.find(c => c.name === charName);
+    const slotRank = rankings.indexOf(slot) + 1;
+    const div  = document.createElement('div');
+    div.className = 'result-char';
+    if (slot === room.winner) div.style.outline = '2px solid var(--gold)';
+    if (char && char.img) {
+      const img = document.createElement('img');
+      img.src = '../assets/' + char.img;
+      img.alt = charName;
+      div.appendChild(img);
+    }
+    const lbl = document.createElement('div');
+    lbl.className = 'result-char-label';
+    const rankStr = slotRank > 0 ? `${ordinal(slotRank)} · ` : '';
+    lbl.textContent = `${rankStr}${slot === playerSlot ? `You (${pName})` : pName}`;
+    const nm = document.createElement('div');
+    nm.className = 'result-char-name';
+    nm.textContent = charName || '???';
+    div.append(lbl, nm);
+    container.appendChild(div);
+  });
 }
+
+// ── Jumpscare picker ──────────────────────────────────────────────────────────
+const JUMPSCARE_NAMES = {
+  freddy: 'Freddy', bonnie: 'Bonnie', chica: 'Chica', foxy: 'Foxy',
+  golden_freddy: 'Golden Freddy', withered_bonnie: 'Withered Bonnie',
+  withered_chica: 'Withered Chica', withered_foxy: 'Withered Foxy',
+  withered_golden_freddy: 'W. Golden Freddy',
+};
+
+function buildJumpscarePicker() {
+  const picker = document.getElementById('jumpscare-picker');
+  picker.innerHTML = '';
+  const isAprilFools = _isAprilFools();
+
+  // On April 1st: only Withered Foxy available (and it always plays the meme)
+  const entries = isAprilFools
+    ? [['withered_foxy', 'Withered Foxy']]
+    : Object.entries(JUMPSCARE_NAMES);
+
+  entries.forEach(([key, label]) => {
+    const btn = document.createElement('button');
+    btn.className = 'mp-btn small jumpscare-opt-btn';
+    btn.textContent = label;
+    btn.addEventListener('click', async () => {
+      // withered_foxy → meme on April 1st
+      const gif = (key === 'withered_foxy' && isAprilFools) ? 'withered_foxy_meme' : key;
+      document.getElementById('jumpscare-btn').style.display = 'none';
+      picker.style.display = 'none';
+      await db.from('mp_events').insert({
+        room_id: roomId, player: playerSlot, type: 'jumpscare', content: gif,
+      });
+    });
+    picker.appendChild(btn);
+  });
+}
+
+document.getElementById('jumpscare-btn').addEventListener('click', () => {
+  const picker = document.getElementById('jumpscare-picker');
+  picker.style.display = picker.style.display === 'none' ? '' : 'none';
+});
 
 // ── Rematch ───────────────────────────────────────────────────────────────────
 const rematchVotes = new Set();
@@ -731,9 +1227,12 @@ async function triggerRematch() {
   gameInit = false; myChar = null; selectionShown = false;
   await db.from('mp_rooms').update({
     state: 'selecting',
-    player1_char: null, player2_char: null,
-    player1_ready: false, player2_ready: false,
+    player1_char: null, player1_ready: false,
+    player2_char: null, player2_ready: false,
+    player3_char: null, player3_ready: false,
+    player4_char: null, player4_ready: false,
     current_question: null, phase: null, winner: null,
+    turn_order: null, guessed_chars: null,
   }).eq('id', roomId);
   selectionShown = true;
   showSelectionScreen();
@@ -743,8 +1242,9 @@ document.getElementById('rematch-btn').addEventListener('click', async () => {
   const btn = document.getElementById('rematch-btn');
   btn.disabled = true;
   rematchVotes.add(playerSlot);
-  if (rematchVotes.size >= 2) { triggerRematch(); return; }
-  btn.textContent = '⏳ Waiting for opponent... (1/2)';
+  const pc = getPlayerCount();
+  if (rematchVotes.size >= pc) { triggerRematch(); return; }
+  btn.textContent = `⏳ Waiting... (${rematchVotes.size}/${pc})`;
   await db.from('mp_events').insert({
     room_id: roomId, player: playerSlot, type: 'rematch_vote', content: 'yes',
   });
@@ -754,26 +1254,90 @@ document.getElementById('rematch-btn').addEventListener('click', async () => {
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('multiplayer-screen').style.display = 'block';
   showScreen('lobby');
-  // Filter dropdowns init
-  const fromSel = document.getElementById('filter-from');
-  const toSel   = document.getElementById('filter-to');
-  if (fromSel && toSel) {
-    GAMES.forEach((g, i) => {
-      fromSel.add(new Option(g.name, i));
-      toSel.add(new Option(g.name, i));
-    });
-    toSel.value = GAMES.length - 1;
-    const filterAllEl = document.getElementById('filter-all');
-    const filterRangeEl = document.getElementById('filter-range');
-    filterAllEl.checked = true;
-    filterRangeEl.style.display = 'none';
-    filterAllEl.addEventListener('change', function() {
-      filterRangeEl.style.display = this.checked ? 'none' : 'flex';
-    });
-    fromSel.addEventListener('change', () => {
-      if (parseInt(toSel.value) < parseInt(fromSel.value)) toSel.value = fromSel.value;
-    });
+
+  // Build game checkboxes with expandable sub-type lists
+  const filterAllEl = document.getElementById('filter-all');
+  const gamesListEl = document.getElementById('filter-games-list');
+
+  function syncFilterAll() {
+    const gameCbs = [...document.querySelectorAll('.filter-game-checkbox')];
+    const allOn = gameCbs.every(c => c.checked && !c.indeterminate);
+    filterAllEl.checked = allOn;
+    filterAllEl.indeterminate = !allOn && gameCbs.some(c => c.checked || c.indeterminate);
   }
+
+  GAMES.forEach((g, i) => {
+    // ── main game row ──
+    const row = document.createElement('div');
+    row.className = 'filter-game-row';
+
+    const label = document.createElement('label');
+    label.className = 'filter-game-item';
+
+    const cb = document.createElement('input');
+    cb.type = 'checkbox'; cb.className = 'filter-game-checkbox'; cb.value = i; cb.checked = true;
+
+    const nameSpan = document.createElement('span');
+    nameSpan.textContent = g.name;
+    label.append(cb, nameSpan);
+
+    const expandBtn = document.createElement('button');
+    expandBtn.type = 'button'; expandBtn.className = 'filter-game-expand-btn'; expandBtn.textContent = '▸';
+    row.append(label, expandBtn);
+    gamesListEl.appendChild(row);
+
+    // ── sub-type list ──
+    const subtypesEl = document.createElement('div');
+    subtypesEl.className = 'filter-game-subtypes'; subtypesEl.style.display = 'none';
+
+    const typeCounts = {};
+    CHARS.slice(g.start, g.end + 1).forEach(c => { typeCounts[c.type] = (typeCounts[c.type] || 0) + 1; });
+
+    Object.entries(typeCounts).sort((a, b) => b[1] - a[1]).forEach(([type, count]) => {
+      const subLabel = document.createElement('label');
+      subLabel.className = 'filter-subtype-item';
+      const subCb = document.createElement('input');
+      subCb.type = 'checkbox'; subCb.className = 'filter-subtype-checkbox';
+      subCb.dataset.game = i; subCb.value = type; subCb.checked = true;
+      const subSpan = document.createElement('span');
+      subSpan.textContent = `${type} (${count})`;
+      subLabel.append(subCb, subSpan);
+      subtypesEl.appendChild(subLabel);
+
+      subCb.addEventListener('change', () => {
+        const subs = subtypesEl.querySelectorAll('.filter-subtype-checkbox');
+        const n = subtypesEl.querySelectorAll('.filter-subtype-checkbox:checked').length;
+        cb.checked = n > 0; cb.indeterminate = n > 0 && n < subs.length;
+        syncFilterAll();
+      });
+    });
+
+    gamesListEl.appendChild(subtypesEl);
+
+    // expand/collapse
+    expandBtn.addEventListener('click', e => {
+      e.preventDefault();
+      const open = subtypesEl.style.display !== 'none';
+      subtypesEl.style.display = open ? 'none' : '';
+      expandBtn.textContent = open ? '▸' : '▾';
+    });
+
+    // game checkbox toggles all its sub-types
+    cb.addEventListener('change', function () {
+      subtypesEl.querySelectorAll('.filter-subtype-checkbox').forEach(s => { s.checked = this.checked; });
+      this.indeterminate = false;
+      syncFilterAll();
+    });
+  });
+
+  filterAllEl.addEventListener('change', function () {
+    gamesListEl.style.display = this.checked ? 'none' : 'flex';
+    if (this.checked) {
+      document.querySelectorAll('.filter-game-checkbox').forEach(c => { c.checked = true; c.indeterminate = false; });
+      document.querySelectorAll('.filter-subtype-checkbox').forEach(c => { c.checked = true; });
+    }
+  });
+
   document.getElementById('create-room-btn').addEventListener('click', createRoom);
   document.getElementById('join-room-btn').addEventListener('click', joinRoom);
   document.getElementById('lobby-code').addEventListener('keydown', e => { if (e.key === 'Enter') joinRoom(); });

@@ -87,6 +87,10 @@ const HEADER_LABELS = {
 // ─── Character pool helpers ───────────────────────────────
 
 function pickSameAnimalChars(n) {
+  if (_isAprilFools()) {
+    const bots = CHARS.filter(c => c.type === 'S.T.A.F.F. Bot');
+    return [...bots].sort(() => Math.random() - 0.5).slice(0, Math.min(n, bots.length));
+  }
   if (n <= 1) return [...CHARS].sort(() => Math.random() - 0.5).slice(0, n);
 
   const byAnimal = {};

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FNAFdle Reborn — Multiplayer</title>
+  <title>FNAFdle Reborn - Multiplayer</title>
   <link rel="icon" type="icon/png" href="../assets/images/default.png">
   <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Oswald:wght@400;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../assets/css/global.css" />
@@ -39,10 +39,19 @@
               <span>All games</span>
             </label>
           </div>
-          <div class="lobby-filter-range" id="filter-range" style="display:none">
-            <select id="filter-from" class="mp-input filter-select"></select>
-            <span class="filter-to-label">to</span>
-            <select id="filter-to" class="mp-input filter-select"></select>
+          <div id="filter-games-list" class="filter-games-list" style="display:none">
+            <!-- populated by JS -->
+          </div>
+        </div>
+
+        <div class="lobby-filter" style="margin-top:-4px">
+          <div class="lobby-filter-header">
+            <span class="lobby-filter-label">👥 Players</span>
+          </div>
+          <div class="playercount-row">
+            <label class="playercount-opt"><input type="radio" name="player-count" value="2" checked><span>2</span></label>
+            <label class="playercount-opt"><input type="radio" name="player-count" value="3"><span>3</span></label>
+            <label class="playercount-opt"><input type="radio" name="player-count" value="4"><span>4</span></label>
           </div>
         </div>
 
@@ -60,11 +69,12 @@
     <!-- ── WAITING ────────────────────────────────────────── -->
     <div id="screen-waiting" style="display:none">
       <div class="mp-card">
-        <h2 class="mp-title">Waiting for opponent...</h2>
-        <p class="mp-sub">Share this code with your friend:</p>
+        <h2 class="mp-title" id="waiting-title">Waiting for players...</h2>
+        <p class="mp-sub">Share this code with your friends:</p>
         <div class="room-code-display" id="waiting-code"></div>
         <button class="mp-btn" id="copy-code-btn">Copy Code</button>
         <p class="mp-sub" id="waiting-filter-label" style="font-size:.75rem;opacity:.6;margin-top:-4px;"></p>
+        <div id="waiting-players" class="waiting-players"></div>
         <div class="waiting-dots"><span>.</span><span>.</span><span>.</span></div>
       </div>
     </div>
@@ -109,6 +119,10 @@
 
           <!-- ASK PANEL: asker chooses a question to ask -->
           <div id="ask-panel" class="acting-panel" style="display:none">
+            <div id="ask-target-row" style="display:none">
+              <div class="qa-label">🎯 Ask who?</div>
+              <div id="ask-target-btns" class="list-picker-grid" style="margin-top:6px;margin-bottom:10px;"></div>
+            </div>
             <div class="qa-label">❓ Choose a question to ask:</div>
             <div id="ask-questions-list" class="list-picker-grid" style="margin-top:10px;"></div>
           </div>
@@ -120,6 +134,7 @@
               <div class="qa-question-text" id="acting-question-text"></div>
               <div class="qa-answer-display" id="acting-answer-display"></div>
             </div>
+            <div id="acting-target-label" class="qa-label" style="margin-top:4px;color:var(--gold);"></div>
             <div class="acting-actions">
               <div class="guess-input-wrap">
                 <input id="guess-input" class="mp-input" type="text" placeholder="Type character name to guess..." maxlength="60" autocomplete="off" />
@@ -183,9 +198,32 @@
         <div class="elim-panel">
           <div class="elim-header">
             <span class="panel-label">🔍 Elimination Board</span>
-            <input id="elim-search" class="mp-input elim-search" type="text" placeholder="Filter..." autocomplete="off" />
+            <input id="elim-search" class="mp-input elim-search" type="text" placeholder="Filter by name..." autocomplete="off" />
+            <button id="elim-adv-btn" class="mp-btn small elim-advanced-toggle" title="Advanced filters">⚙️ Filters</button>
           </div>
-          <div id="elim-grid" class="elim-grid"></div>
+          <div id="elim-advanced" class="elim-advanced" style="display:none">
+            <div class="elim-filter-col">
+              <span class="elim-filter-label">Type</span>
+              <select id="elim-type" class="elim-filter-select">
+                <option value="">All types</option>
+              </select>
+            </div>
+            <div class="elim-filter-col">
+              <span class="elim-filter-label">Animal</span>
+              <select id="elim-animal" class="elim-filter-select">
+                <option value="">All animals</option>
+              </select>
+            </div>
+            <div class="elim-filter-col">
+              <span class="elim-filter-label">Year</span>
+              <input type="number" id="elim-year" class="elim-filter-year" placeholder="e.g. 1987" min="1984" max="2030" />
+            </div>
+            <button id="elim-clear-filters" class="mp-btn small" style="align-self:flex-end">✕ Clear</button>
+          </div>
+          <div id="elim-player-tabs" class="elim-player-tabs" style="display:none"></div>
+          <div id="elim-grid-container">
+            <div id="elim-grid" class="elim-grid"></div>
+          </div>
         </div>
 
       </div>
@@ -200,10 +238,12 @@
           <p class="result-msg" id="result-msg"></p>
         </div>
         <div class="result-buttons">
+          <button class="mp-btn accent jumpscare-btn" id="jumpscare-btn" style="display:none">🎃 Jumpscare!</button>
           <button class="mp-btn primary" id="rematch-btn">🔄 Rematch</button>
           <button class="mp-btn" onclick="location.reload()">🆕 New Room</button>
           <button class="mp-btn" onclick="goHome()">← Modes</button>
         </div>
+        <div id="jumpscare-picker" class="jumpscare-picker" style="display:none"></div>
       </div>
     </div>
 
@@ -212,7 +252,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="../assets/js/config.js"></script>
   <script src="../../../backend/src/db/database.js"></script>
-  <script src="../assets/js/core.js"></script>
+  <script src="../assets/js/core.js?v=2"></script>
   <script src="../assets/js/multiplayer.js"></script>
 </body>
 </html>

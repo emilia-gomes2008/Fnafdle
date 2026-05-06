@@ -29,7 +29,13 @@ function initImageMode() {
   imgHintUsed = false;
 
   const img = document.getElementById('mystery-img');
-  img.src = '../assets/' + imgTarget.img;
+  if (_isAprilFools()) {
+    const c = document.createElement('canvas'); c.width = 1; c.height = 1;
+    c.getContext('2d').fillRect(0, 0, 1, 1);
+    img.src = c.toDataURL();
+  } else {
+    img.src = '../assets/' + imgTarget.img;
+  }
   img.onerror = () => { img.src = ''; };
 
   applyImageFilter(0);
