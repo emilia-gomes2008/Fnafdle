@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,7 +10,7 @@
   <link rel="stylesheet" href="frontend/dist/assets/css/global.css" />
   <link rel="stylesheet" href="frontend/dist/assets/css/menu.css" />
 
-</head> 
+</head>
 
 <body>
 
@@ -25,7 +26,7 @@
     <div class="mode-select-title">Choose a Mode</div>
     <div class="mode-cards">
 
-      
+
       <div class="mode-card" onclick="window.location.href='frontend/dist/pages/image.html'">
         <div class="mode-icon">🔍</div>
         <div class="mode-name">Image</div>
@@ -47,39 +48,40 @@
       <div class="mode-card mode-card-extreme" onclick="window.location.href='frontend/dist/pages/extreme.html'">
         <div class="mode-icon">☠️</div>
         <div class="mode-name">Extreme</div>
-        <div class="mode-desc">6 progressive nights · real-time clock · AI movement · manage the door · 3 attempts · Night 6: 6 animatronics, 2× power drain</div>
+        <div class="mode-desc">6 progressive nights · real-time clock · AI movement · manage the door · 3 attempts ·
+          Night 6: 6 animatronics, 2× power drain</div>
       </div>
-      
+
       <div class="mode-card" onclick="window.location.href='frontend/dist/pages/quote.html?mode=daily'">
         <div class="mode-icon">📅🎭</div>
         <div class="mode-name">Quote Daily</div>
         <div class="mode-desc">1 quote per day · 6 tries · everyone gets the same</div>
       </div>
-      
-            <div class="mode-card" onclick="window.location.href='frontend/dist/pages/quote.html?mode=endless'">
-              <div class="mode-icon">🎭</div>
-              <div class="mode-name">Quote Guesser</div>
-              <div class="mode-desc">A quote appears — guess which FNAF character said it · 6 tries</div>
-            </div>
-      
+
+      <div class="mode-card" onclick="window.location.href='frontend/dist/pages/quote.html?mode=endless'">
+        <div class="mode-icon">🎭</div>
+        <div class="mode-name">Quote Guesser</div>
+        <div class="mode-desc">A quote appears — guess which FNAF character said it · 6 tries</div>
+      </div>
+
       <div class="divider"></div>
-      
-            <div class="mode-card" onclick="window.location.href='frontend/dist/pages/encyclopedia.html'">
-              <div class="mode-icon">📚</div>
-              <div class="mode-name">Who is this?</div>
-              <div class="mode-desc">Browse all animatronics · search & filter · tap to see details</div>
-            </div>
-            
-            <div class="mode-card" onclick="window.location.href='frontend/dist/pages/book.html?mode=book_daily'">
-              <div class="mode-icon">📅📖</div>
-              <div class="mode-name">Books Daily</div>
-              <div class="mode-desc">1 book per day · 7 tries · everyone gets the same</div>
-            </div>
-            <div class="mode-card" onclick="window.location.href='frontend/dist/pages/book.html?mode=book_endless'">
-              <div class="mode-icon">📖</div>
-              <div class="mode-name">Books</div>
-              <div class="mode-desc">Guess the FNaF novel · series, year, edition number · 6 tries</div>
-            </div>
+
+      <div class="mode-card" onclick="window.location.href='frontend/dist/pages/encyclopedia.html'">
+        <div class="mode-icon">📚</div>
+        <div class="mode-name">Who is this?</div>
+        <div class="mode-desc">Browse all animatronics · search & filter · tap to see details</div>
+      </div>
+
+      <div class="mode-card" onclick="window.location.href='frontend/dist/pages/book.html?mode=book_daily'">
+        <div class="mode-icon">📅📖</div>
+        <div class="mode-name">Books Daily</div>
+        <div class="mode-desc">1 book per day · 7 tries · everyone gets the same</div>
+      </div>
+      <div class="mode-card" onclick="window.location.href='frontend/dist/pages/book.html?mode=book_endless'">
+        <div class="mode-icon">📖</div>
+        <div class="mode-name">Books</div>
+        <div class="mode-desc">Guess the FNaF novel · series, year, edition number · 6 tries</div>
+      </div>
 
       <div class="divider"></div>
 
@@ -93,10 +95,12 @@
 
     <!-- Stats buttons row -->
     <div style="display:flex;gap:12px;justify-content:center;margin-top:1.4rem;flex-wrap:wrap;">
-      <button onclick="showStatsModal('animatronic')" style="background:var(--bg-cell);border:1px solid var(--border);font-size:0.8rem;padding:8px 18px;letter-spacing:1px;">
+      <button onclick="showStatsModal('animatronic')"
+        style="background:var(--bg-cell);border:1px solid var(--border);font-size:0.8rem;padding:8px 18px;letter-spacing:1px;">
         📊 Animatronic Stats
       </button>
-      <button onclick="showStatsModal('book')" style="background:var(--bg-cell);border:1px solid var(--border);font-size:0.8rem;padding:8px 18px;letter-spacing:1px;">
+      <button onclick="showStatsModal('book')"
+        style="background:var(--bg-cell);border:1px solid var(--border);font-size:0.8rem;padding:8px 18px;letter-spacing:1px;">
         📊 Books Stats
       </button>
     </div>
@@ -106,7 +110,7 @@
   <script src="backend/src/db/books_database.js"></script>
   <script src="frontend/dist/assets/js/core.js?v=2"></script>
   <script>
-    (function() {
+    (function () {
       var d = new Date();
       if (d.getMonth() !== 3 || d.getDate() !== 1) return;
       function shuffleCards() {
@@ -117,13 +121,23 @@
           var j = Math.floor(Math.random() * (i + 1));
           var tmp = children[i]; children[i] = children[j]; children[j] = tmp;
         }
-        children.forEach(function(c) { container.appendChild(c); });
+        children.forEach(function (c) { container.appendChild(c); });
       }
-      document.addEventListener('DOMContentLoaded', function() {
+      document.addEventListener('DOMContentLoaded', function () {
         shuffleCards();
         setInterval(shuffleCards, 1500);
       });
     })();
   </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-MY3EVSV9FB"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-MY3EVSV9FB');
+  </script>
+
 </body>
-</html> 
+
+</html>
