@@ -279,7 +279,7 @@ const CHARS = [
   {
     name: "Fritz Smith",
     animal: "Human",
-    type: "Human",
+    type: "Fake Identity",
     color: ["Pink"],
     eyeColor: ["Pink"],
     year: 1987,
