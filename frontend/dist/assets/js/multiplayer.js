@@ -74,23 +74,24 @@ function updateWaitingPlayerList(room) {
 
 // ── Game filter ───────────────────────────────────────────────────────────────
 const GAMES = [
-  { name: "Five Nights at Freddy's",             start: 0,   end: 8   },
-  { name: "Five Nights at Freddy's 2",             start: 9,   end: 29  },
-  { name: "Five Nights at Freddy's 3",             start: 30,  end: 39  },
-  { name: "Five Nights at Freddy's 4",             start: 40,  end: 59  },
-  { name: 'FNAF World',         start: 60,  end: 137 },
-  { name: "Five Nights at Freddy's: Sister Location",    start: 138, end: 155 },
-  { name: "Freddy Fazbear's Pizzeria Simulator", start: 156, end: 195 },
-  { name: 'Ultimate Custom Night',                start: 196, end: 210 },
-  { name: "Five Nights at Freddy's: Help Wanted",        start: 211, end: 227 },
-  { name: "Five Nights at Freddy's: Security Breach",    start: 228, end: 268 },
-  { name: "Five Nights at Freddy's: Security Breach - RUIN",               start: 269, end: 287 },
-  { name: "Five Nights at Freddy's: Help Wanted 2",      start: 288, end: 295 },
-  { name: "Five Nights at Freddy's: Secret of the Mimic",               start: 296, end: 352 },
+  { name: "Five Nights at Freddy's",                              start: 0,   end: 8   },
+  { name: "Five Nights at Freddy's 2",                            start: 9,   end: 31  },
+  { name: "Five Nights at Freddy's 3",                            start: 32,  end: 44  },
+  { name: "Five Nights at Freddy's 4",                            start: 45,  end: 68  },
+  { name: 'FNAF World',                                           start: 69,  end: 146 },
+  { name: "Five Nights at Freddy's: Sister Location",             start: 147, end: 166 },
+  { name: "Freddy Fazbear's Pizzeria Simulator",                  start: 167, end: 217 },
+  { name: 'Ultimate Custom Night',                                start: 218, end: 232 },
+  { name: "Five Nights at Freddy's: Help Wanted",                 start: 233, end: 249 },
+  { name: "Five Nights at Freddy's: Special Delivery",            start: 250, end: 250 },
+  { name: "Five Nights at Freddy's: Security Breach",             start: 251, end: 291 },
+  { name: "Five Nights at Freddy's: Security Breach - RUIN",      start: 292, end: 310 },
+  { name: "Five Nights at Freddy's: Help Wanted 2",               start: 311, end: 318 },
+  { name: "Five Nights at Freddy's: Secret of the Mimic",         start: 319, end: 375 },
 ];
 
 // Dee Dee (121) and Old Man Consequences (122) are FNAF World chars that also appear in UCN
-const WORLD_UCN_CHARS = [121, 122];
+const WORLD_UCN_CHARS = [131, 132];
 const GAME_IDX_WORLD = 4;
 const GAME_IDX_UCN   = 7;
 

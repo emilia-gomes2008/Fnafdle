@@ -61,11 +61,11 @@ const CHARS = [
   {
     name: "Ralph",
     animal: "Human",
-    type: "Other",
+    type: "Human",
     color: ["Blue"],
     eyeColor: ["Black"],
     year: "Unconfirmed",
-    img: "images/chars/other/phone_guy.png"
+    img: "images/chars/human/phone_guy.png"
   },
   {
     name: "Fan",
@@ -93,6 +93,15 @@ const CHARS = [
     eyeColor: ["Blue"],
     year: 1993,
     img: "images/chars/endo/endo01.png"
+  },
+{
+    name: "Mike Schmidt",
+    animal: "Human",
+    type: "Fake Identity",
+    color: ["White"],
+    eyeColor: ["White"],
+    year: 1993,
+    img: "images/chars/human/fake/mike.png"
   },
 
   // === Fnaf 2 ===
@@ -261,31 +270,49 @@ const CHARS = [
   {
     name: "Jeremy Fitzgerald",
     animal: "Human",
-    type: "Other",
+    type: "Human",
     color: ["White"],
     eyeColor: ["White"],
     year: "Unconfirmed",
-    img: "images/chars/other/jeremy_fitzgerald.png"
+    img: "images/chars/human/jeremy_fitzgerald.png"
+  },
+  {
+    name: "Fritz Smith",
+    animal: "Human",
+    type: "Human",
+    color: ["Pink"],
+    eyeColor: ["Pink"],
+    year: 1987,
+    img: "images/chars/human/fake/fritz.png"
   },
 
   // === Fnaf 2 Minigmaes ===
   {
     name: "Crying Children",
-    animal: "Other",
-    type: "Other",
+    animal: "Human",
+    type: "Human",
     color: ["White"],
     eyeColor: ["Grey"],
     year: "Unconfirmed",
-    img: "images/chars/other/crying_child.png"
+    img: "images/chars/human/crying_child.png"
+  },
+  {
+    name: "Green Shirt Kid",
+    animal: "Human",
+    type: "Human",
+    color: ["Green"],
+    eyeColor: ["Black"],
+    year: "Unconfirmed",
+    img: "images/chars/human/green_shirt_kid.webp"
   },
   {
     name: "William Afton",
     animal: "Human",
-    type: "Other",
+    type: "Human",
     color: ["Purple"],
     eyeColor: ["White"],
     year: "Unconfirmed",
-    img: "images/chars/other/afton.png"
+    img: "images/chars/human/afton.png"
   },
 
   // === Fnaf 3 ===
@@ -301,11 +328,11 @@ const CHARS = [
   {
     name: "Phone Dude",
     animal: "Human",
-    type: "Other",
+    type: "Human",
     color: ["Green"],
     eyeColor: ["Black"],
     year: "Unconfirmed",
-    img: "images/chars/other/phone_dude.png"
+    img: "images/chars/human/phone_dude.png"
   },
   {
     name: "Phantom Freddy",
@@ -550,20 +577,83 @@ const CHARS = [
   {
     name: "Crying Child",
     animal: "Human",
-    type: "Other",
+    type: "Human",
     color: ["White"],
     eyeColor: ["Black"],
     year: "Unconfirmed",
-    img: "images/chars/other/david_afton.png"
+    img: "images/chars/human/david_afton.png"
   },
   {
-    name: "Michael Afton",
+    name: "Foxy Bro",
+    animal: "Fox",
+    type: "Fake Identity",
+    color: ["Red"],
+    eyeColor: ["White"],
+    year: 1983,
+    img: "images/chars/human/fake/foxy_bully.png"
+  },
+  {
+    name: "Bonnie Bully",
+    animal: "Rabbit",
+    type: "Fake Identity",
+    color: ["Blue"],
+    eyeColor: ["White"],
+    year: 1983,
+    img: "images/chars/human/fake/bonnie_bully.png"
+  },
+  {
+    name: "Chica Bully",
+    animal: "Chicken",
+    type: "Fake Identity",
+    color: ["Yellow"],
+    eyeColor: ["White"],
+    year: 1983,
+    img: "images/chars/human/fake/chica_bully.png"
+  },
+  {
+    name: "Freddy Bully",
+    animal: "Bear",
+    type: "Fake Identity",
+    color: ["Brown"],
+    eyeColor: ["Black"],
+    year: 1983,
+    img: "images/chars/human/fake/freddy_bully.png"
+  },
+  {
+    name: "Toy Girl",
     animal: "Human",
-    type: "Other",
-    color: ["Purple"],
+    type: "Human",
+    color: ["Pink"],
     eyeColor: ["Blue"],
     year: "Unconfirmed",
-    img: "images/chars/other/michael_afton.png"
+    img: "images/chars/human/toy_girl.png"
+  },
+  {
+    name: "Plushtrap Kid",
+    animal: "Human",
+    type: "Human",
+    color: ["Green"],
+    eyeColor: ["Blue"],
+    year: "Unconfirmed",
+    img: "images/chars/human/plushtrap_kid.png"
+  },
+  {
+    name: "Pigtail Girl",
+    animal: "Human",
+    type: "Human",
+    color: ["Orange"],
+    eyeColor: ["Green"],
+    year: "Unconfirmed",
+    img: "images/chars/human/pigtail_girl.png"
+  },
+  {
+    name: "Balloon Kid",
+    animal: "Human",
+    type: "Human",
+    color: ["Red"],
+    eyeColor: ["Blue"],
+    year: "Unconfirmed",
+    img: "images/chars/human/balloon_kid.webp"
   },
 
   // === Fnaf World ===
@@ -1180,11 +1270,11 @@ const CHARS = [
   {
     name: "Desk Man",
     animal: "Human",
-    type: "Other",
+    type: "Human",
     color: ["Grey"],
     eyeColor: ["Grey"],
     year: "Unconfirmed",
-    img: "images/chars/other/desk_man.png"
+    img: "images/chars/human/desk_man.png"
   },
   {
     name: "Endo Plush",
@@ -1198,11 +1288,11 @@ const CHARS = [
   {
     name: "Animdude",
     animal: "Human",
-    type: "Other",
+    type: "Human",
     color: ["Blue"],
     eyeColor: ["White"],
     year: 1978,
-    img: "images/chars/other/Animdude.png"
+    img: "images/chars/human/Animdude.png"
   },
   {
     name: "Coffee",
@@ -1416,6 +1506,15 @@ const CHARS = [
     img: "images/chars/other/handunit.png"
   },
   {
+    name: "Little Joe",
+    animal: "Humanoid",
+    type: "Other",
+    color: ["Blue"],
+    eyeColor: ["Blue"],
+    year: "Unconfirmed",
+    img: "images/chars/other/little_joe.png"
+  },
+  {
     name: "Module Heads",
     animal: "Humanoid",
     type: "Other",
@@ -1424,16 +1523,25 @@ const CHARS = [
     year: "Unconfirmed",
     img: "images/chars/other/module_heads.png"
   },
+  {
+    name: "Michael Afton",
+    animal: "Human",
+    type: "Human",
+    color: ["Purple"],
+    eyeColor: ["Blue"],
+    year: "Unconfirmed",
+    img: "images/chars/human/michael_afton.png"
+  },
 
   // === Immortal and the Restless ===
   {
     name: "Clara",
     animal: "Human",
-    type: "Other",
+    type: "Human",
     color: ["White", "Green"],
     eyeColor: ["Black"],
     year: "Unconfirmed",
-    img: "images/chars/other/clara.png"
+    img: "images/chars/human/clara.png"
   },
   {
     name: "Vlad",
@@ -1458,11 +1566,11 @@ const CHARS = [
   {
     name: "Elizabeth Afton",
     animal: "Human",
-    type: "Other",
+    type: "Human",
     color: ["White", "Pink"],
     eyeColor: ["Green"],
     year: "Unconfirmed",
-    img: "images/chars/other/elizabeth_afton.png"
+    img: "images/chars/human/elizabeth_afton.png"
   },
 
   // === Pizza Sim Fakeout ===
@@ -1534,11 +1642,11 @@ const CHARS = [
   {
     name: "Henry Emily",
     animal: "Human",
-    type: "Other",
+    type: "Human",
     color: ["White", "Orange"],
     eyeColor: ["Green"],
     year: "1980s",
-    img: "images/chars/other/henry.png"
+    img: "images/chars/human/henry.png"
   },
   {
     name: "Ad Crew",
@@ -1757,11 +1865,11 @@ const CHARS = [
   {
     name: "Tutorial Unit",
     animal: "Human",
-    type: "Other",
+    type: "Human",
     color: ["White"],
     eyeColor: ["Black"],
     year: 2023,
-    img: "images/chars/other/tutorial_unit.png"
+    img: "images/chars/human/tutorial_unit.png"
   },
   {
     name: "Winking Sign",
@@ -1836,6 +1944,107 @@ const CHARS = [
     eyeColor: ["Black"],
     year: 2023,
     img: "images/chars/trash/mr_hugs.png"
+  },
+  // === Midnight Motorist ===
+  {
+    name: "Orange Guy",
+    animal: "Human",
+    type: "Human",
+    color: ["Orange"],
+    eyeColor: ["Orange"],
+    year: "Unconfirmed",
+    img: "images/chars/human/fake/orange_guy.png"
+  },
+  {
+    name: "Green Man",
+    animal: "Human",
+    type: "Human",
+    color: ["Green"],
+    eyeColor: ["Green"],
+    year: "Unconfirmed",
+    img: "images/chars/human/fake/green_man.png"
+  },
+  {
+    name: "Couch Person",
+    animal: "Human",
+    type: "Human",
+    color: ["White"],
+    eyeColor: ["Black"],
+    year: "Unconfirmed",
+    img: "images/chars/human/fake/couch_person.png"
+  },
+  {
+    name: "Runaway Kid",
+    animal: "Human",
+    type: "Human",
+    color: ["Black"],
+    eyeColor: ["Black"],
+    year: "Unconfirmed",
+    img: "images/chars/human/fake/runaway.png"
+  },
+  // === William's Victims ===
+  {
+    name: "Charlotte Emily",
+    animal: "Human",
+    type: "Human",
+    color: ["Grey", "Green"],
+    eyeColor: ["Grey"],
+    year: 1985,
+    img: "images/chars/human/charlie.png"
+  },
+  {
+    name: "Susie",
+    animal: "Human",
+    type: "Human",
+    color: ["Grey"],
+    eyeColor: ["Grey"],
+    year: 1985,
+    img: "images/chars/human/susie.png"
+  },
+  {
+    name: "Gabriel",
+    animal: "Human",
+    type: "Human",
+    color: ["Grey"],
+    eyeColor: ["Grey"],
+    year: 1985,
+    img: "images/chars/human/gabriel.png"
+  },
+  {
+    name: "Fritz",
+    animal: "Human",
+    type: "Human",
+    color: ["Grey"],
+    eyeColor: ["Grey"],
+    year: 1985,
+    img: "images/chars/human/fritz.png"
+  },
+  {
+    name: "Jeremy",
+    animal: "Human",
+    type: "Human",
+    color: ["Grey"],
+    eyeColor: ["Grey"],
+    year: 1985,
+    img: "images/chars/human/jeremy.png"
+  },
+  {
+    name: "Cassidy",
+    animal: "Human",
+    type: "Human",
+    color: ["Grey"],
+    eyeColor: ["Grey"],
+    year: 1985,
+    img: "images/chars/human/cassidy.png"
+  },
+  {
+    name: "Andrew",
+    animal: "Human",
+    type: "Human",
+    color: ["Green"],
+    eyeColor: ["Yellow"],
+    year: 1985,
+    img: "images/chars/human/andrew.png"
   },
 
   // === Ultimate Custom Night Plushies ===
@@ -1925,11 +2134,11 @@ const CHARS = [
   {
     name: "The One You Should Not Have Killed",
     animal: "Human",
-    type: "Other",
+    type: "Human",
     color: ["Yellow"],
     eyeColor: ["Black"],
     year: 2023,
-    img: "images/chars/other/toysnhk.png"
+    img: "images/chars/human/fake/toysnhk.png"
   },
   {
     name: "Loading Freddy",
@@ -2098,11 +2307,11 @@ const CHARS = [
   {
     name: "Tape Girl",
     animal: "Human",
-    type: "Other",
+    type: "Human",
     color: ["White"],
     eyeColor: ["Green"],
     year: "Unconfirmed",
-    img: "images/chars/other/tape_girl.png"
+    img: "images/chars/human/tape_girl.png"
   },
   {
     name: "Glitchtrap",
@@ -2141,6 +2350,16 @@ const CHARS = [
     eyeColor: ["Purple"],
     year: "Unconfirmed",
     img: "images/chars/other/ghost_helpy.png"
+  },
+  // === Special Delivery Originals ===
+  {
+    name: "Freddy Frostbear",
+    animal: "Bear",
+    type: "Classic",
+    color: ["Blue"],
+    eyeColor: ["Blue"],
+    year: "Unconfirmed",
+    img: "images/chars/classic/freddy_frostbear.png"
   },
 
   // === Security Breach ===
@@ -2486,29 +2705,29 @@ const CHARS = [
   {
     name: "Gregory",
     animal: "Human",
-    type: "Other",
+    type: "Human",
     color: ["White", "Blue"],
     eyeColor: ["Brown"],
     year: 2035,
-    img: "images/chars/other/ggy.png"
+    img: "images/chars/human/ggy.png"
   },
   {
     name: "Vanessa",
     animal: "Human",
-    type: "Other",
+    type: "Human",
     color: ["White", "Yellow"],
     eyeColor: ["Green"],
     year: 2012,
-    img: "images/chars/other/vanessa.png"
+    img: "images/chars/human/vanessa.png"
   },
   {
     name: "Vanny",
     animal: "Rabbit",
-    type: "Other",
+    type: "Fake Identity",
     color: ["White"],
     eyeColor: ["Red"],
     year: 2035,
-    img: "images/chars/other/vanny.png"
+    img: "images/chars/human/fake/vanny.png"
   },
   {
     name: "Tangle Blob",
@@ -2668,11 +2887,11 @@ const CHARS = [
   {
     name: "Cassie",
     animal: "Human",
-    type: "Other",
+    type: "Human",
     color: ["Brown", "Red"],
     eyeColor: ["Brown"],
     year: 2035,
-    img: "images/chars/other/cassie.png"
+    img: "images/chars/human/cassie.png"
   },
   {
     name: "Mask Bot",
@@ -2773,20 +2992,20 @@ const CHARS = [
   {
     name: "Arnold",
     animal: "Human",
-    type: "Other",
+    type: "Human",
     color: ["Beige"],
     eyeColor: ["Black"],
     year: 1979,
-    img: "images/chars/other/arnold.png"
+    img: "images/chars/human/arnold.png"
   },
   {
     name: "Dispatch",
     animal: "Human",
-    type: "Other",
+    type: "Human",
     color: ["Beige"],
     eyeColor: ["Black"],
     year: 1979,
-    img: "images/chars/other/dispatch.png"
+    img: "images/chars/human/dispatch.png"
   },
   {
     name: "Mr. Helpful",
@@ -3240,11 +3459,11 @@ const CHARS = [
   {
     name: "F10-N4",
     animal: "Human",
-    type: "Other",
+    type: "Human",
     color: ["Grey"],
     eyeColor: ["Green"],
     year: 1979,
-    img: "images/chars/other/f10-n4.png"
+    img: "images/chars/human/f10-n4.png"
   },
   {
     name: "M1",
@@ -3278,28 +3497,28 @@ const CHARS = [
   {
     name: "Edwin Murray",
     animal: "Human",
-    type: "Other",
+    type: "Human",
     color: ["Black"],
     eyeColor: ["Green"],
     year: 1979,
-    img: "images/chars/other/edwin.png"
+    img: "images/chars/human/edwin.png"
   },
   {
     name: "David Sean Murray",
     animal: "Human",
-    type: "Other",
+    type: "Human",
     color: ["Blue"],
     eyeColor: ["Blue"],
     year: 1979,
-    img: "images/chars/other/david_murray.png"
+    img: "images/chars/human/david_murray.png"
   },
   {
     name: "Fiona Murray",
     animal: "Human",
-    type: "Other",
+    type: "Human",
     color: ["Purple"],
     eyeColor: ["Blue"],
     year: 1979,
-    img: "images/chars/other/fiona.png"
+    img: "images/chars/human/fiona.png"
   },
 ];
