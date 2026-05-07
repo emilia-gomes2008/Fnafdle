@@ -615,6 +615,7 @@ function renderGuess(char) {
     const img = document.createElement('img');
     img.src     = '../assets/' + char.img;
     img.alt     = char.name;
+    if (char.imgFocusFace) { img.style.objectFit = 'cover'; img.style.objectPosition = 'top center'; }
     img.onerror = () => {
       imgCell.innerHTML = '';
       const ph = document.createElement('div');
@@ -780,6 +781,7 @@ function renderDropdown() {
       const img = document.createElement('img');
       img.src = '../assets/' + char.img;
       img.alt = char.name;
+      if (char.imgFocusFace) { img.style.objectFit = 'cover'; img.style.objectPosition = 'top center'; }
       item.appendChild(img);
     }
     const span = document.createElement('span');

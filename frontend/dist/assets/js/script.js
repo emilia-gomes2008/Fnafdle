@@ -354,6 +354,7 @@ function renderGuess(char) {
     const img = document.createElement('img');
     img.src = char.img;
     img.alt = char.name;
+    if (char.imgFocusFace) { img.style.objectFit = 'cover'; img.style.objectPosition = 'top center'; }
     img.onerror = () => {
       imgCell.innerHTML = '';
       const ph = document.createElement('div');
@@ -523,6 +524,7 @@ function renderDropdown() {
       const img = document.createElement('img');
       img.src = char.img;
       img.alt = char.name;
+      if (char.imgFocusFace) { img.style.objectFit = 'cover'; img.style.objectPosition = 'top center'; }
       item.appendChild(img);
     }
     const span = document.createElement('span');
@@ -689,6 +691,7 @@ function renderImgGuess(char, correct) {
     const img = document.createElement('img');
     img.src = char.img;
     img.alt = char.name;
+    if (char.imgFocusFace) { img.style.objectFit = 'cover'; img.style.objectPosition = 'top center'; }
     item.appendChild(img);
   }
 
@@ -738,6 +741,7 @@ function renderImgDropdown() {
     const img = document.createElement('img');
     img.src = char.img;
     img.alt = char.name;
+    if (char.imgFocusFace) { img.style.objectFit = 'cover'; img.style.objectPosition = 'top center'; }
     item.appendChild(img);
 
     const span = document.createElement('span');
@@ -1039,6 +1043,7 @@ function renderEncyclopedia() {
       const img = document.createElement('img');
       img.src = char.img;
       img.alt = char.name;
+      if (char.imgFocusFace) { img.style.objectFit = 'cover'; img.style.objectPosition = 'top center'; }
       img.onerror = () => { img.style.display = 'none'; };
       card.appendChild(img);
     } else {
@@ -1167,7 +1172,7 @@ function showEncCard(char) {
     <div style="background:var(--bg-card);border:1.5px solid var(--gold);border-radius:14px;padding:28px 24px;max-width:360px;width:100%;position:relative;text-align:center;">
       <button onclick="document.getElementById('enc-modal-overlay').remove()" style="position:absolute;top:10px;right:14px;background:transparent;border:none;color:var(--text-muted);font-size:1.3rem;padding:0;margin:0;cursor:pointer;">✕</button>
       ${char.img
-        ? `<img src="${char.img}" alt="${char.name}" style="width:120px;height:120px;object-fit:cover;border-radius:12px;border:2px solid var(--gold);margin-bottom:14px;" onerror="this.style.display='none'">`
+        ? `<img src="${char.img}" alt="${char.name}" style="width:120px;height:120px;object-fit:cover;${char.imgFocusFace ? 'object-position:top center;' : ''}border-radius:12px;border:2px solid var(--gold);margin-bottom:14px;" onerror="this.style.display='none'">`
         : `<div style="width:120px;height:120px;border-radius:12px;border:2px solid var(--border);background:var(--bg-page);display:inline-flex;align-items:center;justify-content:center;font-size:3rem;margin-bottom:14px;">?</div>`
       }
       <div style="font-family:'Creepster',cursive;font-size:1.6rem;color:var(--gold);letter-spacing:2px;margin-bottom:4px;">${char.name}</div>

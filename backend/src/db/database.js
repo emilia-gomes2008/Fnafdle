@@ -590,7 +590,8 @@ const CHARS = [
     color: ["Red"],
     eyeColor: ["White"],
     year: 1983,
-    img: "images/chars/human/fake/foxy_bully.png"
+    img: "images/chars/human/fake/foxy_bully.png",
+    imgFocusFace: true
   },
   {
     name: "Bonnie Bully",
@@ -599,7 +600,8 @@ const CHARS = [
     color: ["Blue"],
     eyeColor: ["White"],
     year: 1983,
-    img: "images/chars/human/fake/bonnie_bully.png"
+    img: "images/chars/human/fake/bonnie_bully.png",
+    imgFocusFace: true
   },
   {
     name: "Chica Bully",
@@ -608,7 +610,8 @@ const CHARS = [
     color: ["Yellow"],
     eyeColor: ["White"],
     year: 1983,
-    img: "images/chars/human/fake/chica_bully.png"
+    img: "images/chars/human/fake/chica_bully.png",
+    imgFocusFace: true
   },
   {
     name: "Freddy Bully",
@@ -617,7 +620,8 @@ const CHARS = [
     color: ["Brown"],
     eyeColor: ["Black"],
     year: 1983,
-    img: "images/chars/human/fake/freddy_bully.png"
+    img: "images/chars/human/fake/freddy_bully.png",
+    imgFocusFace: true
   },
   {
     name: "Toy Girl",
@@ -1953,7 +1957,8 @@ const CHARS = [
     color: ["Orange"],
     eyeColor: ["Orange"],
     year: "Unconfirmed",
-    img: "images/chars/human/fake/orange_guy.png"
+    img: "images/chars/human/fake/orange_guy.png",
+    imgFocusFace: true
   },
   {
     name: "Green Man",
@@ -1962,7 +1967,8 @@ const CHARS = [
     color: ["Green"],
     eyeColor: ["Green"],
     year: "Unconfirmed",
-    img: "images/chars/human/fake/green_man.png"
+    img: "images/chars/human/fake/green_man.png",
+    imgFocusFace: true
   },
   {
     name: "Couch Person",

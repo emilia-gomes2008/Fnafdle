@@ -377,6 +377,7 @@ function buildCharGrid(containerEl, onSelect, allowMultiple = false) {
     img.src = '../assets/' + char.img;
     img.alt = char.name;
     img.onerror = () => { img.src = '../assets/images/default.png'; };
+    if (char.imgFocusFace) { img.style.objectFit = 'cover'; img.style.objectPosition = 'top center'; }
     const lbl = document.createElement('div');
     lbl.className = 'char-grid-name';
     lbl.textContent = char.name;
