@@ -54,12 +54,12 @@ function getDailyBookResult() {
 
 function saveDailyResult(won, targetName, guessCount) {
   localStorage.setItem(getDailyKey(), JSON.stringify({ won, targetName, guessCount }));
-  updateStats('animatronic', won, guessCount);
+  updateStats('daily', won, guessCount);
 }
 
 function saveDailyBookResult(won, targetTitle, guessCount) {
   localStorage.setItem(getDailyBookKey(), JSON.stringify({ won, targetTitle, guessCount }));
-  updateStats('book', won, guessCount);
+  updateStats('daily', won, guessCount);
 }
 
 /* =======================================================
@@ -117,7 +117,7 @@ function showStatsModal(key) {
   const stats = getStats(key);
   const winPct = stats.played > 0 ? Math.round((stats.won / stats.played) * 100) : 0;
   const maxDist = Math.max(...Object.values(stats.distribution), 1);
-  const label = key === 'animatronic' ? 'Animatronic' : 'Books';
+  const label = key === 'daily' ? 'Daily' : key === 'endless' ? 'Endless' : key;
 
   let distHTML = '';
   for (let i = 1; i <= 7; i++) {

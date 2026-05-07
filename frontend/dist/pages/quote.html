@@ -81,8 +81,10 @@
         <p class="result-msg" id="result-msg"></p>
       </div>
       <div class="result-buttons">
-        <button id="play-again-btn" onclick="restartQuote()">Play Again</button>
-        <button onclick="goHome()" style="margin-left:10px; background:var(--bg-cell); border:1px solid var(--border);">← Modes</button>
+        <button id="quote-daily-stats-btn" onclick="showStatsModal('daily')">📊 Daily Stats</button>
+        <button id="quote-endless-stats-btn" onclick="showStatsModal('endless')">📊 Endless Stats</button>
+        <button id="quote-play-switch-btn" style="display:none; grid-column:1/-1"></button>
+        <button class="btn-modes" onclick="goHome()" style="background:var(--bg-cell); border:1px solid var(--border);">← Modes</button>
       </div>
     </div>
 

@@ -219,6 +219,23 @@ body {
   border-color: var(--red-border);
 }
 
+.result-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+  max-width: 340px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.result-buttons button {
+  margin-top: 0;
+  width: 100%;
+}
+.result-buttons .btn-modes {
+  grid-column: 1 / -1;
+}
+
 /* =====================================================
        Buttons
        ===================================================== */

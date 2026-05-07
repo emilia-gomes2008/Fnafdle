@@ -98,7 +98,6 @@ function initQuote(mode) {
       banner.classList.remove('lose');
       banner.classList.add('show');
       if (!previous.won) banner.classList.add('lose');
-      document.getElementById('play-again-btn').style.display = 'none';
       document.getElementById('result-title').textContent = previous.won ? '🎉 You already played today!' : '💀 You already played today!';
       document.getElementById('result-msg').textContent = previous.won
         ? `It was ${previous.saidName}! You got it in ${previous.guessCount} tr${previous.guessCount !== 1 ? 'ies' : 'y'}.`
@@ -255,15 +254,16 @@ function endQuoteGame(won) {
 
   if (quoteMode === 'daily') {
     saveDailyQuoteResult(won, quoteTarget.said, quoteGuesses.length);
+    updateStats('daily', won, quoteGuesses.length);
   } else {
     updateStreak('quote', won);
     _renderStreakNums('quote');
+    updateStats('endless', won, quoteGuesses.length);
   }
 
-  const banner   = document.getElementById('result-banner');
-  const titleEl  = document.getElementById('result-title');
-  const msgEl    = document.getElementById('result-msg');
-  const againBtn = document.getElementById('play-again-btn');
+  const banner  = document.getElementById('result-banner');
+  const titleEl = document.getElementById('result-title');
+  const msgEl   = document.getElementById('result-msg');
 
   if (!won) triggerFreddyJumpscare(() => {});
 
@@ -275,10 +275,12 @@ function endQuoteGame(won) {
     ? `It was ${quoteTarget.said}! Guessed in ${quoteGuesses.length} tr${quoteGuesses.length !== 1 ? 'ies' : 'y'}.`
     : `It was ${quoteTarget.said}. Better luck next time!`;
 
-  if (quoteMode === 'daily') {
-    againBtn.style.display = 'none';
-  } else {
-    againBtn.style.display = '';
+  const isDaily = quoteMode === 'daily';
+  const switchBtn = document.getElementById('quote-play-switch-btn');
+  if (switchBtn) {
+    switchBtn.style.display = '';
+    switchBtn.textContent = isDaily ? '♾️ Play Endless' : '📅 Play Daily';
+    switchBtn.onclick = () => { window.location.href = isDaily ? 'quote.html?mode=endless' : 'quote.html?mode=daily'; };
   }
 
   renderResultChar(quoteChar);

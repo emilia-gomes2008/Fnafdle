@@ -31,12 +31,11 @@ function initGame(mode) {
       banner.classList.remove('lose');
       banner.classList.add('show');
       if (!previous.won) banner.classList.add('lose');
-      document.getElementById('play-again-btn').style.display = 'none';
       document.getElementById('result-title').textContent = previous.won ? '🎉 Already played today!' : '💀 Already played today!';
       document.getElementById('result-msg').textContent = previous.won
         ? `It was ${previous.targetName}! Got it in ${previous.guessCount} tries.`
         : `It was ${previous.targetName}. Try again tomorrow!`;
-      
+
       // Inject character image
       const char = CHARS.find(c => c.name === previous.targetName) || target;
       const imgCont = document.getElementById('result-char-container');
@@ -45,12 +44,6 @@ function initGame(mode) {
       resImg.className = 'result-char-img';
       resImg.src = '../assets/' + (char.img || 'images/default.png');
       imgCont.appendChild(resImg);
-
-      const statsBtn = document.createElement('button');
-      statsBtn.textContent = '📊 Stats';
-      statsBtn.style.cssText = 'margin-left:10px;background:var(--bg-cell);border:1px solid var(--border);';
-      statsBtn.onclick = () => showStatsModal('animatronic');
-      banner.appendChild(statsBtn);
       return;
     }
   } else {
@@ -266,13 +259,25 @@ function endGame(won) {
   } else {
     updateStreak('classic', won);
     _renderStreakNums('classic');
+    updateStats('endless', won, guesses.length);
   }
 
   const banner = document.getElementById('result-banner');
   banner.classList.add('show');
   if (!won) banner.classList.add('lose');
 
-  document.getElementById('play-again-btn').style.display = currentMode === 'daily' ? 'none' : '';
+  const isDaily = currentMode === 'daily';
+  const switchBtn = document.getElementById('play-switch-btn');
+  if (switchBtn) {
+    switchBtn.style.display = '';
+    switchBtn.textContent = isDaily ? '♾️ Play Endless' : '📅 Play Daily';
+    switchBtn.onclick = () => { window.location.href = isDaily ? 'classic.html?mode=endless' : 'classic.html?mode=daily'; };
+  }
+  const nextBtn = document.getElementById('next-btn');
+  if (nextBtn) {
+    nextBtn.style.display = '';
+    nextBtn.dataset.href = isDaily ? 'image.html?mode=daily' : 'image.html?mode=endless';
+  }
   document.getElementById('result-title').textContent = won ? '🎉 Got it!' : '💀 Game Over';
   document.getElementById('result-msg').textContent = won
     ? `It was ${target.name}! You guessed it in ${guesses.length} tries.`
@@ -284,14 +289,6 @@ function endGame(won) {
   resImg.className = 'result-char-img';
   resImg.src = '../assets/' + (target.img || 'images/default.png');
   imgCont.appendChild(resImg);
-
-  if (currentMode === 'daily') {
-    const statsBtn = document.createElement('button');
-    statsBtn.textContent = '📊 Stats';
-    statsBtn.style.cssText = 'margin-left:10px;background:var(--bg-cell);border:1px solid var(--border);';
-    statsBtn.onclick = () => showStatsModal('animatronic');
-    banner.appendChild(statsBtn);
-  }
 }
 
 function renderDropdown() {

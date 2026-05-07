@@ -7,6 +7,7 @@ let imgTarget, imgGuesses, imgGameOver;
 const IMG_MAX_GUESSES = 6;
 let imgSelectedIndex = -1;
 let imgHintUsed = false;
+let imgCurrentMode = new URLSearchParams(window.location.search).get('mode') || 'endless';
 
 const IMG_STEPS = [
   { blur: 18, scale: 2.4, grayscale: 1 },
@@ -18,27 +19,117 @@ const IMG_STEPS = [
   { blur: 0,  scale: 1,   grayscale: 0 },
 ];
 
-const imgInput = document.getElementById('img-search-input');
+const imgInput    = document.getElementById('img-search-input');
 const imgDropdown = document.getElementById('img-dropdown');
+const mysteryImg  = document.getElementById('mystery-img');
 
+// ── Daily helpers ─────────────────────────────────────
+function getDailyImgKey() {
+  const now = new Date();
+  return `fnaf_img_daily_${now.getFullYear()}_${now.getMonth() + 1}_${now.getDate()}`;
+}
+
+function getDailyImgIndex() {
+  const now = new Date();
+  const seed = (now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate()) ^ 0xcafebabe;
+  let h = seed ^ 0xdeadbeef;
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b);
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b);
+  h ^= h >>> 16;
+  return Math.abs(h) % CHARS_WITH_IMG.length;
+}
+
+function getDailyImgResult() {
+  try { return JSON.parse(localStorage.getItem(getDailyImgKey())); } catch { return null; }
+}
+
+function saveDailyImgResult(won, targetName, guessCount) {
+  localStorage.setItem(getDailyImgKey(), JSON.stringify({ won, targetName, guessCount }));
+}
+
+// ── Filter helpers ────────────────────────────────────
+function applyImageFilter(wrongCount) {
+  const step = IMG_STEPS[Math.min(wrongCount, IMG_STEPS.length - 1)];
+  mysteryImg.style.filter     = `blur(${step.blur}px) grayscale(${step.grayscale})`;
+  mysteryImg.style.transform  = `scale(${step.scale})`;
+  mysteryImg.style.transition = 'filter 0.6s ease, transform 0.6s ease';
+}
+
+function revealImage() {
+  const step = IMG_STEPS[IMG_STEPS.length - 1];
+  mysteryImg.style.filter    = `blur(${step.blur}px) grayscale(${step.grayscale})`;
+  mysteryImg.style.transform = `scale(${step.scale})`;
+}
+
+function resetImageInstant(wrongCount) {
+  const step = IMG_STEPS[Math.min(wrongCount, IMG_STEPS.length - 1)];
+  mysteryImg.style.transition = 'none';
+  mysteryImg.style.filter     = `blur(${step.blur}px) grayscale(${step.grayscale})`;
+  mysteryImg.style.transform  = `scale(${step.scale})`;
+  // Double rAF: first frame paints the instant state, second re-enables transitions
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    mysteryImg.style.transition = 'filter 0.6s ease, transform 0.6s ease';
+  }));
+}
+
+// ── Init ─────────────────────────────────────────────
 function initImageMode() {
-  imgTarget = CHARS_WITH_IMG[Math.floor(Math.random() * CHARS_WITH_IMG.length)];
-  imgGuesses = [];
-  imgGameOver = false;
+  imgGuesses    = [];
+  imgGameOver   = false;
   imgSelectedIndex = -1;
-  imgHintUsed = false;
+  imgHintUsed   = false;
 
-  const img = document.getElementById('mystery-img');
+  if (imgCurrentMode === 'daily') {
+    imgTarget = CHARS_WITH_IMG[getDailyImgIndex()];
+    document.getElementById('img-mode-badge').textContent = '📅 Image Daily';
+    document.getElementById('streak-widget').style.display = 'none';
+
+    const previous = getDailyImgResult();
+    if (previous) {
+      const banner = document.getElementById('img-result-banner');
+      banner.classList.remove('lose');
+      banner.classList.add('show');
+      if (!previous.won) banner.classList.add('lose');
+
+      document.getElementById('img-result-title').textContent =
+        previous.won ? '🎉 Already played today!' : '💀 Already played today!';
+      document.getElementById('img-result-msg').textContent = previous.won
+        ? `It was ${previous.targetName}! Got it in ${previous.guessCount} tries.`
+        : `It was ${previous.targetName}. Try again tomorrow!`;
+
+      const imgCont = document.getElementById('img-result-char-container');
+      imgCont.innerHTML = '';
+      const char = CHARS_WITH_IMG.find(c => c.name === previous.targetName) || imgTarget;
+      const resImg = document.createElement('img');
+      resImg.className = 'result-char-img';
+      resImg.src = '../assets/' + char.img;
+      imgCont.appendChild(resImg);
+
+      imgInput.disabled = true;
+      document.getElementById('img-search-area').style.display = 'none';
+      document.getElementById('img-hint-area').style.display = 'none';
+      document.getElementById('img-attempts-left').textContent = '';
+      document.getElementById('img-guesses-list').innerHTML = '';
+
+      mysteryImg.src = '../assets/' + imgTarget.img;
+      resetImageInstant(IMG_STEPS.length - 1);
+      return;
+    }
+  } else {
+    imgTarget = CHARS_WITH_IMG[Math.floor(Math.random() * CHARS_WITH_IMG.length)];
+    document.getElementById('img-mode-badge').textContent = '🔍 Image Mode';
+  }
+
+  mysteryImg.onerror = () => { mysteryImg.src = ''; };
   if (_isAprilFools()) {
     const c = document.createElement('canvas'); c.width = 1; c.height = 1;
     c.getContext('2d').fillRect(0, 0, 1, 1);
-    img.src = c.toDataURL();
+    mysteryImg.src = c.toDataURL();
   } else {
-    img.src = '../assets/' + imgTarget.img;
+    mysteryImg.src = '../assets/' + imgTarget.img;
   }
-  img.onerror = () => { img.src = ''; };
 
-  applyImageFilter(0);
+  resetImageInstant(0);
 
   document.getElementById('img-guesses-list').innerHTML = '';
   const banner = document.getElementById('img-result-banner');
@@ -54,23 +145,10 @@ function initImageMode() {
   document.getElementById('img-hint-btn').disabled = false;
   document.getElementById('img-hint-btn').textContent = '💡 Use Hint (first letter)';
 
+  // no play-again-btn in new layout
+
   updateImgAttemptsLeft();
-  showStreakWidget('image');
-}
-
-function applyImageFilter(wrongCount) {
-  const step = IMG_STEPS[Math.min(wrongCount, IMG_STEPS.length - 1)];
-  const img = document.getElementById('mystery-img');
-  img.style.filter = `blur(${step.blur}px) grayscale(${step.grayscale})`;
-  img.style.transform = `scale(${step.scale})`;
-  img.style.transition = 'filter 0.6s ease, transform 0.6s ease';
-}
-
-function revealImage() {
-  const step = IMG_STEPS[IMG_STEPS.length - 1];
-  const img = document.getElementById('mystery-img');
-  img.style.filter = `blur(${step.blur}px) grayscale(${step.grayscale})`;
-  img.style.transform = `scale(${step.scale})`;
+  if (imgCurrentMode === 'endless') showStreakWidget('image');
 }
 
 function updateImgAttemptsLeft() {
@@ -154,8 +232,26 @@ function endImgGame(won) {
   document.getElementById('img-search-area').style.display = 'none';
   document.getElementById('img-hint-area').style.display = 'none';
 
-  updateStreak('image', won);
-  _renderStreakNums('image');
+  const isDaily = imgCurrentMode === 'daily';
+  const switchBtn = document.getElementById('img-play-switch-btn');
+  if (switchBtn) {
+    switchBtn.style.display = '';
+    switchBtn.textContent = isDaily ? '♾️ Play Endless' : '📅 Play Daily';
+    switchBtn.onclick = () => { window.location.href = isDaily ? 'image.html?mode=endless' : 'image.html?mode=daily'; };
+  }
+  const nextBtn = document.getElementById('img-next-btn');
+  if (nextBtn) {
+    nextBtn.style.display = '';
+    nextBtn.dataset.href = isDaily ? 'book.html?mode=book_daily' : 'book.html?mode=book_endless';
+  }
+  if (isDaily) {
+    saveDailyImgResult(won, imgTarget.name, imgGuesses.length);
+    updateStats('daily', won, imgGuesses.length);
+  } else {
+    updateStreak('image', won);
+    _renderStreakNums('image');
+    updateStats('endless', won, imgGuesses.length);
+  }
 
   const banner = document.getElementById('img-result-banner');
   banner.classList.add('show');
@@ -214,7 +310,7 @@ imgInput.addEventListener('keydown', e => {
   if (!items.length) return;
   switch (e.key) {
     case 'ArrowDown': e.preventDefault(); imgSelectedIndex = Math.min(imgSelectedIndex + 1, items.length - 1); break;
-    case 'ArrowUp': e.preventDefault(); imgSelectedIndex = Math.max(imgSelectedIndex - 1, 0); break;
+    case 'ArrowUp':   e.preventDefault(); imgSelectedIndex = Math.max(imgSelectedIndex - 1, 0); break;
     case 'Enter':
       if (imgSelectedIndex >= 0) { items[imgSelectedIndex].click(); e.preventDefault(); } break;
     case 'Tab':

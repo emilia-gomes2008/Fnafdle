@@ -941,7 +941,19 @@ function endBookGame(won) {
   banner.classList.add('show');
   if (!won) banner.classList.add('lose');
 
-  document.getElementById('book-play-again-btn').style.display = currentMode === 'book_daily' ? 'none' : '';
+  const isBookDaily = currentMode === 'book_daily';
+  document.getElementById('book-play-again-btn').style.display = isBookDaily ? 'none' : '';
+  const bookSwitchBtn = document.getElementById('book-play-switch-btn');
+  if (bookSwitchBtn) {
+    bookSwitchBtn.style.display = '';
+    bookSwitchBtn.textContent = isBookDaily ? '♾️ Play Endless' : '📅 Play Daily';
+    bookSwitchBtn.onclick = () => { window.location.href = isBookDaily ? 'book.html?mode=book_endless' : 'book.html?mode=book_daily'; };
+  }
+  const bookNextBtn = document.getElementById('book-next-btn');
+  if (bookNextBtn) {
+    bookNextBtn.style.display = '';
+    bookNextBtn.dataset.href = isBookDaily ? 'quote.html?mode=daily' : 'quote.html?mode=endless';
+  }
   document.getElementById('book-result-title').textContent = won ? '🎉 Got it!' : '💀 Game Over';
   document.getElementById('book-result-msg').textContent = won
     ? `It was "${bookTarget.title}"! Guessed in ${bookGuesses.length} tries.`

@@ -458,6 +458,7 @@ body {
   color: var(--red-text);
 }
 
+
 .result-msg {
   color: var(--text-muted);
   font-size: 0.85rem;

@@ -49,7 +49,7 @@
   <div class="container" id="image-screen" style="display:none;">
 
     <div class="mode-badge-row">
-      <span class="mode-badge">🔍 Image Mode</span>
+      <span class="mode-badge" id="img-mode-badge">🔍 Image Mode</span>
       <div id="streak-widget" class="streak-widget" style="display:none">
         <div class="streak-item"><span class="streak-label">🔥 Streak</span><span class="streak-num" id="streak-current">0</span></div>
         <div class="streak-divider"></div>
@@ -87,8 +87,11 @@
         <p class="result-msg" id="img-result-msg"></p>
       </div>
       <div class="result-buttons">
-        <button onclick="initImageMode()">Play Again</button>
-        <button onclick="goHome()" style="margin-left:10px; background:var(--bg-cell); border:1px solid var(--border);">← Modes</button>
+        <button id="img-next-btn" style="display:none" onclick="window.location.href=this.dataset.href">▶ Next</button>
+        <button id="img-daily-stats-btn" onclick="showStatsModal('daily')">📊 Daily Stats</button>
+        <button id="img-play-switch-btn" style="display:none"></button>
+        <button id="img-endless-stats-btn" onclick="showStatsModal('endless')">📊 Endless Stats</button>
+        <button class="btn-modes" onclick="goHome()" style="background:var(--bg-cell); border:1px solid var(--border);">← Modes</button>
       </div>
     </div>
 

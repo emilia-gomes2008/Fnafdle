@@ -106,9 +106,11 @@
         <p class="result-msg" id="result-msg"></p>
       </div>
       <div class="result-buttons">
-        <button id="play-again-btn" onclick="restartCurrent()">Play Again</button>
-        <button onclick="goHome()"
-          style="margin-left:10px; background:var(--bg-cell); border:1px solid var(--border);">← Modes</button>
+        <button id="next-btn" style="display:none" onclick="window.location.href=this.dataset.href">▶ Next</button>
+        <button id="daily-stats-btn" onclick="showStatsModal('daily')">📊 Daily Stats</button>
+        <button id="play-switch-btn" style="display:none"></button>
+        <button id="endless-stats-btn" onclick="showStatsModal('endless')">📊 Endless Stats</button>
+        <button class="btn-modes" onclick="goHome()" style="background:var(--bg-cell); border:1px solid var(--border);">← Modes</button>
       </div>
     </div>
 

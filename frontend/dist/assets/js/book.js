@@ -28,12 +28,11 @@ function initBookGame(mode) {
       banner.classList.remove('lose');
       banner.classList.add('show');
       if (!previous.won) banner.classList.add('lose');
-      document.getElementById('book-play-again-btn').style.display = 'none';
       document.getElementById('book-result-title').textContent = previous.won ? '🎉 Already played today!' : '💀 Already played today!';
       document.getElementById('book-result-msg').textContent = previous.won
         ? `It was "${previous.targetTitle}"! Got it in ${previous.guessCount} tries.`
         : `It was "${previous.targetTitle}". Try again tomorrow!`;
-      
+
       // Inject book image
       const book = BOOKS.find(b => b.title === previous.targetTitle) || bookTarget;
       const imgCont = document.getElementById('book-result-img-container');
@@ -46,12 +45,6 @@ function initBookGame(mode) {
         resImg.src = '../assets/' + book.img;
         imgCont.appendChild(resImg);
       }
-
-      const statsBtn = document.createElement('button');
-      statsBtn.textContent = '📊 Stats';
-      statsBtn.style.cssText = 'margin-left:10px;background:var(--bg-cell);border:1px solid var(--border);';
-      statsBtn.onclick = () => showStatsModal('book');
-      banner.appendChild(statsBtn);
       return;
     }
   } else {
@@ -194,13 +187,26 @@ function endBookGame(won) {
   } else {
     updateStreak('book', won);
     _renderStreakNums('book');
+    updateStats('endless', won, bookGuesses.length);
   }
 
   const banner = document.getElementById('book-result-banner');
   banner.classList.add('show');
   if (!won) banner.classList.add('lose');
 
-  document.getElementById('book-play-again-btn').style.display = currentMode === 'book_daily' ? 'none' : '';
+  const isBookDaily = currentMode === 'book_daily';
+  const switchBtn = document.getElementById('book-play-switch-btn');
+  if (switchBtn) {
+    switchBtn.style.display = '';
+    switchBtn.textContent = isBookDaily ? '♾️ Play Endless' : '📅 Play Daily';
+    switchBtn.onclick = () => { window.location.href = isBookDaily ? 'book.html?mode=book_endless' : 'book.html?mode=book_daily'; };
+  }
+  const nextBtn = document.getElementById('book-next-btn');
+  if (nextBtn) {
+    nextBtn.style.display = '';
+    nextBtn.dataset.href = isBookDaily ? 'quote.html?mode=daily' : 'quote.html?mode=endless';
+  }
+
   document.getElementById('book-result-title').textContent = won ? '🎉 Got it!' : '💀 Game Over';
   document.getElementById('book-result-msg').textContent = won
     ? `It was "${bookTarget.title}"! Guessed in ${bookGuesses.length} tries.`
@@ -215,14 +221,6 @@ function endBookGame(won) {
     resImg.style.width = '85px';
     resImg.src = '../assets/' + bookTarget.img;
     imgCont.appendChild(resImg);
-  }
-
-  if (currentMode === 'book_daily') {
-    const statsBtn = document.createElement('button');
-    statsBtn.textContent = '📊 Stats';
-    statsBtn.style.cssText = 'margin-left:10px;background:var(--bg-cell);border:1px solid var(--border);';
-    statsBtn.onclick = () => showStatsModal('book');
-    banner.appendChild(statsBtn);
   }
 }
 
