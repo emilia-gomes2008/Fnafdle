@@ -94,7 +94,7 @@ const CHARS = [
     year: 1993,
     img: "images/chars/endo/endo01.png"
   },
-{
+  {
     name: "Mike Schmidt",
     animal: "Human",
     type: "Fake Identity",
