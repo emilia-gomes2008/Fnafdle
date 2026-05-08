@@ -64,7 +64,7 @@ const CHARS = [
     type: "Human",
     color: ["Blue"],
     eyeColor: ["Black"],
-    year: "Unconfirmed",
+    year: 1993,
     img: "images/chars/human/phone_guy.png"
   },
   {
@@ -331,7 +331,7 @@ const CHARS = [
     type: "Human",
     color: ["Green"],
     eyeColor: ["Black"],
-    year: "Unconfirmed",
+    year: 2023,
     img: "images/chars/human/phone_dude.png"
   },
   {
@@ -580,7 +580,7 @@ const CHARS = [
     type: "Human",
     color: ["White"],
     eyeColor: ["Black"],
-    year: "Unconfirmed",
+    year: 1983,
     img: "images/chars/human/david_afton.png"
   },
   {
