@@ -332,7 +332,7 @@ function handleRoomUpdate(room) {
     updateWaitingPlayerList(room);
   } else if (room.state === 'selecting') {
     if (prevState === 'finished' || prevState === 'playing' || prevState === 'waiting') {
-      gameInit = false; myChar = null;
+      gameInit = false; myChar = null; selectionShown = false;
     }
     if (!selectionShown) {
       if (playerSlot === 'player1') subscribeEvents();
@@ -1183,9 +1183,7 @@ function renderResultScreen(room) {
 // ── Jumpscare picker ──────────────────────────────────────────────────────────
 const JUMPSCARE_NAMES = {
   freddy: 'Freddy', bonnie: 'Bonnie', chica: 'Chica', foxy: 'Foxy',
-  golden_freddy: 'Golden Freddy', withered_bonnie: 'Withered Bonnie',
-  withered_chica: 'Withered Chica', withered_foxy: 'Withered Foxy',
-  withered_golden_freddy: 'W. Golden Freddy',
+  golden_freddy: 'Golden Freddy',
 };
 
 function buildJumpscarePicker() {
@@ -1193,9 +1191,9 @@ function buildJumpscarePicker() {
   picker.innerHTML = '';
   const isAprilFools = _isAprilFools();
 
-  // On April 1st: only Withered Foxy available (and it always plays the meme)
+  // On April 1st: only Foxy available (plays the meme instead)
   const entries = isAprilFools
-    ? [['withered_foxy', 'Withered Foxy']]
+    ? [['foxy', 'Foxy']]
     : Object.entries(JUMPSCARE_NAMES);
 
   entries.forEach(([key, label]) => {
@@ -1203,8 +1201,8 @@ function buildJumpscarePicker() {
     btn.className = 'mp-btn small jumpscare-opt-btn';
     btn.textContent = label;
     btn.addEventListener('click', async () => {
-      // withered_foxy → meme on April 1st
-      const gif = (key === 'withered_foxy' && isAprilFools) ? 'withered_foxy_meme' : key;
+      // foxy → meme on April 1st
+      const gif = (key === 'foxy' && isAprilFools) ? 'withered_foxy_meme' : key;
       document.getElementById('jumpscare-btn').style.display = 'none';
       picker.style.display = 'none';
       await db.from('mp_events').insert({
@@ -1234,7 +1232,7 @@ async function triggerRematch() {
     player3_char: null, player3_ready: false,
     player4_char: null, player4_ready: false,
     current_question: null, phase: null, winner: null,
-    turn_order: null, guessed_chars: null,
+    turn_order: null, guessed_chars: null, rankings: null, first_asker: null,
   }).eq('id', roomId);
   selectionShown = true;
   showSelectionScreen();

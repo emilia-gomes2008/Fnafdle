@@ -273,8 +273,11 @@ async function _getGifDurationMs(src) {
   return _gifDurCache[src];
 }
 
+const _JUMPSCARE_EXT = { freddy: 'webp', bonnie: 'webp', chica: 'webp', foxy: 'webp', golden_freddy: 'webp' };
+
 function triggerJumpscare(gifName, callback) {
-  const src = `../assets/images/jumpscare/${gifName}.gif`;
+  const ext = _JUMPSCARE_EXT[gifName] || 'gif';
+  const src = `../assets/images/jumpscare/${gifName}.${ext}`;
 
   const overlay = document.createElement('div');
   overlay.id = 'freddy-jumpscare';
