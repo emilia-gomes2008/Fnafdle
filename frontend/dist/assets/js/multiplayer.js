@@ -333,6 +333,7 @@ function handleRoomUpdate(room) {
   } else if (room.state === 'selecting') {
     if (prevState === 'finished' || prevState === 'playing' || prevState === 'waiting') {
       gameInit = false; myChar = null; selectionShown = false;
+      if (prevState === 'finished') refreshMpPlayerSlot(room); // slot may have changed on rematch
     }
     if (!selectionShown) {
       if (playerSlot === 'player1') subscribeEvents();
@@ -340,10 +341,13 @@ function handleRoomUpdate(room) {
       showSelectionScreen();
     }
   } else if (room.state === 'playing') {
+    // If other player left and only 1 active, end the game
+    const activeCount = allSlots(getPlayerCount()).filter(s => room[`${s}_name`]).length;
+    if (activeCount <= 1 && gameInit) { renderResultScreen(room); return; }
     if (!gameInit) renderGameScreen(room);
     else updateTurnUI(room.phase, room.current_question);
   } else if (room.state === 'finished') {
-    renderResultScreen(room);
+    renderResultScreen(room); // also re-renders when vote count changes
   }
 }
 
@@ -1095,16 +1099,6 @@ function renderEvent(ev) {
       const tLabel = targetSlot && roomData ? ` (${roomData[`${targetSlot}_name`] || targetSlot}'s char)` : '';
       msg.textContent = `${sender} guessed "${guessedChar}"${tLabel} ❌`;
     }
-  } else if (ev.type === 'rematch_vote') {
-    rematchVotes.add(ev.player);
-    const pc = getPlayerCount();
-    if (rematchVotes.size >= pc) {
-      triggerRematch();
-    } else {
-      const btn = document.getElementById('rematch-btn');
-      if (btn && !btn.disabled) btn.textContent = `🔄 Rematch (${rematchVotes.size}/${pc} ready)`;
-    }
-    return;
   } else if (ev.type === 'jumpscare') {
     if (!isMe) triggerJumpscare(ev.content || 'freddy', () => {});
     return;
@@ -1117,12 +1111,25 @@ function renderEvent(ev) {
 // ── Result screen ─────────────────────────────────────────────────────────────
 function renderResultScreen(room) {
   stopPeriodicSync();
-  rematchVotes.clear();
+  const votes = room.phase || '';
+  const pc    = getPlayerCount();
+  const allVoted = allSlots(pc).every(s => votes.includes(s));
+  if (allVoted) { triggerRematch(); return; }
+
   const rematchBtn = document.getElementById('rematch-btn');
-  rematchBtn.disabled = false;
-  rematchBtn.textContent = '🔄 Rematch';
+  const activeCount = allSlots(pc).filter(s => room[`${s}_name`]).length;
+  const wonByLeave = activeCount <= 1;
+  if (wonByLeave) {
+    rematchBtn.style.display = 'none';
+  } else {
+    rematchBtn.style.display = '';
+    const myVoted = votes.includes(playerSlot);
+    rematchBtn.disabled = myVoted;
+    rematchBtn.textContent = myVoted
+      ? `⏳ Waiting... (${allSlots(pc).filter(s => votes.includes(s)).length}/${pc})`
+      : '🔄 Rematch';
+  }
   showScreen('result');
-  const pc = room.player_count || 2;
   let rankings = [];
   try { rankings = JSON.parse(room.rankings) || []; } catch {}
   // Last place = whoever isn't in rankings
@@ -1219,34 +1226,126 @@ document.getElementById('jumpscare-btn').addEventListener('click', () => {
 });
 
 // ── Rematch ───────────────────────────────────────────────────────────────────
-const rematchVotes = new Set();
-
 async function triggerRematch() {
   stopPeriodicSync();
-  rematchVotes.clear();
   gameInit = false; myChar = null; selectionShown = false;
-  await db.from('mp_rooms').update({
-    state: 'selecting',
-    player1_char: null, player1_ready: false,
-    player2_char: null, player2_ready: false,
-    player3_char: null, player3_ready: false,
-    player4_char: null, player4_ready: false,
+
+  const room     = roomData;
+  const voters   = (room.phase || '').split(':').filter(s => /^player\d+$/.test(s));
+  const ordered  = voters.sort((a, b) => +a.slice(6) - +b.slice(6));
+  const newCount = Math.max(2, ordered.length);
+
+  const update = {
+    state: 'selecting', player_count: newCount,
     current_question: null, phase: null, winner: null,
     turn_order: null, guessed_chars: null, rankings: null, first_asker: null,
-  }).eq('id', roomId);
+  };
+
+  // Compact voter slots → player1, player2, …
+  ordered.forEach((origSlot, idx) => {
+    const ns = `player${idx + 1}`;
+    update[`${ns}_id`]    = room[`${origSlot}_id`];
+    update[`${ns}_name`]  = room[`${origSlot}_name`];
+    update[`${ns}_char`]  = null;
+    update[`${ns}_ready`] = false;
+  });
+  // Clear unused slots
+  for (let i = ordered.length + 1; i <= 4; i++) {
+    const ns = `player${i}`;
+    update[`${ns}_id`] = null; update[`${ns}_name`] = null;
+    update[`${ns}_char`] = null; update[`${ns}_ready`] = false;
+  }
+
+  await db.from('mp_rooms').update(update).eq('id', roomId);
+  // Re-detect my slot after compaction
+  refreshMpPlayerSlot({ ...room, ...update });
   selectionShown = true;
   showSelectionScreen();
+}
+
+function refreshMpPlayerSlot(room) {
+  const found = ['player1','player2','player3','player4'].find(s => room[`${s}_id`] === playerId);
+  if (!found) {
+    // Not in the rematch — redirect to lobby
+    setTimeout(() => location.reload(), 2500);
+    return;
+  }
+  playerSlot = found;
 }
 
 document.getElementById('rematch-btn').addEventListener('click', async () => {
   const btn = document.getElementById('rematch-btn');
   btn.disabled = true;
-  rematchVotes.add(playerSlot);
-  const pc = getPlayerCount();
-  if (rematchVotes.size >= pc) { triggerRematch(); return; }
-  btn.textContent = `⏳ Waiting... (${rematchVotes.size}/${pc})`;
-  await db.from('mp_events').insert({
-    room_id: roomId, player: playerSlot, type: 'rematch_vote', content: 'yes',
+
+  const room    = roomData;
+  const pc      = getPlayerCount();
+  const current = room.phase || '';
+  if (current.includes(playerSlot)) return; // already voted
+
+  const newVotes = current ? current + ':' + playerSlot : playerSlot;
+  btn.textContent = `⏳ Waiting... (${allSlots(pc).filter(s => newVotes.includes(s)).length}/${pc})`;
+
+  await db.from('mp_rooms').update({ phase: newVotes }).eq('id', roomId).eq('state', 'finished');
+
+  // If I'm the last vote, trigger immediately
+  if (allSlots(pc).every(s => newVotes.includes(s))) triggerRematch();
+});
+
+// ── Player leave detection ────────────────────────────────────────────────────
+async function cleanupMpPlayerLeft() {
+  if (!roomId || !playerSlot) return;
+  const room      = roomData;
+  const savedId   = roomId;
+  const savedSlot = playerSlot;
+  roomId = null; playerSlot = null; roomData = null;
+  if (!room) return;
+
+  const pc     = getPlayerCount();
+  const active = allSlots(pc).filter(s => room[`${s}_name`] && s !== savedSlot);
+  const update = {
+    [`${savedSlot}_name`]: null,
+    [`${savedSlot}_id`]:   null,
+    [`${savedSlot}_char`]: null,
+  };
+  if (active.length === 1 && room.state === 'playing') {
+    update.state    = 'finished';
+    update.rankings = JSON.stringify([active[0]]);
+    update.winner   = active[0];
+  }
+  try { await db.from('mp_rooms').update(update).eq('id', savedId); } catch (_) {}
+}
+
+const _mpCoreGoHome = window.goHome;
+window.goHome = async function() {
+  await cleanupMpPlayerLeft();
+  _mpCoreGoHome?.();
+};
+
+window.addEventListener('beforeunload', () => {
+  if (!roomId || !playerSlot) return;
+  const savedId   = roomId;
+  const savedSlot = playerSlot;
+  const room      = roomData || {};
+  roomId = null; playerSlot = null; roomData = null;
+
+  const pc     = getPlayerCount();
+  const active = allSlots(pc).filter(s => room[`${s}_name`] && s !== savedSlot);
+  const body   = { [`${savedSlot}_name`]: null, [`${savedSlot}_id`]: null };
+  if (active.length === 1 && room.state === 'playing') {
+    body.state    = 'finished';
+    body.rankings = JSON.stringify([active[0]]);
+    body.winner   = active[0];
+  }
+  fetch(`${cfg.SUPABASE_URL}/rest/v1/mp_rooms?id=eq.${savedId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': cfg.SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${cfg.SUPABASE_ANON_KEY}`,
+      'Prefer': 'return=minimal',
+    },
+    body: JSON.stringify(body),
+    keepalive: true,
   });
 });
 
