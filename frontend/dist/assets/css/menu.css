@@ -41,6 +41,7 @@
 .mode-category-icon {
   font-size: 2rem;
   flex-shrink: 0;
+  transform: translateY(-14px);
 }
 
 .mode-category-label {
@@ -161,3 +162,4 @@
 .mode-card-extreme .mode-name {
   color: #cc1a1a;
 }
+

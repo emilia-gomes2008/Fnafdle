@@ -455,6 +455,78 @@
 }
 .jumpscare-opt-btn:hover:not(:disabled) { background: #3a1a10 !important; border-color: #c0582a !important; }
 
+/* ── Setup label (shared with party) ────────────────── */
+.setup-label {
+  font-family: 'Oswald', sans-serif; font-size: .75rem;
+  text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);
+}
+
+/* ── Create Room Panel ───────────────────────────────── */
+.create-room-wrap {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 12px; width: 100%; max-width: 340px;
+  background: var(--bg-cell); border: 1px solid var(--gold-dark);
+  border-radius: 12px; padding: 16px;
+}
+.create-room-code-display {
+  font-family: 'Creepster', cursive; font-size: 2rem; color: var(--gold);
+  letter-spacing: 8px; padding: 8px 20px; text-align: center;
+  border: 1px dashed var(--gold-dark); border-radius: 8px;
+  background: rgba(200,134,0,.05); width: 100%; user-select: all;
+}
+.privacy-toggle-row { display: flex; gap: 8px; }
+.privacy-opt {
+  display: flex; align-items: center; gap: 5px; cursor: pointer;
+  font-family: 'Oswald', sans-serif; font-size: .9rem; color: var(--text);
+  padding: 6px 16px; border-radius: 20px;
+  border: 1px solid var(--border); background: var(--bg-card);
+  transition: background .1s, border-color .1s; user-select: none;
+}
+.privacy-opt:has(input:checked) {
+  background: var(--gold-dark); border-color: var(--gold); color: #fff;
+}
+.privacy-opt input { display: none; }
+.create-btns-row { display: flex; gap: 8px; width: 100%; }
+.create-btns-row .mp-btn { flex: 1; margin: 0; }
+
+/* ── Public Lobby ────────────────────────────────────── */
+.public-lobby-section {
+  width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 8px;
+}
+.public-lobby-header {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.public-lobby-list {
+  display: flex; flex-direction: column; gap: 6px;
+  max-height: 260px; overflow-y: auto;
+}
+.lobby-room-entry {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg-cell); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 12px;
+  transition: border-color .15s;
+}
+.lobby-room-entry:hover { border-color: var(--gold-dark); }
+.lobby-room-info { flex: 1; min-width: 0; }
+.lobby-room-name {
+  font-family: 'Oswald', sans-serif; font-size: .88rem; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.lobby-room-meta {
+  font-family: 'Oswald', sans-serif; font-size: .7rem; color: var(--text-muted);
+  margin-top: 2px;
+}
+.lobby-room-code {
+  font-family: 'Creepster', cursive; font-size: 1rem; color: var(--gold);
+  letter-spacing: 2px; flex-shrink: 0;
+}
+.lobby-empty {
+  text-align: center; color: var(--text-muted);
+  font-family: 'Oswald', sans-serif; font-size: .82rem;
+  padding: 16px; border: 1px dashed var(--border); border-radius: 8px;
+}
+.lobby-room-entry .mp-btn { margin: 0; padding: 6px 12px; font-size: .78rem; }
+
 /* ── Responsive ──────────────────────────────────────── */
 @media (max-width: 860px) {
   .qa-panel { flex: 0 0 320px; }

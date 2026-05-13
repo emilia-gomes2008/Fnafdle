@@ -51,27 +51,64 @@
           </div>
         </div>
 
-        <div class="lobby-buttons">
-          <button class="mp-btn primary" id="create-room-btn">🏠 Create Room</button>
+        <div class="lobby-buttons" id="lobby-buttons">
+          <button class="mp-btn primary" id="create-room-btn">Create Room</button>
           <div class="join-row">
             <input id="join-code" class="mp-input code-input" type="text" placeholder="Code..." maxlength="6"/>
             <button class="mp-btn" id="join-room-btn">Join</button>
           </div>
         </div>
+
+        <!-- Create Room Panel -->
+        <div id="create-room-panel" style="display:none">
+          <div class="create-room-wrap">
+            <div class="setup-label">Room Name (optional)</div>
+            <input id="create-room-name" class="mp-input" type="text" placeholder="e.g. Freddy's Room" maxlength="30" style="max-width:none;width:100%" />
+            <div class="setup-label">Room Code</div>
+            <div class="create-room-code-display" id="create-room-code"></div>
+            <div class="setup-label">Visibility</div>
+            <div class="privacy-toggle-row">
+              <label class="privacy-opt">
+                <input type="radio" name="party-privacy" value="public" checked />
+                Public
+              </label>
+              <label class="privacy-opt">
+                <input type="radio" name="party-privacy" value="private" />
+                Private
+              </label>
+            </div>
+            <div class="create-btns-row">
+              <button class="mp-btn" id="cancel-create-btn">Cancel</button>
+              <button class="mp-btn primary" id="confirm-create-btn">Create!</button>
+            </div>
+          </div>
+        </div>
+
         <p id="lobby-error" class="mp-error"></p>
+
+        <!-- Public Rooms List -->
+        <div class="public-lobby-section" id="public-lobby-section">
+          <div class="public-lobby-header">
+            <span class="setup-label">Public Rooms</span>
+            <button class="mp-btn small" id="refresh-lobby-btn">↻ Refresh</button>
+          </div>
+          <div id="public-lobby-list" class="public-lobby-list">
+            <div class="lobby-empty">Loading...</div>
+          </div>
+        </div>
 
         <!-- Rules -->
         <div class="rules-toggle-wrap">
-          <button class="mp-btn small" onclick="toggleRules()">📋 How to Play</button>
+          <button class="mp-btn small" onclick="toggleRules()"><span class="ee">📋</span> How to Play</button>
           <div id="rules-box" class="rules-box" style="display:none">
             <ul class="rules-list">
-              <li>🎲 Each player on their own device rolls the dice and moves on the shared board.</li>
-              <li>🔄 Goal: complete <strong>5 laps</strong>. Each lap, 10 coins = 1 pizza automatically.</li>
-              <li>🏆 The player with the <strong>most pizzas</strong> after 5 laps wins!</li>
-              <li>🪙 Yellow space: +2 coins &nbsp;|&nbsp; 🍕 Green space: +1 pizza</li>
-              <li>🎮 Red space: Minigame for everyone! &nbsp;|&nbsp; ❓ Orange space: Random event</li>
-              <li>👥 If two players land on the same space, a minigame starts between them!</li>
-              <li>🎮 Minigames: everyone plays simultaneously, each on their own device.</li>
+              <li><span class="e">🎲</span> Each player on their own device rolls the dice and moves on the shared board.</li>
+              <li><span class="e">🔄</span> Goal: complete <strong>5 laps</strong>. Each lap, 10 coins = 1 pizza automatically.</li>
+              <li><span class="e">🏆</span> The player with the <strong>most pizzas</strong> after 5 laps wins!</li>
+              <li><span class="e">🪙</span> Yellow space: +2 coins &nbsp;|&nbsp; <span class="e">🍕</span> Green space: +1 pizza</li>
+              <li><span class="e">🎮</span> Red space: Minigame for everyone! &nbsp;|&nbsp; <span class="e">❓</span> Orange space: Random event</li>
+              <li><span class="e">👥</span> If two players land on the same space, a minigame starts between them!</li>
+              <li><span class="e">🎮</span> Minigames: everyone plays simultaneously, each on their own device.</li>
             </ul>
           </div>
         </div>
@@ -85,7 +122,9 @@
         <p class="mp-sub" id="waiting-sub">Share this code with your friends:</p>
         <div class="room-code-display" id="waiting-code"></div>
         <button class="mp-btn" id="copy-code-btn">Copy Code</button>
+        <p class="mp-sub" id="waiting-room-name" style="font-size:.85rem;color:var(--gold);margin:-8px 0;min-height:1em;"></p>
         <div id="waiting-players" class="waiting-players"></div>
+        <button class="mp-btn primary" id="start-early-btn" style="display:none">Start Game</button>
 
         <!-- Character selection (shown once in the room) -->
         <div id="char-select-wrap" style="display:none">

@@ -34,6 +34,11 @@
   font-style: normal;
 }
 
+/* Emoji alignment fix — applied via manual spans in HTML or JS wrapping */
+.e { display: inline-block; transform: translateY(-8px); }
+.ee { display: inline-block; transform: translateY(7px); }
+
+
 body {
   font-family: 'FNaF', sans-serif;
   background-color: var(--bg-page);

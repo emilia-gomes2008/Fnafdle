@@ -171,21 +171,52 @@ function lobbyError(msg) {
 
 // ── Lobby setup ───────────────────────────────────────────────────────────────
 function initLobby() {
-  document.getElementById('create-room-btn').addEventListener('click', createRoom);
+  document.getElementById('create-room-btn').addEventListener('click', showPartyCreatePanel);
+  document.getElementById('confirm-create-btn').addEventListener('click', confirmCreatePartyRoom);
+  document.getElementById('cancel-create-btn').addEventListener('click', cancelPartyCreateRoom);
   document.getElementById('join-room-btn').addEventListener('click',   joinRoom);
   document.getElementById('copy-code-btn').addEventListener('click',   copyCode);
+  document.getElementById('refresh-lobby-btn').addEventListener('click', loadPublicPartyLobby);
+  document.getElementById('start-early-btn').addEventListener('click', startEarlyParty);
+  loadPublicPartyLobby();
 }
 
-// ── Create / Join ─────────────────────────────────────────────────────────────
-async function createRoom() {
+// ── Create Panel ──────────────────────────────────────────────────────────────
+function showPartyCreatePanel() {
   const name = document.getElementById('lobby-name').value.trim();
   if (!name) { lobbyError('Enter your name!'); return; }
+  lobbyError('');
+
+  document.getElementById('create-room-code').textContent = genCode();
+  document.getElementById('create-room-name').value = '';
+  const pubRadio = document.querySelector('input[name="party-privacy"][value="public"]');
+  if (pubRadio) pubRadio.checked = true;
+
+  document.getElementById('lobby-buttons').style.display = 'none';
+  document.getElementById('create-room-panel').style.display = '';
+  document.getElementById('public-lobby-section').style.display = 'none';
+}
+
+function cancelPartyCreateRoom() {
+  document.getElementById('lobby-buttons').style.display = '';
+  document.getElementById('create-room-panel').style.display = 'none';
+  document.getElementById('public-lobby-section').style.display = '';
+}
+
+async function confirmCreatePartyRoom() {
+  const name = document.getElementById('lobby-name').value.trim();
+  if (!name) { lobbyError('Enter your name!'); return; }
+
+  const code      = document.getElementById('create-room-code').textContent;
+  const roomName  = document.getElementById('create-room-name').value.trim() || `${name}'s Room`;
+  const isPrivate = document.querySelector('input[name="party-privacy"]:checked')?.value === 'private';
   const pc = +document.querySelector('input[name="party-count"]:checked').value;
 
   const startPos = Math.floor(Math.random() * BOARD_SIZE);
   const { data, error } = await db.from('party_rooms').insert({
-    code: genCode(), player_count: pc, state: 'waiting',
+    code, player_count: pc, state: 'waiting',
     player1_id: playerId, player1_name: name, player1_char: null,
+    room_name: roomName, is_private: isPrivate,
     board: JSON.stringify(generateBoard()),
     player_pos:       JSON.stringify({ player1: startPos }),
     player_coins:     JSON.stringify({ player1: 0 }),
@@ -194,11 +225,102 @@ async function createRoom() {
     current_slot: 'player1', turn_phase: 'roll',
   }).select().single();
 
-  if (error) { lobbyError(error.message); return; }
+  if (error) { cancelPartyCreateRoom(); lobbyError(error.message); return; }
   roomId = data.id; playerSlot = 'player1'; roomData = data;
+  cancelPartyCreateRoom();
   subscribeRoom();
   showWaiting(data);
 }
+
+// ── Public Party Lobby ────────────────────────────────────────────────────────
+async function loadPublicPartyLobby() {
+  const listEl = document.getElementById('public-lobby-list');
+  if (!listEl) return;
+  listEl.innerHTML = '<div class="lobby-empty">Loading...</div>';
+
+  let data, error;
+  ({ data, error } = await db.from('party_rooms')
+    .select('id, code, room_name, player_count, player1_name, player2_name, player3_name, player4_name')
+    .eq('state', 'waiting')
+    .or('is_private.eq.false,is_private.is.null')
+    .order('created_at', { ascending: false })
+    .limit(10));
+
+  if (error) {
+    ({ data, error } = await db.from('party_rooms')
+      .select('id, code, player_count, player1_name, player2_name, player3_name, player4_name')
+      .eq('state', 'waiting')
+      .order('created_at', { ascending: false })
+      .limit(10));
+  }
+
+  if (error || !data) { listEl.innerHTML = '<div class="lobby-empty">Could not load rooms</div>'; return; }
+  renderPublicPartyLobby(data);
+}
+
+function renderPublicPartyLobby(rooms) {
+  const listEl = document.getElementById('public-lobby-list');
+  if (!listEl) return;
+  if (!rooms.length) { listEl.innerHTML = '<div class="lobby-empty">No public rooms available</div>'; return; }
+
+  const escHtml = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  listEl.innerHTML = '';
+  let anyShown = false;
+  rooms.forEach(r => {
+    const pc = r.player_count || 2;
+    const joined = ['player1','player2','player3','player4'].slice(0, pc)
+      .filter(s => r[`${s}_name`]).length;
+    if (joined === 0) return;
+    anyShown = true;
+    const name = r.room_name || (r.player1_name ? `${r.player1_name}'s Room` : 'Room');
+
+    const entry = document.createElement('div');
+    entry.className = 'lobby-room-entry';
+    entry.innerHTML = `
+      <div class="lobby-room-info">
+        <div class="lobby-room-name">${escHtml(name)}</div>
+        <div class="lobby-room-meta">${joined}/${pc} players · Fnafdle Party</div>
+      </div>
+      <div class="lobby-room-code">${r.code}</div>
+      <button class="mp-btn small" onclick="joinFromPartyLobby('${r.code}')">Join</button>
+    `;
+    listEl.appendChild(entry);
+  });
+  if (!anyShown) listEl.innerHTML = '<div class="lobby-empty">No public rooms available</div>';
+}
+
+function joinFromPartyLobby(code) {
+  const codeInput = document.getElementById('join-code');
+  if (codeInput) codeInput.value = code;
+  joinRoom();
+}
+
+// ── Start Early ───────────────────────────────────────────────────────────────
+function updatePartyStartEarlyBtn(room) {
+  const btn = document.getElementById('start-early-btn');
+  if (!btn) return;
+  const pc     = room.player_count || 2;
+  const joined = allSlots(pc).filter(s => room[`${s}_name`]).length;
+  if (playerSlot === 'player1' && joined >= 2 && joined < pc) {
+    btn.style.display = '';
+    btn.textContent = `Start with ${joined} players`;
+    btn.disabled = false;
+  } else {
+    btn.style.display = 'none';
+  }
+}
+
+async function startEarlyParty() {
+  if (playerSlot !== 'player1') return;
+  const pc     = roomData.player_count || 2;
+  const joined = allSlots(pc).filter(s => roomData[`${s}_name`]).length;
+  if (joined < 2) return;
+  const btn = document.getElementById('start-early-btn');
+  if (btn) btn.disabled = true;
+  await db.from('party_rooms').update({ player_count: joined }).eq('id', roomId);
+}
+
+// ── Create / Join ─────────────────────────────────────────────────────────────
 
 async function joinRoom() {
   const name = document.getElementById('lobby-name').value.trim();
@@ -243,6 +365,8 @@ async function joinRoom() {
 function showWaiting(room) {
   showScreen('waiting');
   document.getElementById('waiting-code').textContent = room.code;
+  const rnEl = document.getElementById('waiting-room-name');
+  if (rnEl) rnEl.textContent = room.room_name || '';
   updateWaitingScreen(room);
 }
 
@@ -286,6 +410,13 @@ function updateWaitingScreen(room) {
   const wrap = document.getElementById('char-select-wrap');
   if (wrap) wrap.style.display = joined >= pc ? 'flex' : 'none';
   if (joined >= pc) renderWaitingCharPicker(room);
+
+  // Room name
+  const rnEl = document.getElementById('waiting-room-name');
+  if (rnEl && room.room_name) rnEl.textContent = room.room_name;
+
+  // Start-early button (only for creator when not full)
+  updatePartyStartEarlyBtn(room);
 
   // Check if can start
   checkAllCharsReady(room);

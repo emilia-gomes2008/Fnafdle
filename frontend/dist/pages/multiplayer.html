@@ -80,14 +80,51 @@
           </div>
         </div>
 
-        <div class="lobby-buttons">
+        <div class="lobby-buttons" id="lobby-buttons">
           <button class="mp-btn primary" id="create-room-btn">Create Room</button>
           <div class="join-row">
             <input id="lobby-code" class="mp-input code-input" type="text" placeholder="Room code..." maxlength="6" />
             <button class="mp-btn" id="join-room-btn">Join</button>
           </div>
         </div>
+
+        <!-- Create Room Panel -->
+        <div id="create-room-panel" style="display:none">
+          <div class="create-room-wrap">
+            <div class="setup-label">Room Name (optional)</div>
+            <input id="create-room-name" class="mp-input" type="text" placeholder="e.g. Freddy's Room" maxlength="30" style="max-width:none;width:100%" />
+            <div class="setup-label">Room Code</div>
+            <div class="create-room-code-display" id="create-room-code"></div>
+            <div class="setup-label">Visibility</div>
+            <div class="privacy-toggle-row">
+              <label class="privacy-opt">
+                <input type="radio" name="mp-privacy" value="public" checked />
+                Public
+              </label>
+              <label class="privacy-opt">
+                <input type="radio" name="mp-privacy" value="private" />
+                Private
+              </label>
+            </div>
+            <div class="create-btns-row">
+              <button class="mp-btn" id="cancel-create-btn">Cancel</button>
+              <button class="mp-btn primary" id="confirm-create-btn">Create!</button>
+            </div>
+          </div>
+        </div>
+
         <p id="lobby-error" class="mp-error"></p>
+
+        <!-- Public Rooms List -->
+        <div class="public-lobby-section" id="public-lobby-section">
+          <div class="public-lobby-header">
+            <span class="setup-label">Public Rooms</span>
+            <button class="mp-btn small" id="refresh-lobby-btn">↻ Refresh</button>
+          </div>
+          <div id="public-lobby-list" class="public-lobby-list">
+            <div class="lobby-empty">Loading...</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -98,8 +135,10 @@
         <p class="mp-sub">Share this code with your friends:</p>
         <div class="room-code-display" id="waiting-code"></div>
         <button class="mp-btn" id="copy-code-btn">Copy Code</button>
+        <p class="mp-sub" id="waiting-room-name" style="font-size:.85rem;color:var(--gold);margin:-8px 0;min-height:1em;"></p>
         <p class="mp-sub" id="waiting-filter-label" style="font-size:.75rem;opacity:.6;margin-top:-4px;"></p>
         <div id="waiting-players" class="waiting-players"></div>
+        <button class="mp-btn primary" id="start-early-btn" style="display:none">Start Game</button>
         <div class="waiting-dots"><span>.</span><span>.</span><span>.</span></div>
       </div>
     </div>
