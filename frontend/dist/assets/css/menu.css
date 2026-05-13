@@ -41,7 +41,7 @@
 .mode-category-icon {
   font-size: 2rem;
   flex-shrink: 0;
-  transform: translateY(-14px);
+  transform: translateY(-13px);
 }
 
 .mode-category-label {

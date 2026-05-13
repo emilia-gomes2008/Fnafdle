@@ -747,7 +747,7 @@ function renderActionUI(room) {
     el.innerHTML = `<div class="action-card">
       <div class="action-player-name" style="color:${me.color}">${me.name}</div>
       <div class="action-dice">🎲 ${room.dice_result}</div>
-      <div class="action-space">Landed on: ${cfg.emoji || '⬜'} ${cfg.label}</div>
+      <div class="action-space">Landed on: <span class="mp_emoji">${cfg.emoji || '⬜'}</span> ${cfg.label}</div>
       <button class="mp-btn primary" id="cont-btn">Continue →</button>
     </div>`;
     document.getElementById('cont-btn').addEventListener('click', handleSpace);

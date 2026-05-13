@@ -48,11 +48,11 @@ function checkWin(slot) {
   return g[slot] && g[slot].length >= getPlayerCount() - 1;
 }
 function getRankings() { try { return JSON.parse(roomData.rankings) || []; } catch { return []; } }
-function ordinal(n) { return n === 1 ? '🥇 1st' : n === 2 ? '🥈 2nd' : n === 3 ? '🥉 3rd' : `${n}th`; }
+function ordinal(n) { return n === 1 ? '<span class="e">🥇</span> 1st' : n === 2 ? '<span class="e">🥈</span> 2nd' : n === 3 ? '<span class="e">🥉</span> 3rd' : `${n}th`; }
 function rankMedal(slot) {
   const r = getRankings();
   const i = r.indexOf(slot);
-  return ['🥇','🥈','🥉','4️⃣'][i] ?? '';
+  return ['<span class="e">🥇</span>','<span class="e">🥈</span>','<span class="e">🥉</span>','<span class="e">4️⃣</span>'][i] ?? '';
 }
 function updateWaitingPlayerList(room) {
   const pc = room.player_count || 2;
@@ -63,7 +63,7 @@ function updateWaitingPlayerList(room) {
     const name = room[`${s}_name`];
     const li = document.createElement('div');
     li.className = 'waiting-player-row';
-    li.textContent = name ? `✅ ${name}` : `⏳ Player ${i + 1}...`;
+    li.innerHTML = name ? `<span class="mp_emoji">✅</span> ${name}` : `<span class="mp_emoji">⏳</span> Player ${i + 1}...`;
     li.style.color = name ? 'var(--green-text)' : 'var(--text-muted)';
     listEl.appendChild(li);
   });
@@ -185,11 +185,11 @@ function filterLabel(filter) {
 
 // ── Predefined questions ──────────────────────────────────────────────────────
 const QUESTIONS = [
-  { field: 'animal',   text: '🐾 What animal is this animatronic?',              uiType: 'list'  },
-  { field: 'type',     text: '🏷️ What type category is this animatronic?',       uiType: 'list'  },
-  { field: 'color',    text: '🎨 What is the main color of this animatronic?',    uiType: 'color' },
-  { field: 'eyeColor', text: '👁️ What eye color does this animatronic have?',    uiType: 'color' },
-  { field: 'year',     text: '📅 What year does this animatronic originate from?', uiType: 'year' },
+  { field: 'animal',   text: '<span class="e">🐾</span> What animal is this animatronic?',              uiType: 'list'  },
+  { field: 'type',     text: '<span class="e">🏷️</span> What type category is this animatronic?',       uiType: 'list'  },
+  { field: 'color',    text: '<span class="e">🎨</span> What is the main color of this animatronic?',    uiType: 'color' },
+  { field: 'eyeColor', text: '<span class="e">👁️</span> What eye color does this animatronic have?',    uiType: 'color' },
+  { field: 'year',     text: '<span class="e">📅</span> What year does this animatronic originate from?', uiType: 'year' },
 ];
 
 function getQuestion(field) { return QUESTIONS.find(q => q.field === field) || QUESTIONS[0]; }
@@ -277,7 +277,7 @@ async function confirmCreateRoom() {
 
   roomId = data.id; playerSlot = 'player1'; roomData = data;
   document.getElementById('waiting-code').textContent = data.room_code;
-  document.getElementById('waiting-filter-label').textContent = '🎮 ' + filterLabel(data.game_filter);
+  document.getElementById('waiting-filter-label').innerHTML = '<span class="mp_emoji">🎮</span> ' + filterLabel(data.game_filter);
   const rnEl = document.getElementById('waiting-room-name');
   if (rnEl) rnEl.textContent = data.room_name || '';
   updateWaitingPlayerList(data);
@@ -442,7 +442,7 @@ function announceNewRankings(oldRoom, newRoom) {
     const msg = document.createElement('div');
     msg.className = 'chat-msg msg-system';
     msg.style.fontWeight = 'bold';
-    msg.textContent = `🏆 ${pName} finished in ${ordinal(idx + 1)}!`;
+    msg.innerHTML = `<span class="e">🏆</span> ${pName} finished in ${ordinal(idx + 1)}!`;
     chatLog.appendChild(msg);
     chatLog.scrollTop = chatLog.scrollHeight;
   });
@@ -686,8 +686,8 @@ function renderGameScreen(room, rollMsg) {
   const firstName = room[`${firstAsker}_name`] || 'Player 1';
   const chatLog = document.getElementById('chat-log');
   const diceMsg = rollMsg
-    ? `🎲 Dice roll! (${rollMsg}) — <strong>${firstName}</strong> goes first.`
-    : `🪙 Coin flip! <strong>${firstName}</strong> goes first.`;
+    ? `<span class="e">🎲</span> Dice roll! (${rollMsg}) — <strong>${firstName}</strong> goes first.`
+    : `<span class="e">🪙</span> Coin flip! <strong>${firstName}</strong> goes first.`;
   chatLog.innerHTML = `<div class="chat-msg msg-system">${diceMsg}</div>`;
 
   // Build one elimination grid per opponent
@@ -808,7 +808,7 @@ function buildAskUI() {
     const btn = document.createElement('button');
     btn.className = 'list-pick-btn';
     btn.style.textAlign = 'left';
-    btn.textContent = q.text;
+    btn.innerHTML = q.text;
     btn.disabled = pc > 2; // disabled until target chosen (for multi-player)
     btn.addEventListener('click', async () => {
       if (!currentAskTarget) return;
@@ -856,7 +856,7 @@ async function updateTurnUI(phase, questionField) {
     if (myRank !== -1) {
       // Already ranked — skip ask, show waiting
       indicator.className = 'turn-indicator opponent-turn';
-      indicator.textContent = `${ordinal(myRank + 1)} — Waiting for others to finish...`;
+      indicator.innerHTML = `${ordinal(myRank + 1)} — Waiting for others to finish...`;
       document.getElementById('waiting-panel-text').textContent = 'You already guessed everyone!';
       waitingPanel.style.display = '';
       // Automatically pass the turn to the next non-ranked player
@@ -872,9 +872,9 @@ async function updateTurnUI(phase, questionField) {
   } else if (isMyAct) {
     indicator.className = 'turn-indicator my-turn';
     indicator.textContent = `Your turn — guess ${name(target)}'s character or pass!`;
-    if (q) document.getElementById('acting-question-text').textContent = q.text;
+    if (q) document.getElementById('acting-question-text').innerHTML = q.text;
     const tl = document.getElementById('acting-target-label');
-    if (tl) tl.textContent = getPlayerCount() > 2 ? `🎯 Guessing: ${name(target)}` : '';
+    if (tl) tl.innerHTML = getPlayerCount() > 2 ? `<span class="mp_emoji">🎯</span> Guessing: ${name(target)}` : '';
     actingPanel.style.display = '';
   } else if (isMyAnswer) {
     indicator.className = 'turn-indicator answer-turn';
@@ -907,7 +907,7 @@ function renderAnswerUI(q) {
   pendingAnswer = null;
   document.getElementById('submit-answer-btn').disabled = true;
   document.getElementById('answer-chosen-preview').textContent = '';
-  document.getElementById('answer-question-text').textContent = q.text;
+  document.getElementById('answer-question-text').innerHTML = q.text;
 
   const colorPicker = document.getElementById('answer-color-picker');
   const listPicker  = document.getElementById('answer-list-picker');
@@ -1111,7 +1111,7 @@ async function sendGuess() {
       const gameOver = rankings.length >= pc - 1;
       const updatePayload = {
         rankings: JSON.stringify(rankings),
-        ...(gameOver ? { state: 'finished', winner: rankings[0] } : {}),
+        ...(gameOver ? { state: 'finished', winner: rankings[0], phase: null } : {}),
       };
       await db.from('mp_rooms').update(updatePayload).eq('id', roomId);
 
@@ -1121,7 +1121,7 @@ async function sendGuess() {
         const ann = document.createElement('div');
         ann.className = 'chat-msg msg-system';
         ann.style.fontWeight = 'bold';
-        ann.textContent = `🏆 You finished in ${ordinal(rankings.length)}!`;
+        ann.innerHTML = `<span class="e">🏆</span> You finished in ${ordinal(rankings.length)}!`;
         chatLog.appendChild(ann);
         chatLog.scrollTop = chatLog.scrollHeight;
       }
@@ -1193,14 +1193,14 @@ function renderEvent(ev) {
     msg.className = `chat-msg ${isMe ? 'msg-me' : 'msg-opponent'}`;
     msg.innerHTML =
       `<span class="msg-sender">${sender}</span> asked:<br>` +
-      `<em class="qa-q-text">${escHtml(parsed.question || '')}</em>`;
+      `<em class="qa-q-text">${parsed.question || ''}</em>`;
   } else if (ev.type === 'answer') {
     let parsed; try { parsed = JSON.parse(ev.content); } catch { parsed = { question: '?', value: ev.content }; }
     msg.className = `chat-msg ${isMe ? 'msg-me' : 'msg-opponent'}`;
     const val = parsed.value || '';
     msg.innerHTML =
       `<span class="msg-sender">${sender}</span> answered:<br>` +
-      `<em class="qa-q-text">${escHtml(parsed.question || '')}</em><br>` +
+      `<em class="qa-q-text">${parsed.question || ''}</em><br>` +
       `<strong class="qa-a-text" style="display:inline-flex;align-items:center;">${colorSwatch(val)}${escHtml(val)}</strong>`;
 
     // Also populate acting panel if it's my acting turn
@@ -1217,13 +1217,13 @@ function renderEvent(ev) {
     if (ev.correct) {
       if (involvedInGuess) {
         const tLabel = targetSlot && roomData ? ` (${roomData[`${targetSlot}_name`] || targetSlot}'s char)` : '';
-        msg.textContent = `${sender} guessed "${guessedChar}"${tLabel} ✅`;
+        msg.innerHTML = `${sender} guessed "${guessedChar}"${tLabel} <span class="mp_emoji">✅</span>`;
       } else {
-        msg.textContent = `${sender} got one right! 🎉`;
+        msg.innerHTML = `${sender} got one right! <span class="e">🎉</span>`;
       }
     } else {
       const tLabel = targetSlot && roomData ? ` (${roomData[`${targetSlot}_name`] || targetSlot}'s char)` : '';
-      msg.textContent = `${sender} guessed "${guessedChar}"${tLabel} ❌`;
+      msg.innerHTML = `${sender} guessed "${guessedChar}"${tLabel} <span class="mp_emoji">❌</span>`;
     }
   } else if (ev.type === 'jumpscare') {
     if (!isMe) triggerJumpscare(ev.content || 'freddy', () => {});
@@ -1239,7 +1239,10 @@ function renderResultScreen(room) {
   stopPeriodicSync();
   const votes = room.phase || '';
   const pc    = getPlayerCount();
-  const allVoted = allSlots(pc).every(s => votes.includes(s));
+  // Only treat phase as vote list if it's exclusively player slots (not a game phase like 'ask:player1:...')
+  const voteList = votes.split(':');
+  const isVotePhase = voteList.every(v => v === '' || /^player\d$/.test(v));
+  const allVoted = isVotePhase && allSlots(pc).every(s => voteList.includes(s));
   if (allVoted) { triggerRematch(); return; }
 
   const rematchBtn = document.getElementById('rematch-btn');
@@ -1249,11 +1252,11 @@ function renderResultScreen(room) {
     rematchBtn.style.display = 'none';
   } else {
     rematchBtn.style.display = '';
-    const myVoted = votes.includes(playerSlot);
+    const myVoted = voteList.includes(playerSlot);
     rematchBtn.disabled = myVoted;
-    rematchBtn.textContent = myVoted
-      ? `⏳ Waiting... (${allSlots(pc).filter(s => votes.includes(s)).length}/${pc})`
-      : '🔄 Rematch';
+    rematchBtn.innerHTML = myVoted
+      ? `<span class="mp_emoji">⏳</span> Waiting... (${allSlots(pc).filter(s => voteList.includes(s)).length}/${pc})`
+      : '<span class="mp_emoji">🔄</span> Rematch';
   }
   showScreen('result');
   let rankings = [];
@@ -1279,8 +1282,8 @@ function renderResultScreen(room) {
   if (isWinner) buildJumpscarePicker();
 
   const placeLabel = myRank > 0 ? ordinal(myRank) : '?';
-  document.getElementById('result-title').textContent =
-    isWinner ? `🎉 You Won! (${placeLabel})` : `${placeLabel} Place`;
+  document.getElementById('result-title').innerHTML =
+    isWinner ? `<span class="e">🎉</span> You Won! (${placeLabel})` : `${placeLabel} Place`;
   document.getElementById('result-msg').textContent =
     isWinner ? `You guessed all opponents' animatronics!` : '';
 
@@ -1304,7 +1307,7 @@ function renderResultScreen(room) {
     const lbl = document.createElement('div');
     lbl.className = 'result-char-label';
     const rankStr = slotRank > 0 ? `${ordinal(slotRank)} · ` : '';
-    lbl.textContent = `${rankStr}${slot === playerSlot ? `You (${pName})` : pName}`;
+    lbl.innerHTML = `${rankStr}${slot === playerSlot ? `You (${pName})` : pName}`;
     const nm = document.createElement('div');
     nm.className = 'result-char-name';
     nm.textContent = charName || '???';
@@ -1412,9 +1415,7 @@ document.getElementById('rematch-btn').addEventListener('click', async () => {
   btn.textContent = `⏳ Waiting... (${allSlots(pc).filter(s => newVotes.includes(s)).length}/${pc})`;
 
   await db.from('mp_rooms').update({ phase: newVotes }).eq('id', roomId).eq('state', 'finished');
-
-  // If I'm the last vote, trigger immediately
-  if (allSlots(pc).every(s => newVotes.includes(s))) triggerRematch();
+  // triggerRematch is handled by renderResultScreen when the realtime update fires
 });
 
 // ── Player leave detection ────────────────────────────────────────────────────
@@ -1433,8 +1434,14 @@ async function cleanupMpPlayerLeft() {
     [`${savedSlot}_id`]:   null,
     [`${savedSlot}_char`]: null,
   };
-  if (active.length === 1 && room.state === 'playing') {
+  if (room.state === 'selecting') {
+    update.state         = 'waiting';
+    update.phase         = null;
+    update[`${savedSlot}_ready`] = false;
+    allSlots(pc).forEach(s => { update[`${s}_ready`] = false; update[`${s}_char`] = null; });
+  } else if (active.length === 1 && room.state === 'playing') {
     update.state    = 'finished';
+    update.phase    = null;
     update.rankings = JSON.stringify([active[0]]);
     update.winner   = active[0];
   }
@@ -1456,9 +1463,14 @@ window.addEventListener('beforeunload', () => {
 
   const pc     = getPlayerCount();
   const active = allSlots(pc).filter(s => room[`${s}_name`] && s !== savedSlot);
-  const body   = { [`${savedSlot}_name`]: null, [`${savedSlot}_id`]: null };
-  if (active.length === 1 && room.state === 'playing') {
+  const body   = { [`${savedSlot}_name`]: null, [`${savedSlot}_id`]: null, [`${savedSlot}_char`]: null };
+  if (room.state === 'selecting') {
+    body.state = 'waiting';
+    body.phase = null;
+    allSlots(pc).forEach(s => { body[`${s}_ready`] = false; body[`${s}_char`] = null; });
+  } else if (active.length === 1 && room.state === 'playing') {
     body.state    = 'finished';
+    body.phase    = null;
     body.rankings = JSON.stringify([active[0]]);
     body.winner   = active[0];
   }

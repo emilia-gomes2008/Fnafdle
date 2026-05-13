@@ -139,7 +139,7 @@ function showStatsModal(key) {
   modal.innerHTML = `
     <div style="background:var(--bg-card);border:1.5px solid var(--gold);border-radius:14px;padding:28px 24px;max-width:380px;width:100%;position:relative;">
       <button onclick="document.getElementById('stats-modal-overlay').remove()" style="position:absolute;top:10px;right:14px;background:transparent;border:none;color:var(--text-muted);font-size:1.3rem;padding:0;margin:0;cursor:pointer;">✕</button>
-      <div style="font-family:'Creepster',cursive;font-size:1.5rem;color:var(--gold);letter-spacing:3px;text-align:center;margin-bottom:18px;"><span class="ee">📊</span> ${label} Stats</div>
+      <div style="font-family:'Creepster',cursive;font-size:1.5rem;color:var(--gold);letter-spacing:3px;text-align:center;margin-bottom:18px;"><span class="stat_emoji">📊</span> ${label} Stats</div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;margin-bottom:22px;">
         <div><div style="font-size:1.8rem;font-family:'Oswald',sans-serif;color:var(--text)">${stats.played}</div><div style="font-size:0.65rem;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;">Played</div></div>
         <div><div style="font-size:1.8rem;font-family:'Oswald',sans-serif;color:var(--text)">${winPct}%</div><div style="font-size:0.65rem;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;">Win %</div></div>

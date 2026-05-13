@@ -36,8 +36,8 @@
 
 /* Emoji alignment fix — applied via manual spans in HTML or JS wrapping */
 .e { display: inline-block; transform: translateY(-8px); }
-.ee { display: inline-block; transform: translateY(7px); }
-
+.stat_emoji { display: inline-block; transform: translateY(7px); }
+.mp_emoji { display: inline-block; transform: translateY(-1px); }
 
 body {
   font-family: 'FNaF', sans-serif;
