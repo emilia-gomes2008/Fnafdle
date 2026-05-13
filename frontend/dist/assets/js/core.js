@@ -277,7 +277,7 @@ const _JUMPSCARE_EXT = { freddy: 'webp', bonnie: 'webp', chica: 'webp', foxy: 'w
 
 function triggerJumpscare(gifName, callback) {
   const ext = _JUMPSCARE_EXT[gifName] || 'gif';
-  const src = `../assets/images/jumpscare/${gifName}.${ext}`;
+  const src = `../assets/images/jumpscare/${gifName}_optimized.${ext}`;
 
   const overlay = document.createElement('div');
   overlay.id = 'freddy-jumpscare';
