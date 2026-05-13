@@ -308,6 +308,7 @@ function tick() {
   if (nightElapsedMs >= NIGHT_TOTAL_MS) {
     nightElapsedMs = NIGHT_TOTAL_MS;
     stopLoop();
+    gameOver = true; input.disabled = true; dropdown.style.display = 'none';
     triggerFreddyJumpscare(() => endGame(false, 'time'));
     return;
   }
@@ -331,6 +332,7 @@ function tick() {
     battery = 0;
     stopLoop();
     updatePower();
+    gameOver = true; input.disabled = true; dropdown.style.display = 'none';
     triggerFreddyJumpscare(() => endGame(false, 'battery'));
     return;
   }
@@ -380,6 +382,7 @@ function processEntityTimer(e, now) {
       e.nextMs = now + rand(RETREAT_MIN_MS, RETREAT_MAX_MS);
     } else if (now >= e.nextMs) {
       stopLoop();
+      gameOver = true; input.disabled = true; dropdown.style.display = 'none';
       triggerFreddyJumpscare(() => endGame(false, 'entry'));
     }
   } else if (e.state === 'blocked') {
@@ -690,6 +693,7 @@ function submitGuess(char) {
     glitchMainCam();
     if (guesses.length >= MAX_GUESSES) {
       stopLoop();
+      gameOver = true; input.disabled = true; dropdown.style.display = 'none';
       triggerFreddyJumpscare(() => endGame(false, 'guesses'));
     }
   }

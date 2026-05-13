@@ -549,7 +549,7 @@ button:hover { background-color: var(--ex-red-dk) !important; }
   letter-spacing: 1px;
 }
 
-.legend-dot            { width: 12px; height: 12px; border-radius: 3px; }
+.legend-dot            { width: 12px; height: 12px; border-radius: 3px; transform: translateY(-5px);}
 .legend-dot.correct    { background: var(--green-border); }
 .legend-dot.wrong      { background: var(--red-border); }
 .legend-dot.hidden-dot { background: var(--hid-bdr); }

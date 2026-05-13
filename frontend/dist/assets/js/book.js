@@ -167,6 +167,9 @@ function submitBookGuess(book) {
 
   if (book.title === bookTarget.title) endBookGame(true);
   else if (bookGuesses.length >= BOOK_MAX_GUESSES) {
+    bookGameOver = true;
+    bookInput.disabled = true;
+    bookDropdown.style.display = 'none';
     if (currentMode === 'book_daily') {
       triggerFreddyJumpscare(() => endBookGame(false));
     } else {

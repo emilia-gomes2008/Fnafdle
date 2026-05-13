@@ -238,6 +238,9 @@ function submitGuess(char) {
 
   if (char.name === target.name) endGame(true);
   else if (guesses.length >= MAX_GUESSES) {
+    gameOver = true;
+    input.disabled = true;
+    dropdown.style.display = 'none';
     if (currentMode === 'daily') {
       triggerFreddyJumpscare(() => endGame(false));
     } else {

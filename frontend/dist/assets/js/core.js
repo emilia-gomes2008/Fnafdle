@@ -214,8 +214,7 @@ function showStreakWidget(key) {
        Freddy Jumpscare
 ======================================================= */
 const _JUMPSCARE_POOL = [
-  'freddy','bonnie','chica','foxy','golden_freddy',
-  'withered_bonnie','withered_chica','withered_foxy','withered_golden_freddy'
+  'freddy','bonnie','chica','foxy','golden_freddy'
 ];
 
 // ── Animation duration parsers ────────────────────────────────────────────
@@ -274,10 +273,23 @@ async function _getGifDurationMs(src) {
 }
 
 const _JUMPSCARE_EXT = { freddy: 'webp', bonnie: 'webp', chica: 'webp', foxy: 'webp', golden_freddy: 'webp' };
+const _jumpscarePreloaded = {};
+
+(function _preloadJumpscares() {
+  var names = Object.keys(_JUMPSCARE_EXT);
+  names.forEach(function(name) {
+    var ext = _JUMPSCARE_EXT[name];
+    var src = `../assets/images/jumpscare/${name}.${ext}`;
+    var img = new Image();
+    img.src = src;
+    _jumpscarePreloaded[name] = img;
+    _getGifDurationMs(src); // warm the duration cache early
+  });
+})();
 
 function triggerJumpscare(gifName, callback) {
   const ext = _JUMPSCARE_EXT[gifName] || 'gif';
-  const src = `../assets/images/jumpscare/${gifName}_optimized.${ext}`;
+  const src = `../assets/images/jumpscare/${gifName}.${ext}`;
 
   const overlay = document.createElement('div');
   overlay.id = 'freddy-jumpscare';
@@ -309,8 +321,8 @@ function triggerJumpscare(gifName, callback) {
     callback();
   };
 
-  // Safe fallback — always dismisses after 3 s even if GIF parse fails
-  fallbackTimer = setTimeout(dismiss, 3000);
+  // Safe fallback — always dismisses after 15 s even if GIF parse fails
+  fallbackTimer = setTimeout(dismiss, 15000);
 
   overlay.addEventListener('click', dismiss);
 
