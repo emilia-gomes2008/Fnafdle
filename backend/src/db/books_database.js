@@ -235,6 +235,13 @@ const BOOKS = [
     number: 3,
     img: "images/books/tales/graphic_3.png"
   },
+  {
+    title: "Tales from the Pizzaplex Graphic Novel Collection #4",
+    series: "Tales from the Pizzaplex Graphic Novel Collection",
+    year: 2026,
+    number: 4,
+    img: "images/books/tales/graphic_4.png"
+  },
   
   // === Interactive Novels ===
   {
@@ -347,6 +354,50 @@ const BOOKS = [
     year: 2026,
     number: 2,
     img: "images/books/encyclopedia/2.png"
+  },
+  
+  // === Miscellaneous ===
+  {
+    title: "Five Nights at Freddy's Sticker Album",
+    series: "Miscellaneous",
+    year: 2017,
+    number: 1,
+    img: "images/books/misc/sticker_album.png"
+  },
+  {
+    title: "Art with Edge, Five Nights at Freddy's",
+    series: "Miscellaneous",
+    year: 2018,
+    number: 2,
+    img: "images/books/misc/art_with_edge.png"
+  },
+  {
+    title: "The Official Five Nights at Freddy's Coloring Book",
+    series: "Miscellaneous",
+    year: 2021,
+    number: 3,
+    img: "images/books/misc/coloring_book.png"
+  },
+  {
+    title: "The Official Five Nights at Freddy's How to Draw",
+    series: "Miscellaneous",
+    year: 2022,
+    number: 4,
+    img: "images/books/misc/how_to_draw.png"
+  },
+  {
+    title: "The Official Five Nights at Freddy's Glow-in-the-Dark Coloring Book",
+    series: "Miscellaneous",
+    year: 2024,
+    number: 5,
+    img: "images/books/misc/glow_in_the_dark.png"
+  },
+  {
+    title: "The Official Five Nights at Freddy's Stickerpedia",
+    series: "Miscellaneous",
+    year: 2025,
+    number: 6,
+    img: "images/books/misc/stickerpedia.png"
   },
   
   // === Lore Relevant ===
