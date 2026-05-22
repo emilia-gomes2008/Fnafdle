@@ -1716,6 +1716,23 @@ async function passOrMinigame(room, extraUpdates = {}) {
     }).eq('id', roomId);
   }
 }
+// After a space effect, either trigger a same-space collision minigame (if others share
+// the space) or hand off to passOrMinigame. Lap-completion minigame takes priority
+// because it already involves all players, making the collision a subset.
+async function resolveSpace(room, updates, others) {
+  const ns = updates.player_stats ? JSON.parse(updates.player_stats) : pStats(room);
+  if (!ns[playerSlot]?.lapCompleted && others.length > 0) {
+    if (Object.keys(updates).length > 0) {
+      await db.from('party_rooms').update(updates).eq('id', roomId);
+    }
+    const involved = [playerSlot, ...others];
+    emitEvent(`💥 ${involved.map(s => room[`${s}_name`]).join(' & ')} on the same space! Minigame!`);
+    await triggerMinigame(involved);
+  } else {
+    await passOrMinigame(room, updates);
+  }
+}
+
 async function handleSpace() {
   // Guard: re-read DB to confirm we're still in 'moved' phase for our slot.
   // A stale delayed Supabase event can re-show the Continue button after the
@@ -1760,7 +1777,7 @@ async function handleSpace() {
     st.coins[playerSlot] = (st.coins[playerSlot] || 0) + 2 * mul;
     emitEvent(`🪙 ${room[`${playerSlot}_name`]} got ${2*mul} coins!`);
     showToast(`+${2*mul} coins! 🪙`);
-    await passOrMinigame(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) });
+    await resolveSpace(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) }, others);
     return;
   }
   if (type === 'jackpot') {
@@ -1768,7 +1785,7 @@ async function handleSpace() {
     st.coins[playerSlot] = (st.coins[playerSlot] || 0) + jackVal;
     emitEvent(`💰 ${room[`${playerSlot}_name`]} hit the JACKPOT for ${jackVal} coins!`);
     showToast(`💰 JACKPOT! +${jackVal} coins!`);
-    await passOrMinigame(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) });
+    await resolveSpace(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) }, others);
     return;
   }
   if (type === 'badluck') {
@@ -1777,7 +1794,7 @@ async function handleSpace() {
     ns[playerSlot].badLucks = (ns[playerSlot].badLucks || 0) + 1;
     emitEvent(`💀 ${room[`${playerSlot}_name`]} hit bad luck! -${3*mul} coins`);
     showToast(`-${3*mul} coins 💀${mul>1?' ×2':''}`);
-    await passOrMinigame(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) });
+    await resolveSpace(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) }, others);
     return;
   }
   if (type === 'pizza') {
@@ -1816,7 +1833,7 @@ async function handleSpace() {
     eff.eff(st, playerSlot, room, ns);
     emitEvent(`😱 ${room[`${playerSlot}_name`]} entered the Freddy Zone! ${eff.text}`);
     showToast(`😱 Freddy Zone! ${eff.text}`);
-    await passOrMinigame(room, { player_pos: JSON.stringify(st.pos), player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns) });
+    await resolveSpace(room, { player_pos: JSON.stringify(st.pos), player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns) }, others);
     return;
   }
   if (type === 'trap') {
@@ -1824,7 +1841,7 @@ async function handleSpace() {
     eff.eff(st, playerSlot, room, ns);
     emitEvent(`🪤 ${room[`${playerSlot}_name`]} hit a Trap! ${eff.text}`);
     showToast(`🪤 Trap! ${eff.text}`);
-    await passOrMinigame(room, { player_pos: JSON.stringify(st.pos), player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns) });
+    await resolveSpace(room, { player_pos: JSON.stringify(st.pos), player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns) }, others);
     return;
   }
   if (type === 'challenge') {
@@ -1838,10 +1855,8 @@ async function handleSpace() {
     await triggerMinigame(active, { isChallenge: true, challenger: playerSlot, challengeReward: reward, isPizzaReward: active.length >= 4 });
     return;
   }
-  if (type === 'minigame' || others.length > 0) {
-    const involved = type === 'minigame'
-      ? allSlots(pc).filter(s => room[`${s}_name`])
-      : [playerSlot, ...others];
+  if (type === 'minigame') {
+    const involved = allSlots(pc).filter(s => room[`${s}_name`]);
     emitEvent(`🎮 Minigame triggered by ${room[`${playerSlot}_name`]}!`);
     await triggerMinigame(involved);
     return;
@@ -1852,9 +1867,9 @@ async function handleSpace() {
     await triggerQuestion();
     return;
   }
-  // Normal space
+  // Normal space (collision handled by resolveSpace)
   emitEvent(`⬜ ${room[`${playerSlot}_name`]} landed on Normal (space ${pos})`);
-  await passOrMinigame(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) });
+  await resolveSpace(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) }, others);
 }
 
 async function triggerQuestion() {
@@ -1885,6 +1900,7 @@ async function buyPizza() {
   const { laps, tiles, boardSize, mapType, toll, skipMap, freeMap, nodes, boardAspect, nextMap } = parseBoard(room);
   const pos = boardPos(room, playerSlot);
   const st  = pState(room);
+  const ns  = pStats(room);
   const mul = isDoublePhase(room) ? 2 : 1;
 
   st.coins[playerSlot]  = Math.max(0, (st.coins[playerSlot] || 0) - 10);
@@ -1901,15 +1917,63 @@ async function buyPizza() {
 
   emitEvent(`🍕 ${room[`${playerSlot}_name`]} bought a pizza! (-10🪙)`);
   showToast(`🍕 Got a pizza! Pizza moves to a new spot.`);
-  await passOrMinigame(room, {
-    player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas),
-    board: JSON.stringify(newBoard),
-  });
+
+  // Resume any pending steps saved when the player was stopped at pizza mid-roll (Jackpot)
+  const pendingSteps = ns[playerSlot]?.pendingSteps || 0;
+  if (pendingSteps > 0) {
+    if (!ns[playerSlot]) ns[playerSlot] = { mgWins: 0, badLucks: 0 };
+    ns[playerSlot].pendingSteps = 0;
+    const result = moveStepByStep(st, playerSlot, pendingSteps, boardSize, newTiles, nextMap);
+    if (result.completedLap) { ns[playerSlot].lapCompleted = true; lapCompletedLocal = true; }
+    let finalPhase = 'roll', finalSlot = nextSlot(room);
+    if (result.hitTollbooth) {
+      ns[playerSlot].pendingSteps = result.remainingSteps;
+      finalPhase = 'tollbooth'; finalSlot = playerSlot;
+    } else {
+      finalPhase = 'moved'; finalSlot = playerSlot;
+    }
+    await db.from('party_rooms').update({
+      player_pos: JSON.stringify(st.pos), player_coins: JSON.stringify(st.coins),
+      player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns),
+      board: JSON.stringify(newBoard), turn_phase: finalPhase, current_slot: finalSlot,
+    }).eq('id', roomId);
+  } else {
+    await passOrMinigame(room, {
+      player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas),
+      board: JSON.stringify(newBoard), player_stats: JSON.stringify(ns),
+    });
+  }
 }
 
 async function skipPizza() {
+  const room = roomData;
+  const { tiles, boardSize, nextMap } = parseBoard(room);
+  const st = pState(room);
+  const ns = pStats(room);
   showToast('Skipped the pizza 🍕');
-  await passOrMinigame(roomData);
+
+  // Resume any pending steps saved when the player was stopped at pizza mid-roll (Jackpot)
+  const pendingSteps = ns[playerSlot]?.pendingSteps || 0;
+  if (pendingSteps > 0) {
+    if (!ns[playerSlot]) ns[playerSlot] = { mgWins: 0, badLucks: 0 };
+    ns[playerSlot].pendingSteps = 0;
+    const result = moveStepByStep(st, playerSlot, pendingSteps, boardSize, tiles, nextMap);
+    if (result.completedLap) { ns[playerSlot].lapCompleted = true; lapCompletedLocal = true; }
+    let finalPhase = 'roll', finalSlot = nextSlot(room);
+    if (result.hitTollbooth) {
+      ns[playerSlot].pendingSteps = result.remainingSteps;
+      finalPhase = 'tollbooth'; finalSlot = playerSlot;
+    } else {
+      finalPhase = 'moved'; finalSlot = playerSlot;
+    }
+    await db.from('party_rooms').update({
+      player_pos: JSON.stringify(st.pos), player_coins: JSON.stringify(st.coins),
+      player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns),
+      turn_phase: finalPhase, current_slot: finalSlot,
+    }).eq('id', roomId);
+  } else {
+    await passOrMinigame(room);
+  }
 }
 
 // ── Character abilities ───────────────────────────────────────────────────────
@@ -2154,7 +2218,8 @@ function showDiceShop(room) {
 
     let footer;
     if (isEquipped) {
-      footer = `<span class="dic-status">✓ EQUIPPED</span>`;
+      const canUnequip = d.id !== 'd6' && !isThisForced;
+      footer = `<span class="dic-status">✓ EQUIPPED</span>${canUnequip ? ` <button class="mp-btn small dic-unequip-btn">Unequip</button>` : ''}`;
     } else if (isOwned) {
       footer = otherForced
         ? `<button class="mp-btn small dic-equip-btn" data-id="${d.id}" disabled title="Forced die active">🔒 Locked</button>`
@@ -2222,7 +2287,8 @@ function showDiceShop(room) {
       actionHTML = `
         <div class="dp-toll-title">🐻 Freddy's Toll</div>
         ${canPass ? `<button class="mp-btn accent dp-action-btn" id="dp-freddy-pass">🐻 Free Pass → ${skipLabel}</button>` : ''}
-        <button class="mp-btn primary dp-action-btn" id="dp-pay-toll" ${canAfford ? '' : 'disabled'}>${canAfford ? `💰 Pay ${currentToll}🪙 → ${skipLabel}` : `💰 Need ${currentToll}🪙`}${currentToll < nextToll ? `<span class="dp-toll-next"> (→${nextToll}🪙)</span>` : ' <span class="dp-toll-max">MAX</span>'}</button>
+        <button class="mp-btn primary dp-action-btn" id="dp-pay-toll" ${canAfford ? '' : 'disabled'}>${canAfford ? `💰 Pay ${currentToll}🪙 → ${skipLabel}` : `💰 Need ${currentToll}🪙`}</button>
+        ${currentToll < nextToll ? `<div class="dp-toll-next-info">Next: ${nextToll}🪙</div>` : `<div class="dp-toll-next-info dp-toll-max-info">MAX price</div>`}
         <button class="mp-btn dp-action-btn" id="dp-free-path">😰 Free → ${freeLabel}</button>`;
     }
   }
@@ -2238,6 +2304,15 @@ function showDiceShop(room) {
   });
   panel.querySelectorAll('.dic-equip-btn:not([disabled])').forEach(btn => {
     btn.addEventListener('click', () => equipDice(btn.dataset.id), { once: true });
+  });
+  panel.querySelectorAll('.dic-unequip-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const ns = pStats(roomData);
+      if (!ns[playerSlot]) ns[playerSlot] = { mgWins: 0, badLucks: 0 };
+      ns[playerSlot].dice = 'd6';
+      await db.from('party_rooms').update({ player_stats: JSON.stringify(ns) }).eq('id', roomId);
+      showToast('Unequipped — back to d6 🎲');
+    }, { once: true });
   });
 
   // ── action button wires ──────────────────────────────────
@@ -2349,7 +2424,14 @@ async function resolveTollChoice(destIdx, orSkipFwd, labelA, labelB, noLap = fal
 
   let finalPhase = 'roll', finalSlot = nextSlot(room), hitAnother = false;
 
-  if (pendingSteps > 0) {
+  // Stop at pizza: always when pendingSteps=0 (all maps), or when passing through in Jackpot
+  const destTileType = (destIdx !== null && destIdx !== undefined) ? (tiles[destIdx] || 'normal') : null;
+  const stopAtPizza = destTileType === 'pizza' && (pendingSteps === 0 || mapType === 'jackpot');
+
+  if (stopAtPizza) {
+    if (pendingSteps > 0) ns[playerSlot].pendingSteps = pendingSteps;
+    finalPhase = 'moved'; finalSlot = playerSlot;
+  } else if (pendingSteps > 0) {
     const result = moveStepByStep(st, playerSlot, pendingSteps, boardSize, tiles, nextMap);
     if (result.hitTollbooth) {
       ns[playerSlot].pendingSteps = result.remainingSteps;
@@ -2644,6 +2726,7 @@ async function finishMinigame(room) {
   const isChallenge = !!mgConfig.isChallenge;
   const rewardMul   = mgConfig.rewardMul || 1;
   const reward      = room.mg_reward || 0; // hoisted so podiumRows can use it
+  let challengeCoinsChange = {}; // populated below for podium display
 
   if (isChallenge) {
     const challenger      = mgConfig.challenger;
@@ -2658,11 +2741,20 @@ async function finishMinigame(room) {
         else               st.coins[challenger]  = (st.coins[challenger]  || 0) + challengeReward;
         if (!ns[challenger]) ns[challenger] = { mgWins: 0, badLucks: 0 };
         ns[challenger].mgWins = (ns[challenger].mgWins || 0) + 1;
+        challengeCoinsChange[challenger] = isPizzaReward ? 0 : +challengeReward;
+        emitEvent(`⚔️ ${room[`${challenger}_name`]} won the Challenge! ${isPizzaReward ? '+🍕' : '+' + challengeReward + '🪙'}`);
       } else {
+        // Challenger loses: deduct from challenger, split among others
+        st.coins[challenger] = Math.max(0, (st.coins[challenger] || 0) - challengeReward);
+        challengeCoinsChange[challenger] = -challengeReward;
         const split = Math.ceil(challengeReward / Math.max(1, others.length));
-        others.forEach(s => st.coins[s] = (st.coins[s] || 0) + split);
+        others.forEach(s => {
+          st.coins[s] = (st.coins[s] || 0) + split;
+          challengeCoinsChange[s] = +split;
+        });
         if (!ns[winner]) ns[winner] = { mgWins: 0, badLucks: 0 };
         ns[winner].mgWins = (ns[winner].mgWins || 0) + 1;
+        emitEvent(`⚔️ ${room[`${challenger}_name`]} lost the Challenge! -${challengeReward}🪙 split among others`);
       }
     }
   } else {
@@ -2686,7 +2778,7 @@ async function finishMinigame(room) {
   const perTie = (isTie && reward > 0) ? Math.max(1, Math.ceil(reward / ranked.length)) : 0;
   const podiumRows = ranked.map(r => ({
     slot: r.slot, name: room[`${r.slot}_name`], char: room[`${r.slot}_char`] || 'freddy', score: r.score,
-    coinsChange: isChallenge ? 0 : isTie ? perTie : r.slot === winner ? +reward : 0,
+    coinsChange: isChallenge ? (challengeCoinsChange[r.slot] || 0) : isTie ? perTie : r.slot === winner ? +reward : 0,
   }));
   const nextPlayer = nextSlot(room);
   const mgCfg = MINIGAME_LIST.find(m => m.id === room.mg_id);
@@ -3435,8 +3527,11 @@ function showResult(room) {
     picker.className = 'jumpscare-picker';
     picker.style.display = 'none';
 
+    const CHARS_WITH_JUMPSCARE = new Set(['freddy', 'bonnie', 'chica', 'foxy']);
     const jsOptions = [
-      ...Object.entries(CHAR_CFG).map(([key, c]) => ({ key, label: c.name })),
+      ...Object.entries(CHAR_CFG)
+        .filter(([key]) => CHARS_WITH_JUMPSCARE.has(key))
+        .map(([key, c]) => ({ key, label: c.name })),
       { key: 'golden_freddy', label: 'Golden Freddy' },
     ];
     jsOptions.forEach(({ key, label }) => {

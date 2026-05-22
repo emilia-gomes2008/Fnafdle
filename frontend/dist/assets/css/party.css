@@ -481,6 +481,8 @@
 .dp-toll-title      { font-family: 'Oswald', sans-serif; font-size: .72rem; text-transform: uppercase; letter-spacing: .5px; color: var(--gold); margin-bottom: 1px; }
 .dp-toll-next       { font-size: .6rem; color: var(--text-muted); }
 .dp-toll-max        { font-size: .6rem; color: #f66; }
+.dp-toll-next-info  { font-size: .58rem; color: var(--text-muted); text-align: center; margin: -2px 0 1px; }
+.dp-toll-max-info   { color: #f66; }
 .dice-shop-title { font-family: 'Oswald', sans-serif; font-size: .78rem; color: var(--gold); text-align: center; margin-bottom: 2px; letter-spacing: 1px; }
 .dice-shop-coins { font-size: .7rem; color: var(--gold); text-align: center; margin-bottom: 5px; }
 .dice-inv-list   { display: flex; flex-direction: column; gap: 6px; }
@@ -550,10 +552,9 @@
   display: flex; flex-direction: column; gap: 5px;
   z-index: 50; overflow: hidden;
 }
-#ps-slots-area { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+#ps-slots-area { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; height: calc((100vh - 34px) / 2); overflow: hidden; }
 .player-slot {
-  height: calc((100vh - 50px) / 6);
-  flex: 0 0 auto; border-radius: 7px;
+  flex: 1; min-height: 0; border-radius: 7px;
   position: relative; overflow: hidden;
   background: var(--bg-page); border: 2px solid var(--border);
   padding: 5px 7px;
