@@ -15,7 +15,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Oswald:wght@400;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../assets/css/global.css" />
   <link rel="stylesheet" href="../assets/css/multiplayer.css" />
-  <link rel="stylesheet" href="../assets/css/party.css" />
+  <link rel="stylesheet" href="../assets/css/party.css?v=42" />
 </head>
 <body>
 
@@ -24,6 +24,17 @@
       <img src="../assets/images/title/fnafdlereborn.png" alt="Fnafdle" />
     </div>
     <div class="fnaf-subtitle">Party Mode</div>
+  </div>
+
+  <!-- Outer layout: [players] [gray container] [shop] -->
+  <div class="party-outer-layout">
+  <!-- Left sidebar: player slots + event log -->
+  <div id="player-slots-panel" style="display:none">
+    <div id="ps-slots-area"></div>
+    <div id="event-log-panel" class="event-log-panel">
+      <div class="event-log-header">📋 Events</div>
+      <div id="event-log-list" class="event-log-list"></div>
+    </div>
   </div>
 
   <div class="container" id="party-container">
@@ -48,6 +59,8 @@
             <label class="playercount-opt"><input type="radio" name="party-count" value="2" checked><span>2</span></label>
             <label class="playercount-opt"><input type="radio" name="party-count" value="3"><span>3</span></label>
             <label class="playercount-opt"><input type="radio" name="party-count" value="4"><span>4</span></label>
+            <label class="playercount-opt"><input type="radio" name="party-count" value="5"><span>5</span></label>
+            <label class="playercount-opt"><input type="radio" name="party-count" value="6"><span>6</span></label>
           </div>
         </div>
 
@@ -77,6 +90,36 @@
                 Private
               </label>
             </div>
+            <div class="setup-label">Map</div>
+            <div class="map-select-row">
+              <label class="map-select-opt">
+                <input type="radio" name="party-map" value="easy" checked />
+                <span class="map-opt-name">Easy</span>
+                <span class="map-opt-desc">20 spaces · mixed tiles</span>
+              </label>
+              <label class="map-select-opt">
+                <input type="radio" name="party-map" value="jackpot" />
+                <span class="map-opt-name">Jackpot 💰</span>
+                <span class="map-opt-desc">39 spaces · minigame every lap</span>
+              </label>
+              <label class="map-select-opt">
+                <input type="radio" name="party-map" value="normal_map" />
+                <span class="map-opt-name">Normal</span>
+                <span class="map-opt-desc">46 spaces · split paths · random tiles</span>
+              </label>
+              <label class="map-select-opt">
+                <input type="radio" name="party-map" value="hard" />
+                <span class="map-opt-name">Hard 🐻</span>
+                <span class="map-opt-desc">58 spaces · 3 tollbooths · complex paths</span>
+              </label>
+            </div>
+            <div class="setup-label">Rounds (Laps)</div>
+            <div class="playercount-row">
+              <label class="playercount-opt"><input type="radio" name="party-laps" value="3"><span>3</span></label>
+              <label class="playercount-opt"><input type="radio" name="party-laps" value="5" checked><span>5</span></label>
+              <label class="playercount-opt"><input type="radio" name="party-laps" value="10"><span>10</span></label>
+              <label class="playercount-opt"><input type="radio" name="party-laps" value="15"><span>15</span></label>
+            </div>
             <div class="create-btns-row">
               <button class="mp-btn" id="cancel-create-btn">Cancel</button>
               <button class="mp-btn primary" id="confirm-create-btn">Create!</button>
@@ -103,12 +146,16 @@
           <div id="rules-box" class="rules-box" style="display:none">
             <ul class="rules-list">
               <li><span class="e">🎲</span> Each player on their own device rolls the dice and moves on the shared board.</li>
-              <li><span class="e">🔄</span> Goal: complete <strong>5 laps</strong>. Each lap, 10 coins = 1 pizza automatically.</li>
-              <li><span class="e">🏆</span> The player with the <strong>most pizzas</strong> after 5 laps wins!</li>
-              <li><span class="e">🪙</span> Yellow space: +2 coins &nbsp;|&nbsp; <span class="e">🍕</span> Green space: +1 pizza</li>
-              <li><span class="e">🎮</span> Red space: Minigame for everyone! &nbsp;|&nbsp; <span class="e">❓</span> Orange space: Random event</li>
-              <li><span class="e">👥</span> If two players land on the same space, a minigame starts between them!</li>
-              <li><span class="e">🎮</span> Minigames: everyone plays simultaneously, each on their own device.</li>
+              <li><span class="e">🔄</span> Goal: complete the set number of laps. Each lap, 10 coins = 1 pizza automatically.</li>
+              <li><span class="e">🏆</span> Most pizzas wins! Tie → most coins. Still tied → sudden-death minigame!</li>
+              <li><span class="e">🪙</span> Yellow: +2 coins &nbsp;|&nbsp; <span class="e">🍕</span> Green: buy a pizza (10 coins) or skip &nbsp;|&nbsp; <span class="e">💀</span> Red: −3 coins</li>
+              <li><span class="e">🎮</span> Orange: Minigame for all! &nbsp;|&nbsp; <span class="e">❓</span> Purple: Random event &nbsp;|&nbsp; <span class="e">⚔️</span> Challenge: 1 vs all</li>
+              <li><span class="e">🐻</span> Tollbooth: path splits. Pay coins → Path A (shortcut) or take Path B free (setback). Price rises each visit!</li>
+              <li><span class="e">👥</span> Two players on the same space = instant minigame between them!</li>
+              <li><span class="e">🎲</span> Dice Shop: buy special dice with limited uses (3–5). Each die can be equipped any time from the panel.</li>
+              <li><span class="e">1️⃣</span> All-Ones Die: always rolls 1, but you're <strong>forced</strong> to use it for 5 turns — can't unequip!</li>
+              <li><span class="e">🦊🐻🐔🎸🪤🎭🎀</span> Characters each have a unique ability. Freddy: take Path A free at tollbooths (cd:3). Foxy: re-roll once (cd:2). Chica: steal 5 coins from nearby player (cd:3). Bonnie: jump 4 spaces (cd:3). Springtrap: send a nearby player back to start (cd:5). Puppet: convert 10 coins → pizza for any nearby player (cd:5). Mangle: shuffle all non-locked board spaces (cd:5).</li>
+              <li><span class="e">💰</span> Jackpot map: minigame every round. Jackpot spaces grow until claimed!</li>
             </ul>
           </div>
         </div>
@@ -137,15 +184,26 @@
 
         <div class="waiting-dots" id="waiting-dots"><span>.</span><span>.</span><span>.</span></div>
       </div>
+
+      <!-- Mini showcase -->
+      <div class="mini-showcase">
+        <div class="showcase-title">🎲 How to Play</div>
+        <div class="showcase-grid">
+          <div class="showcase-card"><div class="sc-icon">🎲</div><div class="sc-name">Roll &amp; Move</div><div class="sc-desc">Roll your die and move. Finish laps to convert 10 coins → 1 pizza!</div></div>
+          <div class="showcase-card"><div class="sc-icon">🍕</div><div class="sc-name">Win Condition</div><div class="sc-desc">Most pizzas wins. Tie → most coins. Still tied → 1v1 minigame!</div></div>
+          <div class="showcase-card"><div class="sc-icon">🪙🍕💀🎮</div><div class="sc-name">Basic Spaces</div><div class="sc-desc">🪙+2 coins · 🍕+1 pizza (need 10 coins!) · 💀-3 coins · 🎮 Minigame</div></div>
+          <div class="showcase-card"><div class="sc-icon">❓🪤⚔️💰</div><div class="sc-name">Special Spaces</div><div class="sc-desc">❓ Event · 🪤 Trap (bad luck) · ⚔️ Challenge (1vAll) · 💰 Jackpot (grows!)</div></div>
+          <div class="showcase-card"><div class="sc-icon">🎲 2×</div><div class="sc-name">Dice Shop &amp; Double</div><div class="sc-desc">At half-laps: visit the Dice Shop! Past the midpoint all space values double!</div></div>
+          <div class="showcase-card"><div class="sc-icon">🦊🐻🐔🎸</div><div class="sc-name">Characters &amp; Dice</div><div class="sc-desc">All start with d6. Buy special dice in shop: Foxy (d8), Chica (Chef), Bonnie (Rocker) + generics</div></div>
+        </div>
+      </div>
     </div>
 
     <!-- ── BOARD ──────────────────────────────────────────── -->
     <div id="screen-board" style="display:none">
-      <div id="player-status-bar" class="player-status-bar"></div>
       <div class="board-wrap">
         <div id="party-board" class="party-board"></div>
       </div>
-      <div id="current-player-action" class="current-player-action"></div>
     </div>
 
     <!-- ── MINIGAME ───────────────────────────────────────── -->
@@ -169,12 +227,25 @@
       </div>
     </div>
 
+  </div><!-- /party-container -->
+
+  <!-- Action box panel (sits left of dice shop) -->
+  <div id="dice-action-panel" class="dice-action-box" style="display:none">
+    <div id="current-player-action" class="current-player-action"></div>
+    <div id="dice-action-btns"></div>
   </div>
+
+  <!-- Dice shop panel -->
+  <div id="dice-shop-panel" class="dice-shop-panel" style="display:none">
+    <div id="dice-shop-content"></div>
+  </div>
+
+  </div><!-- /party-outer-layout -->
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="../assets/js/config.js"></script>
   <script src="../../../backend/src/db/database.js"></script>
   <script src="../assets/js/core.js?v=2"></script>
-  <script src="../assets/js/party.js"></script>
+  <script src="../assets/js/party.js?v=64"></script>
 </body>
 </html>

@@ -87,25 +87,55 @@ Online 2-player mode powered by Supabase real-time.
 ---
 
 ### Fnafdle Party
-A Mario Party-inspired online board game for 2–4 players, powered by Supabase real-time.
+A Mario Party-inspired online board game for 2–6 players, powered by Supabase real-time.
 
-- **20-space board**, played over **5 laps**: first to finish triggers the end; most pizzas wins, coins break ties
-- Each lap, every **10 coins** you've saved automatically convert into **1 pizza**
-- **Space types:** Normal (pass through), 🪙 Coin (+2 coins), 🍕 Pizza (+1 pizza), 🎮 Minigame (triggers a minigame for all players), ❓ Event (random FNAF-themed event), landing on the same space as another player also triggers a 1v1 minigame
-- **4 playable characters**, each with a unique ability on cooldown:
-  - 🐻 **Freddy** - no ability
-  - 🐔 **Chica** - throw her Cupcake up to 5 spaces ahead to steal 5 coins from a player (cooldown: 3 turns)
-  - 🎸 **Bonnie** - jump exactly 4 spaces instead of rolling (cooldown: 3 turns)
-  - 🦊 **Foxy** - re-roll the dice after seeing the first result (cooldown: 2 turns)
-- **5 minigames**, all played simultaneously on each player's own device:
-  - 👃 **Helpy Boop** - click Helpy's nose as many times as possible in 30 seconds
-  - 💰 **Money Laundering** - drag coins to Rockstar Freddy; most deposited in 30 seconds wins
-  - 🍕 **Feeding Frenzy** - follow Chica's recipe in order; wrong ingredient or timeout = 0 points and -1 pizza
-  - 🎸 **Guitar Finder** - find Bonnie's guitar hidden in a 4×4 grid as fast as possible
-  - 🔦 **Power Out** - close the door before Freddy attacks; random timing keeps everyone on edge
-- **Minigame reward:** winner gains coins, loser loses coins (1–3, rolled randomly per minigame)
-- **Random events** on ❓ spaces: coin bonuses/penalties, forced movement, losing a pizza, board reshuffles, and more - all FNAF-themed
-- Rematch requires all players to agree; players who opt out are dropped and slots compacted
+**Setup:** Create a room, choose a map and number of laps, then each player picks and confirms a character. The first player is chosen randomly.
+
+**Goal:** Complete the set number of laps. Every 10 coins = 1 pizza automatically on each lap pass. Most pizzas at the end wins; ties broken by coins, then a sudden-death minigame.
+
+**Maps:** Easy (20 spaces), Normal (46 spaces, split paths), Jackpot (39 spaces, minigame every lap), Hard (58 spaces, 3 tollbooths, Freddy-zone danger).
+
+**Space types:**
+| Space | Effect |
+|-------|--------|
+| 🪙 Yellow | +2 coins |
+| 🍕 Green | Buy 1 pizza for 10 coins |
+| 💀 Red | −3 coins |
+| 🎮 Orange | Minigame for all players |
+| ❓ Purple | Random FNAF event |
+| ⚔️ Blue | Challenge: 1v all |
+| 🐻 Tollbooth | Pay coins → shortcut, or take the free (longer) path. Price rises per visit! |
+| 💰 Jackpot | Growing coin pool — claim it first! |
+
+**Characters** (7 total, each with a unique ability):
+| Character | Ability | Cooldown |
+|-----------|---------|----------|
+| 🐻 Freddy | Take tollbooth Path A for free | 3 turns |
+| 🎸 Bonnie | Jump exactly 4 spaces | 3 turns |
+| 🐔 Chica | Throw Cupcake — steal 5 coins from a nearby player | 3 turns |
+| 🦊 Foxy | Re-roll after seeing the first result | 2 turns |
+| 🎀 Mangle | Shuffle all non-locked board spaces | 5 turns |
+| 🎭 Puppet | Convert 10 coins → 1 pizza for any nearby player | 5 turns |
+| 🪤 Springtrap | Send a nearby player back to start | 5 turns |
+
+**Dice shop** (buy with coins mid-game): each character has a character-specific die plus generic options (2d6, All-Ones, Lucky 7, Pick-Your-Steps).
+
+**Minigames** (7 total, played simultaneously on each device):
+| Minigame | Description |
+|----------|-------------|
+| 👃 Helpy Boop | Tap Helpy's nose as many times as possible — 30s |
+| 💰 Money Laundering | Drag coins to Rockstar Freddy — most deposited in 30s wins |
+| 🍕 Feeding Frenzy | Follow Chica's recipe in order; wrong ingredient = penalty — race to finish |
+| 🎸 Guitar Finder | Find Bonnie's guitar in a 4×4 grid as fast as possible |
+| 🔦 Power Out | Close the door before Freddy lunges — random timing |
+| 🔦 Flashlight | Tap as fast as you can for 15s. Watch for Withered Foxy... |
+| 🍕 Pizza Dough | Draw the most perfect circle in 5 seconds |
+
+**Minigame rewards:** winner gains coins (1–3 random, doubled in the second half). No coins lost for losing. Ties split the reward equally.
+
+**Random events** on ❓ spaces: coin bonuses/penalties, forced movement, losing a pizza, board reshuffles, and more.
+
+Rematch requires all players to agree; players who opt out are dropped and slots compacted.
 
 ---
 

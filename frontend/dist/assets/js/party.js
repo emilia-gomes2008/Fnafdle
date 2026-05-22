@@ -1,35 +1,142 @@
 // ── Constants ─────────────────────────────────────────────────────────────────
-const BOARD_SIZE    = 20;
+const BOARD_SIZE    = 20;  // default / easy board size
 const TOTAL_LAPS    = 5;
 const COINS_PER_PIZZA = 10;
+const TOLL_SKIP     = 4;   // spaces skipped when paying Freddy
 
-const BOARD_GRID = [
+// ─── Board grids ──────────────────────────────────────────
+const BOARD_GRID_EASY = [
   [1,1],[1,2],[1,3],[1,4],[1,5],[1,6],
   [2,6],[3,6],[4,6],[5,6],
   [6,6],[6,5],[6,4],[6,3],[6,2],[6,1],
   [5,1],[4,1],[3,1],[2,1],
-];
+]; // 20 spaces, 6×6
+
+const BOARD_GRID_NORMAL = [
+  [1,1],[1,2],[1,3],[1,4],[1,5],[1,6],[1,7],[1,8], // top: 8
+  [2,8],[3,8],[4,8],[5,8],                          // right: 4
+  [6,8],[6,7],[6,6],[6,5],[6,4],[6,3],[6,2],[6,1], // bottom: 8
+  [5,1],[4,1],[3,1],[2,1],                          // left: 4
+]; // 24 spaces, 8×6 wide racetrack
+
+function getBoardGrid(mapType) {
+  return mapType === 'normal' ? BOARD_GRID_NORMAL : BOARD_GRID_EASY;
+}
 
 const SPACE_CFG = {
-  normal:   { cls: 'space-normal',   emoji: '',   label: 'Normal' },
-  minigame: { cls: 'space-minigame', emoji: '🎮', label: 'Minigame' },
-  coin:     { cls: 'space-coin',     emoji: '🪙', label: '+2 Moedas' },
-  pizza:    { cls: 'space-pizza',    emoji: '🍕', label: '+1 Pizza' },
-  question: { cls: 'space-question', emoji: '❓', label: 'Event' },
+  normal:      { cls: 'space-normal',      emoji: '',   label: 'Normal' },
+  minigame:    { cls: 'space-minigame',    emoji: '🎮', label: 'Minigame' },
+  coin:        { cls: 'space-coin',        emoji: '🪙', label: '+2 Coins' },
+  pizza:       { cls: 'space-pizza',       emoji: '🍕', label: '+1 Pizza' },
+  badluck:     { cls: 'space-badluck',     emoji: '💀', label: '-3 Coins' },
+  trap:        { cls: 'space-trap',        emoji: '🪤', label: 'Trap!' },
+  challenge:   { cls: 'space-challenge',   emoji: '⚔️', label: 'Challenge!' },
+  question:    { cls: 'space-question',    emoji: '❓', label: 'Event' },
+  tollbooth:   { cls: 'space-tollbooth',   emoji: '🐻', label: "Freddy's Toll" },
+  freddy_zone: { cls: 'space-freddy-zone', emoji: '😱', label: 'Freddy Zone' },
+  jackpot:     { cls: 'space-jackpot',     emoji: '💰', label: 'Jackpot!' },
 };
+
+// ─── Freddy face hard board ───────────────────────────────
+// Nodes trace the real Freddy face outline clockwise from chin.
+// Tollbooth at 5 → skip dest = 9 (5+TOLL_SKIP=4).
+// Tollbooth at 12 → skip dest = 16 (12+TOLL_SKIP=4).
+// Freddy-zone danger: nodes 6-8 (right eye), nodes 13-15 (left eye).
+const FREDDY_HEAD_NODES = [
+  { x: 50, y: 94 }, // 0  chin          (START)
+  { x: 66, y: 89 }, // 1  right jaw
+  { x: 79, y: 77 }, // 2  right cheek
+  { x: 88, y: 60 }, // 3  right cheek upper
+  { x: 90, y: 44 }, // 4  right ear
+  { x: 77, y: 32 }, // 5  TOLLBOOTH right eyebrow   (skip → 9)
+  { x: 76, y: 47 }, // 6  right eye upper  (freddy_zone)
+  { x: 75, y: 57 }, // 7  right eye mid    (freddy_zone)
+  { x: 69, y: 64 }, // 8  right eye lower  (freddy_zone)
+  { x: 64, y: 17 }, // 9  hat brim right   (skip dest 5+4)
+  { x: 50, y: 8  }, // 10 hat top          (JACKPOT)
+  { x: 36, y: 17 }, // 11 hat brim left
+  { x: 23, y: 32 }, // 12 TOLLBOOTH left eyebrow    (skip → 16)
+  { x: 25, y: 47 }, // 13 left eye upper   (freddy_zone)
+  { x: 25, y: 57 }, // 14 left eye mid     (freddy_zone)
+  { x: 31, y: 64 }, // 15 left eye lower   (freddy_zone)
+  { x: 10, y: 44 }, // 16 left ear         (skip dest 12+4)
+  { x: 12, y: 60 }, // 17 left cheek
+  { x: 21, y: 77 }, // 18 left cheek lower
+  { x: 34, y: 89 }, // 19 left jaw
+];
 
 const CHAR_CFG = {
-  freddy: { name: 'Freddy', emoji: '🐻', color: '#c48b14', img: 'images/chars/classic/freddy.png',
-            desc: 'Default character. No special abilities.', ability: null },
-  chica:  { name: 'Chica',  emoji: '🐔', color: '#d4a017', img: 'images/chars/classic/chica.png',
-            desc: 'Throws the Cupcake up to 5 spaces and steals 5 coins. Cooldown: 3 turns.', ability: 'cupcake', cooldown: 3 },
-  bonnie: { name: 'Bonnie', emoji: '🎸', color: '#4169e1', img: 'images/chars/classic/bonnie.png',
-            desc: 'Jumps exactly 4 spaces instead of rolling the dice. Cooldown: 3 turns.', ability: 'jump', cooldown: 3 },
-  foxy:   { name: 'Foxy',   emoji: '🦊', color: '#cc4400', img: 'images/chars/classic/foxy.png',
-            desc: 'Re-rolls the dice after the first result. Cooldown: 2 turns.', ability: 'reroll', cooldown: 2 },
+  freddy:    { name: 'Freddy',    emoji: '🐻', color: '#c48b14', img: 'images/chars/classic/freddy.png',
+               desc: "At Freddy's Tollbooths, can take Path A for free (ignores toll cost). Cooldown: 3 turns.", ability: 'tollpass', cooldown: 3 },
+  bonnie:    { name: 'Bonnie',    emoji: '🎸', color: '#4169e1', img: 'images/chars/classic/bonnie.png',
+               desc: 'Jumps exactly 4 spaces instead of rolling the dice. Cooldown: 3 turns.', ability: 'jump', cooldown: 3 },
+  chica:     { name: 'Chica',     emoji: '🐔', color: '#d4a017', img: 'images/chars/classic/chica.png',
+               desc: 'Throws the Cupcake up to 5 spaces and steals 5 coins. Cooldown: 3 turns.', ability: 'cupcake', cooldown: 3 },
+  foxy:      { name: 'Foxy',      emoji: '🦊', color: '#cc4400', img: 'images/chars/classic/foxy.png',
+               desc: 'Re-rolls the dice after the first result. Cooldown: 2 turns.', ability: 'reroll', cooldown: 2 },
+  mangle:    { name: 'Mangle',    emoji: '🎀', color: '#e875b0', img: 'images/chars/toy/mangle.png',
+               desc: 'Shuffles all non-locked board spaces. Cooldown: 5 turns.', ability: 'shuffle', cooldown: 5 },
+  puppet:    { name: 'Puppet',    emoji: '🎭', color: '#9a3ab0', img: 'images/chars/toy/puppet.png',
+               desc: 'Gifts: converts 10 coins → 1 pizza for any player within 5 spaces (including self). Cooldown: 5 turns.', ability: 'gifts', cooldown: 5 },
+  springtrap:{ name: 'Springtrap',emoji: '🪤', color: '#3a6a2a', img: 'images/chars/springlock/springtrap.png',
+               desc: 'Kill: sends a player within 5 spaces back to start (resets laps, keeps coins & pizzas). Cooldown: 5 turns.', ability: 'kill', cooldown: 5 },
 };
 
-const PLAYER_COLORS = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12'];
+const PLAYER_COLORS = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#1abca8', '#e67e22'];
+
+// ─── Dice system ──────────────────────────────────────────
+const DICE_TYPES = {
+  d6:         { label: 'Standard Die',            emoji: '🎲',   roll: () => Math.floor(Math.random()*6)+1 },
+  d8:         { label: "Foxy's Die (d8)",          emoji: '🦊🎲', roll: () => Math.floor(Math.random()*8)+1 },
+  chef:       { label: "Chica's Chef Die",         emoji: '🍗🎲', roll: () => [2,2,3,3,4,5][Math.floor(Math.random()*6)] },
+  rocker:     { label: "Bonnie's Rocker Die",      emoji: '🎸🎲', roll: () => [1,1,3,4,6,7][Math.floor(Math.random()*6)] },
+  '2d6':      { label: 'Double Die (2d6)',         emoji: '🎲🎲', roll: () => Math.floor(Math.random()*6)+1 + Math.floor(Math.random()*6)+1 },
+  all1:       { label: 'All-Ones Die',             emoji: '1️⃣',   roll: () => 1 },
+  lucky7:     { label: 'Lucky Seven Die',          emoji: '7️⃣',   roll: () => { const r = Math.random(); return r < 0.34 ? 6 : r < 0.67 ? 7 : 0; } },
+  pick:       { label: 'Pick Your Steps',          emoji: '🎯',   roll: null, pick: true },
+  // Springtrap: faces 6-10 + Springlock (0 = go to start, no move)
+  springlock: { label: 'Springlock Die',           emoji: '🪤🎲', roll: () => [6,7,8,9,10,0][Math.floor(Math.random()*6)], springlock: true },
+  // Puppet: faces 3-3-4-4-5-6; 6 = place a Music Box trap
+  musicbox:   { label: 'Music Box Die',            emoji: '🎭🎲', roll: () => [3,3,4,4,5,6][Math.floor(Math.random()*6)], musicbox: true },
+  // Mangle: 2d5 (2–10)
+  '2d5':      { label: "Mangle's 2d5",             emoji: '🎀🎲', roll: () => Math.floor(Math.random()*5)+1 + Math.floor(Math.random()*5)+1 },
+};
+
+const CHAR_DEFAULT_DICE = { freddy: 'd6', bonnie: 'd6', chica: 'd6', foxy: 'd6', mangle: 'd6', puppet: 'd6', springtrap: 'd6' };
+
+const SHOP_DICE = [
+  { id: 'd8',         price: 8,  maxUses: 4, label: "Foxy's Die (d8)",      emoji: '🦊🎲', desc: 'Rolls 1–8. Foxy only. · 4 uses.',                             onlyChar: 'foxy'       },
+  { id: 'chef',       price: 8,  maxUses: 4, label: "Chica's Chef Die",      emoji: '🍗🎲', desc: 'Rolls 2-2-3-3-4-5. Chica only. · 4 uses.',                   onlyChar: 'chica'      },
+  { id: 'rocker',     price: 8,  maxUses: 4, label: "Bonnie's Rocker Die",   emoji: '🎸🎲', desc: 'Rolls 1-1-3-4-6-6. Bonnie only. · 4 uses.',                  onlyChar: 'bonnie'     },
+  { id: '2d5',        price: 8,  maxUses: 4, label: "Mangle's 2d5",        emoji: '🎀🎲', desc: 'Rolls 2d5 (2–10). Mangle only. · 4 uses.',                    onlyChar: 'mangle'     },
+  { id: 'springlock', price: 8,  maxUses: 3, label: 'Springlock Die',        emoji: '🪤🎲', desc: 'Rolls 6-10 or Springlock (no move + back to start!). Springtrap only. · 3 uses.', onlyChar: 'springtrap' },
+  { id: 'musicbox',   price: 8,  maxUses: 3, label: 'Music Box Die',         emoji: '🎭🎲', desc: 'Rolls 3-3-4-4-5-6. On 6: places a Music Box trap! Puppet only. · 3 uses.',       onlyChar: 'puppet'     },
+  { id: '2d6',        price: 8,  maxUses: 3, label: 'Double Die (2d6)',       emoji: '🎲🎲', desc: 'Roll 2d6 and add results (2–12). · 3 uses.' },
+  { id: 'all1',       price: 3,  maxUses: 5, forced: 5, label: 'All-Ones Die', emoji: '1️⃣', desc: 'Always rolls 1. FORCED for 5 turns — cannot unequip!' },
+  { id: 'lucky7',     price: 12, maxUses: 4, label: 'Lucky Seven Die',        emoji: '7️⃣',   desc: 'Rolls 6 or 7... or 0. High risk, high reward. · 4 uses.' },
+  { id: 'pick',       price: 15, maxUses: 3, label: 'Pick Your Steps Die',    emoji: '🎯',   desc: 'Choose exactly how many spaces to move (1–6). · 3 uses.' },
+];
+
+const TRAP_EFFECTS = [
+  { text: 'Lost 5 coins! 💸',          eff: (st, s)         => { st.coins[s] = Math.max(0, (st.coins[s]||0) - 5); } },
+  { text: 'Lost 1 pizza! 🍕',          eff: (st, s)         => { if ((st.pizzas[s]||0) > 0) st.pizzas[s]--; } },
+  { text: 'Swapped with last place! 🔄', eff: (st, s, room) => {
+    const pc = room.player_count || 2;
+    const last = allSlots(pc).filter(sl => room[`${sl}_name`])
+      .map(sl => ({ sl, score: (st.pizzas[sl]||0)*100 + (st.coins[sl]||0) }))
+      .sort((a,b) => a.score - b.score)[0]?.sl;
+    if (last && last !== s) {
+      [st.coins[s], st.coins[last]]   = [st.coins[last]||0, st.coins[s]||0];
+      [st.pizzas[s], st.pizzas[last]] = [st.pizzas[last]||0, st.pizzas[s]||0];
+    }
+  }},
+  { text: 'Sent back to start! ⏮️',    eff: (st, s)         => { st.pos[s] = 0; } },
+  { text: 'Dice reset to default! 🎲', eff: (st, s, room, ns) => {
+    const char = room[`${s}_char`] || 'freddy';
+    if (!ns[s]) ns[s] = { mgWins: 0, badLucks: 0 };
+    ns[s].dice = CHAR_DEFAULT_DICE[char] || 'd6';
+  }},
+];
 
 const MINIGAME_LIST = [
   { id: 'helpyBoop',     name: 'Helpy Boop',       emoji: '👃', desc: 'Click Helpy\'s nose as many times as you can in 30 seconds!' },
@@ -37,6 +144,8 @@ const MINIGAME_LIST = [
   { id: 'feedingFrenzy', name: 'Feeding Frenzy',    emoji: '🍕', desc: 'Make Chica\'s pizza as fast as possible! Wrong ingredient = -1 pizza.' },
   { id: 'guitarFinder',  name: 'Guitar Finder',     emoji: '🎸', desc: 'Find Bonnie\'s guitar hidden in the grid as fast as possible!' },
   { id: 'powerOut',      name: 'Power Out',         emoji: '🔦', desc: 'Close the door before Freddy attacks! Random timing.' },
+  { id: 'flashlight',    name: 'Flashlight',        emoji: '🔦', desc: 'Tap as fast as you can for 15 seconds! Watch out for Withered Foxy...' },
+  { id: 'pizzaDough',    name: 'Pizza Dough',       emoji: '🍕', desc: 'Draw the most perfect circle you can in 5 seconds!' },
 ];
 
 const QUESTION_EVENTS = [
@@ -74,12 +183,18 @@ sessionStorage.setItem('party_pid', playerId);
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let roomId, playerSlot, roomData;
-let broadcastCh;                   // Supabase broadcast channel
-let liveScores  = {};              // { slot: score } – real-time during minigame
-let activeMgId  = null;            // set when 'minigame' phase starts → prevents re-triggering
-let mgWaitKey   = null;            // set when 'mg_waiting' starts → separate from activeMgId
-let mgCleanup   = null;            // function to clean up active minigame timers
-let pendingRoll = null;            // Foxy re-roll: new value before DB subscription fires
+let broadcastCh;
+let liveScores   = {};
+let mgDoneLocal          = {};   // tracks submitted slots via broadcast
+let podiumConfirmedLocal = new Set(); // tracks podium-confirmed slots via broadcast
+let activeMgId   = null;
+let mgWaitKey    = null;
+let mgCleanup    = null;
+let mgPoller     = null;
+let pendingRoll  = null;
+let lapCompletedLocal = false;     // local backup so lap-minigame survives Supabase race conditions
+let eventLog    = [];              // local event history (broadcast to all clients)
+let prevPlayerPos = {};            // track positions for movement animation
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const imgPath = rel => '../assets/' + rel;
@@ -87,7 +202,7 @@ const charImg = char => imgPath(CHAR_CFG[char]?.img || 'images/default.png');
 const slotNum = slot  => +slot.replace('player', '');              // 'player2' → 2
 const mgScoreKey = slot => `mg_score_p${slotNum(slot)}`;
 const mgDoneKey  = slot => `mg_done_p${slotNum(slot)}`;
-const allSlots = n => ['player1','player2','player3','player4'].slice(0, n);
+const allSlots = n => ['player1','player2','player3','player4','player5','player6'].slice(0, n);
 
 function pState(room) {
   return {
@@ -97,11 +212,128 @@ function pState(room) {
     cooldowns: JSON.parse(room.player_cooldowns || '{}'),
   };
 }
+function parseBoard(room) {
+  try {
+    const raw = JSON.parse(room.board || '[]');
+    if (Array.isArray(raw)) return { tiles: raw, laps: TOTAL_LAPS, boardSize: BOARD_SIZE, mapType: 'easy', toll: 5, tollMap: {}, skipMap: {}, freeMap: {}, nodes: null, boardAspect: '1:1' };
+    return {
+      tiles:       Array.isArray(raw.tiles) ? raw.tiles : [],
+      laps:        raw.laps        || TOTAL_LAPS,
+      boardSize:   raw.boardSize   || BOARD_SIZE,
+      mapType:     raw.mapType     || 'easy',
+      toll:        raw.toll        ?? 5,
+      tollMap:     raw.tollMap     || {},
+      skipMap:     raw.skipMap     || {},
+      freeMap:     raw.freeMap     || {},
+      nodes:       Array.isArray(raw.nodes) ? raw.nodes : null,
+      boardAspect: raw.boardAspect || '1:1',
+      nextMap:            raw.nextMap            || {},
+      endOfRoundMinigame: raw.endOfRoundMinigame || false,
+    };
+  } catch { return { tiles: [], laps: TOTAL_LAPS, boardSize: BOARD_SIZE, mapType: 'easy', toll: 5, tollMap: {}, skipMap: {}, freeMap: {}, nodes: null, boardAspect: '1:1' }; }
+}
+function pStats(room) {
+  try { return JSON.parse(room.player_stats || '{}'); } catch { return {}; }
+}
+function isDoublePhase(room) {
+  const { laps } = parseBoard(room);
+  const half = Math.floor(laps / 2);
+  const pc   = room.player_count || 2;
+  return allSlots(pc).some(s => room[`${s}_name`] && playerLaps(room, s) >= half);
+}
+function getPlayerDice(room, slot) {
+  const ns = pStats(room)[slot] || {};
+  if (ns.forcedDice && (ns.forcedTurns || 0) > 0) return ns.forcedDice;
+  const char = room[`${slot}_char`] || 'freddy';
+  return ns.dice || CHAR_DEFAULT_DICE[char] || 'd6';
+}
+function getJackpotValue(room) {
+  const pc = room.player_count || 2;
+  const maxLap = Math.max(0, ...allSlots(pc)
+    .filter(s => room[`${s}_name`])
+    .map(s => playerLaps(room, s)));
+  return Math.min(3 + maxLap * 3, 30);
+}
+function addEvent(msg) {
+  eventLog.unshift(msg);
+  if (eventLog.length > 300) eventLog.length = 300;
+  const el = document.getElementById('event-log-list');
+  if (!el) return;
+  el.innerHTML = eventLog.map(m => `<div class="event-entry">${m}</div>`).join('');
+  const panel = document.getElementById('event-log-panel');
+  if (panel) panel.scrollTop = 0;
+}
+function emitEvent(msg) {
+  addEvent(msg);
+  broadcastCh?.send({ type: 'broadcast', event: 'game_event', payload: { msg } });
+}
+
+// ── Minigame poller — polls DB every 2s while minigame is active ──────────────
+// Needed because Supabase real-time is unreliable for the allDone detection.
+function startMgPoller() {
+  stopMgPoller();
+  mgPoller = setInterval(async () => {
+    if (!roomId) return stopMgPoller();
+    try {
+      const { data: r } = await db.from('party_rooms').select('*').eq('id', roomId).single();
+      if (!r) return;
+      if (r.turn_phase === 'mg_podium') {
+        stopMgPoller(); handleRoomUpdate(r); return;
+      }
+      if (r.turn_phase !== 'minigame') {
+        stopMgPoller(); handleRoomUpdate(r); return;
+      }
+      const inv = JSON.parse(r.mg_players || '[]');
+      if (inv.every(s => r[mgDoneKey(s)])) { stopMgPoller(); finishMinigame(r); }
+    } catch {}
+  }, 2000);
+}
+function stopMgPoller() {
+  if (mgPoller) { clearInterval(mgPoller); mgPoller = null; }
+}
+
+// Broadcast-based allDone: fires when all involved players sent mg_done via broadcast.
+function checkMgAllDoneLocal() {
+  if (!roomId) return;
+  const involved = JSON.parse(roomData?.mg_players || '[]');
+  if (!involved.length) return;
+  if (involved.every(s => s in mgDoneLocal)) {
+    stopMgPoller();
+    (async () => {
+      try { const { data: r } = await db.from('party_rooms').select('*').eq('id', roomId).single(); if (r) finishMinigame(r); } catch {}
+    })();
+  }
+}
+
+// Broadcast-based podium confirm: fires when all involved players confirmed via broadcast.
+function checkPodiumAllConfirmedLocal() {
+  if (!roomData) return;
+  const involved = JSON.parse(roomData.mg_players || '[]');
+  if (!involved.length) return;
+  if (involved.every(s => podiumConfirmedLocal.has(s))) {
+    // Everyone confirmed — advance to roll
+    let nextPlayer;
+    try { nextPlayer = JSON.parse(roomData.mg_config || '{}').nextPlayer; } catch {}
+    nextPlayer = nextPlayer || nextSlot(roomData);
+    db.from('party_rooms').update({
+      turn_phase: 'roll', current_slot: nextPlayer, mg_id: null,
+      mg_done_p1: false, mg_done_p2: false, mg_done_p3: false, mg_done_p4: false,
+    }).eq('id', roomId).eq('turn_phase', 'mg_podium').then(() => {}, () => {});
+    // Also advance locally without waiting for subscription
+    document.getElementById('mg-result-overlay')?.remove();
+    roomData = { ...roomData, turn_phase: 'roll', current_slot: nextPlayer, mg_id: null };
+    showScreen('board');
+    renderBoard(roomData);
+    renderActionUI(roomData);
+    renderStatusBar(roomData);
+    updateTokens(roomData);
+  }
+}
 function playerPos(room, slot)  { return pState(room).pos[slot]       || 0; }
 function playerCoins(room, slot){ return pState(room).coins[slot]     || 0; }
 function playerPizzas(room, slot){ return pState(room).pizzas[slot]   || 0; }
-function playerLaps(room, slot)  { return Math.floor(playerPos(room, slot) / BOARD_SIZE); }
-function boardPos(room, slot)    { return playerPos(room, slot) % BOARD_SIZE; }
+function playerLaps(room, slot)  { const { boardSize } = parseBoard(room); return Math.floor(playerPos(room, slot) / boardSize); }
+function boardPos(room, slot)    { const { boardSize } = parseBoard(room); return playerPos(room, slot) % boardSize; }
 
 function myPlayer(room) {
   const s = pState(room);
@@ -129,10 +361,10 @@ function nextSlot(room) {
   return room.current_slot;
 }
 
-function moveFwd(state, slot, steps, doConvert = true) {
-  const oldLaps = Math.floor(state.pos[slot] / BOARD_SIZE);
+function moveFwd(state, slot, steps, doConvert = true, boardSize = BOARD_SIZE) {
+  const oldLaps = Math.floor(state.pos[slot] / boardSize);
   state.pos[slot] = (state.pos[slot] || 0) + steps;
-  const newLaps = Math.floor(state.pos[slot] / BOARD_SIZE);
+  const newLaps = Math.floor(state.pos[slot] / boardSize);
   if (newLaps > oldLaps && doConvert) {
     const earned = Math.floor((state.coins[slot] || 0) / COINS_PER_PIZZA);
     state.pizzas[slot] = (state.pizzas[slot] || 0) + earned;
@@ -143,17 +375,179 @@ function moveBack(state, slot, steps) {
   state.pos[slot] = Math.max(0, (state.pos[slot] || 0) - steps);
 }
 
-function generateBoard() {
-  const pool = [
-    ...Array(10).fill('normal'), ...Array(4).fill('minigame'),
-    ...Array(3).fill('coin'), ...Array(2).fill('pizza'), 'question',
-  ];
+// Graph-aware movement — follows nextMap connections, counts laps at node 0.
+function moveByGraph(state, slot, steps, boardSize, nextMap) {
+  let node = (state.pos[slot] || 0) % boardSize;
+  let laps = Math.floor((state.pos[slot] || 0) / boardSize);
+  for (let i = 0; i < steps; i++) {
+    const nxt = (nextMap && nextMap[node] !== undefined) ? nextMap[node] : (node + 1) % boardSize;
+    node = nxt;
+    if (node === 0) {
+      laps++;
+      const earned = Math.floor((state.coins[slot] || 0) / COINS_PER_PIZZA);
+      state.pizzas[slot] = (state.pizzas[slot] || 0) + earned;
+      state.coins[slot]  = (state.coins[slot]  || 0) % COINS_PER_PIZZA;
+    }
+  }
+  state.pos[slot] = laps * boardSize + node;
+}
+
+// Jump directly to a board node index.
+// noLap = true: setback jump (freeMap going backward) — stays in same lap epoch, no coin conversion.
+function jumpToNode(state, slot, targetIdx, boardSize, noLap = false) {
+  const cur     = state.pos[slot] || 0;
+  const curNode = cur % boardSize;
+  const lapBase = cur - curNode;
+  const newPos  = (noLap || targetIdx >= curNode)
+    ? lapBase + targetIdx                  // no new lap: stay in current epoch
+    : lapBase + boardSize + targetIdx;     // wraps forward: counts as lap
+  const oldLap = Math.floor(cur / boardSize);
+  const newLap = Math.floor(newPos / boardSize);
+  state.pos[slot] = newPos;
+  if (!noLap && newLap > oldLap) {
+    const earned = Math.floor((state.coins[slot] || 0) / COINS_PER_PIZZA);
+    state.pizzas[slot] = (state.pizzas[slot] || 0) + earned;
+    state.coins[slot]  = (state.coins[slot]  || 0) % COINS_PER_PIZZA;
+  }
+}
+
+function shufflePool(pool) {
   for (let i = pool.length - 1; i > 1; i--) {
     const j = 1 + Math.floor(Math.random() * i);
     [pool[i], pool[j]] = [pool[j], pool[i]];
   }
   pool[0] = 'normal';
   return pool;
+}
+
+function generateBoard() { return createBoard('easy').tiles; } // backwards compat for boardShuffle event
+
+function createBoard(mapType = 'easy', laps = TOTAL_LAPS) {
+  if (mapType === 'normal') {
+    return { tiles: shufflePool([
+      ...Array(5).fill('normal'), ...Array(4).fill('minigame'),
+      ...Array(4).fill('coin'),   ...Array(3).fill('pizza'),
+      ...Array(3).fill('badluck'),...Array(2).fill('trap'),
+      'challenge', 'question', 'jackpot',
+    ]), laps, boardSize: 24, mapType, toll: 5 };
+  }
+  if (mapType === 'normal_map') {
+    // 46-node custom board with split paths. Non-fixed tiles randomized each game.
+    const FIXED    = new Set(['tollbooth', 'freddy_zone', 'jackpot']);
+    const template = [
+      'normal','badluck','jackpot','pizza','normal','jackpot','badluck','coin','trap','question',
+      'tollbooth','normal','coin','freddy_zone','minigame','freddy_zone','normal','coin','normal',
+      'trap','normal','pizza','pizza','coin','normal','coin','minigame','minigame','trap',
+      'freddy_zone','coin','minigame','coin','jackpot','normal','badluck','badluck','challenge',
+      'question','minigame','minigame','badluck','pizza','normal','challenge','pizza',
+    ];
+    // 38 randomizable slots (skip index 0 START + 7 fixed-type nodes)
+    const pool = shufflePool([
+      ...Array(7).fill('normal'),   ...Array(7).fill('coin'),    ...Array(6).fill('pizza'),
+      ...Array(6).fill('minigame'), ...Array(5).fill('badluck'), ...Array(3).fill('trap'),
+      ...Array(2).fill('challenge'),...Array(2).fill('question'),
+    ]);
+    let pi = 0;
+    const tiles = template.map((t, i) => {
+      if (i === 0) return 'normal'; // START always normal
+      if (FIXED.has(t)) return t;
+      return pool[pi++ % pool.length];
+    });
+    return {
+      tiles, laps, boardSize: 46, mapType: 'normal_map', toll: 5,
+      skipMap: { 10: 35 }, freeMap: { 10: 11 }, nextMap: { 34: 0 }, boardAspect: '1:1',
+      nodes: [
+        {x:22.5,y:13.5},{x:30.9,y:24.3},{x:40.7,y:12.9},{x:46.1,y:17.9},{x:50.8,y:27.2},
+        {x:56.5,y:23.4},{x:65.5,y:19.5},{x:70.6,y:28.0},{x:76.9,y:36.9},{x:75.0,y:45.4},
+        {x:68.0,y:57.3},{x:63.0,y:51.5},{x:58.8,y:55.0},{x:53.4,y:61.9},{x:49.2,y:54.7},
+        {x:43.0,y:61.4},{x:36.9,y:57.5},{x:39.4,y:53.8},{x:37.3,y:48.6},{x:32.3,y:49.1},
+        {x:29.2,y:56.9},{x:32.1,y:63.3},{x:36.2,y:68.3},{x:33.3,y:74.9},{x:27.1,y:74.4},
+        {x:25.2,y:68.0},{x:24.5,y:61.1},{x:14.6,y:60.6},{x:14.7,y:49.5},{x:20.3,y:44.5},
+        {x:11.6,y:33.4},{x:12.5,y:27.8},{x:18.0,y:25.7},{x:15.4,y:15.3},{x:18.7,y:8.4},
+        {x:65.7,y:63.9},{x:61.2,y:73.0},{x:68.0,y:79.1},{x:60.3,y:85.1},{x:47.2,y:82.7},
+        {x:47.6,y:71.1},{x:47.9,y:62.7},{x:54.8,y:42.7},{x:40.2,y:39.6},{x:29.0,y:35.4},
+        {x:22.3,y:23.9},
+      ],
+    };
+  }
+  if (mapType === 'hard') {
+    // 58-node custom hard map · 3 tollbooths · complex paths
+    const FIXED = new Set(['tollbooth', 'freddy_zone', 'jackpot']);
+    const template = [
+      'normal','tollbooth','normal','normal','normal','normal','normal','normal','normal','normal',
+      'tollbooth','jackpot','jackpot','jackpot','normal','normal','normal','normal','normal','normal',
+      'normal','normal','normal','normal','normal','normal','normal','normal','normal','normal',
+      'normal','normal','normal','normal','tollbooth','trap','challenge','freddy_zone','trap',
+      'badluck','badluck','freddy_zone','badluck','challenge','normal','normal','normal','normal','normal',
+      'normal','normal','normal','normal','normal','normal','normal','normal','normal',
+    ];
+    const pool = shufflePool([
+      'normal','normal','normal','coin','coin','coin',
+      'pizza','pizza','minigame','minigame','badluck','badluck','trap','challenge','question',
+    ]);
+    let pi = 0;
+    const tiles = template.map((t, i) => {
+      if (i === 0) return 'normal';
+      if (FIXED.has(t)) return t;
+      return pool[pi++ % pool.length];
+    });
+    return {
+      tiles, laps, boardSize: 58, mapType: 'hard', toll: 5,
+      skipMap: { 1: 2,  10: 11, 34: 44 },
+      freeMap: { 1: 23, 10: 14, 34: 35 },
+      nextMap: { 22: 0 },
+      boardAspect: '1:1',
+      nodes: [
+        {x:49.2,y:60.0},{x:48.9,y:51.4},{x:39.8,y:54.1},{x:28.4,y:57.2},{x:26.5,y:69.1},
+        {x:25.8,y:78.6},{x:30.5,y:92.8},{x:48.5,y:97.1},{x:48.0,y:77.9},{x:17.3,y:61.7},
+        {x:23.2,y:43.1},{x:11.7,y:42.5},{x:4.6,y:27.3},{x:14.8,y:21.4},{x:25.9,y:29.7},
+        {x:30.9,y:19.7},{x:38.2,y:18.9},{x:36.3,y:3.7},{x:45.8,y:2.5},{x:46.0,y:39.3},
+        {x:35.3,y:36.2},{x:31.1,y:48.2},{x:39.0,y:44.4},{x:57.5,y:55.6},{x:65.2,y:55.3},
+        {x:70.2,y:58.0},{x:73.8,y:64.1},{x:74.2,y:73.4},{x:74.4,y:83.7},{x:66.3,y:94.8},
+        {x:56.0,y:96.9},{x:55.6,y:77.4},{x:84.6,y:59.3},{x:79.6,y:54.0},{x:74.8,y:44.8},
+        {x:78.9,y:38.4},{x:87.4,y:41.9},{x:96.3,y:43.1},{x:97.5,y:36.7},{x:100.0,y:29.6},
+        {x:96.8,y:21.4},{x:87.2,y:18.2},{x:81.3,y:24.5},{x:77.0,y:30.3},{x:70.3,y:30.7},
+        {x:64.7,y:19.5},{x:59.5,y:12.2},{x:60.2,y:3.7},{x:52.4,y:3.4},{x:51.7,y:18.8},
+        {x:51.5,y:27.4},{x:52.5,y:39.9},{x:56.0,y:34.5},{x:62.5,y:32.7},{x:68.1,y:40.2},
+        {x:60.0,y:39.7},{x:66.8,y:46.6},{x:55.6,y:47.2},
+      ],
+    };
+  }
+  if (mapType === 'jackpot') {
+    // 39-node map: 28 jackpots → 9 chained tollbooths → 1 pizza.
+    // No randomization. Minigame every lap.
+    const tiles = [
+      'normal',
+      ...Array(28).fill('jackpot'),
+      ...Array(9).fill('tollbooth'),
+      'pizza',
+    ];
+    return {
+      tiles, laps, boardSize: 39, mapType: 'jackpot', toll: 5,
+      skipMap: { 29:30, 30:31, 31:32, 32:33, 33:34, 34:35, 35:36, 36:37, 37:38 },
+      freeMap: { 29:1,  30:1,  31:1,  32:1,  33:1,  34:1,  35:1,  36:1,  37:1  },
+      boardAspect: '1:1',
+      endOfRoundMinigame: true,
+      nodes: [
+        {x:49.2,y:67.9},{x:47.9,y:89.2},{x:66.7,y:87.2},{x:49.0,y:99.5},{x:30.5,y:86.4},
+        {x:32.8,y:52.1},{x:38.3,y:48.8},{x:32.1,y:33.4},{x:34.7,y:18.8},{x:27.5,y:16.7},
+        {x:26.7,y:8.4},{x:36.0,y:8.2},{x:39.3,y:14.2},{x:44.7,y:1.5},{x:54.7,y:1.9},
+        {x:62.5,y:13.3},{x:66.4,y:7.2},{x:72.3,y:8.2},{x:70.7,y:16.4},{x:64.7,y:19.9},
+        {x:68.9,y:34.1},{x:64.3,y:47.2},{x:56.1,y:50.4},{x:51.2,y:36.6},{x:47.7,y:31.5},
+        {x:54.4,y:31.0},{x:44.6,y:50.4},{x:66.6,y:52.4},{x:67.6,y:70.3},{x:60.8,y:65.9},
+        {x:53.4,y:64.3},{x:49.7,y:58.6},{x:45.6,y:63.8},{x:39.2,y:65.2},{x:43.3,y:69.7},
+        {x:42.0,y:76.8},{x:49.1,y:73.2},{x:56.8,y:77.4},{x:55.0,y:70.3},
+      ],
+    };
+  }
+
+  // easy
+  return { tiles: shufflePool([
+    ...Array(5).fill('normal'), ...Array(3).fill('minigame'),
+    ...Array(3).fill('coin'),   ...Array(2).fill('pizza'),
+    ...Array(2).fill('badluck'),...Array(2).fill('trap'),
+    'challenge', 'question', 'jackpot',
+  ]), laps, boardSize: 20, mapType, toll: 5 };
 }
 function genCode() { return Math.random().toString(36).slice(2, 8).toUpperCase(); }
 
@@ -163,6 +557,19 @@ function showScreen(name) {
     const el = document.getElementById(`screen-${s}`);
     if (el) el.style.display = (s === name) ? '' : 'none';
   });
+  const inGame    = ['board','minigame','result'].includes(name);
+  const inGameHUD = ['board','minigame'].includes(name);
+  const shop = document.getElementById('dice-shop-panel');
+  if (shop) shop.style.display = inGameHUD ? '' : 'none';
+  const actionPanel = document.getElementById('dice-action-panel');
+  if (actionPanel) actionPanel.style.display = inGameHUD ? '' : 'none';
+  const slots = document.getElementById('player-slots-panel');
+  if (slots) slots.style.display = inGameHUD ? '' : 'none';
+  // Hide header and reduce container padding on in-game screens
+  const hdr = document.querySelector('.fnaf-header');
+  if (hdr) hdr.style.display = inGame ? 'none' : '';
+  const cnt = document.getElementById('party-container');
+  if (cnt) cnt.style.padding = inGame ? '8px 12px' : '';
 }
 function lobbyError(msg) {
   const el = document.getElementById('lobby-error');
@@ -210,18 +617,21 @@ async function confirmCreatePartyRoom() {
   const code      = document.getElementById('create-room-code').textContent;
   const roomName  = document.getElementById('create-room-name').value.trim() || `${name}'s Room`;
   const isPrivate = document.querySelector('input[name="party-privacy"]:checked')?.value === 'private';
-  const pc = +document.querySelector('input[name="party-count"]:checked').value;
+  const pc       = +document.querySelector('input[name="party-count"]:checked').value;
+  const totalLaps = +document.querySelector('input[name="party-laps"]:checked').value;
+  const mapType  = document.querySelector('input[name="party-map"]:checked').value;
+  const board    = createBoard(mapType, totalLaps);
 
-  const startPos = Math.floor(Math.random() * BOARD_SIZE);
   const { data, error } = await db.from('party_rooms').insert({
     code, player_count: pc, state: 'waiting',
     player1_id: playerId, player1_name: name, player1_char: null,
     room_name: roomName, is_private: isPrivate,
-    board: JSON.stringify(generateBoard()),
-    player_pos:       JSON.stringify({ player1: startPos }),
+    board: JSON.stringify(board),
+    player_pos:       JSON.stringify({ player1: 0 }),
     player_coins:     JSON.stringify({ player1: 0 }),
     player_pizzas:    JSON.stringify({ player1: 0 }),
     player_cooldowns: JSON.stringify({ player1: 0 }),
+    player_stats:     JSON.stringify({}),
     current_slot: 'player1', turn_phase: 'roll',
   }).select().single();
 
@@ -340,7 +750,7 @@ async function joinRoom() {
   else { lobbyError('Room is full!'); return; }
 
   const st = pState(room);
-  st.pos[slot]       = Math.floor(Math.random() * BOARD_SIZE);
+  st.pos[slot]       = 0;
   st.coins[slot]     = 0;
   st.pizzas[slot]    = 0;
   st.cooldowns[slot] = 0;
@@ -385,10 +795,11 @@ function updateWaitingScreen(room) {
       row.className = 'waiting-player-row';
       if (name) {
         const c = CHAR_CFG[char];
+        const confirmed = JSON.parse(room.player_stats || '{}')[`confirmed_${s}`];
         row.innerHTML = char
-          ? `<img src="${charImg(char)}" style="width:16px;height:16px;border-radius:50%;object-fit:contain;vertical-align:middle;margin-right:4px" onerror="this.style.display='none'"/>✅ ${name} <span style="color:var(--gold);font-size:.75rem">(${c ? c.name : char})</span>`
+          ? `<img src="${charImg(char)}" style="width:16px;height:16px;border-radius:50%;object-fit:contain;vertical-align:middle;margin-right:4px" onerror="this.style.display='none'"/>${confirmed ? '✅' : '⏳'} ${name} <span style="color:var(--gold);font-size:.75rem">(${c ? c.name : char})</span>`
           : `⏳ ${name} — choosing...`;
-        row.style.color = char ? 'var(--green-text)' : 'var(--text-muted)';
+        row.style.color = confirmed ? 'var(--green-text)' : char ? 'var(--yellow-text)' : 'var(--text-muted)';
       } else {
         row.textContent = `⏳ Player ${i + 1}...`;
         row.style.color = 'var(--text-muted)';
@@ -398,12 +809,16 @@ function updateWaitingScreen(room) {
   }
 
   // Title
-  const allChosen = allSlots(pc).filter(s => room[`${s}_name`]).every(s => room[`${s}_char`]);
+  const active    = allSlots(pc).filter(s => room[`${s}_name`]);
+  const allChosen = active.every(s => room[`${s}_char`]);
+  const stats     = JSON.parse(room.player_stats || '{}');
+  const allConfirmed = allChosen && active.every(s => stats[`confirmed_${s}`]);
   const title = document.getElementById('waiting-title');
   if (title) {
-    if (joined < pc)           title.textContent = `Waiting for players... (${joined}/${pc})`;
-    else if (!allChosen)       title.textContent = 'Choose your character!';
-    else                       title.textContent = 'All ready! Starting...';
+    if (joined < pc)        title.textContent = `Waiting for players... (${joined}/${pc})`;
+    else if (!allChosen)    title.textContent = 'Choose your character!';
+    else if (!allConfirmed) title.textContent = 'Confirm your character!';
+    else                    title.textContent = 'All confirmed! Starting...';
   }
 
   // Char picker (show once all players have joined)
@@ -417,6 +832,16 @@ function updateWaitingScreen(room) {
 
   // Start-early button (only for creator when not full)
   updatePartyStartEarlyBtn(room);
+
+  // Conflict detection: if my char is already taken by someone else, clear it
+  const myChar = room[`${playerSlot}_char`];
+  if (myChar && playerSlot) {
+    const conflict = allSlots(pc).some(s => s !== playerSlot && room[`${s}_char`] === myChar);
+    if (conflict) {
+      db.from('party_rooms').update({ [`${playerSlot}_char`]: null }).eq('id', roomId);
+      showToast('Character taken! Choose another 😅');
+    }
+  }
 
   // Check if can start
   checkAllCharsReady(room);
@@ -434,7 +859,9 @@ function renderWaitingCharPicker(room) {
   const desc   = document.getElementById('waiting-char-desc');
   if (!picker) return;
 
-  picker.innerHTML = Object.entries(CHAR_CFG).map(([k, c]) => {
+  const charEntries = Object.entries(CHAR_CFG);
+  const ROW1_KEYS = ['freddy','bonnie','chica','foxy'];
+  const renderCharOpt = ([k, c]) => {
     const taken    = takenBy[k];
     const selected = myChar === k;
     return `<label class="char-pick-opt${selected ? ' selected' : ''}" data-k="${k}"
@@ -445,34 +872,87 @@ function renderWaitingCharPicker(room) {
       <span class="char-emoji-fb" style="display:none">${c.emoji}</span>
       <span class="char-name">${c.name}${taken ? `<br><small style="font-size:.6rem">${taken}</small>` : ''}</span>
     </label>`;
-  }).join('');
+  };
+  const row1 = charEntries.filter(([k]) =>  ROW1_KEYS.includes(k));
+  const row2 = charEntries.filter(([k]) => !ROW1_KEYS.includes(k));
+  picker.innerHTML =
+    row1.map(renderCharOpt).join('') +
+    '<div style="width:100%;flex-basis:100%;height:0"></div>' +
+    row2.map(renderCharOpt).join('');
 
   picker.querySelectorAll('.char-pick-opt').forEach(opt => {
     opt.addEventListener('click', () => selectChar(opt.dataset.k));
   });
 
   if (desc) desc.textContent = myChar ? CHAR_CFG[myChar].desc : 'Click a character to select it';
+
+  // Confirm button
+  const stats    = JSON.parse(room.player_stats || '{}');
+  const confirmed = stats[`confirmed_${playerSlot}`];
+  let confirmWrap = document.getElementById('char-confirm-wrap');
+  if (!confirmWrap) {
+    confirmWrap = document.createElement('div');
+    confirmWrap.id = 'char-confirm-wrap';
+    confirmWrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:4px;width:100%';
+    document.getElementById('char-select-wrap')?.appendChild(confirmWrap);
+  }
+  if (!myChar) {
+    confirmWrap.innerHTML = '';
+  } else if (confirmed) {
+    confirmWrap.innerHTML = `<div style="color:var(--green-text);font-family:'Oswald',sans-serif;font-size:.85rem">✅ Confirmed — waiting for others...</div>`;
+  } else {
+    confirmWrap.innerHTML = `<button class="mp-btn primary" id="char-confirm-btn" style="margin-top:0">✅ Confirm ${CHAR_CFG[myChar].name}</button>`;
+    document.getElementById('char-confirm-btn')?.addEventListener('click', confirmChar, { once: true });
+  }
 }
 
 async function selectChar(charKey) {
-  const room = roomData;
-  const pc   = room.player_count || 2;
-  const takenByOther = allSlots(pc).some(s => s !== playerSlot && room[`${s}_char`] === charKey);
-  if (takenByOther) { showToast('Character already taken!'); return; }
-  await db.from('party_rooms').update({ [`${playerSlot}_char`]: charKey }).eq('id', roomId);
+  const pc = (roomData.player_count || 2);
+  const { data: fresh } = await db.from('party_rooms').select('*').eq('id', roomId).single();
+  if (!fresh) return;
+  const takenByOther = allSlots(pc).some(s => s !== playerSlot && fresh[`${s}_char`] === charKey);
+  if (takenByOther) { showToast('Already taken! Choose another 😅'); renderWaitingCharPicker(fresh); return; }
+  // Clear confirmation when changing character
+  const ps = JSON.parse(fresh.player_stats || '{}');
+  delete ps[`confirmed_${playerSlot}`];
+  await db.from('party_rooms').update({ [`${playerSlot}_char`]: charKey, player_stats: JSON.stringify(ps) }).eq('id', roomId);
+}
+
+async function confirmChar() {
+  if (!roomData[`${playerSlot}_char`]) return;
+  const { data: fresh } = await db.from('party_rooms').select('player_stats').eq('id', roomId).single();
+  const ps = JSON.parse(fresh?.player_stats || '{}');
+  ps[`confirmed_${playerSlot}`] = true;
+  await db.from('party_rooms').update({ player_stats: JSON.stringify(ps) }).eq('id', roomId);
 }
 
 async function checkAllCharsReady(room) {
   const pc     = room.player_count || 2;
   const active = allSlots(pc).filter(s => room[`${s}_name`]);
-  if (active.length < pc) return; // not everyone joined yet
+  if (active.length < pc) return;
   const allChosen = active.every(s => room[`${s}_char`]);
   if (!allChosen) return;
   const chars  = active.map(s => room[`${s}_char`]);
   const unique = new Set(chars).size === chars.length;
-  if (!unique) return; // duplicate chars — wait for resolution
-  if (playerSlot !== active[0]) return; // only first player triggers start
-  await db.from('party_rooms').update({ state: 'playing' }).eq('id', roomId).eq('state', 'waiting');
+  if (!unique) return;
+  // Require all players to confirm their character
+  const stats = JSON.parse(room.player_stats || '{}');
+  if (!active.every(s => stats[`confirmed_${s}`])) return;
+  if (playerSlot !== active[0]) return;
+  const firstSlot = active[Math.floor(Math.random() * active.length)];
+  const initStats = {};
+  active.forEach(s => {
+    const char = room[`${s}_char`] || 'freddy';
+    const defaultDice = CHAR_DEFAULT_DICE[char] || 'd6';
+    initStats[s] = { mgWins: 0, badLucks: 0, dice: defaultDice, ownedDice: defaultDice !== 'd6' ? [defaultDice] : [], shopVisited: false };
+  });
+  const firstEvent = `🎲 ${room[`${firstSlot}_name`]} goes first! (randomly chosen)`;
+  await db.from('party_rooms').update({
+    state: 'playing',
+    current_slot: firstSlot,
+    player_stats: JSON.stringify(initStats),
+    mg_config: JSON.stringify({ firstEvent }),
+  }).eq('id', roomId).eq('state', 'waiting');
 }
 
 // Find my slot in the current room (needed after slot compaction on rematch)
@@ -518,8 +998,21 @@ function subscribeRoom() {
       liveScores[payload.slot] = payload.score;
       updateLiveBar();
     })
+    .on('broadcast', { event: 'mg_done' }, ({ payload }) => {
+      mgDoneLocal[payload.slot] = payload.score;
+      liveScores[payload.slot]  = payload.score;
+      updateLiveBar();
+      checkMgAllDoneLocal();
+    })
+    .on('broadcast', { event: 'podium_confirm' }, ({ payload }) => {
+      podiumConfirmedLocal.add(payload.slot);
+      checkPodiumAllConfirmedLocal();
+    })
     .on('broadcast', { event: 'jumpscare' }, ({ payload }) => {
       if (payload.sender !== playerId) triggerJumpscare(payload.char, () => {});
+    })
+    .on('broadcast', { event: 'game_event' }, ({ payload }) => {
+      addEvent(payload.msg);
     })
     .subscribe();
 }
@@ -570,14 +1063,45 @@ async function handleRoomUpdate(room) {
         liveScores = {};
         startMinigameScreen(room); // activeMgId was null (reset in mg_waiting) → always fires
       } else {
-        // Check if all done
         const involved = JSON.parse(room.mg_players || '[]');
         const allDone  = involved.every(s => room[mgDoneKey(s)]);
-        if (allDone && involved[0] === playerSlot) {
-          finishMinigame(room);
-        }
+        if (allDone) { stopMgPoller(); finishMinigame(room); }
+      }
+    } else if (room.turn_phase === 'tollbooth') {
+      showScreen('board');
+      if (prev?.board !== room.board) renderBoard(room);
+      renderStatusBar(room);
+      updateTokens(room);
+      if (isMyTurn(room)) {
+        showTollboothUI(room);
+      } else {
+        const curName  = room[`${room.current_slot}_name`] || '?';
+        const curColor = PLAYER_COLORS[slotNum(room.current_slot) - 1];
+        const el = document.getElementById('current-player-action');
+        if (el) el.innerHTML = `<div class="action-card"><div class="action-waiting">🐻 <strong style="color:${curColor}">${curName}</strong> is at Freddy's Tollbooth...</div></div>`;
+      }
+      showDiceShop(room);
+    } else if (room.turn_phase === 'mg_podium') {
+      showScreen('board');
+      if (prev?.board !== room.board) renderBoard(room);
+      renderStatusBar(room);
+      updateTokens(room);
+      const involved = JSON.parse(room.mg_players || '[]');
+      const allConfirmed = involved.every(s => room[mgDoneKey(s)]);
+      if (allConfirmed) {
+        let nextPlayer;
+        try { nextPlayer = JSON.parse(room.mg_config || '{}').nextPlayer; } catch {}
+        nextPlayer = nextPlayer || nextSlot(room);
+        await db.from('party_rooms').update({
+          turn_phase: 'roll', current_slot: nextPlayer, mg_id: null,
+          mg_done_p1: false, mg_done_p2: false, mg_done_p3: false, mg_done_p4: false,
+        }).eq('id', roomId).eq('turn_phase', 'mg_podium');
+      } else if (!podiumConfirmedLocal.has(playerSlot)) {
+        showMgPodium(room);
+        showDiceShop(room);
       }
     } else if (room.turn_phase === 'roll' || room.turn_phase === 'rolled' || room.turn_phase === 'moved') {
+      document.getElementById('mg-result-overlay')?.remove();
       showScreen('board');
       if (prev?.board !== room.board) renderBoard(room);
       renderActionUI(room);
@@ -585,8 +1109,16 @@ async function handleRoomUpdate(room) {
     return;
   }
   if (room.state === 'finished') {
-    // Check if all players voted for rematch
     const pc = room.player_count || 2;
+    const statsMap = pStats(room);
+    if (!statsMap._awardsApplied) {
+      const active = allSlots(pc).filter(s => room[`${s}_name`]);
+      if (playerSlot === active[0]) {
+        await applyEndAwards(room);
+      }
+      // Await DB propagation — don't show result yet
+      return;
+    }
     const voters = room.mg_id || '';
     const allVoted = allSlots(pc).filter(s => room[`${s}_name`]).every(s => voters.includes(s));
     if (allVoted) triggerPartyRematch(room);
@@ -597,6 +1129,11 @@ async function handleRoomUpdate(room) {
 // ── Game start ────────────────────────────────────────────────────────────────
 function startGame(room) {
   roomData = room;
+  // Emit the "goes first" event that was stored at game start
+  try {
+    const firstEvent = JSON.parse(room.mg_config || '{}').firstEvent;
+    if (firstEvent) addEvent(firstEvent);
+  } catch {}
   showScreen('board');
   renderBoard(room);
   renderStatusBar(room);
@@ -605,86 +1142,315 @@ function startGame(room) {
 
 // ── Board render ──────────────────────────────────────────────────────────────
 function renderBoard(room) {
-  const el    = document.getElementById('party-board');
-  const board = JSON.parse(room.board || '[]');
+  const el = document.getElementById('party-board');
+  const { tiles, laps, mapType, toll, nodes, skipMap, freeMap, boardAspect } = parseBoard(room);
   el.innerHTML = '';
+  el.className = `party-board board-theme-${mapType}`;
 
-  BOARD_GRID.forEach(([row, col], idx) => {
-    const type = board[idx] || 'normal';
-    const cfg  = SPACE_CFG[type];
-    const sp   = document.createElement('div');
-    sp.className = `board-space ${cfg.cls}${idx === 0 ? ' space-start' : ''}`;
-    sp.style.gridRow    = row;
-    sp.style.gridColumn = col;
-    sp.innerHTML = `
-      <span class="space-num">${idx === 0 ? '🏁' : idx}</span>
-      ${cfg.emoji ? `<span class="space-emoji">${cfg.emoji}</span>` : ''}
-      <div class="space-tokens" id="tok-${idx}"></div>`;
-    el.appendChild(sp);
-  });
+  if (nodes && nodes.length > 0) {
+    renderCustomBoard(el, tiles, laps, toll, nodes, skipMap, freeMap, boardAspect);
+  } else if (mapType === 'hard') {
+    renderFreddyFaceBoard(el, tiles, laps, toll);
+  } else {
+    const grid = getBoardGrid(mapType);
+    const maxCol = Math.max(...grid.map(([,c]) => c));
+    const maxRow = Math.max(...grid.map(([r]) => r));
+    el.style.gridTemplateColumns = `repeat(${maxCol}, 1fr)`;
+    el.style.gridTemplateRows    = `repeat(${maxRow}, 1fr)`;
+    el.style.aspectRatio  = `${maxCol} / ${maxRow}`;
+    el.style.position     = '';
+    el.style.paddingBottom = '';
+    el.style.height       = '';
 
-  const center = document.createElement('div');
-  center.className = 'board-center';
-  center.style.gridColumn = '2 / 6';
-  center.style.gridRow    = '2 / 6';
-  center.innerHTML = `
-    <div class="board-center-logo">🎂</div>
-    <div class="board-center-text">FNAFDLE<br>PARTY</div>
-    <div class="board-lap-info">${TOTAL_LAPS} voltas</div>`;
-  el.appendChild(center);
+    grid.forEach(([row, col], idx) => {
+      const type = tiles[idx] || 'normal';
+      const cfg  = SPACE_CFG[type] || SPACE_CFG.normal;
+      const jackLabel = type === 'jackpot' ? `<span class="space-jack-val">${getJackpotValue(room)}</span>` : '';
+      const sp   = document.createElement('div');
+      sp.className = `board-space ${cfg.cls}${idx === 0 ? ' space-start' : ''}`;
+      sp.style.gridRow    = row;
+      sp.style.gridColumn = col;
+      sp.innerHTML = `
+        <span class="space-num">${idx === 0 ? '🏁' : idx}</span>
+        ${cfg.emoji ? `<span class="space-emoji">${cfg.emoji}</span>` : ''}${jackLabel}
+        <div class="space-tokens" id="tok-${idx}"></div>`;
+      el.appendChild(sp);
+    });
+
+    const mapIcon = mapType === 'normal' ? '🍕' : '🎂';
+    const center = document.createElement('div');
+    center.className = 'board-center';
+    center.style.gridColumn = `2 / ${maxCol}`;
+    center.style.gridRow    = `2 / ${maxRow}`;
+    center.innerHTML = `
+      <div class="board-center-logo">${mapIcon}</div>
+      <div class="board-center-text">FNAFDLE<br>PARTY</div>
+      <div class="board-lap-info">${laps} laps</div>`;
+    el.appendChild(center);
+  }
 
   updateTokens(room);
 }
 
+function renderFreddyFaceBoard(el, tiles, laps, toll) {
+  el.style.gridTemplateColumns = 'none';
+  el.style.gridTemplateRows    = 'none';
+  el.style.position    = 'relative';
+  el.style.width       = 'min(480px, 100%)';
+  el.style.paddingBottom = 'min(480px, 100%)';
+  el.style.height      = '0';
+
+  // SVG face layer
+  const NS  = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 100 100');
+  svg.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;';
+
+  function svgEl(tag, attrs) {
+    const e = document.createElementNS(NS, tag);
+    Object.entries(attrs).forEach(([k,v]) => e.setAttribute(k, v));
+    return e;
+  }
+
+  // ── Face shape ────────────────────────────────────────
+  // Main head oval (matches face proportions from Freddy image)
+  svg.appendChild(svgEl('ellipse', { cx:'50', cy:'58', rx:'41', ry:'38', fill:'#1a0900', stroke:'#7a4200', 'stroke-width':'0.8', opacity:'0.65' }));
+  // Hat brim (wide flat band at y≈17-21)
+  svg.appendChild(svgEl('rect', { x:'28', y:'18', width:'44', height:'4', rx:'2', fill:'#0d0600', stroke:'#7a4200', 'stroke-width':'0.6', opacity:'0.65' }));
+  // Hat body (tall rectangle above brim)
+  svg.appendChild(svgEl('rect', { x:'35', y:'2', width:'30', height:'17', rx:'2', fill:'#0d0600', stroke:'#7a4200', 'stroke-width':'0.6', opacity:'0.65' }));
+  // Right ear (circle at ~90%, 44%)
+  svg.appendChild(svgEl('circle', { cx:'92', cy:'44', r:'7', fill:'#200e00', stroke:'#7a4200', 'stroke-width':'0.6', opacity:'0.6' }));
+  // Left ear (circle at ~8%, 44%)
+  svg.appendChild(svgEl('circle', { cx:'8', cy:'44', r:'7', fill:'#200e00', stroke:'#7a4200', 'stroke-width':'0.6', opacity:'0.6' }));
+  // Right eye socket (danger zone, around nodes 6-8, center ≈ 75,55)
+  svg.appendChild(svgEl('ellipse', { cx:'74', cy:'54', rx:'8', ry:'10', fill:'#1e0505', stroke:'#882222', 'stroke-width':'0.7', opacity:'0.8' }));
+  // Left eye socket (danger zone, around nodes 13-15, center ≈ 26,55)
+  svg.appendChild(svgEl('ellipse', { cx:'26', cy:'54', rx:'8', ry:'10', fill:'#1e0505', stroke:'#882222', 'stroke-width':'0.7', opacity:'0.8' }));
+  // Nose (small oval at center)
+  svg.appendChild(svgEl('ellipse', { cx:'50', cy:'68', rx:'5', ry:'4', fill:'#150800', stroke:'#7a4200', 'stroke-width':'0.5', opacity:'0.5' }));
+  // Mouth (wide arc near bottom)
+  svg.appendChild(svgEl('path', { d:'M 35 76 Q 50 87 65 76', fill:'none', stroke:'#7a4200', 'stroke-width':'0.7', opacity:'0.55' }));
+  // Eyebrows (arcs above eye sockets)
+  svg.appendChild(svgEl('path', { d:'M 65 35 Q 74 30 82 33', fill:'none', stroke:'#442200', 'stroke-width':'1.2', opacity:'0.6' }));
+  svg.appendChild(svgEl('path', { d:'M 35 35 Q 26 30 18 33', fill:'none', stroke:'#442200', 'stroke-width':'1.2', opacity:'0.6' }));
+
+  // ── Path connection lines ──────────────────────────────
+  function line(a, b, col = '#7a4200', op = 0.45) {
+    const n1 = FREDDY_HEAD_NODES[a], n2 = FREDDY_HEAD_NODES[b];
+    svg.appendChild(svgEl('line', { x1: n1.x, y1: n1.y, x2: n2.x, y2: n2.y, stroke: col, 'stroke-width':'0.9', opacity: op }));
+  }
+  // Main outer path (clockwise, skipping danger zones)
+  [0,1,2,3,4,5,9,10,11,12,16,17,18,19].reduce((a,b) => { line(a,b); return b; });
+  line(19, 0); // close loop
+  // Danger zone right eye (red dashed-style, thinner)
+  [5,6,7,8,9].reduce((a,b) => { line(a,b,'#cc2222',0.55); return b; });
+  // Danger zone left eye
+  [12,13,14,15,16].reduce((a,b) => { line(a,b,'#cc2222',0.55); return b; });
+
+  el.appendChild(svg);
+
+  // Space nodes with absolute positioning
+  FREDDY_HEAD_NODES.forEach(({x, y}, idx) => {
+    const type = tiles[idx] || 'normal';
+    const cfg  = SPACE_CFG[type] || SPACE_CFG.normal;
+    const jackLabel = type === 'jackpot' ? `<span class="space-jack-val">${getJackpotValue({board: JSON.stringify({tiles, laps, boardSize: 20, mapType: 'hard', toll})})}</span>` : '';
+    const sp = document.createElement('div');
+    sp.className = `board-space board-node ${cfg.cls}${idx === 0 ? ' space-start' : ''}`;
+    sp.style.cssText = `position:absolute;left:${x}%;top:${y}%;transform:translate(-50%,-50%);width:11%;aspect-ratio:1;z-index:2;`;
+    sp.innerHTML = `
+      <span class="space-num">${idx === 0 ? '🏁' : idx}</span>
+      ${cfg.emoji ? `<span class="space-emoji">${cfg.emoji}</span>` : ''}${jackLabel}
+      <div class="space-tokens" id="tok-${idx}"></div>`;
+    el.appendChild(sp);
+  });
+
+  // Center label (nose area)
+  const lbl = document.createElement('div');
+  lbl.style.cssText = 'position:absolute;left:50%;top:67%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;z-index:1;';
+  lbl.innerHTML = `<div style="font-family:Creepster,cursive;font-size:1.1rem;color:#c48b14;opacity:.45;letter-spacing:2px">FREDDY</div>
+    <div style="font-size:.55rem;color:#8b5a00;opacity:.5">${laps} laps · Toll: ${toll}🪙</div>`;
+  el.appendChild(lbl);
+}
+
+function renderCustomBoard(el, tiles, laps, toll, nodes, skipMap, freeMap, boardAspect) {
+  el.style.gridTemplateColumns = 'none';
+  el.style.gridTemplateRows    = 'none';
+  el.style.position            = 'relative';
+
+  const [aw, ah] = (boardAspect || '1:1').split(':').map(Number);
+  const maxPx = nodes.length > 45 ? 960 : nodes.length > 35 ? 840 : nodes.length > 25 ? 640 : 480;
+  const base   = `min(${maxPx}px, 100%)`;
+  el.style.width         = base;
+  el.style.paddingBottom = ah === aw ? base : `calc(${base} * ${ah / aw})`;
+  el.style.height        = '0';
+
+  const NS  = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 100 100');
+  svg.setAttribute('preserveAspectRatio', 'none');
+  svg.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;';
+
+  function svgEl(tag, attrs) {
+    const e = document.createElementNS(NS, tag);
+    Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v));
+    return e;
+  }
+
+  // Auto-normalize coordinates: spread nodes to fill 5-95% of the canvas
+  const PAD = 5;
+  const xs = nodes.map(n => n.x), ys = nodes.map(n => n.y);
+  const xMin = Math.min(...xs), xMax = Math.max(...xs);
+  const yMin = Math.min(...ys), yMax = Math.max(...ys);
+  const xSpan = (xMax - xMin) || 1, ySpan = (yMax - yMin) || 1;
+  const nx = x => +(PAD + (x - xMin) / xSpan * (100 - 2 * PAD)).toFixed(2);
+  const ny = y => +(PAD + (y - yMin) / ySpan * (100 - 2 * PAD)).toFixed(2);
+
+  // Sequential path lines
+  for (let i = 0; i < nodes.length; i++) {
+    const a = nodes[i], b = nodes[(i + 1) % nodes.length];
+    svg.appendChild(svgEl('line', { x1: nx(a.x), y1: ny(a.y), x2: nx(b.x), y2: ny(b.y), stroke: '#5a4a3a', 'stroke-width': '0.9', opacity: '0.5' }));
+  }
+
+  // Tollbooth split-path arrows
+  tiles.forEach((type, i) => {
+    if (type !== 'tollbooth') return;
+    const n    = nodes[i];
+    if (!n) return;
+    const payIdx  = skipMap?.[i];
+    const freeIdx = freeMap?.[i];
+    if (payIdx !== undefined && nodes[payIdx]) {
+      const d = nodes[payIdx];
+      svg.appendChild(svgEl('line', { x1: nx(n.x), y1: ny(n.y), x2: nx(d.x), y2: ny(d.y), stroke: '#c48b14', 'stroke-width': '1.3', 'stroke-dasharray': '3,2', opacity: '0.75' }));
+    }
+    if (freeIdx !== undefined && nodes[freeIdx]) {
+      const d = nodes[freeIdx];
+      svg.appendChild(svgEl('line', { x1: nx(n.x), y1: ny(n.y), x2: nx(d.x), y2: ny(d.y), stroke: '#cc3322', 'stroke-width': '1.3', 'stroke-dasharray': '3,2', opacity: '0.7'  }));
+    }
+  });
+
+  el.appendChild(svg);
+
+  const nodeW = nodes.length > 45 ? 4.5 : nodes.length > 35 ? 4 : nodes.length > 25 ? 5.5 : 8;
+
+  // Space nodes
+  nodes.forEach(({ x, y }, idx) => {
+    const type = tiles[idx] || 'normal';
+    const cfg  = SPACE_CFG[type] || SPACE_CFG.normal;
+    const jackLabel = type === 'jackpot' ? `<span class="space-jack-val">${getJackpotValue({ board: JSON.stringify({ tiles, laps, boardSize: nodes.length, mapType: 'custom', toll }) })}</span>` : '';
+    const sp = document.createElement('div');
+    sp.className = `board-space board-node ${cfg.cls}${idx === 0 ? ' space-start' : ''}`;
+    sp.style.cssText = `position:absolute;left:${nx(x)}%;top:${ny(y)}%;transform:translate(-50%,-50%);width:${nodeW}%;aspect-ratio:1;z-index:2;`;
+    sp.innerHTML = `
+      <span class="space-num">${idx === 0 ? '🏁' : idx}</span>
+      ${cfg.emoji ? `<span class="space-emoji">${cfg.emoji}</span>` : ''}${jackLabel}
+      <div class="space-tokens" id="tok-${idx}"></div>`;
+    el.appendChild(sp);
+  });
+
+  const lbl = document.createElement('div');
+  lbl.style.cssText = 'position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;z-index:1;';
+  lbl.innerHTML = `<div style="font-family:Creepster,cursive;font-size:1.1rem;color:#c48b14;opacity:.3;letter-spacing:2px">PARTY</div>
+    <div style="font-size:.55rem;color:#8b5a00;opacity:.4">${laps} laps · Toll: ${toll}🪙</div>`;
+  el.appendChild(lbl);
+}
+
+// Spread offsets (px) per token count — scaled by JS for node vs grid boards
+const TOKEN_OFFSET_PATTERNS = [
+  [[0, 0]],
+  [[-1, 0], [1, 0]],
+  [[0, -1.1], [-1, 0.7], [1, 0.7]],
+  [[-1, -1], [1, -1], [-1, 1], [1, 1]],
+];
+
 function updateTokens(room) {
-  for (let i = 0; i < BOARD_SIZE; i++) {
+  const { boardSize, nodes } = parseBoard(room);
+  // Node boards use compact 16px tokens; grid boards use 24px — scale offsets accordingly
+  const spread = nodes && nodes.length > 0 ? 10 : 14;
+
+  for (let i = 0; i < boardSize; i++) {
     const el = document.getElementById(`tok-${i}`);
     if (el) el.innerHTML = '';
   }
   const pc = room.player_count || 2;
-  allSlots(pc).forEach((slot, i) => {
+  const newPos = JSON.parse(room.player_pos || '{}');
+
+  // Group active players by their board position
+  const byPos = {};
+  allSlots(pc).forEach((slot, slotIdx) => {
     if (!room[`${slot}_name`]) return;
     const pos = boardPos(room, slot);
-    const el  = document.getElementById(`tok-${pos}`);
-    if (!el) return;
-    const char = room[`${slot}_char`] || 'freddy';
-    const tok  = document.createElement('div');
-    tok.className   = 'player-token';
-    tok.style.borderColor = PLAYER_COLORS[i];
-    tok.title = room[`${slot}_name`];
-    const img = document.createElement('img');
-    img.src = charImg(char);
-    img.onerror = () => { tok.textContent = room[`${slot}_name`][0]; };
-    tok.appendChild(img);
-    el.appendChild(tok);
+    if (!byPos[pos]) byPos[pos] = [];
+    byPos[pos].push({ slot, slotIdx });
   });
+
+  Object.entries(byPos).forEach(([posStr, players]) => {
+    const el = document.getElementById(`tok-${posStr}`);
+    if (!el) return;
+    const count   = players.length;
+    const pattern = TOKEN_OFFSET_PATTERNS[Math.min(count, 4) - 1];
+
+    players.forEach(({ slot, slotIdx }, tokIdx) => {
+      const char  = room[`${slot}_char`] || 'freddy';
+      const moved = prevPlayerPos[slot] !== undefined && prevPlayerPos[slot] !== (newPos[slot] || 0);
+      const tok   = document.createElement('div');
+      tok.className         = `player-token${moved ? ' token-moved' : ''}`;
+      tok.style.borderColor = PLAYER_COLORS[slotIdx];
+      tok.title = room[`${slot}_name`];
+      if (count > 1) {
+        const [px, py] = pattern[tokIdx];
+        tok.style.transform = `translate(calc(-50% + ${px * spread}px), calc(-50% + ${py * spread}px))`;
+      }
+      const img = document.createElement('img');
+      img.src = charImg(char);
+      img.onerror = () => { tok.textContent = room[`${slot}_name`][0]; };
+      tok.appendChild(img);
+      el.appendChild(tok);
+    });
+  });
+
+  prevPlayerPos = JSON.parse(room.player_pos || '{}');
 }
 
 function renderStatusBar(room) {
-  const pc  = room.player_count || 2;
   const bar = document.getElementById('player-status-bar');
-  bar.innerHTML = allSlots(pc).map((slot, i) => {
-    if (!room[`${slot}_name`]) return '';
+  if (bar) bar.innerHTML = '';
+  renderPlayerSlots(room);
+}
+
+function renderPlayerSlots(room) {
+  const panel = document.getElementById('ps-slots-area');
+  if (!panel) return;
+  const pc = room.player_count || 2;
+  const { laps: boardLaps, boardSize } = parseBoard(room);
+
+  panel.innerHTML = allSlots(pc).map((slot, i) => {
+    const name = room[`${slot}_name`];
+    if (!name) {
+      return `<div class="player-slot ps-empty">
+        <div class="ps-empty-label">Waiting...</div>
+      </div>`;
+    }
     const char    = room[`${slot}_char`] || 'freddy';
-    const c       = CHAR_CFG[char];
-    const active  = room.current_slot === slot && room.turn_phase !== 'minigame';
+    const c       = CHAR_CFG[char] || {};
+    const isCur   = room.current_slot === slot && room.turn_phase !== 'minigame';
     const laps    = playerLaps(room, slot);
     const coins   = playerCoins(room, slot);
     const pizzas  = playerPizzas(room, slot);
     const cd      = pState(room).cooldowns[slot] || 0;
     const color   = PLAYER_COLORS[i];
-    return `<div class="player-status-card${active ? ' active' : ''}" style="border-color:${color}">
-      <div class="psc-header">
-        <img class="psc-avatar" src="${charImg(char)}" alt="${char}"
-             onerror="this.style.display='none'"/>
-        <span class="psc-name" style="color:${color}">${room[`${slot}_name`]}</span>
+    const lapDisp = `${Math.min(laps + 1, boardLaps)}/${boardLaps}`;
+    return `<div class="player-slot ps-occupied${isCur ? ' ps-current' : ''}">
+      <div class="ps-header">
+        <img class="ps-avatar" src="${charImg(char)}" alt="${char}" onerror="this.style.display='none'"/>
+        <span class="ps-name" title="${name}">${name}</span>
       </div>
-      <div class="psc-stats">
+      <div class="ps-stats">
         <span>🪙${coins}</span>
         <span>🍕${pizzas}</span>
-        <span>🔄${Math.min(laps + 1, TOTAL_LAPS)}/${TOTAL_LAPS}</span>
+        <span>🔄${lapDisp}</span>
       </div>
-      ${c.ability ? `<div class="psc-cooldown">${cd > 0 ? `⏳${cd}t` : '✨'}</div>` : ''}
+      ${c.ability ? `<div class="ps-cd">${cd > 0 ? `⏳${cd}t` : '✨ Ready'}</div>` : ''}
     </div>`;
   }).join('');
 }
@@ -702,65 +1468,134 @@ function renderActionUI(room) {
     el.innerHTML = `<div class="action-card">
       <div class="action-waiting"><strong style="color:${curColor}">${curName}</strong>'s turn${extra}</div>
     </div>`;
+    showDiceShop(room);
     return;
   }
 
   const me  = myPlayer(room);
   const c   = CHAR_CFG[me.char];
   const pos = boardPos(room, me.slot);
+  const { laps: boardLaps, boardSize } = parseBoard(room);
 
   if (room.turn_phase === 'roll') {
-    // Reroll is not shown here — it appears after rolling (in 'rolled' phase)
-    const canAbility = c.ability && c.ability !== 'reroll' && (pState(room).cooldowns[playerSlot] || 0) === 0;
-    const abilLabel  = c.name === 'Chica' ? '🧁 Cupcake' : '🎸 Jump';
+    const diceId  = getPlayerDice(room, playerSlot);
+    const diceObj = DICE_TYPES[diceId] || DICE_TYPES.d6;
+    const dblTag  = isDoublePhase(room) ? ' <span style="color:#f9c;font-size:.7rem">2×</span>' : '';
+    const psn     = pStats(room)[playerSlot] || {};
+    const forcedTag = (psn.forcedDice && (psn.forcedTurns || 0) > 0)
+      ? `<div style="font-size:.65rem;color:#f66;margin:1px 0">🔒 Forced: ${psn.forcedTurns}t</div>` : '';
     el.innerHTML = `<div class="action-card">
       <div class="action-player-name" style="color:${me.color}">
-        <img src="${charImg(me.char)}" style="width:24px;height:24px;border-radius:50%;object-fit:contain;vertical-align:middle;margin-right:6px" onerror="this.style.display='none'"/>
+        <img src="${charImg(me.char)}" style="width:22px;height:22px;border-radius:50%;object-fit:contain;vertical-align:middle;margin-right:5px" onerror="this.style.display='none'"/>
         ${me.name}
       </div>
-      <div class="action-pos">Space ${pos} · Lap ${Math.min(Math.floor(me.pos / BOARD_SIZE) + 1, TOTAL_LAPS)}/${TOTAL_LAPS} · 🪙${me.coins} 🍕${me.pizzas}</div>
-      <div class="action-btns">
-        <button class="mp-btn primary" id="roll-btn">🎲 Roll Dice</button>
-        ${canAbility ? `<button class="mp-btn accent" id="ability-btn">${abilLabel}</button>` : ''}
-      </div>
+      <div class="action-pos">Space ${pos} · Lap ${Math.min(Math.floor(me.pos / boardSize) + 1, boardLaps)}/${boardLaps} · 🪙${me.coins} 🍕${me.pizzas}${dblTag}</div>
+      <div style="font-size:.7rem;color:var(--text-muted);margin:1px 0">${diceObj.emoji} ${diceObj.label}</div>
+      ${forcedTag}
     </div>`;
-    document.getElementById('roll-btn').addEventListener('click', doRoll);
-    if (canAbility) document.getElementById('ability-btn').addEventListener('click', useAbility);
 
   } else if (room.turn_phase === 'rolled') {
-    // Dice rolled — show result, let Foxy re-roll if ability available
-    const canReroll = me.char === 'foxy' && (pState(room).cooldowns[playerSlot] || 0) === 0;
+    const lastDice    = pStats(room)[playerSlot]?.lastDiceId || getPlayerDice(room, playerSlot);
+    const isSpringlock = lastDice === 'springlock' && room.dice_result === 0;
+    const diceDisplay  = isSpringlock ? '🪤 Springlock!' : `🎲 ${room.dice_result}`;
     el.innerHTML = `<div class="action-card">
       <div class="action-player-name" style="color:${me.color}">${me.name}</div>
-      <div class="action-dice">🎲 ${room.dice_result}</div>
-      <div class="action-btns">
-        <button class="mp-btn primary" id="apply-btn">Continue →</button>
-        ${canReroll ? `<button class="mp-btn accent" id="reroll-btn">🔄 Re-Roll</button>` : ''}
-      </div>
+      <div class="action-dice">${diceDisplay}</div>
+      ${isSpringlock ? `<div style="font-size:.7rem;color:#f66;margin:2px 0">Sent back to start!</div>` : ''}
     </div>`;
-    document.getElementById('apply-btn').addEventListener('click', applyMove);
-    if (canReroll) document.getElementById('reroll-btn').addEventListener('click', doFoxyReroll);
 
   } else if (room.turn_phase === 'moved') {
-    const board = JSON.parse(room.board || '[]');
-    const cfg   = SPACE_CFG[board[pos] || 'normal'];
+    const { tiles: bt } = parseBoard(room);
+    const spType = bt[pos] || 'normal';
+    const cfg    = SPACE_CFG[spType] || SPACE_CFG.normal;
+    const jackInfo = spType === 'jackpot' ? ` (${getJackpotValue(room)}🪙)` : '';
     el.innerHTML = `<div class="action-card">
       <div class="action-player-name" style="color:${me.color}">${me.name}</div>
       <div class="action-dice">🎲 ${room.dice_result}</div>
-      <div class="action-space">Landed on: <span class="mp_emoji">${cfg.emoji || '⬜'}</span> ${cfg.label}</div>
-      <button class="mp-btn primary" id="cont-btn">Continue →</button>
+      <div class="action-space">Landed: <span class="mp_emoji">${cfg.emoji || '⬜'}</span> <strong>${cfg.label}</strong>${jackInfo}</div>
     </div>`;
-    document.getElementById('cont-btn').addEventListener('click', handleSpace);
   }
+  showDiceShop(room);
 }
 
 // ── Roll dice ─────────────────────────────────────────────────────────────────
 async function doRoll() {
-  const roll = Math.floor(Math.random() * 6) + 1;
+  const diceId = getPlayerDice(roomData, playerSlot);
+  const dice   = DICE_TYPES[diceId] || DICE_TYPES.d6;
+  const roll   = dice.roll();
+  const ns     = pStats(roomData);
+  if (!ns[playerSlot]) ns[playerSlot] = { mgWins: 0, badLucks: 0 };
+
+  const shopD = SHOP_DICE.find(d => d.id === diceId);
+  if (shopD?.maxUses) {
+    if (!ns[playerSlot].diceUses) ns[playerSlot].diceUses = {};
+    const newUses = Math.max(0, (ns[playerSlot].diceUses[diceId] ?? shopD.maxUses) - 1);
+    ns[playerSlot].diceUses[diceId] = newUses;
+
+    // Count down forced turns (all1)
+    if (ns[playerSlot].forcedDice === diceId) {
+      const left = Math.max(0, (ns[playerSlot].forcedTurns || 0) - 1);
+      ns[playerSlot].forcedTurns = left;
+      if (left === 0) { ns[playerSlot].forcedDice = null; ns[playerSlot].forcedTurns = 0; }
+    }
+
+    // Auto-remove when uses run out
+    if (newUses === 0) {
+      ns[playerSlot].ownedDice = getOwnedDice(roomData, playerSlot).filter(id => id !== diceId);
+      ns[playerSlot].dice = 'd6';
+      showToast(`${shopD.label} ran out of uses! Back to d6 🎲`);
+      emitEvent(`🎲 ${roomData[`${playerSlot}_name`]}'s ${shopD.label} expired!`);
+    }
+  }
+
+  ns[playerSlot].lastDiceId = diceId;
+  const rollLabel = (diceId === 'springlock' && roll === 0) ? '🪤 SPRINGLOCK!' : String(roll);
+  emitEvent(`🎲 ${roomData[`${playerSlot}_name`]} rolled ${rollLabel} (${dice.label})`);
   await db.from('party_rooms').update({
-    turn_phase: 'rolled',
-    dice_result: roll,
+    turn_phase: 'rolled', dice_result: roll, player_stats: JSON.stringify(ns),
   }).eq('id', roomId);
+}
+
+function showPickDiceUI() {
+  const me = myPlayer(roomData);
+  const el = document.getElementById('current-player-action');
+  if (!el) return;
+  el.innerHTML = `<div class="action-card">
+    <div class="action-player-name" style="color:${me.color}">🎯 Pick your steps!</div>
+    <div class="pick-dice-grid">
+      ${[1,2,3,4,5,6].map(n => `<button class="mp-btn pick-num-btn" data-n="${n}">${n}</button>`).join('')}
+    </div>
+  </div>`;
+  el.querySelectorAll('.pick-num-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      el.querySelectorAll('.pick-num-btn').forEach(b => b.disabled = true);
+      await db.from('party_rooms').update({ turn_phase: 'rolled', dice_result: +btn.dataset.n }).eq('id', roomId);
+    }, { once: true });
+  });
+}
+
+// Step-by-step movement — stops early if a tollbooth is hit mid-roll.
+function moveStepByStep(state, slot, steps, boardSize, tiles, nextMap) {
+  let node = (state.pos[slot] || 0) % boardSize;
+  let laps = Math.floor((state.pos[slot] || 0) / boardSize);
+  const startLaps = laps;
+  for (let i = 0; i < steps; i++) {
+    const nxt = (nextMap && nextMap[node] !== undefined) ? nextMap[node] : (node + 1) % boardSize;
+    node = nxt;
+    if (node === 0) {
+      laps++;
+      const earned = Math.floor((state.coins[slot] || 0) / COINS_PER_PIZZA);
+      state.pizzas[slot] = (state.pizzas[slot] || 0) + earned;
+      state.coins[slot]  = (state.coins[slot]  || 0) % COINS_PER_PIZZA;
+    }
+    // Stop if passing THROUGH a tollbooth (not the final step)
+    if (tiles[node] === 'tollbooth' && i < steps - 1) {
+      state.pos[slot] = laps * boardSize + node;
+      return { hitTollbooth: true, remainingSteps: steps - i - 1, completedLap: laps > startLaps };
+    }
+  }
+  state.pos[slot] = laps * boardSize + node;
+  return { hitTollbooth: false, remainingSteps: 0, completedLap: laps > startLaps };
 }
 
 // Apply movement (called after confirming dice in 'rolled' phase)
@@ -769,22 +1604,67 @@ async function applyMove() {
   const roll = pendingRoll ?? room.dice_result;
   pendingRoll = null;
   const st   = pState(room);
+  const { laps, boardSize, tiles, nextMap, endOfRoundMinigame } = parseBoard(room);
   if ((st.cooldowns[playerSlot] || 0) > 0) st.cooldowns[playerSlot]--;
-  moveFwd(st, playerSlot, roll);
-  const finished = Math.floor(st.pos[playerSlot] / BOARD_SIZE) >= TOTAL_LAPS;
+
+  const ns = pStats(room);
+  if (!ns[playerSlot]) ns[playerSlot] = { mgWins: 0, badLucks: 0 };
+
+  const lastDiceId = ns[playerSlot].lastDiceId || getPlayerDice(room, playerSlot);
+
+  // Springlock: no movement, go back to start (reset laps/position, keep coins/pizzas)
+  if (lastDiceId === 'springlock' && roll === 0) {
+    st.pos[playerSlot] = 0;
+    emitEvent(`🪤 ${room[`${playerSlot}_name`]}'s Springlock triggered! Back to start!`);
+    showToast('🪤 SPRINGLOCK! Back to start!');
+    await db.from('party_rooms').update({
+      player_pos: JSON.stringify(st.pos), player_cooldowns: JSON.stringify(st.cooldowns),
+      player_stats: JSON.stringify(ns), turn_phase: 'moved',
+    }).eq('id', roomId);
+    return;
+  }
+
+  const result = moveStepByStep(st, playerSlot, roll, boardSize, tiles, nextMap);
+  if (result.completedLap) { ns[playerSlot].lapCompleted = true; lapCompletedLocal = true; }
+
+  // Music Box: on roll 6 with musicbox die, place a trap on the landing space
+  if (lastDiceId === 'musicbox' && roll === 6 && !result.hitTollbooth) {
+    const landingNode = st.pos[playerSlot] % boardSize;
+    if (!ns._musicBoxes) ns._musicBoxes = [];
+    // Replace any existing box by this player (only one active at a time)
+    ns._musicBoxes = ns._musicBoxes.filter(mb => mb.ownerSlot !== playerSlot);
+    ns._musicBoxes.push({ spaceIdx: landingNode, ownerSlot: playerSlot });
+    emitEvent(`🎵 ${room[`${playerSlot}_name`]} placed a Music Box on space ${landingNode}!`);
+    showToast('🎵 Music Box placed!');
+  }
+
+  if (result.hitTollbooth) {
+    ns[playerSlot].pendingSteps = result.remainingSteps;
+    emitEvent(`🐻 ${room[`${playerSlot}_name`]} hit Freddy's Tollbooth! (${result.remainingSteps} steps left)`);
+    await db.from('party_rooms').update({
+      player_pos: JSON.stringify(st.pos), player_coins: JSON.stringify(st.coins),
+      player_pizzas: JSON.stringify(st.pizzas), player_cooldowns: JSON.stringify(st.cooldowns),
+      player_stats: JSON.stringify(ns), turn_phase: 'tollbooth',
+    }).eq('id', roomId);
+    return;
+  }
+
+  const finished = Math.floor(st.pos[playerSlot] / boardSize) >= laps;
   await db.from('party_rooms').update({
     player_pos:       JSON.stringify(st.pos),
     player_coins:     JSON.stringify(st.coins),
     player_pizzas:    JSON.stringify(st.pizzas),
     player_cooldowns: JSON.stringify(st.cooldowns),
-    turn_phase: 'moved',
+    player_stats:     JSON.stringify(ns),
+    turn_phase: finished ? undefined : 'moved',
     ...(finished ? { state: 'finished' } : {}),
   }).eq('id', roomId);
 }
 
-// Foxy re-roll (stays in 'rolled' phase, sets cooldown so button disappears)
 async function doFoxyReroll() {
-  const roll = Math.floor(Math.random() * 6) + 1;
+  const diceId = getPlayerDice(roomData, playerSlot);
+  const dice   = DICE_TYPES[diceId] || DICE_TYPES.d6;
+  const roll   = dice.roll ? dice.roll() : Math.floor(Math.random()*6)+1;
   pendingRoll = roll;
   const st   = pState(roomData);
   st.cooldowns[playerSlot] = CHAR_CFG['foxy'].cooldown;
@@ -803,43 +1683,169 @@ async function doFoxyReroll() {
   showToast('Re-rolled! 🎲');
 }
 
+// Returns true if slotB is within 5 board steps (either direction) of slotA
+function inRange5(room, slotA, slotB) {
+  const { boardSize } = parseBoard(room);
+  const a = boardPos(room, slotA) % boardSize;
+  const b = boardPos(room, slotB) % boardSize;
+  const fwd = (b - a + boardSize) % boardSize;
+  const bwd = (a - b + boardSize) % boardSize;
+  return Math.min(fwd, bwd) <= 5;
+}
+
 // ── Space effect ──────────────────────────────────────────────────────────────
+// Passes turn to next player, or fires end-of-lap minigame first if flag is set.
+// extraUpdates: any DB fields to include in the turn-pass update.
+// If extraUpdates contains player_stats, that value is used for the flag check.
+async function passOrMinigame(room, extraUpdates = {}) {
+  const ns = extraUpdates.player_stats
+    ? JSON.parse(extraUpdates.player_stats)
+    : pStats(room);
+  if (ns[playerSlot]?.lapCompleted) {
+    if (ns[playerSlot]) ns[playerSlot].lapCompleted = false;
+    const allPlayers = allSlots(room.player_count || 2).filter(s => room[`${s}_name`]);
+    await db.from('party_rooms').update({
+      ...extraUpdates,
+      player_stats: JSON.stringify(ns),
+    }).eq('id', roomId);
+    await triggerMinigame(allPlayers, { nextPlayer: nextSlot(room) });
+  } else {
+    await db.from('party_rooms').update({
+      turn_phase: 'roll', current_slot: nextSlot(room),
+      ...extraUpdates,
+    }).eq('id', roomId);
+  }
+}
 async function handleSpace() {
   const room  = roomData;
-  const board = JSON.parse(room.board || '[]');
+  const { tiles, laps, boardSize: bs } = parseBoard(room);
   const pos   = boardPos(room, playerSlot);
-  const type  = board[pos] || 'normal';
+  const type  = tiles[pos] || 'normal';
   const pc    = room.player_count || 2;
   const others = allSlots(pc).filter(s =>
     s !== playerSlot && room[`${s}_name`] && boardPos(room, s) === pos);
 
   const st = pState(room);
+  const ns = pStats(room);
+  // Restore lap-completion flag from local backup in case Supabase was stale
+  if (lapCompletedLocal) {
+    if (!ns[playerSlot]) ns[playerSlot] = { mgWins: 0, badLucks: 0 };
+    ns[playerSlot].lapCompleted = true;
+    lapCompletedLocal = false;
+  }
+  const mul = isDoublePhase(room) ? 2 : 1;
+
+  // Music Box trap: if an opponent placed a box on this node
+  const currentNode = pos % bs;
+  const mbIdx = (ns._musicBoxes || []).findIndex(mb => mb.spaceIdx === currentNode && mb.ownerSlot !== playerSlot && room[`${mb.ownerSlot}_name`]);
+  if (mbIdx !== -1) {
+    const mb = ns._musicBoxes[mbIdx];
+    st.coins[playerSlot]     = (st.coins[playerSlot]     || 0) - 5; // can go negative
+    st.coins[mb.ownerSlot]   = (st.coins[mb.ownerSlot]   || 0) + 5;
+    ns._musicBoxes.splice(mbIdx, 1);
+    emitEvent(`🎵 ${room[`${playerSlot}_name`]} triggered Puppet's Music Box! -5🪙 → ${room[`${mb.ownerSlot}_name`]}`);
+    showToast('🎵 Music Box trap! -5🪙');
+  }
 
   if (type === 'coin') {
-    st.coins[playerSlot] = (st.coins[playerSlot] || 0) + 2;
-    await db.from('party_rooms').update({ player_coins: JSON.stringify(st.coins), turn_phase: 'roll', current_slot: nextSlot(room) }).eq('id', roomId);
-    showToast(`${room[`${playerSlot}_name`]} got 2 coins! 🪙`);
+    st.coins[playerSlot] = (st.coins[playerSlot] || 0) + 2 * mul;
+    emitEvent(`🪙 ${room[`${playerSlot}_name`]} got ${2*mul} coins!`);
+    showToast(`+${2*mul} coins! 🪙`);
+    await passOrMinigame(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) });
+    return;
+  }
+  if (type === 'jackpot') {
+    const jackVal = getJackpotValue(room) * mul;
+    st.coins[playerSlot] = (st.coins[playerSlot] || 0) + jackVal;
+    emitEvent(`💰 ${room[`${playerSlot}_name`]} hit the JACKPOT for ${jackVal} coins!`);
+    showToast(`💰 JACKPOT! +${jackVal} coins!`);
+    await passOrMinigame(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) });
+    return;
+  }
+  if (type === 'badluck') {
+    st.coins[playerSlot] = Math.max(0, (st.coins[playerSlot] || 0) - 3 * mul);
+    if (!ns[playerSlot]) ns[playerSlot] = { mgWins: 0, badLucks: 0 };
+    ns[playerSlot].badLucks = (ns[playerSlot].badLucks || 0) + 1;
+    emitEvent(`💀 ${room[`${playerSlot}_name`]} hit bad luck! -${3*mul} coins`);
+    showToast(`-${3*mul} coins 💀${mul>1?' ×2':''}`);
+    await passOrMinigame(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) });
     return;
   }
   if (type === 'pizza') {
-    st.pizzas[playerSlot] = (st.pizzas[playerSlot] || 0) + 1;
-    await db.from('party_rooms').update({ player_pizzas: JSON.stringify(st.pizzas), turn_phase: 'roll', current_slot: nextSlot(room) }).eq('id', roomId);
-    showToast(`${room[`${playerSlot}_name`]} got 1 pizza! 🍕`);
+    const coins = st.coins[playerSlot] || 0;
+    if (coins < 10) {
+      emitEvent(`🍕 ${room[`${playerSlot}_name`]} landed on Pizza but needs 10🪙 (${coins}/10)`);
+      showToast(`Need 10🪙 to buy pizza! 🍕`);
+      await passOrMinigame(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) });
+      return;
+    }
+    // Save music box state now (before player makes a choice)
+    if (mbIdx !== -1) await db.from('party_rooms').update({ player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) }).eq('id', roomId);
+    const el = document.getElementById('current-player-action');
+    if (el) el.innerHTML = `<div class="action-card">
+      <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot)-1]}">🍕 Pizza Shop</div>
+      <div class="action-space">Buy a pizza for <strong>10🪙</strong>? You have <strong>${coins}🪙</strong>.</div>
+      <div class="action-btns">
+        <button class="mp-btn primary" id="pizza-buy-btn">🍕 Buy (10🪙)</button>
+        <button class="mp-btn" id="pizza-skip-btn">Skip</button>
+      </div>
+    </div>`;
+    document.getElementById('pizza-buy-btn').addEventListener('click', () => buyPizza(), { once: true });
+    document.getElementById('pizza-skip-btn').addEventListener('click', () => skipPizza(), { once: true });
+    return;
+  }
+  if (type === 'tollbooth') {
+    // Save music box state before toll choice UI
+    if (mbIdx !== -1) await db.from('party_rooms').update({ player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) }).eq('id', roomId);
+    const _tb = parseBoard(room); const _tbToll = (_tb.tollMap[boardPos(room, playerSlot)] !== undefined ? _tb.tollMap[boardPos(room, playerSlot)] : _tb.toll);
+    emitEvent(`🐻 ${room[`${playerSlot}_name`]} reached Freddy's Tollbooth! (toll: ${_tbToll}🪙)`);
+    await db.from('party_rooms').update({ turn_phase: 'tollbooth' }).eq('id', roomId);
+    return;
+  }
+  if (type === 'freddy_zone') {
+    const eff = TRAP_EFFECTS[Math.floor(Math.random() * 2)];
+    eff.eff(st, playerSlot, room, ns);
+    emitEvent(`😱 ${room[`${playerSlot}_name`]} entered the Freddy Zone! ${eff.text}`);
+    showToast(`😱 Freddy Zone! ${eff.text}`);
+    await passOrMinigame(room, { player_pos: JSON.stringify(st.pos), player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns) });
+    return;
+  }
+  if (type === 'trap') {
+    const eff = TRAP_EFFECTS[Math.floor(Math.random() * TRAP_EFFECTS.length)];
+    eff.eff(st, playerSlot, room, ns);
+    emitEvent(`🪤 ${room[`${playerSlot}_name`]} hit a Trap! ${eff.text}`);
+    showToast(`🪤 Trap! ${eff.text}`);
+    await passOrMinigame(room, { player_pos: JSON.stringify(st.pos), player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns) });
+    return;
+  }
+  if (type === 'challenge') {
+    const active = allSlots(pc).filter(s => room[`${s}_name`]);
+    if (active.length < 2) {
+      await passOrMinigame(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) });
+      return;
+    }
+    const reward = active.length === 2 ? 5 : active.length === 3 ? 10 : 0;
+    emitEvent(`⚔️ ${room[`${playerSlot}_name`]} issued a Challenge! (1v${active.length - 1})`);
+    await triggerMinigame(active, { isChallenge: true, challenger: playerSlot, challengeReward: reward, isPizzaReward: active.length >= 4 });
     return;
   }
   if (type === 'minigame' || others.length > 0) {
     const involved = type === 'minigame'
-      ? allSlots(pc).filter(s => room[`${s}_name`]).map(s => s)
+      ? allSlots(pc).filter(s => room[`${s}_name`])
       : [playerSlot, ...others];
+    emitEvent(`🎮 Minigame triggered by ${room[`${playerSlot}_name`]}!`);
     await triggerMinigame(involved);
     return;
   }
   if (type === 'question') {
+    if (mbIdx !== -1) await db.from('party_rooms').update({ player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) }).eq('id', roomId);
+    emitEvent(`❓ ${room[`${playerSlot}_name`]} landed on Event!`);
     await triggerQuestion();
     return;
   }
   // Normal space
-  await db.from('party_rooms').update({ turn_phase: 'roll', current_slot: nextSlot(room) }).eq('id', roomId);
+  emitEvent(`⬜ ${room[`${playerSlot}_name`]} landed on Normal (space ${pos})`);
+  await passOrMinigame(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) });
 }
 
 async function triggerQuestion() {
@@ -852,16 +1858,49 @@ async function triggerQuestion() {
   st.pizzas[playerSlot] = Math.max(0, tempPlayer.pizzas);
   st.pos[playerSlot]    = Math.max(0, tempPlayer.pos);
 
-  const extra = ev.boardShuffle ? { board: JSON.stringify(generateBoard()) } : {};
+  const extra = ev.boardShuffle ? { board: JSON.stringify(createBoard(parseBoard(roomData).mapType, parseBoard(roomData).laps)) } : {};
 
-  await db.from('party_rooms').update({
+  emitEvent(`❓ ${roomData[`${playerSlot}_name`]} got event: ${ev.text} → ${ev.desc}`);
+  showToast(`${ev.text}`);
+  await passOrMinigame(roomData, {
     player_pos:    JSON.stringify(st.pos),
     player_coins:  JSON.stringify(st.coins),
     player_pizzas: JSON.stringify(st.pizzas),
-    turn_phase: 'roll', current_slot: nextSlot(roomData),
     ...extra,
-  }).eq('id', roomId);
-  showToast(`${ev.text} (${ev.desc})`);
+  });
+}
+
+// ── Pizza choice ──────────────────────────────────────────────────────────────
+async function buyPizza() {
+  const room = roomData;
+  const { laps, tiles, boardSize, mapType, toll, skipMap, freeMap, nodes, boardAspect, nextMap } = parseBoard(room);
+  const pos = boardPos(room, playerSlot);
+  const st  = pState(room);
+  const mul = isDoublePhase(room) ? 2 : 1;
+
+  st.coins[playerSlot]  = Math.max(0, (st.coins[playerSlot] || 0) - 10);
+  st.pizzas[playerSlot] = (st.pizzas[playerSlot] || 0) + mul;
+
+  const newTiles = [...tiles];
+  newTiles[pos] = 'normal';
+  const free = newTiles.map((t,i) => i).filter(i => newTiles[i] === 'normal' && i !== 0);
+  if (free.length) newTiles[free[Math.floor(Math.random()*free.length)]] = 'pizza';
+  const newBoard = { tiles: newTiles, laps, boardSize, mapType, toll, skipMap, freeMap };
+  if (nodes) newBoard.nodes = nodes;
+  if (boardAspect) newBoard.boardAspect = boardAspect;
+  if (nextMap && Object.keys(nextMap).length) newBoard.nextMap = nextMap;
+
+  emitEvent(`🍕 ${room[`${playerSlot}_name`]} bought a pizza! (-10🪙)`);
+  showToast(`🍕 Got a pizza! Pizza moves to a new spot.`);
+  await passOrMinigame(room, {
+    player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas),
+    board: JSON.stringify(newBoard),
+  });
+}
+
+async function skipPizza() {
+  showToast('Skipped the pizza 🍕');
+  await passOrMinigame(roomData);
 }
 
 // ── Character abilities ───────────────────────────────────────────────────────
@@ -871,16 +1910,134 @@ function useAbility() {
     case 'cupcake': showCupcakeTarget(); break;
     case 'jump':    doJump();            break;
     case 'reroll':  doReroll();          break;
+    case 'kill':    showKillTarget();    break;
+    case 'gifts':   showGiftsTarget();   break;
+    case 'shuffle': doShuffle();         break;
   }
+}
+
+// ── Mangle: Shuffle ability ───────────────────────────────────────────────────
+async function doShuffle() {
+  const board = parseBoard(roomData);
+  const locked = new Set(['start', 'tollbooth', 'freddy_zone', 'jackpot']);
+  const tiles  = [...board.tiles];
+
+  // Collect shuffleable indices and their values
+  const freeIdx = tiles.map((t, i) => i).filter(i => !locked.has(tiles[i]));
+  const freeVals = freeIdx.map(i => tiles[i]);
+  // Fisher-Yates shuffle
+  for (let i = freeVals.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [freeVals[i], freeVals[j]] = [freeVals[j], freeVals[i]];
+  }
+  freeIdx.forEach((idx, i) => { tiles[idx] = freeVals[i]; });
+
+  const newBoard = { ...board, tiles };
+  const st = pState(roomData);
+  st.cooldowns[playerSlot] = CHAR_CFG['mangle'].cooldown;
+
+  await db.from('party_rooms').update({
+    board:            JSON.stringify(newBoard),
+    player_cooldowns: JSON.stringify(st.cooldowns),
+  }).eq('id', roomId);
+
+  emitEvent(`🎀 ${roomData[`${playerSlot}_name`]} tangled the board! Spaces shuffled!`);
+  showToast('🎀 Board spaces shuffled!');
+  renderActionUI(roomData);
+}
+
+// ── Springtrap: Kill ability ──────────────────────────────────────────────────
+function showKillTarget() {
+  const room = roomData;
+  const pc   = room.player_count || 2;
+  const targets = allSlots(pc).filter(s =>
+    s !== playerSlot && room[`${s}_name`] && inRange5(room, playerSlot, s));
+  if (!targets.length) { showToast('No players in range (5 spaces)!'); return; }
+
+  const el = document.getElementById('current-player-action');
+  el.innerHTML = `<div class="action-card">
+    <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot)-1]}">🪤 Kill!</div>
+    <p style="font-size:.7rem;color:var(--text-muted);margin:2px 0">Send a player within 5 spaces back to start</p>
+    <div class="ability-targets">
+      ${targets.map(s => {
+        const char = room[`${s}_char`] || 'freddy';
+        return `<button class="mp-btn" onclick="executeKill('${s}')">
+          <img src="${charImg(char)}" style="width:20px;height:20px;border-radius:50%;object-fit:contain;vertical-align:middle" onerror="this.style.display='none'"/>
+          ${room[`${s}_name`]}
+        </button>`;
+      }).join('')}
+    </div>
+    <button class="mp-btn small" onclick="renderActionUI(roomData)" style="margin-top:4px">Cancel</button>
+  </div>`;
+}
+
+async function executeKill(targetSlot) {
+  const st = pState(roomData);
+  st.pos[targetSlot] = 0; // reset to start (lap 0, node 0) — coins/pizzas stay
+  st.cooldowns[playerSlot] = CHAR_CFG['springtrap'].cooldown;
+  await db.from('party_rooms').update({
+    player_pos:       JSON.stringify(st.pos),
+    player_cooldowns: JSON.stringify(st.cooldowns),
+  }).eq('id', roomId);
+  emitEvent(`🪤 ${roomData[`${playerSlot}_name`]} killed ${roomData[`${targetSlot}_name`]}! Back to start!`);
+  showToast(`🪤 ${roomData[`${targetSlot}_name`]} goes back to start!`);
+  renderActionUI(roomData);
+}
+
+// ── Puppet: Gifts ability ─────────────────────────────────────────────────────
+function showGiftsTarget() {
+  const room = roomData;
+  const pc   = room.player_count || 2;
+  const targets = allSlots(pc).filter(s => {
+    if (!room[`${s}_name`]) return false;
+    return s === playerSlot || inRange5(room, playerSlot, s);
+  });
+  if (!targets.length) { showToast('No players in range (5 spaces)!'); return; }
+
+  const el = document.getElementById('current-player-action');
+  el.innerHTML = `<div class="action-card">
+    <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot)-1]}">🎁 Gifts!</div>
+    <p style="font-size:.7rem;color:var(--text-muted);margin:2px 0">Convert 10🪙 → 1🍕 for a player within 5 spaces</p>
+    <div class="ability-targets">
+      ${targets.map(s => {
+        const char    = room[`${s}_char`] || 'freddy';
+        const coins   = playerCoins(room, s);
+        const canGift = coins >= 10;
+        return `<button class="mp-btn" onclick="executeGifts('${s}')" ${canGift ? '' : 'disabled'} title="${canGift ? '' : 'Needs 10🪙'}">
+          <img src="${charImg(char)}" style="width:20px;height:20px;border-radius:50%;object-fit:contain;vertical-align:middle" onerror="this.style.display='none'"/>
+          ${room[`${s}_name`]} (${coins}🪙)
+        </button>`;
+      }).join('')}
+    </div>
+    <button class="mp-btn small" onclick="renderActionUI(roomData)" style="margin-top:4px">Cancel</button>
+  </div>`;
+}
+
+async function executeGifts(targetSlot) {
+  const st = pState(roomData);
+  if ((st.coins[targetSlot] || 0) < 10) { showToast('Not enough coins!'); return; }
+  st.coins[targetSlot]  = (st.coins[targetSlot]  || 0) - 10;
+  st.pizzas[targetSlot] = (st.pizzas[targetSlot] || 0) + 1;
+  st.cooldowns[playerSlot] = CHAR_CFG['puppet'].cooldown;
+  await db.from('party_rooms').update({
+    player_coins:     JSON.stringify(st.coins),
+    player_pizzas:    JSON.stringify(st.pizzas),
+    player_cooldowns: JSON.stringify(st.cooldowns),
+  }).eq('id', roomId);
+  const target = roomData[`${targetSlot}_name`];
+  emitEvent(`🎁 ${roomData[`${playerSlot}_name`]} gifted a pizza to ${target}!`);
+  showToast(`🎁 Gift sent${targetSlot === playerSlot ? ' to yourself' : ` to ${target}`}!`);
+  renderActionUI(roomData);
 }
 
 function showCupcakeTarget() {
   const room   = roomData;
   const pc     = room.player_count || 2;
+  const { boardSize: bs } = parseBoard(room);
   const myPos  = boardPos(room, playerSlot);
   const targets = allSlots(pc).filter(s => {
     if (s === playerSlot || !room[`${s}_name`]) return false;
-    const dist = (boardPos(room, s) - myPos + BOARD_SIZE) % BOARD_SIZE;
+    const dist = (boardPos(room, s) - myPos + bs) % bs;
     return dist > 0 && dist <= 5;
   });
   if (!targets.length) { showToast('No players in range!'); return; }
@@ -918,9 +2075,10 @@ async function executeCupcake(targetSlot) {
 async function doJump() {
   const steps = 4;
   const st    = pState(roomData);
+  const { laps, boardSize } = parseBoard(roomData);
   st.cooldowns[playerSlot] = CHAR_CFG[roomData[`${playerSlot}_char`]].cooldown;
-  moveFwd(st, playerSlot, steps);
-  const finished = Math.floor(st.pos[playerSlot] / BOARD_SIZE) >= TOTAL_LAPS;
+  moveFwd(st, playerSlot, steps, true, boardSize);
+  const finished = Math.floor(st.pos[playerSlot] / boardSize) >= laps;
   await db.from('party_rooms').update({
     player_pos:       JSON.stringify(st.pos),
     player_coins:     JSON.stringify(st.coins),
@@ -939,11 +2097,338 @@ async function doReroll() {
   showToast('Roll again!');
 }
 
+// ── Dice shop ─────────────────────────────────────────────────────────────────
+// Returns array of die IDs the player owns (always includes d6)
+function getOwnedDice(room, slot) {
+  const stats = pStats(room)[slot] || {};
+  if (Array.isArray(stats.ownedDice)) return stats.ownedDice;
+  // backwards compat: own d6 + whatever was equipped
+  const cur = stats.dice || 'd6';
+  return cur === 'd6' ? ['d6'] : ['d6', cur];
+}
+
+function showDiceShop(room) {
+  const coins    = playerCoins(room, playerSlot);
+  const myChar   = room[`${playerSlot}_char`] || 'freddy';
+  const equipped = getPlayerDice(room, playerSlot);
+  const owned    = getOwnedDice(room, playerSlot);
+  const btnsEl   = document.getElementById('dice-action-btns');
+  const panel    = document.getElementById('dice-shop-content') || document.getElementById('dice-shop-panel');
+  if (!panel) return;
+
+  const psn = pStats(room)[playerSlot] || {};
+  const forcedDie   = psn.forcedDice;
+  const forcedTurns = psn.forcedTurns || 0;
+  const isForced    = !!(forcedDie && forcedTurns > 0);
+
+  const allDice = [
+    { id: 'd6', label: 'Standard Die', emoji: '🎲', desc: 'Default die. Rolls 1–6.', price: 0 },
+    ...SHOP_DICE.filter(d => !d.onlyChar || d.onlyChar === myChar),
+  ];
+
+  const cards = allDice.map(d => {
+    const isEquipped = equipped === d.id;
+    const isOwned    = owned.includes(d.id);
+    const canBuy     = !isOwned && d.price > 0 && coins >= d.price;
+    const shopD      = SHOP_DICE.find(x => x.id === d.id);
+    const usesLeft   = isOwned && shopD?.maxUses
+      ? (psn.diceUses?.[d.id] ?? shopD.maxUses)
+      : null;
+    const isThisForced = isForced && d.id === forcedDie;
+    const otherForced  = isForced && d.id !== forcedDie;
+
+    const cls = isEquipped ? 'dic-equipped' : (!isOwned ? 'dic-locked' : '');
+
+    let usesTag = '';
+    if (usesLeft !== null) usesTag = `<span class="dic-uses">${usesLeft} use${usesLeft !== 1 ? 's' : ''} left</span>`;
+    if (isThisForced) usesTag += `<span class="dic-forced">🔒 ${forcedTurns}t forced</span>`;
+
+    let footer;
+    if (isEquipped) {
+      footer = `<span class="dic-status">✓ EQUIPPED</span>`;
+    } else if (isOwned) {
+      footer = otherForced
+        ? `<button class="mp-btn small dic-equip-btn" data-id="${d.id}" disabled title="Forced die active">🔒 Locked</button>`
+        : `<button class="mp-btn small dic-equip-btn" data-id="${d.id}">Equip</button>`;
+    } else {
+      footer = `<span class="dic-price">${d.price}🪙</span>
+        <button class="mp-btn small dic-buy-btn" data-id="${d.id}" data-price="${d.price}" ${canBuy ? '' : 'disabled'}>${coins < d.price ? `Need ${d.price}🪙` : 'Buy'}</button>`;
+    }
+
+    return `<div class="dic-card ${cls}">
+      <div class="dic-header">
+        <span class="dic-emoji">${d.emoji}</span>
+        <span class="dic-name">${d.label}</span>
+      </div>
+      <span class="dic-desc">${d.desc}</span>
+      ${usesTag ? `<div class="dic-uses-row">${usesTag}</div>` : ''}
+      <div class="dic-footer">${footer}</div>
+    </div>`;
+  }).join('');
+
+  const myTurn = isMyTurn(room);
+  const diceObj = DICE_TYPES[getPlayerDice(room, playerSlot)] || DICE_TYPES.d6;
+
+  // ── build action section based on phase ─────────────────
+  let actionHTML = '';
+  if (myTurn) {
+    if (room.turn_phase === 'roll') {
+      const me = myPlayer(room);
+      const c  = CHAR_CFG[me.char] || {};
+      const canAbility = c.ability && c.ability !== 'reroll' && c.ability !== 'tollpass'
+        && (pState(room).cooldowns[playerSlot] || 0) === 0;
+      const abilLabel = { cupcake:'🧁 Cupcake', jump:'🎸 Jump', kill:'🪤 Kill', gifts:'🎁 Gifts' }[c.ability] || '✨ Ability';
+      actionHTML = `
+        <button class="mp-btn primary dp-action-btn" id="dp-roll-btn">${diceObj.pick ? '🎯 Pick Steps' : `${diceObj.emoji} Roll!`}</button>
+        ${canAbility ? `<button class="mp-btn accent dp-action-btn" id="dp-ability-btn">${abilLabel}</button>` : ''}`;
+
+    } else if (room.turn_phase === 'rolled') {
+      const me = myPlayer(room);
+      const c  = CHAR_CFG[me.char] || {};
+      const canReroll   = c.ability === 'reroll' && (pState(room).cooldowns[playerSlot] || 0) === 0;
+      const lastDice    = pStats(room)[playerSlot]?.lastDiceId || getPlayerDice(room, playerSlot);
+      const isSpringlock = lastDice === 'springlock' && room.dice_result === 0;
+      actionHTML = `
+        <button class="mp-btn primary dp-action-btn" id="dp-apply-btn">${isSpringlock ? '🪤 Back to Start' : '→ Continue'}</button>
+        ${canReroll && !isSpringlock ? `<button class="mp-btn accent dp-action-btn" id="dp-reroll-btn">🔄 Re-Roll</button>` : ''}`;
+
+    } else if (room.turn_phase === 'moved') {
+      actionHTML = `<button class="mp-btn primary dp-action-btn" id="dp-cont-btn">→ Continue</button>`;
+
+    } else if (room.turn_phase === 'tollbooth') {
+      const { toll, tollMap, skipMap, freeMap, boardSize, tiles } = parseBoard(room);
+      const pos         = boardPos(room, playerSlot);
+      const currentToll = tollMap[pos] !== undefined ? tollMap[pos] : toll;
+      const canAfford   = coins >= currentToll;
+      const myChar      = room[`${playerSlot}_char`] || 'freddy';
+      const cd          = pState(room).cooldowns[playerSlot] || 0;
+      const canPass     = myChar === 'freddy' && cd === 0;
+      const nextToll    = Math.min(toll + 25, currentToll + 5);
+      const skipIdx     = skipMap[pos] !== undefined ? skipMap[pos] : (pos + TOLL_SKIP) % boardSize;
+      const freeIdx     = freeMap[pos] !== undefined ? freeMap[pos] : null;
+      const skipCfg     = SPACE_CFG[tiles[skipIdx]] || SPACE_CFG.normal;
+      const freeCfg     = freeIdx !== null ? (SPACE_CFG[tiles[freeIdx]] || SPACE_CFG.normal) : null;
+      const skipLabel   = `Space ${skipIdx} ${skipCfg.emoji || ''}`;
+      const freeLabel   = freeIdx !== null ? `Space ${freeIdx} ${freeCfg.emoji || ''}` : 'Danger zone';
+      actionHTML = `
+        <div class="dp-toll-title">🐻 Freddy's Toll</div>
+        ${canPass ? `<button class="mp-btn accent dp-action-btn" id="dp-freddy-pass">🐻 Free Pass → ${skipLabel}</button>` : ''}
+        <button class="mp-btn primary dp-action-btn" id="dp-pay-toll" ${canAfford ? '' : 'disabled'}>${canAfford ? `💰 Pay ${currentToll}🪙 → ${skipLabel}` : `💰 Need ${currentToll}🪙`}${currentToll < nextToll ? `<span class="dp-toll-next"> (→${nextToll}🪙)</span>` : ' <span class="dp-toll-max">MAX</span>'}</button>
+        <button class="mp-btn dp-action-btn" id="dp-free-path">😰 Free → ${freeLabel}</button>`;
+    }
+  }
+
+  if (btnsEl) btnsEl.innerHTML = actionHTML ? `<div class="dice-panel-actions">${actionHTML}</div>` : '';
+  panel.innerHTML = `
+    <div class="dice-shop-title">🎲 Dice</div>
+    <div class="dice-shop-coins">🪙 ${coins} available</div>
+    <div class="dice-inv-list">${cards}</div>`;
+
+  panel.querySelectorAll('.dic-buy-btn').forEach(btn => {
+    if (!btn.disabled) btn.addEventListener('click', () => buyDice(btn.dataset.id, +btn.dataset.price), { once: true });
+  });
+  panel.querySelectorAll('.dic-equip-btn:not([disabled])').forEach(btn => {
+    btn.addEventListener('click', () => equipDice(btn.dataset.id), { once: true });
+  });
+
+  // ── action button wires ──────────────────────────────────
+  const dpRoll = document.getElementById('dp-roll-btn');
+  if (dpRoll) dpRoll.addEventListener('click', () => { dpRoll.disabled = true; if (diceObj.pick) showPickDiceUI(); else doRoll(); }, { once: true });
+  const dpAbility = document.getElementById('dp-ability-btn');
+  if (dpAbility) dpAbility.addEventListener('click', () => { dpAbility.disabled = true; useAbility(); }, { once: true });
+  const dpApply = document.getElementById('dp-apply-btn');
+  if (dpApply) dpApply.addEventListener('click', () => { dpApply.disabled = true; applyMove(); }, { once: true });
+  const dpReroll = document.getElementById('dp-reroll-btn');
+  if (dpReroll) dpReroll.addEventListener('click', () => { dpReroll.disabled = true; doFoxyReroll(); }, { once: true });
+  const dpCont = document.getElementById('dp-cont-btn');
+  if (dpCont) dpCont.addEventListener('click', () => { dpCont.disabled = true; handleSpace(); }, { once: true });
+  const dpPass = document.getElementById('dp-freddy-pass');
+  if (dpPass) dpPass.addEventListener('click', () => { dpPass.disabled = true; freddyTollPass(); }, { once: true });
+  const dpPayToll = document.getElementById('dp-pay-toll');
+  if (dpPayToll && !dpPayToll.disabled) dpPayToll.addEventListener('click', () => { dpPayToll.disabled = true; payToll(); }, { once: true });
+  const dpFreePath = document.getElementById('dp-free-path');
+  if (dpFreePath) dpFreePath.addEventListener('click', () => { dpFreePath.disabled = true; passTollFree(); }, { once: true });
+}
+
+async function buyDice(diceId, price) {
+  const ns = pStats(roomData);
+  if (!ns[playerSlot]) ns[playerSlot] = { mgWins: 0, badLucks: 0, shopVisited: true };
+  const owned = getOwnedDice(roomData, playerSlot);
+  if (!owned.includes(diceId)) owned.push(diceId);
+  ns[playerSlot].ownedDice = owned;
+  ns[playerSlot].dice = diceId;
+  const shopD = SHOP_DICE.find(d => d.id === diceId);
+  if (shopD?.maxUses) {
+    if (!ns[playerSlot].diceUses) ns[playerSlot].diceUses = {};
+    ns[playerSlot].diceUses[diceId] = shopD.maxUses;
+  }
+  if (shopD?.forced) {
+    ns[playerSlot].forcedDice  = diceId;
+    ns[playerSlot].forcedTurns = shopD.forced;
+  }
+  const st = pState(roomData);
+  st.coins[playerSlot] = Math.max(0, (st.coins[playerSlot] || 0) - price);
+  await db.from('party_rooms').update({
+    player_stats: JSON.stringify(ns),
+    player_coins: JSON.stringify(st.coins),
+  }).eq('id', roomId);
+  emitEvent(`🎲 ${roomData[`${playerSlot}_name`]} bought the ${DICE_TYPES[diceId].label}!`);
+  const forcedNote = shopD?.forced ? ` (forced ${shopD.forced} turns!)` : '';
+  showToast(`Bought ${DICE_TYPES[diceId].label}!${forcedNote} ${DICE_TYPES[diceId].emoji}`);
+}
+
+async function equipDice(diceId) {
+  const owned = getOwnedDice(roomData, playerSlot);
+  if (!owned.includes(diceId)) return;
+  const ns = pStats(roomData);
+  const psn = ns[playerSlot] || {};
+  if (psn.forcedDice && (psn.forcedTurns || 0) > 0 && diceId !== psn.forcedDice) {
+    showToast(`🔒 Forced die active for ${psn.forcedTurns} more turn${psn.forcedTurns > 1 ? 's' : ''}!`);
+    return;
+  }
+  if (!ns[playerSlot]) ns[playerSlot] = { mgWins: 0, badLucks: 0 };
+  ns[playerSlot].dice = diceId;
+  await db.from('party_rooms').update({ player_stats: JSON.stringify(ns) }).eq('id', roomId);
+  showToast(`Equipped ${DICE_TYPES[diceId]?.label || diceId}! ${DICE_TYPES[diceId]?.emoji || '🎲'}`);
+}
+
+// ── Tollbooth (hard mode) ─────────────────────────────────────────────────────
+function showTollboothUI(room) {
+  const { boardSize, tiles, skipMap, freeMap } = parseBoard(room);
+  const pos     = boardPos(room, playerSlot);
+  const el      = document.getElementById('current-player-action');
+  if (!el) return;
+
+  const skipIdx  = skipMap[pos] !== undefined ? skipMap[pos] : (pos + TOLL_SKIP) % boardSize;
+  const freeIdx  = freeMap[pos] !== undefined ? freeMap[pos] : null;
+  const skipCfg  = SPACE_CFG[tiles[skipIdx]] || SPACE_CFG.normal;
+  const freeCfg  = freeIdx !== null ? (SPACE_CFG[tiles[freeIdx]] || SPACE_CFG.normal) : null;
+  const skipDesc = `Space ${skipIdx} ${skipCfg.emoji || ''}`;
+  const freeDesc = freeIdx !== null ? `Space ${freeIdx} ${freeCfg.emoji || ''}` : 'Danger zone';
+  const pendingSteps = pStats(room)[playerSlot]?.pendingSteps || 0;
+
+  el.innerHTML = `<div class="action-card">
+    <div class="tollbooth-title">🐻 Freddy's Tollbooth</div>
+    <div class="action-pos">A: ${skipDesc} · B: ${freeDesc}</div>
+    ${pendingSteps > 0 ? `<div style="font-size:.65rem;color:var(--gold)">${pendingSteps} steps left after choice</div>` : ''}
+    <div style="font-size:.65rem;color:var(--text-muted);margin-top:2px">Choose in the panel →</div>
+  </div>`;
+}
+
+// Shared helper: after a tollbooth choice, moves to destination then continues pending steps.
+// noLap = true when the free path is a setback (goes backward) so it doesn't count as a lap or a round.
+// coinDeduct: amount to subtract from player's coins (for payToll).
+async function resolveTollChoice(destIdx, orSkipFwd, labelA, labelB, noLap = false, coinDeduct = 0) {
+  const room = roomData;
+  const board = parseBoard(room);
+  const { tiles, laps, boardSize, mapType, toll, tollMap, skipMap, freeMap, nodes, boardAspect, nextMap } = board;
+  const st  = pState(room);
+  const ns  = pStats(room);
+  const pos = boardPos(room, playerSlot);
+  if (coinDeduct > 0) st.coins[playerSlot] = Math.max(0, (st.coins[playerSlot] || 0) - coinDeduct);
+
+  // Jump to chosen destination
+  if (destIdx !== null && destIdx !== undefined) {
+    jumpToNode(st, playerSlot, destIdx, boardSize, noLap);
+  } else if (orSkipFwd) {
+    moveFwd(st, playerSlot, TOLL_SKIP, true, boardSize);
+  }
+
+  const pendingSteps = ns[playerSlot]?.pendingSteps || 0;
+  if (!ns[playerSlot]) ns[playerSlot] = { mgWins: 0, badLucks: 0 };
+  ns[playerSlot].pendingSteps = 0;
+
+  let finalPhase = 'roll', finalSlot = nextSlot(room), hitAnother = false;
+
+  if (pendingSteps > 0) {
+    const result = moveStepByStep(st, playerSlot, pendingSteps, boardSize, tiles, nextMap);
+    if (result.hitTollbooth) {
+      ns[playerSlot].pendingSteps = result.remainingSteps;
+      finalPhase = 'tollbooth'; finalSlot = playerSlot; hitAnother = true;
+    } else {
+      finalPhase = 'moved'; finalSlot = playerSlot;
+    }
+  }
+
+  const finished = Math.floor(st.pos[playerSlot] / boardSize) >= laps;
+  // Per-tollbooth pricing: only increase the node we were on, only when paying (coinDeduct > 0)
+  const newTollMap = { ...tollMap };
+  if (coinDeduct > 0) {
+    const nodeToll = newTollMap[pos] !== undefined ? newTollMap[pos] : toll;
+    newTollMap[pos] = Math.min(toll + 25, nodeToll + 5);
+  }
+  const newBoard = { tiles, laps, boardSize, mapType, toll, tollMap: newTollMap, skipMap, freeMap };
+  if (nodes)   newBoard.nodes = nodes;
+  if (boardAspect) newBoard.boardAspect = boardAspect;
+  if (nextMap && Object.keys(nextMap).length) newBoard.nextMap = nextMap;
+  if (board.endOfRoundMinigame) newBoard.endOfRoundMinigame = true;
+
+  await db.from('party_rooms').update({
+    player_pos:    JSON.stringify(st.pos),
+    player_coins:  JSON.stringify(st.coins),
+    player_pizzas: JSON.stringify(st.pizzas),
+    player_stats:  JSON.stringify(ns),
+    board:         JSON.stringify(newBoard),
+    turn_phase:    finished ? undefined : finalPhase,
+    current_slot:  finished ? undefined : finalSlot,
+    ...(finished ? { state: 'finished' } : {}),
+  }).eq('id', roomId);
+
+  emitEvent(`🐻 ${room[`${playerSlot}_name`]} ${labelA}`);
+  showToast(labelB);
+}
+
+async function payToll() {
+  const room  = roomData;
+  const { toll, tollMap, skipMap } = parseBoard(room);
+  const pos   = boardPos(room, playerSlot);
+  const currentToll = tollMap[pos] !== undefined ? tollMap[pos] : toll;
+  const skipIdx = skipMap[pos] !== undefined ? skipMap[pos] : null;
+  const dest    = skipIdx !== null ? `Space ${skipIdx}` : `+${TOLL_SKIP} spaces`;
+  await resolveTollChoice(skipIdx, skipIdx === null, `paid ${currentToll}🪙 — Path A → ${dest}`, `Paid ${currentToll}🪙 — Path A! 🐻`, false, currentToll);
+}
+
+async function passTollFree() {
+  const room  = roomData;
+  const { freeMap } = parseBoard(room);
+  const pos   = boardPos(room, playerSlot);
+  const freeIdx = freeMap[pos];
+
+  if (freeIdx !== undefined) {
+    // noLap=true: free path is a setback, don't count as lap completion or round end
+    await resolveTollChoice(freeIdx, false, `took Path B → Space ${freeIdx}`, `Free path → Space ${freeIdx}! 😰`, true);
+  } else {
+    // No explicit free destination: sequential continuation (into freddy zone)
+    await resolveTollChoice(null, false, 'entered the Freddy Zone!', 'Entering the Freddy Zone... 😰', false);
+  }
+}
+
+// Freddy's ability: take Path A for free (no coin cost), sets cooldown
+async function freddyTollPass() {
+  const room  = roomData;
+  const { skipMap } = parseBoard(room);
+  const pos   = boardPos(room, playerSlot);
+  const st    = pState(room);
+  const skipIdx = skipMap[pos] !== undefined ? skipMap[pos] : null;
+  st.cooldowns[playerSlot] = CHAR_CFG['freddy'].cooldown;
+  await resolveTollChoice(skipIdx, skipIdx === null, `used Freddy's Pass — Path A for free! 🐻`, `Freddy's Pass! Path A for free 🐻`);
+  await db.from('party_rooms').update({ player_cooldowns: JSON.stringify(st.cooldowns) }).eq('id', roomId);
+}
+
 // ── Minigame trigger ──────────────────────────────────────────────────────────
-async function triggerMinigame(involvedSlots) {
-  const cfg    = MINIGAME_LIST[Math.floor(Math.random() * MINIGAME_LIST.length)];
-  const reward = Math.floor(Math.random() * 3) + 1;
-  const config = { seed: Date.now(), recipe: null, guitarPos: null, attackDelay: null };
+async function triggerMinigame(involvedSlots, extraCfg = {}) {
+  // Only p1-p4 have mg_done/mg_score DB columns — cap participants at 4
+  involvedSlots = involvedSlots.slice(0, 4);
+  const cfg = MINIGAME_LIST[Math.floor(Math.random() * MINIGAME_LIST.length)];
+  let reward = extraCfg.challengeReward !== undefined ? extraCfg.challengeReward : Math.floor(Math.random() * 3) + 1;
+
+  // Double multiplier: last-lap double phase OR triggering player has 2d6 equipped
+  let rewardMul = 1;
+  if (isDoublePhase(roomData)) rewardMul *= 2;
+  if (getPlayerDice(roomData, playerSlot) === '2d6') rewardMul *= 2;
+  reward = reward * rewardMul;
+
+  const config = { seed: Date.now(), recipe: null, guitarPos: null, attackDelay: null, rewardMul, ...extraCfg };
 
   // Deterministic seeds for fairness
   if (cfg.id === 'feedingFrenzy') {
@@ -956,7 +2441,7 @@ async function triggerMinigame(involvedSlots) {
     config.guitarPos = Math.floor(seededRand(config.seed)() * 16);
   }
   if (cfg.id === 'powerOut') {
-    config.attackDelay = Math.floor(seededRand(config.seed)() * 9000) + 1000;
+    config.attackDelay = Math.floor(seededRand(config.seed)() * 5000) + 500;
   }
 
   const resetScores = {
@@ -1006,7 +2491,7 @@ function showMgWaitScreen(room) {
         </span>`;
       }).join('')}
     </div>
-    <div class="mg-reward">🏆 Winner +${room.mg_reward}🪙 · Loser -${room.mg_reward}🪙</div>
+    <div class="mg-reward">🏆 Winner +${room.mg_reward}🪙 · 🤝 Tie: split equally</div>
     ${!alreadyReady && involved.includes(playerSlot)
       ? `<button class="mp-btn primary" id="mg-ready-btn">⚡ I'm Ready!</button>`
       : `<p class="mg-desc" style="font-size:.8rem">Waiting for all players...</p>`}
@@ -1028,6 +2513,9 @@ async function readyForMinigame() {
 // ── Minigame screen (auto-starts when all ready) ──────────────────────────────
 function startMinigameScreen(room) {
   if (mgCleanup) { mgCleanup(); mgCleanup = null; }
+  stopMgPoller();
+  mgDoneLocal          = {};
+  podiumConfirmedLocal = new Set();
   const mg       = { id: room.mg_id, config: JSON.parse(room.mg_config || '{}'), reward: room.mg_reward };
   const involved = JSON.parse(room.mg_players || '[]');
   const cfg      = MINIGAME_LIST.find(m => m.id === mg.id);
@@ -1035,24 +2523,27 @@ function startMinigameScreen(room) {
 
   showScreen('minigame');
   buildLiveBar(room, involved);
+  // Poller runs for everyone — participants detect allDone, spectators detect mg_podium
+  startMgPoller();
 
   // Spectator view
   if (!involved.includes(playerSlot)) {
     document.getElementById('mg-content').innerHTML = `<div class="minigame-intro">
       <div class="mg-emoji">${cfg.emoji}</div>
       <h2 class="mg-title">${cfg.name}</h2>
-      <p class="mg-desc">Minigame in progress... waiting for results!</p>
+      <p class="mg-desc">Minigame in progress...</p>
     </div>`;
     return;
   }
 
-  // All players were ready — start immediately
   const runners = {
     helpyBoop:     () => playHelpyBoop(room, mg),
     moneyLaundry:  () => playMoneyLaundry(room, mg),
     feedingFrenzy: () => playFeedingFrenzy(room, mg),
     guitarFinder:  () => playGuitarFinder(room, mg),
     powerOut:      () => playPowerOut(room, mg),
+    flashlight:    () => playFlashlight(room, mg),
+    pizzaDough:    () => playPizzaDough(room, mg),
   };
   runners[mg.id]?.();
 }
@@ -1080,68 +2571,230 @@ function updateLiveBar() {
 }
 
 async function submitScore(score) {
-  liveScores[playerSlot] = score;
+  mgDoneLocal[playerSlot] = score;
+  liveScores[playerSlot]  = score;
   updateLiveBar();
-  // Broadcast to others
+  broadcastCh?.send({ type: 'broadcast', event: 'mg_done',  payload: { slot: playerSlot, score } });
   broadcastCh?.send({ type: 'broadcast', event: 'mg_score', payload: { slot: playerSlot, score } });
-  // Write to DB as done
-  await db.from('party_rooms').update({
-    [mgScoreKey(playerSlot)]: score,
-    [mgDoneKey(playerSlot)]: true,
-  }).eq('id', roomId);
+
+  // Write to DB
+  if (slotNum(playerSlot) <= 4) {
+    const { error: we } = await db.from('party_rooms').update({
+      [mgScoreKey(playerSlot)]: score,
+      [mgDoneKey(playerSlot)]: true,
+    }).eq('id', roomId);
+  }
+
+  let r0 = null;
+  try { const res = await db.from('party_rooms').select('*').eq('id', roomId).single(); r0 = res.data; } catch {}
+  if (!r0) return;
+  const inv0 = JSON.parse(r0.mg_players || '[]');
+
+  if (r0.turn_phase === 'mg_podium') { stopMgPoller(); handleRoomUpdate(r0); return; }
+  if (r0.turn_phase === 'minigame') {
+    const allDone = inv0.every(s => r0[mgDoneKey(s)] || (s in mgDoneLocal));
+    if (allDone) { stopMgPoller(); finishMinigame(r0); return; }
+  }
+
+  checkMgAllDoneLocal();
+
+  const forceTry = async () => {
+    if (!roomId) return;
+    let r = null;
+    try { r = (await db.from('party_rooms').select('*').eq('id', roomId).single()).data; } catch {}
+    if (!r) return;
+    if (r.turn_phase === 'mg_podium') { stopMgPoller(); handleRoomUpdate(r); return; }
+    if (r.turn_phase !== 'minigame') return;
+    const inv = JSON.parse(r.mg_players || '[]');
+    const allDB = inv.every(s => r[mgDoneKey(s)]);
+    const allBC = inv.every(s => s in mgDoneLocal);
+    if (allDB || allBC) { stopMgPoller(); finishMinigame(r); }
+  };
+  setTimeout(forceTry, 2000);
+  setTimeout(forceTry, 5000);
+  setTimeout(forceTry, 10000);
 }
 
 async function finishMinigame(room) {
+  try {
   const involved = JSON.parse(room.mg_players || '[]');
+  if (!involved.length) return;
   const ranked   = involved
-    .map(s => ({ slot: s, score: room[mgScoreKey(s)] || 0 }))
+    .map(s => ({ slot: s, score: mgDoneLocal[s] ?? room[mgScoreKey(s)] ?? 0 }))
     .sort((a, b) => b.score - a.score);
 
-  const winner = ranked[0].slot;
-  const loser  = ranked[ranked.length - 1].slot;
-  const reward = room.mg_reward;
-  const st     = pState(room);
+  const winner   = ranked[0].slot;
+  const loser    = ranked[ranked.length - 1].slot;
+  const topScore = ranked[0].score;
+  const isTie    = ranked.length > 1 && ranked.every(r => r.score === topScore);
+  const st       = pState(room);
+  const ns       = pStats(room);
 
-  st.coins[winner] = (st.coins[winner] || 0) + reward;
-  if (winner !== loser) {
-    st.coins[loser] = Math.max(0, (st.coins[loser] || 0) - reward);
-    if (room.mg_id === 'moneyLaundry')
-      st.coins[loser] = Math.max(0, st.coins[loser] - 5);
-  }
+  let mgConfig = {};
+  try { mgConfig = JSON.parse(room.mg_config || '{}'); } catch {}
+  const isChallenge = !!mgConfig.isChallenge;
+  const rewardMul   = mgConfig.rewardMul || 1;
+  const reward      = room.mg_reward || 0; // hoisted so podiumRows can use it
 
-  // Feeding Frenzy: deduct 1 pizza from players who failed (score = 0)
-  if (room.mg_id === 'feedingFrenzy') {
-    involved.forEach(s => {
-      if ((room[mgScoreKey(s)] || 0) === 0 && (st.pizzas[s] || 0) > 0) {
-        st.pizzas[s]--;
+  if (isChallenge) {
+    const challenger      = mgConfig.challenger;
+    const challengeReward = (mgConfig.challengeReward || 5) * rewardMul;
+    const isPizzaReward   = !!mgConfig.isPizzaReward;
+    const challengerWon   = ranked[0].slot === challenger;
+    const others          = involved.filter(s => s !== challenger);
+
+    if (!isTie) {
+      if (challengerWon) {
+        if (isPizzaReward) st.pizzas[challenger] = (st.pizzas[challenger] || 0) + 1;
+        else               st.coins[challenger]  = (st.coins[challenger]  || 0) + challengeReward;
+        if (!ns[challenger]) ns[challenger] = { mgWins: 0, badLucks: 0 };
+        ns[challenger].mgWins = (ns[challenger].mgWins || 0) + 1;
+      } else {
+        const split = Math.ceil(challengeReward / Math.max(1, others.length));
+        others.forEach(s => st.coins[s] = (st.coins[s] || 0) + split);
+        if (!ns[winner]) ns[winner] = { mgWins: 0, badLucks: 0 };
+        ns[winner].mgWins = (ns[winner].mgWins || 0) + 1;
       }
-    });
+    }
+  } else {
+    const mulTag = rewardMul > 1 ? ` (${rewardMul}×!)` : '';
+    if (isTie) {
+      const perPlayer = reward > 0 ? Math.max(1, Math.ceil(reward / ranked.length)) : 0;
+      if (perPlayer > 0) {
+        ranked.forEach(r => { st.coins[r.slot] = (st.coins[r.slot] || 0) + perPlayer; });
+        emitEvent(`🎮 Minigame tied! Each player gets ${perPlayer}🪙`);
+      } else {
+        emitEvent(`🎮 Minigame tied!`);
+      }
+    } else {
+      st.coins[winner] = (st.coins[winner] || 0) + reward;
+      if (!ns[winner]) ns[winner] = { mgWins: 0, badLucks: 0 };
+      ns[winner].mgWins = (ns[winner].mgWins || 0) + 1;
+      emitEvent(`🎮 ${room[`${winner}_name`]} won the minigame!${mulTag}`);
+    }
   }
 
-  // Distribute pizzas to any player whose coins >= 10
-  involved.forEach(s => {
-    const extra = Math.floor((st.coins[s] || 0) / COINS_PER_PIZZA);
-    if (extra > 0) {
-      st.pizzas[s] = (st.pizzas[s] || 0) + extra;
-      st.coins[s]  = (st.coins[s]  || 0) % COINS_PER_PIZZA;
-    }
-  });
-
+  const perTie = (isTie && reward > 0) ? Math.max(1, Math.ceil(reward / ranked.length)) : 0;
+  const podiumRows = ranked.map(r => ({
+    slot: r.slot, name: room[`${r.slot}_name`], char: room[`${r.slot}_char`] || 'freddy', score: r.score,
+    coinsChange: isChallenge ? 0 : isTie ? perTie : r.slot === winner ? +reward : 0,
+  }));
   const nextPlayer = nextSlot(room);
-  await db.from('party_rooms').update({
-    turn_phase: 'roll',
-    current_slot: nextPlayer,
-    player_coins:  JSON.stringify(st.coins),
-    player_pizzas: JSON.stringify(st.pizzas),
-    mg_id: null,
-  }).eq('id', roomId).eq('turn_phase', 'minigame');
+  const mgCfg = MINIGAME_LIST.find(m => m.id === room.mg_id);
+
+  const podiumCfg = {
+    podium: podiumRows, nextPlayer, mgId: room.mg_id, isTie, rewardMul,
+    mgName: mgCfg ? `${mgCfg.emoji} ${mgCfg.name}${rewardMul > 1 ? ` ${rewardMul}×` : ''}` : (isChallenge ? '⚔️ Challenge' : 'Minigame'),
+  };
+  const { data: updated } = await db.from('party_rooms').update({
+    turn_phase: 'mg_podium',
+    mg_config: JSON.stringify(podiumCfg),
+    player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas),
+    player_stats: JSON.stringify(ns),
+    mg_done_p1: false, mg_done_p2: false, mg_done_p3: false, mg_done_p4: false,
+  }).eq('id', roomId).eq('turn_phase', 'minigame').select('id');
+
+  // Build the podium room for local display (works whether or not we won the DB race)
+  const podiumRoom = {
+    ...room, turn_phase: 'mg_podium', mg_config: JSON.stringify(podiumCfg),
+    player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas),
+    player_stats: JSON.stringify(ns),
+    mg_done_p1: false, mg_done_p2: false, mg_done_p3: false, mg_done_p4: false,
+  };
+  roomData = podiumRoom;
+  showScreen('board');
+  renderBoard(podiumRoom);
+  renderStatusBar(podiumRoom);
+  updateTokens(podiumRoom);
+  showMgPodium(podiumRoom);
+  showDiceShop(podiumRoom);
+  } catch (e) { console.error('[finishMinigame]', e); }
+}
+
+function showMgPodium(room) {
+  const involved = JSON.parse(room.mg_players || '[]');
+  let podiumRows = [], mgName = 'Minigame', isTie = false;
+  try {
+    const cfg = JSON.parse(room.mg_config || '{}');
+    podiumRows = cfg.podium || [];
+    mgName     = cfg.mgName || 'Minigame';
+    isTie      = !!cfg.isTie;
+  } catch {}
+
+  const alreadyConfirmed = room[mgDoneKey(playerSlot)];
+  const isInvolved = involved.includes(playerSlot);
+  const myRank = podiumRows.findIndex(p => p.slot === playerSlot);
+
+  document.getElementById('mg-result-overlay')?.remove();
+
+  const medals = ['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣'];
+
+  const podiumHTML = podiumRows.map((p, i) => {
+    const color  = PLAYER_COLORS[slotNum(p.slot) - 1];
+    const isMe   = p.slot === playerSlot;
+    const change = p.coinsChange > 0 ? `<span style="color:#2ecc71">+${p.coinsChange}🪙</span>`
+                 : p.coinsChange < 0 ? `<span style="color:#e74c3c">${p.coinsChange}🪙</span>` : '';
+    return `<div class="pdm-row${isMe ? ' pdm-me' : ''}" style="border-color:${isMe ? color : 'transparent'}">
+      <span class="pdm-medal">${isTie ? '🤝' : medals[i]}</span>
+      <img class="pdm-avatar" src="${charImg(p.char)}" style="border-color:${color}" onerror="this.style.display='none'"/>
+      <div class="pdm-info">
+        <span class="pdm-name" style="color:${color}">${p.name}${isMe ? ' (you)' : ''}</span>
+        <span class="pdm-pts">${p.score} pts ${change}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  const tieCoins = podiumRows[0]?.coinsChange || 0;
+  const verdict = isTie ? (tieCoins > 0 ? `🤝 Tie — +${tieCoins}🪙 each!` : '🤝 Tie — coins split!')
+    : myRank === 0 ? '🏆 You won!'
+    : myRank === podiumRows.length - 1 ? '💀 You lost!'
+    : `#${myRank + 1}`;
+
+  const overlay = document.createElement('div');
+  overlay.id = 'mg-result-overlay';
+  overlay.className = 'mg-result-overlay';
+  overlay.innerHTML = `
+    <div class="mg-result-card">
+      <div class="mg-result-title">${mgName}</div>
+      ${isInvolved ? `<div class="mg-result-verdict ${myRank === 0 && !isTie ? 'mg-result-win' : myRank === podiumRows.length-1 && !isTie ? 'mg-result-lose' : ''}">${verdict}</div>` : ''}
+      <div class="pdm-list">${podiumHTML}</div>
+      ${!alreadyConfirmed && isInvolved
+        ? `<button class="mp-btn primary" id="mg-result-confirm" style="margin-top:6px;width:100%">✅ Continue</button>`
+        : `<p class="mg-result-waiting">Waiting for others...</p>`}
+    </div>`;
+
+  document.body.appendChild(overlay);
+  const btn = document.getElementById('mg-result-confirm');
+  if (btn) btn.addEventListener('click', () => {
+    btn.disabled = true; btn.textContent = '⏳';
+    // PRIMARY: broadcast confirm (doesn't depend on DB columns)
+    podiumConfirmedLocal.add(playerSlot);
+    broadcastCh?.send({ type: 'broadcast', event: 'podium_confirm', payload: { slot: playerSlot } });
+    // Also write to DB (best-effort)
+    db.from('party_rooms').update({ [mgDoneKey(playerSlot)]: true }).eq('id', roomId).then(() => {}, () => {});
+    overlay.remove();
+    checkPodiumAllConfirmedLocal();
+  }, { once: true });
+}
+
+async function confirmPodium() {
+  await db.from('party_rooms').update({ [mgDoneKey(playerSlot)]: true }).eq('id', roomId);
 }
 
 // ── Helpy Boop ────────────────────────────────────────────────────────────────
 function playHelpyBoop(room, mg) {
-  let score = 0, timeLeft = 30;
+  let score = 0, timeLeft = 30, done = false;
   let spawnTimer, countTimer;
   const helpyImgSrc = '../assets/images/chars/other/helpy.gif';
+
+  function end() {
+    if (done) return; done = true;
+    clearInterval(countTimer); clearTimeout(spawnTimer);
+    const el = document.getElementById('mg-content');
+    if (el) el.innerHTML = `<div class="mg-done-msg">⏳ Waiting for results...</div>`;
+    submitScore(score);
+  }
+  mgCleanup = end;
 
   document.getElementById('mg-content').innerHTML = `<div class="mg-play helpy-boop">
     <div class="mg-hud">
@@ -1160,6 +2813,7 @@ function playHelpyBoop(room, mg) {
   const timerEl = document.getElementById('hb-timer');
 
   function spawnHelpy() {
+    if (done) return;
     const old = area.querySelector('.helpy-face');
     if (old) old.remove();
     const h = document.createElement('div');
@@ -1169,14 +2823,14 @@ function playHelpyBoop(room, mg) {
     h.style.left = Math.random() * maxX + 'px';
     h.style.top  = Math.random() * maxY + 'px';
     const img = document.createElement('img');
-    img.src = helpyImgSrc;
+    img.src = helpyImgSrc; img.draggable = false;
     img.onerror = () => { h.textContent = '😊'; h.style.fontSize = '2.5rem'; h.style.background = '#ffcc44'; };
     h.appendChild(img);
     h.addEventListener('click', () => {
+      if (done) return;
       score++;
       scoreEl.textContent = `👃 ${score}`;
-      liveScores[playerSlot] = score;
-      updateLiveBar();
+      liveScores[playerSlot] = score; updateLiveBar();
       broadcastCh?.send({ type: 'broadcast', event: 'mg_score', payload: { slot: playerSlot, score } });
       h.classList.add('clicked');
       clearTimeout(spawnTimer);
@@ -1190,22 +2844,28 @@ function playHelpyBoop(room, mg) {
   countTimer = setInterval(() => {
     timeLeft--;
     if (timerEl) timerEl.textContent = `⏱ ${timeLeft}s`;
-    if (timeLeft <= 0) {
-      clearInterval(countTimer); clearTimeout(spawnTimer);
-      const a = document.getElementById('hb-area');
-      if (a) a.innerHTML = `<div class="mg-done-msg">👃 ${score} clicks!</div>`;
-      submitScore(score);
-    }
+    if (timeLeft <= 0) end();
   }, 1000);
-
-  mgCleanup = () => { clearInterval(countTimer); clearTimeout(spawnTimer); };
 }
 
 // ── Money Laundering (drag to Rockstar Freddy) ────────────────────────────────
 function playMoneyLaundry(room, mg) {
-  let deposited = 0, timeLeft = 30;
+  let deposited = 0, timeLeft = 30, done = false;
   let dragCoin = null, dragOX = 0, dragOY = 0;
   const rfSrc = '../assets/images/chars/rockstar/rockstar_freddy.png';
+
+  function end() {
+    if (done) return; done = true;
+    clearInterval(ct);
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup',   onUp);
+    document.removeEventListener('touchmove', onMove);
+    document.removeEventListener('touchend',  onUp);
+    const el = document.getElementById('mg-content');
+    if (el) el.innerHTML = `<div class="mg-done-msg">⏳ Waiting for results...</div>`;
+    submitScore(deposited);
+  }
+  mgCleanup = end;
 
   document.getElementById('mg-content').innerHTML = `<div class="mg-play money-laundry">
     <div class="mg-hud">
@@ -1217,75 +2877,64 @@ function playMoneyLaundry(room, mg) {
     <div class="ml-scene" id="ml-scene">
       <div class="ml-freddy-ring"></div>
       <div class="ml-freddy" id="ml-freddy">
-        <img src="${rfSrc}" alt="Rockstar Freddy" onerror="this.innerHTML='🐻'"/>
+        <img src="${rfSrc}" alt="Rockstar Freddy" draggable="false" onerror="this.innerHTML='🐻'"/>
       </div>
     </div>
     <p style="font-size:.75rem;color:var(--text-muted);text-align:center;margin:0">Drag coins to Rockstar Freddy!</p>
   </div>`;
 
-  const scene  = document.getElementById('ml-scene');
-  const freddy = document.getElementById('ml-freddy');
-  const depEl  = document.getElementById('ml-dep');
+  const scene   = document.getElementById('ml-scene');
+  const freddy  = document.getElementById('ml-freddy');
+  const depEl   = document.getElementById('ml-dep');
   const timerEl = document.getElementById('ml-timer');
 
-  function getFreddyRect() { return freddy.getBoundingClientRect(); }
   function isOverFreddy(x, y) {
-    const r = getFreddyRect();
-    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-    return Math.hypot(x - cx, y - cy) < 55;
+    const r = freddy.getBoundingClientRect();
+    return Math.hypot(x - (r.left + r.width/2), y - (r.top + r.height/2)) < 55;
   }
 
   function spawnCoin() {
-    if (timeLeft <= 0) return;
-    const coin  = document.createElement('div');
+    if (done) return;
+    const coin = document.createElement('div');
     coin.className = 'ml-coin';
-    const maxX = scene.clientWidth  - 40;
-    const maxY = scene.clientHeight - 40;
-    let cx, cy;
-    do { cx = Math.random() * maxX; cy = Math.random() * maxY; }
-    while (Math.abs(cx - scene.clientWidth/2) < 60 && Math.abs(cy - scene.clientHeight/2) < 60);
-    coin.style.left = cx + 'px';
-    coin.style.top  = cy + 'px';
-    coin.textContent = '🪙';
-
-    const startDrag = (e) => {
-      e.preventDefault();
-      dragCoin = coin;
-      const client = e.touches ? e.touches[0] : e;
-      const rect = coin.getBoundingClientRect();
-      dragOX = client.clientX - rect.left;
-      dragOY = client.clientY - rect.top;
-      coin.classList.add('dragging');
-    };
+    const w = scene.clientWidth || 300, h = scene.clientHeight || 260;
+    const cx0 = w/2, cy0 = h/2;
+    let cx, cy, t = 0;
+    do { cx = Math.random() * Math.max(w-40,40); cy = Math.random() * Math.max(h-40,40); t++; }
+    while (t < 30 && Math.abs(cx-cx0) < 60 && Math.abs(cy-cy0) < 60);
+    coin.style.left = cx+'px'; coin.style.top = cy+'px'; coin.textContent = '🪙';
     coin.addEventListener('mousedown', startDrag);
     coin.addEventListener('touchstart', startDrag, { passive: false });
     scene.appendChild(coin);
   }
 
-  const onMove = (e) => {
-    if (!dragCoin) return;
-    e.preventDefault();
+  function startDrag(e) {
+    if (done) return; e.preventDefault();
+    dragCoin = e.currentTarget;
     const client = e.touches ? e.touches[0] : e;
-    const sRect  = scene.getBoundingClientRect();
-    dragCoin.style.left = (client.clientX - sRect.left - dragOX) + 'px';
-    dragCoin.style.top  = (client.clientY - sRect.top  - dragOY) + 'px';
+    const rect = dragCoin.getBoundingClientRect();
+    dragOX = client.clientX - rect.left; dragOY = client.clientY - rect.top;
+    dragCoin.classList.add('dragging');
+  }
+  const onMove = (e) => {
+    if (!dragCoin) return; e.preventDefault();
+    const client = e.touches ? e.touches[0] : e;
+    const sr = scene.getBoundingClientRect();
+    dragCoin.style.left = (client.clientX - sr.left - dragOX)+'px';
+    dragCoin.style.top  = (client.clientY - sr.top  - dragOY)+'px';
   };
   const onUp = (e) => {
     if (!dragCoin) return;
     const client = e.changedTouches ? e.changedTouches[0] : e;
+    dragCoin.classList.remove('dragging');
     if (isOverFreddy(client.clientX, client.clientY)) {
-      dragCoin.classList.add('deposited');
-      dragCoin.classList.remove('dragging');
-      deposited++;
-      depEl.textContent = `🏦 ${deposited}`;
-      liveScores[playerSlot] = deposited;
-      updateLiveBar();
+      deposited++; depEl.textContent = `🏦 ${deposited}`;
+      liveScores[playerSlot] = deposited; updateLiveBar();
       broadcastCh?.send({ type: 'broadcast', event: 'mg_score', payload: { slot: playerSlot, score: deposited } });
-      setTimeout(() => { dragCoin?.remove(); dragCoin = null; spawnCoin(); }, 280);
-    } else {
-      dragCoin.classList.remove('dragging');
-      dragCoin = null;
-    }
+      dragCoin.classList.add('deposited');
+      const dc = dragCoin; dragCoin = null;
+      setTimeout(() => { dc.remove(); spawnCoin(); }, 280);
+    } else { dragCoin = null; }
   };
 
   document.addEventListener('mousemove', onMove);
@@ -1293,111 +2942,79 @@ function playMoneyLaundry(room, mg) {
   document.addEventListener('touchmove', onMove, { passive: false });
   document.addEventListener('touchend',  onUp);
 
-  for (let i = 0; i < 6; i++) setTimeout(spawnCoin, i * 200);
+  for (let i = 0; i < 6; i++) setTimeout(spawnCoin, i * 150);
 
   const ct = setInterval(() => {
     timeLeft--;
     if (timerEl) timerEl.textContent = `⏱ ${timeLeft}s`;
-    if (timeLeft <= 0) {
-      clearInterval(ct);
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup',   onUp);
-      document.removeEventListener('touchmove', onMove);
-      document.removeEventListener('touchend',  onUp);
-      const s = document.getElementById('ml-scene');
-      if (s) s.innerHTML = `<div class="mg-done-msg" style="color:var(--gold)">💰 ${deposited} deposited!</div>`;
-      submitScore(deposited);
-    }
+    if (timeLeft <= 0) end();
   }, 1000);
-
-  mgCleanup = () => {
-    clearInterval(ct);
-    document.removeEventListener('mousemove', onMove);
-    document.removeEventListener('mouseup',   onUp);
-    document.removeEventListener('touchmove', onMove);
-    document.removeEventListener('touchend',  onUp);
-  };
 }
 
 // ── Feeding Frenzy ────────────────────────────────────────────────────────────
 const FF_INGREDIENTS = ['🍅','🧀','🥓','🫑','🧅','🍄','🫒','🌶️','🥚','🍗'];
 
 function playFeedingFrenzy(room, mg) {
-  const recipe   = mg.config.recipe || [...FF_INGREDIENTS].sort(() => Math.random() - .5).slice(0, 3);
-  const chSrc    = '../assets/images/chars/classic/chica.png';
-  let step       = 0, failed = false;
-  const start    = Date.now();
-  let ct         = null;
+  const recipe = mg.config.recipe || [...FF_INGREDIENTS].sort(() => Math.random()-.5).slice(0,3);
+  const chSrc  = '../assets/images/chars/classic/chica.png';
+  let step = 0, done = false, ct = null;
+  const start = Date.now();
+
+  function end(score) {
+    if (done) return; done = true;
+    if (ct) clearInterval(ct);
+    const el = document.getElementById('mg-content');
+    if (el) el.innerHTML = `<div class="mg-done-msg">⏳ Waiting for results...</div>`;
+    submitScore(score);
+  }
+  mgCleanup = () => end(0);
 
   function render() {
-    const shuffled = [...FF_INGREDIENTS].sort(() => Math.random() - .5);
+    if (done) return;
+    const shuffled = [...FF_INGREDIENTS].sort(() => Math.random()-.5);
     document.getElementById('mg-content').innerHTML = `<div class="mg-play feeding-frenzy">
       <div class="mg-hud">
         <img class="ff-chica-img" src="${chSrc}" onerror="this.style.display='none'"/>
         <span>Feeding Frenzy</span>
-        <span>Step ${step + 1}/${recipe.length}</span>
+        <span>${step+1}/${recipe.length}</span>
         <span id="ff-timer">⏱ 60s</span>
       </div>
       <div class="ff-recipe">
         <div class="ff-label">Chica's Recipe</div>
         <div class="ff-recipe-items">
-          ${recipe.map((ing, i) => `<span class="ff-recipe-ing ${i < step ? 'done' : i === step ? 'current' : ''}">${i < step ? '✅' : ing}</span>`).join('')}
+          ${recipe.map((ing,i)=>`<span class="ff-recipe-ing ${i<step?'done':i===step?'current':''}">${i<step?'✅':ing}</span>`).join('')}
         </div>
       </div>
       <div class="ff-instruction">Click: <span class="ff-target">${recipe[step]}</span></div>
       <div class="ff-ingredients" id="ff-grid">
-        ${shuffled.map(ing => `<button class="mp-btn ff-ing-btn" data-ing="${ing}">${ing}</button>`).join('')}
+        ${shuffled.map(ing=>`<button class="mp-btn ff-ing-btn" data-ing="${ing}">${ing}</button>`).join('')}
       </div>
     </div>`;
 
-    // Attach click listeners (event delegation)
     document.getElementById('ff-grid').addEventListener('click', (e) => {
-      const btn = e.target.closest('.ff-ing-btn');
-      if (!btn || failed) return;
-      handleFFClick(btn.dataset.ing);
+      if (done) return;
+      const btn = e.target.closest('.ff-ing-btn'); if (!btn) return;
+      const ing = btn.dataset.ing;
+      if (ing === recipe[step]) {
+        step++;
+        if (step >= recipe.length) {
+          const elapsed = ((Date.now()-start)/1000).toFixed(1);
+          end(Math.round(1000/parseFloat(elapsed)));
+        } else render();
+      } else {
+        end(0);
+      }
     });
 
-    // Timer
-    let tLeft = 60 - Math.floor((Date.now() - start) / 1000);
     if (ct) clearInterval(ct);
+    let tLeft = 60 - Math.floor((Date.now()-start)/1000);
     ct = setInterval(() => {
       tLeft--;
-      const te = document.getElementById('ff-timer');
-      if (te) te.textContent = `⏱ ${tLeft}s`;
-      if (tLeft <= 0) { clearInterval(ct); if (!failed) ffEnd(false); }
+      const te = document.getElementById('ff-timer'); if (te) te.textContent = `⏱ ${tLeft}s`;
+      if (tLeft <= 0) end(0);
     }, 1000);
   }
 
-  function handleFFClick(ing) {
-    if (failed) return;
-    if (ing === recipe[step]) {
-      step++;
-      if (step >= recipe.length) {
-        if (ct) clearInterval(ct);
-        const elapsed = ((Date.now() - start) / 1000).toFixed(1);
-        const score   = Math.round(1000 / parseFloat(elapsed));
-        document.getElementById('mg-content').innerHTML =
-          `<div class="mg-done-msg">🍕 Pizza done in ${elapsed}s!</div>`;
-        submitScore(score);
-      } else {
-        render();
-      }
-    } else {
-      if (ct) clearInterval(ct);
-      ffEnd(true);
-    }
-  }
-
-  function ffEnd(wrong) {
-    if (failed) return;
-    failed = true;
-    const msg = wrong ? '❌ Wrong ingredient! -1 pizza 😢' : '⏱ Time\'s up! -1 pizza 😢';
-    document.getElementById('mg-content').innerHTML = `<div class="mg-done-msg">${msg}</div>`;
-    submitScore(0);
-  }
-
-  mgCleanup = () => { if (ct) clearInterval(ct); };
-  setTimeout(() => { if (!failed && step < recipe.length) ffEnd(false); }, 60000);
   render();
 }
 
@@ -1408,9 +3025,18 @@ function playGuitarFinder(room, mg) {
   const gPos  = mg.config.guitarPos ?? Math.floor(Math.random() * 16);
   const items = Array.from({ length: 16 }, (_, i) =>
     i === gPos ? '🎸' : GF_ITEMS[Math.floor(Math.random() * GF_ITEMS.length)]);
-  const start  = Date.now();
+  const start = Date.now();
   let timeLeft = 30, done = false;
-  const bnSrc  = '../assets/images/chars/classic/bonnie.png';
+  const bnSrc = '../assets/images/chars/classic/bonnie.png';
+
+  function end(score) {
+    if (done) return; done = true;
+    clearInterval(ct);
+    const el = document.getElementById('mg-content');
+    if (el) el.innerHTML = `<div class="mg-done-msg">⏳ Waiting for results...</div>`;
+    submitScore(score);
+  }
+  mgCleanup = () => end(0);
 
   document.getElementById('mg-content').innerHTML = `<div class="mg-play guitar-finder">
     <div class="mg-hud">
@@ -1420,46 +3046,42 @@ function playGuitarFinder(room, mg) {
     </div>
     <div class="gf-instruction">Find Bonnie's guitar 🎸!</div>
     <div class="gf-grid" id="gf-grid">
-      ${items.map((item, i) => `<button class="mp-btn gf-item" data-idx="${i}">${item}</button>`).join('')}
+      ${items.map((item,i) => `<button class="mp-btn gf-item" data-idx="${i}">${item}</button>`).join('')}
     </div>
   </div>`;
 
   document.getElementById('gf-grid').addEventListener('click', (e) => {
-    const btn = e.target.closest('.gf-item');
-    if (!btn || done) return;
+    if (done) return;
+    const btn = e.target.closest('.gf-item'); if (!btn) return;
     const idx = +btn.dataset.idx;
     if (idx === gPos) {
-      done = true; clearInterval(ct);
-      const elapsed = ((Date.now() - start) / 1000).toFixed(2);
-      const score   = Math.round(10000 / parseFloat(elapsed));
-      document.getElementById('mg-content').innerHTML =
-        `<div class="mg-done-msg">🎸 Found it in ${elapsed}s!</div>`;
-      submitScore(score);
-    } else {
-      btn.style.background = '#8b2020'; btn.disabled = true;
-    }
+      end(Math.round(10000/((Date.now()-start)/1000)));
+    } else { btn.style.background = '#8b2020'; btn.disabled = true; }
   });
 
   const ct = setInterval(() => {
     timeLeft--;
-    const te = document.getElementById('gf-timer');
-    if (te) te.textContent = `⏱ ${timeLeft}s`;
-    if (timeLeft <= 0) {
-      done = true; clearInterval(ct);
-      document.getElementById('mg-content').innerHTML = `<div class="mg-done-msg">⏱ Didn't find it! 0 pts</div>`;
-      submitScore(0);
-    }
+    const te = document.getElementById('gf-timer'); if (te) te.textContent = `⏱ ${timeLeft}s`;
+    if (timeLeft <= 0) end(0);
   }, 1000);
-
-  mgCleanup = () => clearInterval(ct);
 }
 
 // ── Power Out ─────────────────────────────────────────────────────────────────
 function playPowerOut(room, mg) {
-  const attackDelay = mg.config.attackDelay ?? (Math.floor(Math.random() * 9000) + 1000);
-  let survived = false;
-  const start  = Date.now();
-  const frSrc  = '../assets/images/chars/classic/freddy.png';
+  const attackDelay  = mg.config.attackDelay ?? (Math.floor(Math.random() * 4000) + 500);
+  const REACT_WINDOW = 3000;
+  let done = false, freddyTime = 0;
+  let reactPoll = null, dotTimer = null, attackTimer = null;
+  const frSrc = '../assets/images/chars/classic/freddy.png';
+
+  function end(score) {
+    if (done) return; done = true;
+    clearInterval(reactPoll); clearInterval(dotTimer); clearTimeout(attackTimer);
+    const el = document.getElementById('mg-content');
+    if (el) el.innerHTML = `<div class="mg-done-msg">⏳ Waiting for results...</div>`;
+    submitScore(score);
+  }
+  mgCleanup = () => end(0);
 
   document.getElementById('mg-content').innerHTML = `<div class="mg-play power-out">
     <div class="mg-hud">
@@ -1472,54 +3094,267 @@ function playPowerOut(room, mg) {
       <div class="po-freddy-container" id="po-fc">
         <img class="po-freddy-img" src="${frSrc}" alt="Freddy" onerror="this.textContent='🐻'"/>
       </div>
-      <div class="po-instruction">Close the door when Freddy appears!</div>
+      <div class="po-instruction" id="po-inst">Wait... then close the door as fast as possible!</div>
+      <div id="po-bar-wrap" style="display:none;width:80%;height:8px;background:#333;border-radius:4px;z-index:3;overflow:hidden">
+        <div id="po-bar" style="height:100%;background:#e74c3c;width:100%;transition:none"></div>
+      </div>
       <button class="mp-btn primary po-door-btn" id="po-door" disabled>🚪 Close Door!</button>
     </div>
   </div>`;
 
   let dots = 0;
-  const dotTimer = setInterval(() => {
-    dots = (dots + 1) % 4;
+  dotTimer = setInterval(() => {
+    dots = (dots+1) % 4;
     const s = document.getElementById('po-status');
-    if (s && !survived) s.textContent = '🌑 Waiting' + '.'.repeat(dots);
+    if (s) s.textContent = '🌑 Waiting' + '.'.repeat(dots);
   }, 500);
 
-  const attackTimer = setTimeout(() => {
+  attackTimer = setTimeout(() => {
+    if (done) return;
     clearInterval(dotTimer);
-    const scene  = document.getElementById('po-scene');
-    const door   = document.getElementById('po-door');
+    const scene = document.getElementById('po-scene');
+    const door  = document.getElementById('po-door');
     const status = document.getElementById('po-status');
-    if (!scene) return;
+    const inst   = document.getElementById('po-inst');
+    const barWrap = document.getElementById('po-bar-wrap');
+    const bar     = document.getElementById('po-bar');
+    if (!scene) { end(0); return; }
 
+    freddyTime = Date.now();
     scene.classList.add('freddy-incoming');
-    if (status) status.textContent = '😱 FREDDY!!!';
+    if (status) status.textContent = '😱 CLOSE THE DOOR!';
+    if (inst)   inst.textContent   = 'CLICK NOW! 🚪';
     if (door)   door.disabled = false;
+    if (barWrap) barWrap.style.display = 'block';
+    if (bar) { bar.style.transition = `width ${REACT_WINDOW}ms linear`; requestAnimationFrame(() => { bar.style.width = '0%'; }); }
 
-    const missTimer = setTimeout(() => {
-      if (!survived) {
-        const elapsed = ((Date.now() - start) / 1000).toFixed(1);
-        document.getElementById('mg-content').innerHTML =
-          `<div class="mg-done-msg">💀 Freddy got you! (${elapsed}s)</div>`;
-        submitScore(Math.round(parseFloat(elapsed) * 10));
-      }
-    }, 3000);
+    reactPoll = setInterval(() => {
+      if (done) { clearInterval(reactPoll); return; }
+      if (Date.now() - freddyTime >= REACT_WINDOW) end(0);
+    }, 50);
 
-    door?.addEventListener('click', () => {
-      if (survived) return;
-      survived = true;
-      clearTimeout(missTimer);
-      const elapsed = ((Date.now() - start) / 1000).toFixed(1);
-      const score   = Math.round(parseFloat(elapsed) * 10 + 500);
-      document.getElementById('mg-content').innerHTML =
-        `<div class="mg-done-msg">✅ Survived! (${elapsed}s) 🎉</div>`;
-      submitScore(score);
+    if (door) door.addEventListener('click', () => {
+      end(REACT_WINDOW - Math.min(REACT_WINDOW, Date.now() - freddyTime));
     }, { once: true });
   }, attackDelay);
+}
 
-  mgCleanup = () => { clearInterval(dotTimer); clearTimeout(attackTimer); };
+// ── Flashlight ────────────────────────────────────────────────────────────────
+function playFlashlight(room, mg) {
+  const DURATION = 15000;
+  let done = false, clicks = 0, foxyShown = false;
+  let timer = null, foxyTimer = null, countdownTimer = null;
+
+  function end(score) {
+    if (done) return; done = true;
+    clearInterval(timer); clearTimeout(foxyTimer); clearInterval(countdownTimer);
+    const el = document.getElementById('mg-content');
+    if (el) el.innerHTML = `<div class="mg-done-msg">⏳ Waiting for results...</div>`;
+    submitScore(score);
+  }
+  mgCleanup = () => end(clicks);
+
+  const wfSrc = '../assets/images/chars/withered/withered_foxy.png';
+  document.getElementById('mg-content').innerHTML = `
+    <div class="mg-play" style="gap:6px">
+      <div class="mg-hud">
+        <span>🔦 Flashlight</span>
+        <span id="fl-time">${DURATION/1000}s</span>
+        <span id="fl-clicks">0 taps</span>
+      </div>
+      <div id="fl-scene" class="fl-scene">
+        <div id="fl-beam" class="fl-beam"></div>
+        <div id="fl-foxy" class="fl-foxy" style="display:none">
+          <img src="${wfSrc}" alt="Withered Foxy" onerror="this.textContent='🦊'" draggable="false" style="pointer-events:none;-webkit-user-drag:none"/>
+        </div>
+        <div id="fl-tap-hint" class="fl-tap-hint">TAP!</div>
+      </div>
+    </div>`;
+
+  const scene  = document.getElementById('fl-scene');
+  const beam   = document.getElementById('fl-beam');
+  const foxyEl = document.getElementById('fl-foxy');
+  const hint   = document.getElementById('fl-tap-hint');
+
+  let lit = false;
+  function flash() {
+    lit = !lit;
+    scene.classList.toggle('fl-lit', lit);
+    beam.style.opacity = lit ? '1' : '0';
+  }
+
+  scene.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    if (done) return;
+    clicks++;
+    document.getElementById('fl-clicks').textContent = `${clicks} taps`;
+    flash();
+    if (hint) hint.style.opacity = '0';
+  });
+
+  let elapsed = 0;
+  countdownTimer = setInterval(() => {
+    elapsed += 100;
+    const left = Math.max(0, Math.ceil((DURATION - elapsed) / 1000));
+    const tEl = document.getElementById('fl-time');
+    if (tEl) tEl.textContent = `${left}s`;
+    if (elapsed >= DURATION) end(clicks);
+  }, 100);
+
+  // Withered Foxy: 12% chance to appear briefly
+  const foxyDelay = 3000 + Math.random() * 8000;
+  foxyTimer = setTimeout(() => {
+    if (done || !foxyEl) return;
+    foxyShown = true;
+    foxyEl.style.display = 'flex';
+    foxyEl.classList.add('fl-foxy-scare');
+    setTimeout(() => { if (foxyEl) { foxyEl.style.display = 'none'; foxyEl.classList.remove('fl-foxy-scare'); } }, 1200);
+  }, Math.random() < 0.12 ? foxyDelay : DURATION + 1000);
+
+  timer = setInterval(() => { if (done) clearInterval(timer); }, 200);
+}
+
+// ── Pizza Dough ───────────────────────────────────────────────────────────────
+function playPizzaDough(room, mg) {
+  const DURATION = 5000;
+  let done = false, drawing = false, path = [], startTime = null;
+  let countdownTimer = null;
+
+  function circleScore(pts) {
+    if (pts.length < 20) return 0;
+    // Centroid
+    const cx = pts.reduce((s, p) => s + p.x, 0) / pts.length;
+    const cy = pts.reduce((s, p) => s + p.y, 0) / pts.length;
+    // Radii
+    const radii = pts.map(p => Math.hypot(p.x - cx, p.y - cy));
+    const rMean = radii.reduce((s, r) => s + r, 0) / radii.length;
+    if (rMean < 20) return 0;
+    const variance = radii.reduce((s, r) => s + (r - rMean) ** 2, 0) / radii.length;
+    const stdDev   = Math.sqrt(variance);
+    const roundness = Math.max(0, 1 - stdDev / rMean);
+    // Closure: distance between first and last point vs radius
+    const closure = 1 - Math.min(1, Math.hypot(pts[0].x - pts[pts.length-1].x, pts[0].y - pts[pts.length-1].y) / (rMean * 2));
+    return Math.round(roundness * 0.7 * 100 + closure * 0.3 * 100);
+  }
+
+  function drawPath(canvas, pts, score) {
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (pts.length < 2) return;
+    // Draw circle guide (faint)
+    const cx = pts.reduce((s, p) => s + p.x, 0) / pts.length;
+    const cy = pts.reduce((s, p) => s + p.y, 0) / pts.length;
+    const rMean = pts.map(p => Math.hypot(p.x - cx, p.y - cy)).reduce((s, r) => s + r, 0) / pts.length;
+    ctx.beginPath(); ctx.arc(cx, cy, rMean, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(200,134,0,.2)'; ctx.lineWidth = 2; ctx.stroke();
+    // Draw user path
+    ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
+    pts.forEach(p => ctx.lineTo(p.x, p.y));
+    const hue = score > 70 ? 120 : score > 40 ? 45 : 0;
+    ctx.strokeStyle = `hsl(${hue},80%,55%)`; ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.stroke();
+  }
+
+  function end(score) {
+    if (done) return; done = true;
+    clearInterval(countdownTimer);
+    const el = document.getElementById('mg-content');
+    if (el) el.innerHTML = `<div class="mg-done-msg">⏳ Waiting for results...</div>`;
+    submitScore(score);
+  }
+  mgCleanup = () => end(done ? undefined : circleScore(path));
+
+  document.getElementById('mg-content').innerHTML = `
+    <div class="mg-play" style="gap:6px">
+      <div class="mg-hud">
+        <span>🍕 Pizza Dough</span>
+        <span id="pd-time">${DURATION/1000}s</span>
+        <span id="pd-score">Draw a circle!</span>
+      </div>
+      <canvas id="pd-canvas" class="pd-canvas" width="360" height="300"></canvas>
+      <div id="pd-hint" style="font-size:.72rem;color:var(--text-muted)">Hold & draw a circle, then release</div>
+    </div>`;
+
+  const canvas = document.getElementById('pd-canvas');
+
+  function getPos(e) {
+    const r = canvas.getBoundingClientRect();
+    const src = e.touches ? e.touches[0] : e;
+    return { x: src.clientX - r.left, y: src.clientY - r.top };
+  }
+
+  canvas.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    if (done) return;
+    drawing = true; path = [];
+    path.push(getPos(e));
+    const hint = document.getElementById('pd-hint');
+    if (hint) hint.style.display = 'none';
+  });
+  canvas.addEventListener('pointermove', e => {
+    e.preventDefault();
+    if (!drawing || done) return;
+    path.push(getPos(e));
+    const s = circleScore(path);
+    const sc = document.getElementById('pd-score');
+    if (sc) sc.textContent = path.length > 30 ? `${s}%` : 'Keep drawing...';
+    drawPath(canvas, path, s);
+  });
+  canvas.addEventListener('pointerup', e => {
+    e.preventDefault();
+    if (!drawing || done) return;
+    drawing = false;
+    if (path.length < 20) return;
+    const s = circleScore(path);
+    drawPath(canvas, path, s);
+    const sc = document.getElementById('pd-score');
+    if (sc) sc.textContent = `${s}% — ${s>80?'Perfect!':s>60?'Great!':s>40?'Not bad':'Try again!'}`;
+    // Auto-submit on release if < 5s left, otherwise let them redraw
+    const elapsed2 = Date.now() - startTime;
+    if (DURATION - elapsed2 < 5000) end(s);
+  });
+  canvas.addEventListener('touchstart',  e => e.preventDefault(), { passive: false });
+  canvas.addEventListener('touchmove',   e => e.preventDefault(), { passive: false });
+
+  startTime = Date.now();
+  let elapsed = 0;
+  countdownTimer = setInterval(() => {
+    elapsed += 100;
+    const left = Math.max(0, Math.ceil((DURATION - elapsed) / 1000));
+    const tEl = document.getElementById('pd-time');
+    if (tEl) tEl.textContent = `${left}s`;
+    if (elapsed >= DURATION) end(circleScore(path));
+  }, 100);
 }
 
 // ── Result screen ─────────────────────────────────────────────────────────────
+async function applyEndAwards(room) {
+  const pc = room.player_count || 2;
+  const active = allSlots(pc).filter(s => room[`${s}_name`]);
+  const statsMap = pStats(room);
+  const st = pState(room);
+
+  const best = (key) => active.reduce((b, s) =>
+    ((statsMap[s]?.[key] || 0) > (statsMap[b]?.[key] || 0) ? s : b), active[0]);
+
+  const mgChamp  = best('mgWins');
+  const badLucky = best('badLucks');
+
+  if ((statsMap[mgChamp]?.mgWins  || 0) > 0) {
+    st.pizzas[mgChamp]  = (st.pizzas[mgChamp]  || 0) + 1;
+    emitEvent(`🎮 ${room[`${mgChamp}_name`]} wins the Minigame Champion award! +1🍕`);
+  }
+  if ((statsMap[badLucky]?.badLucks || 0) > 0) {
+    st.pizzas[badLucky] = (st.pizzas[badLucky] || 0) + 1;
+    emitEvent(`💀 ${room[`${badLucky}_name`]} wins the Most Unlucky award! +1🍕`);
+  }
+
+  const ns = { ...statsMap, _awardsApplied: true };
+  await db.from('party_rooms').update({
+    player_pizzas: JSON.stringify(st.pizzas),
+    player_stats:  JSON.stringify(ns),
+  }).eq('id', roomId).eq('state', 'finished');
+}
+
 function showResult(room) {
   const pc = room.player_count || 2;
   const st = pState(room);
@@ -1541,6 +3376,10 @@ function showResult(room) {
   const winner = ranked[0];
   if (!winner) return;
 
+  const statsMap = pStats(room);
+  const mostMgWins   = ranked.reduce((b, p) => ((statsMap[p.slot]?.mgWins  || 0) > (statsMap[b.slot]?.mgWins  || 0) ? p : b), ranked[0]);
+  const mostBadLucks = ranked.reduce((b, p) => ((statsMap[p.slot]?.badLucks || 0) > (statsMap[b.slot]?.badLucks || 0) ? p : b), ranked[0]);
+
   rankEl.innerHTML = `
     <div class="result-winner-banner">
       <img class="rwb-avatar" src="${charImg(winner.char)}" onerror="this.style.display='none'"/>
@@ -1553,7 +3392,22 @@ function showResult(room) {
         <img class="result-avatar" src="${charImg(p.char)}" onerror="this.style.display='none'"/>
         <span class="result-player-name" style="color:${p.color}">${p.name}</span>
         <span class="result-score">🍕${p.pizzas} 🪙${p.coins}</span>
-      </div>`).join('')}`;
+      </div>`).join('')}
+    <div class="result-awards">
+      <div class="result-awards-title">🏅 Mini Awards</div>
+      <div class="result-award-row">
+        <span class="award-icon">🎮</span>
+        <span class="award-label">Minigame Champion</span>
+        <span class="award-winner" style="color:${mostMgWins.color}">${mostMgWins.name}</span>
+        <span class="award-detail">${statsMap[mostMgWins.slot]?.mgWins || 0} wins</span>
+      </div>
+      <div class="result-award-row">
+        <span class="award-icon">💀</span>
+        <span class="award-label">Most Unlucky</span>
+        <span class="award-winner" style="color:${mostBadLucks.color}">${mostBadLucks.name}</span>
+        <span class="award-detail">${statsMap[mostBadLucks.slot]?.badLucks || 0} bad luck${(statsMap[mostBadLucks.slot]?.badLucks || 0) !== 1 ? 's' : ''}</span>
+      </div>
+    </div>`;
 
   // Hide "Play Again" if game ended because someone left (only 1 active player)
   const wonByLeave = ranked.length === 1;
@@ -1625,9 +3479,12 @@ async function triggerPartyRematch(room) {
 
   const newCount = ordered.length;
   const taken = [], pos = {}, coins = {}, pizzas = {}, cooldowns = {};
+  const { laps, mapType } = parseBoard(room);
+  const rematchBoard = createBoard(mapType, laps);
   const update = {
     state: 'waiting', player_count: newCount,
-    board: JSON.stringify(generateBoard()),
+    board: JSON.stringify(rematchBoard),
+    player_stats: JSON.stringify({}),
     current_slot: 'player1', turn_phase: 'roll', dice_result: 0,
     mg_id: null, mg_config: '{}', mg_players: '[]', mg_reward: 1,
     mg_score_p1: 0, mg_score_p2: 0, mg_score_p3: 0, mg_score_p4: 0,
@@ -1640,7 +3497,7 @@ async function triggerPartyRematch(room) {
     update[`${ns}_id`]   = room[`${origSlot}_id`];
     update[`${ns}_name`] = room[`${origSlot}_name`];
     update[`${ns}_char`] = null; // must re-pick
-    let p; do { p = Math.floor(Math.random() * BOARD_SIZE); } while (taken.includes(p));
+    let p; do { p = Math.floor(Math.random() * rematchBoard.boardSize); } while (taken.includes(p));
     taken.push(p);
     pos[ns] = p; coins[ns] = 0; pizzas[ns] = 0; cooldowns[ns] = 0;
   });
@@ -1662,6 +3519,7 @@ async function triggerPartyRematch(room) {
 function restartParty() {
   roomId = null; playerSlot = null; roomData = null;
   liveScores = {}; activeMgId = null; mgWaitKey = null;
+  stopMgPoller();
   if (mgCleanup) { mgCleanup(); mgCleanup = null; }
   const livebar = document.getElementById('mg-live-bar');
   if (livebar) livebar.style.display = 'none';
