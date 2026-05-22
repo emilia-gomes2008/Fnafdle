@@ -1717,6 +1717,15 @@ async function passOrMinigame(room, extraUpdates = {}) {
   }
 }
 async function handleSpace() {
+  // Guard: re-read DB to confirm we're still in 'moved' phase for our slot.
+  // A stale delayed Supabase event can re-show the Continue button after the
+  // phase already advanced to mg_waiting, causing the minigame to be skipped.
+  try {
+    const { data: guard } = await db.from('party_rooms')
+      .select('turn_phase,current_slot').eq('id', roomId).single();
+    if (!guard || guard.turn_phase !== 'moved' || guard.current_slot !== playerSlot) return;
+  } catch { return; }
+
   const room  = roomData;
   const { tiles, laps, boardSize: bs } = parseBoard(room);
   const pos   = boardPos(room, playerSlot);
@@ -2456,7 +2465,7 @@ async function triggerMinigame(involvedSlots, extraCfg = {}) {
     mg_players: JSON.stringify(involvedSlots),
     mg_reward: reward,
     ...resetScores,
-  }).eq('id', roomId);
+  }).eq('id', roomId).eq('turn_phase', 'moved');
 }
 
 function seededRand(seed) {
