@@ -72,6 +72,17 @@ function resetImageInstant(wrongCount) {
   }));
 }
 
+function getDailyImgProgressKey() {
+  const now = new Date();
+  return `fnaf_img_daily_progress_${now.getFullYear()}_${now.getMonth() + 1}_${now.getDate()}`;
+}
+function saveDailyImgProgress() {
+  try { localStorage.setItem(getDailyImgProgressKey(), JSON.stringify({ guessNames: imgGuesses.map(g => g.name), hintUsed: imgHintUsed })); } catch {}
+}
+function clearDailyImgProgress() {
+  localStorage.removeItem(getDailyImgProgressKey());
+}
+
 // ── Init ─────────────────────────────────────────────
 function initImageMode() {
   imgGuesses    = [];
@@ -81,7 +92,7 @@ function initImageMode() {
 
   if (imgCurrentMode === 'daily') {
     imgTarget = CHARS_WITH_IMG[getDailyImgIndex()];
-    document.getElementById('img-mode-badge').textContent = '📅 Image Daily';
+    document.getElementById('img-mode-badge').textContent = T('image.badgeDaily');
     document.getElementById('streak-widget').style.display = 'none';
 
     const previous = getDailyImgResult();
@@ -92,10 +103,10 @@ function initImageMode() {
       if (!previous.won) banner.classList.add('lose');
 
       document.getElementById('img-result-title').textContent =
-        previous.won ? '🎉 Already played today!' : '💀 Already played today!';
+        previous.won ? T('game.alreadyPlayedWon') : T('game.alreadyPlayedLost');
       document.getElementById('img-result-msg').textContent = previous.won
-        ? `It was ${previous.targetName}! Got it in ${previous.guessCount} tries.`
-        : `It was ${previous.targetName}. Try again tomorrow!`;
+        ? T('game.alreadyWonMsg', { name: previous.targetName, count: previous.guessCount })
+        : T('game.alreadyLostMsg', { name: previous.targetName });
 
       const imgCont = document.getElementById('img-result-char-container');
       imgCont.innerHTML = '';
@@ -115,9 +126,49 @@ function initImageMode() {
       resetImageInstant(IMG_STEPS.length - 1);
       return;
     }
+
+    const imgProgress = JSON.parse(localStorage.getItem(getDailyImgProgressKey()) || 'null');
+    if (imgProgress && imgProgress.guessNames && imgProgress.guessNames.length > 0) {
+      imgGuesses = [];
+      imgGameOver = false;
+      imgSelectedIndex = -1;
+      imgHintUsed = imgProgress.hintUsed || false;
+      document.getElementById('img-guesses-list').innerHTML = '';
+      document.getElementById('img-result-banner').classList.remove('show', 'lose');
+      imgInput.disabled = false;
+      imgInput.value = '';
+      imgInput.placeholder = T('classic.placeholder');
+      document.getElementById('img-search-area').style.display = '';
+      imgDropdown.style.display = 'none';
+      mysteryImg.onerror = () => { mysteryImg.src = ''; };
+      if (_isAprilFools()) {
+        const cv = document.createElement('canvas'); cv.width = 1; cv.height = 1;
+        cv.getContext('2d').fillRect(0, 0, 1, 1);
+        mysteryImg.src = cv.toDataURL();
+      } else {
+        mysteryImg.src = '../assets/' + imgTarget.img;
+      }
+      imgProgress.guessNames.forEach(function (name) {
+        const char = CHARS_WITH_IMG.find(function (c) { return c.name === name; });
+        if (char) { imgGuesses.push(char); renderImgGuess(char, char.name === imgTarget.name); }
+      });
+      const imgWrongCount = imgGuesses.filter(function (g) { return g.name !== imgTarget.name; }).length;
+      resetImageInstant(imgWrongCount);
+      document.getElementById('img-hint-text').textContent = '';
+      document.getElementById('img-hint-btn').disabled = imgHintUsed;
+      document.getElementById('img-hint-btn').textContent = imgHintUsed ? T('game.hintUsed') : T('game.useHint');
+      if (imgHintUsed) {
+        document.getElementById('img-hint-text').textContent = T('game.hintFirstLetter', { letter: imgTarget.name[0].toUpperCase() });
+        document.getElementById('img-hint-area').style.display = '';
+      } else {
+        document.getElementById('img-hint-area').style.display = (imgWrongCount > 0 && imgWrongCount % 3 === 0) ? '' : 'none';
+      }
+      updateImgAttemptsLeft();
+      return;
+    }
   } else {
     imgTarget = CHARS_WITH_IMG[Math.floor(Math.random() * CHARS_WITH_IMG.length)];
-    document.getElementById('img-mode-badge').textContent = '🔍 Image Mode';
+    document.getElementById('img-mode-badge').textContent = T('image.badgeEndless');
   }
 
   mysteryImg.onerror = () => { mysteryImg.src = ''; };
@@ -136,14 +187,14 @@ function initImageMode() {
   banner.classList.remove('show', 'lose');
   imgInput.disabled = false;
   imgInput.value = '';
-  imgInput.placeholder = 'Write an animatronic...';
+  imgInput.placeholder = T('classic.placeholder');
   document.getElementById('img-search-area').style.display = '';
   imgDropdown.style.display = 'none';
 
   document.getElementById('img-hint-area').style.display = 'none';
   document.getElementById('img-hint-text').textContent = '';
   document.getElementById('img-hint-btn').disabled = false;
-  document.getElementById('img-hint-btn').textContent = '💡 Use Hint (first letter)';
+  document.getElementById('img-hint-btn').textContent = T('game.useHint');
 
   // no play-again-btn in new layout
 
@@ -154,28 +205,30 @@ function initImageMode() {
 function updateImgAttemptsLeft() {
   const el = document.getElementById('img-attempts-left');
   const remaining = IMG_MAX_GUESSES - imgGuesses.length;
-  el.textContent = imgGameOver ? '' : `Tries left: ${remaining}`;
+  el.textContent = imgGameOver ? '' : T('game.triesLeft', { remaining });
 }
 
 function useImageHint() {
   if (imgHintUsed || !imgTarget) return;
   imgHintUsed = true;
   document.getElementById('img-hint-btn').disabled = true;
-  document.getElementById('img-hint-btn').textContent = '💡 Hint used';
-  document.getElementById('img-hint-text').textContent = `First letter: ${imgTarget.name[0].toUpperCase()}`;
+  document.getElementById('img-hint-btn').textContent = T('game.hintUsed');
+  document.getElementById('img-hint-text').textContent = T('game.hintFirstLetter', { letter: imgTarget.name[0].toUpperCase() });
+  if (imgCurrentMode === 'daily') saveDailyImgProgress();
 }
 
 function submitImgGuess(char) {
   if (imgGameOver) return;
 
   if (imgGuesses.some(g => g.name === char.name)) {
-    imgInput.placeholder = 'You tried that already!';
+    imgInput.placeholder = T('game.triedAlready');
     imgInput.value = '';
     imgDropdown.style.display = 'none';
     return;
   }
 
   imgGuesses.push(char);
+  if (imgCurrentMode === 'daily') saveDailyImgProgress();
   imgInput.value = '';
   imgDropdown.style.display = 'none';
   imgSelectedIndex = -1;
@@ -236,7 +289,7 @@ function endImgGame(won) {
   const switchBtn = document.getElementById('img-play-switch-btn');
   if (switchBtn) {
     switchBtn.style.display = '';
-    switchBtn.textContent = isDaily ? '♾️ Play Endless' : '📅 Play Daily';
+    switchBtn.textContent = isDaily ? T('game.playEndless') : T('game.playDaily');
     switchBtn.onclick = () => { window.location.href = isDaily ? 'image.html?mode=endless' : 'image.html?mode=daily'; };
   }
   const nextBtn = document.getElementById('img-next-btn');
@@ -246,6 +299,7 @@ function endImgGame(won) {
   }
   if (isDaily) {
     saveDailyImgResult(won, imgTarget.name, imgGuesses.length);
+    clearDailyImgProgress();
     updateStats('daily', won, imgGuesses.length);
   } else {
     updateStreak('image', won);
@@ -257,10 +311,10 @@ function endImgGame(won) {
   banner.classList.add('show');
   if (!won) banner.classList.add('lose');
 
-  document.getElementById('img-result-title').textContent = won ? '🎉 Got it!' : '💀 Game Over';
+  document.getElementById('img-result-title').textContent = won ? T('game.got') : T('game.gameOver');
   document.getElementById('img-result-msg').textContent = won
-    ? `It was ${imgTarget.name}! Guessed in ${imgGuesses.length} tries.`
-    : `It was ${imgTarget.name}. Better luck next time!`;
+    ? T('image.guessedIn', { name: imgTarget.name, count: imgGuesses.length })
+    : T('game.betterLuck', { name: imgTarget.name });
 
   const imgCont = document.getElementById('img-result-char-container');
   imgCont.innerHTML = '';
@@ -337,6 +391,35 @@ document.addEventListener('click', e => {
     imgSelectedIndex = -1;
   }
 });
+
+window.onLangChange = function () {
+  if (!imgTarget) return;
+  document.getElementById('img-mode-badge').textContent =
+    imgCurrentMode === 'daily' ? T('image.badgeDaily') : T('image.badgeEndless');
+  updateImgAttemptsLeft();
+  document.getElementById('img-guesses-list').innerHTML = '';
+  imgGuesses.forEach(function (g) { renderImgGuess(g, g.name === imgTarget.name); });
+  if (imgGameOver) {
+    const isDaily = imgCurrentMode === 'daily';
+    if (isDaily && imgGuesses.length === 0) {
+      const prev = getDailyImgResult();
+      if (prev) {
+        document.getElementById('img-result-title').textContent = prev.won ? T('game.alreadyPlayedWon') : T('game.alreadyPlayedLost');
+        document.getElementById('img-result-msg').textContent = prev.won
+          ? T('game.alreadyWonMsg', { name: prev.targetName, count: prev.guessCount })
+          : T('game.alreadyLostMsg', { name: prev.targetName });
+      }
+    } else {
+      const won = imgGuesses.some(function (g) { return g.name === imgTarget.name; });
+      document.getElementById('img-result-title').textContent = won ? T('game.got') : T('game.gameOver');
+      document.getElementById('img-result-msg').textContent = won
+        ? T('image.guessedIn', { name: imgTarget.name, count: imgGuesses.length })
+        : T('game.betterLuck', { name: imgTarget.name });
+      const sw = document.getElementById('img-play-switch-btn');
+      if (sw && sw.style.display !== 'none') sw.textContent = isDaily ? T('game.playEndless') : T('game.playDaily');
+    }
+  }
+};
 
 function restartCurrent() {
   initImageMode();

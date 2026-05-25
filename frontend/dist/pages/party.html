@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="../assets/css/global.css" />
   <link rel="stylesheet" href="../assets/css/multiplayer.css" />
   <link rel="stylesheet" href="../assets/css/party.css?v=42" />
+  <style>#lang-switcher{display:none!important}</style>
 </head>
 <body>
 
@@ -23,7 +24,7 @@
     <div class="fnaf-title">
       <img src="../assets/images/title/fnafdlereborn.png" alt="Fnafdle" />
     </div>
-    <div class="fnaf-subtitle">Party Mode</div>
+    <div class="fnaf-subtitle" data-i18n="misc.partyMode">Party Mode</div>
   </div>
 
   <!-- Outer layout: [players] [gray container] [shop] -->
@@ -32,29 +33,29 @@
   <div id="player-slots-panel" style="display:none">
     <div id="ps-slots-area"></div>
     <div id="event-log-panel" class="event-log-panel">
-      <div class="event-log-header">📋 Events</div>
+      <div class="event-log-header" data-i18n="misc.events">📋 Events</div>
       <div id="event-log-list" class="event-log-list"></div>
     </div>
   </div>
 
   <div class="container" id="party-container">
     <div class="mode-badge-row">
-      <span class="mode-badge">🎲 Fnafdle Party</span>
-      <button class="back-btn" onclick="goHome()">← Modes</button>
+      <span class="mode-badge" data-i18n="misc.partyBadge">🎲 Fnafdle Party</span>
+      <button class="back-btn" onclick="goHome()" data-i18n="misc.goHome">← Modes</button>
     </div>
 
     <!-- ── LOBBY ──────────────────────────────────────────── -->
     <div id="screen-lobby">
       <div class="party-lobby-wrap">
         <h2 class="party-title">Fnafdle Party</h2>
-        <p class="party-sub">Online board game · 2–4 players · 5 laps · Most pizzas wins!</p>
+        <p class="party-sub" data-i18n="lobby.subtitle">Online board game · 2–6 players · Most pizzas wins!</p>
 
         <!-- Name -->
         <input id="lobby-name" class="mp-input" type="text" placeholder="Your name..." maxlength="20" />
 
         <!-- Player count (only used when creating) -->
         <div id="lobby-count-section" class="setup-section">
-          <div class="setup-label">Number of Players (when creating)</div>
+          <div class="setup-label" data-i18n="lobby.playerCount">Number of Players (when creating)</div>
           <div class="playercount-row">
             <label class="playercount-opt"><input type="radio" name="party-count" value="2" checked><span>2</span></label>
             <label class="playercount-opt"><input type="radio" name="party-count" value="3"><span>3</span></label>
@@ -65,55 +66,55 @@
         </div>
 
         <div class="lobby-buttons" id="lobby-buttons">
-          <button class="mp-btn primary" id="create-room-btn">Create Room</button>
+          <button class="mp-btn primary" id="create-room-btn" data-i18n="lobby.createRoom">Create Room</button>
           <div class="join-row">
             <input id="join-code" class="mp-input code-input" type="text" placeholder="Code..." maxlength="6"/>
-            <button class="mp-btn" id="join-room-btn">Join</button>
+            <button class="mp-btn" id="join-room-btn" data-i18n="lobby.join">Join</button>
           </div>
         </div>
 
         <!-- Create Room Panel -->
         <div id="create-room-panel" style="display:none">
           <div class="create-room-wrap">
-            <div class="setup-label">Room Name (optional)</div>
+            <div class="setup-label" data-i18n="lobby.roomName">Room Name (optional)</div>
             <input id="create-room-name" class="mp-input" type="text" placeholder="e.g. Freddy's Room" maxlength="30" style="max-width:none;width:100%" />
-            <div class="setup-label">Room Code</div>
+            <div class="setup-label" data-i18n="lobby.roomCode">Room Code</div>
             <div class="create-room-code-display" id="create-room-code"></div>
-            <div class="setup-label">Visibility</div>
+            <div class="setup-label" data-i18n="lobby.visibility">Visibility</div>
             <div class="privacy-toggle-row">
               <label class="privacy-opt">
                 <input type="radio" name="party-privacy" value="public" checked />
-                Public
+                <span data-i18n="lobby.public">Public</span>
               </label>
               <label class="privacy-opt">
                 <input type="radio" name="party-privacy" value="private" />
-                Private
+                <span data-i18n="lobby.private">Private</span>
               </label>
             </div>
-            <div class="setup-label">Map</div>
+            <div class="setup-label" data-i18n="lobby.map">Map</div>
             <div class="map-select-row">
               <label class="map-select-opt">
                 <input type="radio" name="party-map" value="easy" checked />
-                <span class="map-opt-name">Easy</span>
-                <span class="map-opt-desc">20 spaces · mixed tiles</span>
+                <span class="map-opt-name" data-i18n="map.easy.name">Easy</span>
+                <span class="map-opt-desc" data-i18n="map.easy.desc">20 spaces · mixed tiles</span>
               </label>
               <label class="map-select-opt">
                 <input type="radio" name="party-map" value="jackpot" />
-                <span class="map-opt-name">Jackpot 💰</span>
-                <span class="map-opt-desc">39 spaces · minigame every lap</span>
+                <span class="map-opt-name" data-i18n="map.jackpot.name">Jackpot 💰</span>
+                <span class="map-opt-desc" data-i18n="map.jackpot.desc">39 spaces · minigame every lap</span>
               </label>
               <label class="map-select-opt">
                 <input type="radio" name="party-map" value="normal_map" />
-                <span class="map-opt-name">Normal</span>
-                <span class="map-opt-desc">46 spaces · split paths · random tiles</span>
+                <span class="map-opt-name" data-i18n="map.normal.name">Normal</span>
+                <span class="map-opt-desc" data-i18n="map.normal.desc">46 spaces · split paths · random tiles</span>
               </label>
               <label class="map-select-opt">
                 <input type="radio" name="party-map" value="hard" />
-                <span class="map-opt-name">Hard 🐻</span>
-                <span class="map-opt-desc">58 spaces · 3 tollbooths · complex paths</span>
+                <span class="map-opt-name" data-i18n="map.hard.name">Hard 🐻</span>
+                <span class="map-opt-desc" data-i18n="map.hard.desc">58 spaces · 3 tollbooths · complex paths</span>
               </label>
             </div>
-            <div class="setup-label">Rounds (Laps)</div>
+            <div class="setup-label" data-i18n="lobby.rounds">Rounds (Laps)</div>
             <div class="playercount-row">
               <label class="playercount-opt"><input type="radio" name="party-laps" value="3"><span>3</span></label>
               <label class="playercount-opt"><input type="radio" name="party-laps" value="5" checked><span>5</span></label>
@@ -121,8 +122,8 @@
               <label class="playercount-opt"><input type="radio" name="party-laps" value="15"><span>15</span></label>
             </div>
             <div class="create-btns-row">
-              <button class="mp-btn" id="cancel-create-btn">Cancel</button>
-              <button class="mp-btn primary" id="confirm-create-btn">Create!</button>
+              <button class="mp-btn" id="cancel-create-btn" data-i18n="lobby.cancel">Cancel</button>
+              <button class="mp-btn primary" id="confirm-create-btn" data-i18n="lobby.createBtn">Create!</button>
             </div>
           </div>
         </div>
@@ -132,31 +133,19 @@
         <!-- Public Rooms List -->
         <div class="public-lobby-section" id="public-lobby-section">
           <div class="public-lobby-header">
-            <span class="setup-label">Public Rooms</span>
-            <button class="mp-btn small" id="refresh-lobby-btn">↻ Refresh</button>
+            <span class="setup-label" data-i18n="lobby.publicRooms">Public Rooms</span>
+            <button class="mp-btn small" id="refresh-lobby-btn" data-i18n="lobby.refresh">↻ Refresh</button>
           </div>
           <div id="public-lobby-list" class="public-lobby-list">
-            <div class="lobby-empty">Loading...</div>
+            <div class="lobby-empty" data-i18n="lobby.loading">Loading...</div>
           </div>
         </div>
 
         <!-- Rules -->
         <div class="rules-toggle-wrap">
-          <button class="mp-btn small" onclick="toggleRules()"><span class="emoji">📋</span> How to Play</button>
+          <button class="mp-btn small" onclick="toggleRules()" data-i18n="lobby.howToPlay">📋 How to Play</button>
           <div id="rules-box" class="rules-box" style="display:none">
-            <ul class="rules-list">
-              <li><span class="e">🎲</span> Each player on their own device rolls the dice and moves on the shared board.</li>
-              <li><span class="e">🔄</span> Goal: complete the set number of laps. Each lap, 10 coins = 1 pizza automatically.</li>
-              <li><span class="e">🏆</span> Most pizzas wins! Tie → most coins. Still tied → sudden-death minigame!</li>
-              <li><span class="e">🪙</span> Yellow: +2 coins &nbsp;|&nbsp; <span class="e">🍕</span> Green: buy a pizza (10 coins) or skip &nbsp;|&nbsp; <span class="e">💀</span> Red: −3 coins</li>
-              <li><span class="e">🎮</span> Orange: Minigame for all! &nbsp;|&nbsp; <span class="e">❓</span> Purple: Random event &nbsp;|&nbsp; <span class="e">⚔️</span> Challenge: 1 vs all</li>
-              <li><span class="e">🐻</span> Tollbooth: path splits. Pay coins → Path A (shortcut) or take Path B free (setback). Price rises each visit!</li>
-              <li><span class="e">👥</span> Two players on the same space = instant minigame between them!</li>
-              <li><span class="e">🎲</span> Dice Shop: buy special dice with limited uses (3–5). Each die can be equipped any time from the panel.</li>
-              <li><span class="e">1️⃣</span> All-Ones Die: always rolls 1, but you're <strong>forced</strong> to use it for 5 turns — can't unequip!</li>
-              <li><span class="e">🦊🐻🐔🎸🪤🎭🎀</span> Characters each have a unique ability. Freddy: take Path A free at tollbooths (cd:3). Foxy: re-roll once (cd:2). Chica: steal 5 coins from nearby player (cd:3). Bonnie: jump 4 spaces (cd:3). Springtrap: send a nearby player back to start (cd:5). Puppet: convert 10 coins → pizza for any nearby player (cd:5). Mangle: shuffle all non-locked board spaces (cd:5).</li>
-              <li><span class="e">💰</span> Jackpot map: minigame every round. Jackpot spaces grow until claimed!</li>
-            </ul>
+            <ul class="rules-list" id="rules-list"></ul>
           </div>
         </div>
       </div>
@@ -166,19 +155,19 @@
     <div id="screen-waiting" style="display:none">
       <div class="mp-card">
         <h2 class="mp-title" id="waiting-title">Waiting for players...</h2>
-        <p class="mp-sub" id="waiting-sub">Share this code with your friends:</p>
+        <p class="mp-sub" id="waiting-sub" data-i18n="waiting.shareCode">Share this code with your friends:</p>
         <div class="room-code-display" id="waiting-code"></div>
-        <button class="mp-btn" id="copy-code-btn">Copy Code</button>
+        <button class="mp-btn" id="copy-code-btn" data-i18n="waiting.copyCode">Copy Code</button>
         <p class="mp-sub" id="waiting-room-name" style="font-size:.85rem;color:var(--gold);margin:-8px 0;min-height:1em;"></p>
         <div id="waiting-players" class="waiting-players"></div>
         <button class="mp-btn primary" id="start-early-btn" style="display:none">Start Game</button>
 
         <!-- Character selection (shown once in the room) -->
         <div id="char-select-wrap" style="display:none">
-          <div class="setup-label" style="margin:12px 0 6px">Choose your character</div>
+          <div class="setup-label" style="margin:12px 0 6px" data-i18n="waiting.chooseChar">Choose your character</div>
           <div class="char-picker" id="waiting-char-picker"></div>
           <div class="char-desc-box" style="margin-top:6px">
-            <span id="waiting-char-desc">Click a character to select it</span>
+            <span id="waiting-char-desc" data-i18n="waiting.clickSelect">Click a character to select it</span>
           </div>
         </div>
 
@@ -189,12 +178,12 @@
       <div class="mini-showcase">
         <div class="showcase-title">🎲 How to Play</div>
         <div class="showcase-grid">
-          <div class="showcase-card"><div class="sc-icon">🎲</div><div class="sc-name">Roll &amp; Move</div><div class="sc-desc">Roll your die and move. Finish laps to convert 10 coins → 1 pizza!</div></div>
-          <div class="showcase-card"><div class="sc-icon">🍕</div><div class="sc-name">Win Condition</div><div class="sc-desc">Most pizzas wins. Tie → most coins. Still tied → 1v1 minigame!</div></div>
-          <div class="showcase-card"><div class="sc-icon">🪙🍕💀🎮</div><div class="sc-name">Basic Spaces</div><div class="sc-desc">🪙+2 coins · 🍕+1 pizza (need 10 coins!) · 💀-3 coins · 🎮 Minigame</div></div>
-          <div class="showcase-card"><div class="sc-icon">❓🪤⚔️💰</div><div class="sc-name">Special Spaces</div><div class="sc-desc">❓ Event · 🪤 Trap (bad luck) · ⚔️ Challenge (1vAll) · 💰 Jackpot (grows!)</div></div>
-          <div class="showcase-card"><div class="sc-icon">🎲 2×</div><div class="sc-name">Dice Shop &amp; Double</div><div class="sc-desc">At half-laps: visit the Dice Shop! Past the midpoint all space values double!</div></div>
-          <div class="showcase-card"><div class="sc-icon">🦊🐻🐔🎸</div><div class="sc-name">Characters &amp; Dice</div><div class="sc-desc">All start with d6. Buy special dice in shop: Foxy (d8), Chica (Chef), Bonnie (Rocker) + generics</div></div>
+          <div class="showcase-card"><div class="sc-icon">🎲</div><div class="sc-name" data-i18n="showcase.roll.name">Roll &amp; Move</div><div class="sc-desc" data-i18n="showcase.roll.desc">Roll your die and move. Finish laps to convert 10 coins → 1 pizza!</div></div>
+          <div class="showcase-card"><div class="sc-icon">🍕</div><div class="sc-name" data-i18n="showcase.win.name">Win Condition</div><div class="sc-desc" data-i18n="showcase.win.desc">Most pizzas wins. Tie → most coins. Still tied → 1v1 minigame!</div></div>
+          <div class="showcase-card"><div class="sc-icon">🪙🍕💀🎮</div><div class="sc-name" data-i18n="showcase.basic.name">Basic Spaces</div><div class="sc-desc" data-i18n="showcase.basic.desc">🪙+2 coins · 🍕+1 pizza (need 10 coins!) · 💀-3 coins · 🎮 Minigame</div></div>
+          <div class="showcase-card"><div class="sc-icon">❓🪤⚔️💰</div><div class="sc-name" data-i18n="showcase.special.name">Special Spaces</div><div class="sc-desc" data-i18n="showcase.special.desc">❓ Event · 🪤 Trap (bad luck) · ⚔️ Challenge (1vAll) · 💰 Jackpot (grows!)</div></div>
+          <div class="showcase-card"><div class="sc-icon">🎲 2×</div><div class="sc-name" data-i18n="showcase.dice.name">Dice Shop &amp; Double</div><div class="sc-desc" data-i18n="showcase.dice.desc">At half-laps: visit the Dice Shop! Past the midpoint all space values double!</div></div>
+          <div class="showcase-card"><div class="sc-icon">🦊🐻🐔🎸</div><div class="sc-name" data-i18n="showcase.chars.name">Characters &amp; Dice</div><div class="sc-desc" data-i18n="showcase.chars.desc">All start with d6. Buy special dice in shop: Foxy (d8), Chica (Chef), Bonnie (Rocker) + generics</div></div>
         </div>
       </div>
     </div>
@@ -220,9 +209,9 @@
         <h2 class="party-title">Game Over! 🎉</h2>
         <div id="result-rankings" class="result-rankings"></div>
         <div class="result-action-btns">
-          <button class="mp-btn primary" id="rematch-btn" onclick="voteRematch()">🔄 Play Again</button>
-          <button class="mp-btn" onclick="restartParty()">🆕 New Room</button>
-          <button class="mp-btn" onclick="goHome()">← Modes</button>
+          <button class="mp-btn primary" id="rematch-btn" onclick="voteRematch()" data-i18n="result.playAgain">🔄 Play Again</button>
+          <button class="mp-btn" onclick="restartParty()" data-i18n="result.newRoom">🆕 New Room</button>
+          <button class="mp-btn" onclick="goHome()" data-i18n="result.modes">← Modes</button>
         </div>
       </div>
     </div>
@@ -244,8 +233,10 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/translations.js"></script>
+  <script>document.addEventListener('DOMContentLoaded', function () { document.querySelectorAll('[data-i18n]').forEach(function (el) { el.textContent = T(el.dataset.i18n); }); });</script>
   <script src="../../../backend/src/db/database.js"></script>
-  <script src="../assets/js/core.js?v=2"></script>
-  <script src="../assets/js/party.js?v=65"></script>
+  <script src="../assets/js/core.js?v=3"></script>
+  <script src="../assets/js/party.js?v=66"></script>
 </body>
 </html>

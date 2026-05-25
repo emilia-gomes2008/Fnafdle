@@ -329,7 +329,7 @@
 @keyframes ring-pulse { 0%,100% { opacity:.4; transform: translate(-50%,-50%) scale(1); } 50% { opacity:.8; transform: translate(-50%,-50%) scale(1.1); } }
 .ml-coin {
   position: absolute;
-  font-size: 1.7rem; line-height: 1;
+  width: 28px; height: 28px; line-height: 1;
   cursor: grab; user-select: none;
   animation: coin-appear .25s ease;
   z-index: 10;

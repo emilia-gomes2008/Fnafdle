@@ -45,7 +45,7 @@ function renderEncyclopedia() {
 
     const type = document.createElement('div');
     type.className = 'enc-card-type';
-    type.textContent = char.type;
+    type.textContent = T('db.type.' + char.type);
     card.appendChild(type);
 
     grid.appendChild(card);
@@ -60,7 +60,7 @@ function renderEncyclopedia() {
     if (filteredBooks.length > 0) {
       const divider = document.createElement('div');
       divider.style.cssText = 'grid-column:1/-1;text-align:center;padding:1.2rem 0 0.6rem;color:var(--gold);font-family:\'Creepster\',cursive;font-size:1.1rem;letter-spacing:3px;border-top:1px solid var(--border);margin-top:0.8rem;';
-      divider.textContent = '📚 Books';
+      divider.textContent = T('enc.books');
       grid.appendChild(divider);
 
       filteredBooks.forEach(book => {
@@ -97,10 +97,10 @@ function renderEncyclopedia() {
     }
 
     if (filtered.length === 0 && filteredBooks.length === 0) {
-      grid.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:2rem;letter-spacing:2px;font-size:0.8rem;grid-column:1/-1;">No results found.</div>';
+      grid.innerHTML = `<div style="color:var(--text-muted);text-align:center;padding:2rem;letter-spacing:2px;font-size:0.8rem;grid-column:1/-1;">${T('enc.noResults')}</div>`;
     }
   } else if (filtered.length === 0) {
-    grid.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:2rem;letter-spacing:2px;font-size:0.8rem;grid-column:1/-1;">No characters found.</div>';
+    grid.innerHTML = `<div style="color:var(--text-muted);text-align:center;padding:2rem;letter-spacing:2px;font-size:0.8rem;grid-column:1/-1;">${T('enc.noChars')}</div>`;
   }
 }
 
@@ -122,11 +122,11 @@ function showEncBookCard(book) {
       <div style="font-size:0.7rem;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:18px;">${book.series}</div>
       <table style="width:100%;border-collapse:collapse;text-align:left;font-size:0.82rem;">
         <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:7px 8px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-size:0.68rem;width:40%;">Year</td>
+          <td style="padding:7px 8px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-size:0.68rem;width:40%;">${T('enc.year')}</td>
           <td style="padding:7px 8px;color:var(--text);">${book.year}</td>
         </tr>
         <tr>
-          <td style="padding:7px 8px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-size:0.68rem;">Edition #</td>
+          <td style="padding:7px 8px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-size:0.68rem;">${T('enc.edition')}</td>
           <td style="padding:7px 8px;color:var(--text);">#${book.number}</td>
         </tr>
       </table>
@@ -146,7 +146,7 @@ function showEncCard(char) {
     return arr.map(c => {
       const hex = COLOR_HEX[c.toLowerCase()] || '#666';
       const bg = hex.startsWith('linear') ? `background-image:${hex}` : `background:${hex}`;
-      return `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;border:1px solid rgba(255,255,255,0.2);${bg};margin-right:4px;vertical-align:middle; transform: translateY(-6px);" title="${c}"></span>${c}`;
+      return `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;border:1px solid rgba(255,255,255,0.2);${bg};margin-right:4px;vertical-align:middle; transform: translateY(-6px);" title="${c}"></span>${T('db.color.' + c)}`;
     }).join(' / ');
   }
 
@@ -161,22 +161,22 @@ function showEncCard(char) {
         : `<div style="width:120px;height:120px;border-radius:12px;border:2px solid var(--border);background:var(--bg-page);display:inline-flex;align-items:center;justify-content:center;font-size:3rem;margin-bottom:14px;">?</div>`
       }
       <div style="font-family:'Creepster',cursive;font-size:1.6rem;color:var(--gold);letter-spacing:2px;margin-bottom:4px;">${char.name}</div>
-      <div style="font-size:0.7rem;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:18px;">${char.type}</div>
+      <div style="font-size:0.7rem;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:18px;">${T('db.type.' + char.type)}</div>
       <table style="width:100%;border-collapse:collapse;text-align:left;font-size:0.82rem;">
         <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:7px 8px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-size:0.68rem;width:40%;">Animal</td>
-          <td style="padding:7px 8px;color:var(--text);">${char.animal}</td>
+          <td style="padding:7px 8px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-size:0.68rem;width:40%;">${T('enc.animal')}</td>
+          <td style="padding:7px 8px;color:var(--text);">${T('db.animal.' + char.animal)}</td>
         </tr>
         <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:7px 8px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-size:0.68rem;">Color</td>
+          <td style="padding:7px 8px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-size:0.68rem;">${T('enc.color')}</td>
           <td style="padding:7px 8px;color:var(--text);">${swatchesHTML(colors)}</td>
         </tr>
         <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:7px 8px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-size:0.68rem;">Eye Color</td>
+          <td style="padding:7px 8px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-size:0.68rem;">${T('enc.eyeColor')}</td>
           <td style="padding:7px 8px;color:var(--text);">${swatchesHTML(eyeColors)}</td>
         </tr>
         <tr>
-          <td style="padding:7px 8px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-size:0.68rem;">Year</td>
+          <td style="padding:7px 8px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-size:0.68rem;">${T('enc.year')}</td>
           <td style="padding:7px 8px;color:var(--text);">${char.year}</td>
         </tr>
       </table>
@@ -189,7 +189,7 @@ function populateEncTypeFilter() {
   const types = [...new Set(CHARS.map(c => c.type).filter(Boolean))].sort();
   const sel = document.getElementById('enc-type-filter');
   if (!sel) return;
-  sel.innerHTML = '<option value="">All Types</option>';
+  sel.innerHTML = `<option value="">${T('enc.allTypes')}</option>`;
   types.forEach(t => {
     const opt = document.createElement('option');
     opt.value = t;

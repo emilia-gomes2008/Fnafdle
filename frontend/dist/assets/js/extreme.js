@@ -79,9 +79,9 @@ const HEADER_IDS = {
   animal: 'header-animal', type: 'header-type',
   color: 'header-color',   eyeColor: 'header-eyecolor', year: 'header-year',
 };
-const HEADER_LABELS = {
-  animal: 'Animal', type: 'Type',
-  color: 'Color',   eyeColor: 'Eye Color', year: 'Year',
+const HEADER_I18N = {
+  animal: 'classic.colAnimal', type: 'classic.colType',
+  color: 'classic.colColor',   eyeColor: 'classic.colEyeColor', year: 'classic.colYear',
 };
 
 // ─── Character pool helpers ───────────────────────────────
@@ -140,6 +140,8 @@ let selCamIdx    = 0;
 let battery      = 99;
 let doorClosed   = false;
 let doorHeldFor  = 0;
+let lastLoseReason  = null;
+let lastNightResult = null;
 
 let nightElapsedMs = 0;  // real-time night clock (0 → NIGHT_TOTAL_MS)
 
@@ -220,7 +222,7 @@ function initGame() {
   document.getElementById('result-banner').classList.remove('show', 'lose');
   input.disabled    = false;
   input.value       = '';
-  input.placeholder = 'Identify the animatronic on camera...';
+  input.placeholder = T('extreme.placeholder');
   document.getElementById('search-area').style.display = '';
   dropdown.style.display = 'none';
   document.getElementById('door-btn').disabled = false;
@@ -252,7 +254,7 @@ function setupHeaders() {
       el.textContent = '???';
       el.classList.add('hidden-col');
     } else {
-      el.textContent = HEADER_LABELS[field];
+      el.textContent = T(HEADER_I18N[field]);
       el.classList.remove('hidden-col');
     }
   });
@@ -262,10 +264,10 @@ function updateNightLabel() {
   const el = document.getElementById('night-label');
   if (!el) return;
   if (currentNight === 6) {
-    el.textContent = '☠ NIGHT 6 ☠';
+    el.textContent = T('extreme.night6Label');
     el.style.color = '#cc1a1a';
   } else {
-    el.textContent = `☆ NIGHT ${currentNight} ☆`;
+    el.textContent = T('extreme.nightLabel', { n: currentNight });
     el.style.color = '';
   }
 }
@@ -277,9 +279,11 @@ function updateNightWarning(cfg) {
   const powerMult   = cfg.powerMult   || 1;
   const el          = document.getElementById('extreme-warning');
   if (!el) return;
+  const animWord  = T(count      > 1 ? 'extreme.warnAnims'  : 'extreme.warnAnim');
+  const fieldWord = T(hiddenCount > 1 ? 'extreme.warnFields' : 'extreme.warnField');
   let extra = '';
-  if (powerMult > 1) extra += ` · ⚡ <strong>${powerMult}× power drain</strong>`;
-  el.innerHTML = `<strong>NIGHT ${currentNight}</strong> · <strong>${count}</strong> animatronic${count > 1 ? 's' : ''} active · AI: <strong>${aiList}</strong> · No year arrows · <strong>${hiddenCount}</strong> field${hiddenCount > 1 ? 's' : ''} <strong>corrupted</strong>${extra}`;
+  if (powerMult > 1) extra = ` · ⚡ <strong>${powerMult}× ${T('extreme.warnPowerDrain')}</strong>`;
+  el.innerHTML = `<strong>${T('extreme.warnNight')} ${currentNight}</strong> · <strong>${count}</strong> ${animWord} ${T('extreme.warnActive')} · AI: <strong>${aiList}</strong> · ${T('extreme.warnNoArrows')} · <strong>${hiddenCount}</strong> ${fieldWord} <strong>${T('extreme.warnCorrupted')}</strong>${extra}`;
 }
 
 // ─── Game Loop ────────────────────────────────────────────
@@ -525,10 +529,10 @@ function toggleDoor() {
 function updateDoorBtn() {
   const btn = document.getElementById('door-btn');
   if (doorClosed) {
-    btn.textContent = '🚪 OPEN DOOR';
+    btn.textContent = T('extreme.doorOpen');
     btn.className   = 'door-btn door-closed';
   } else {
-    btn.textContent = '🚪 CLOSE DOOR';
+    btn.textContent = T('extreme.doorClose');
     btn.className   = 'door-btn door-open';
   }
 }
@@ -557,7 +561,7 @@ function updateAttemptsLeft() {
   const el  = document.getElementById('attempts-left');
   const rem = MAX_GUESSES - guesses.length;
   if (gameOver) { el.textContent = ''; return; }
-  el.textContent = `Attempts: ${rem} / ${MAX_GUESSES}`;
+  el.textContent = T('extreme.attempts', { rem, max: MAX_GUESSES });
   el.className   = 'attempts-left' + (rem === 1 ? ' danger' : '');
 }
 
@@ -587,7 +591,7 @@ function makeColorLabel(colors) {
     wrap.appendChild(makeSwatch(c));
     const txt = document.createElement('span');
     txt.className   = 'color-name';
-    txt.textContent = c;
+    txt.textContent = T('db.color.' + c);
     wrap.appendChild(txt);
     if (i < arr.length - 1) {
       const sep = document.createElement('span');
@@ -658,8 +662,14 @@ function renderGuess(char) {
       cell.appendChild(makeColorLabel(char[f.key]));
     } else {
       const lbl = document.createElement('div');
-      lbl.className   = 'cell-label';
-      lbl.textContent = char[f.key];
+      lbl.className = 'cell-label';
+      let val = char[f.key];
+      if (f.key === 'animal' || f.key === 'type') {
+        val = T('db.' + f.key + '.' + val);
+      } else if (f.key === 'year' && isNaN(parseInt(val))) {
+        val = T('db.year.' + val);
+      }
+      lbl.textContent = val;
       cell.appendChild(lbl);
     }
     row.appendChild(cell);
@@ -673,7 +683,7 @@ function renderGuess(char) {
 function submitGuess(char) {
   if (gameOver) return;
   if (guesses.some(g => g.name === char.name)) {
-    input.placeholder = 'Already tried that!';
+    input.placeholder = T('extreme.triedAlready');
     input.value = '';
     dropdown.style.display = 'none';
     return;
@@ -724,38 +734,42 @@ function endGame(won, loseReason) {
   const msgEl         = document.getElementById('result-msg');
   const playAgainBtn  = document.getElementById('play-again-btn');
   const nightJustDone = currentNight;
+  lastLoseReason      = loseReason || null;
 
   banner.classList.add('show');
 
   if (won) {
     banner.classList.remove('lose');
     if (nightJustDone >= MAX_NIGHTS) {
-      titleEl.textContent      = '🏆 All 6 Nights Complete!';
-      msgEl.textContent        = `It was ${target.name}! You survived every night, even Night 6. Legend.`;
-      playAgainBtn.textContent = '↩ Restart (Night 1)';
+      titleEl.textContent      = T('extreme.allComplete');
+      msgEl.textContent        = T('extreme.allCompleteMsg', { name: target.name });
+      playAgainBtn.textContent = T('extreme.restartNight1');
+      lastNightResult          = { won: true, nightJustDone };
       currentNight = 1;
       saveNight();
     } else {
       const next = nightJustDone + 1;
       const teaser = next === 6
-        ? `Night 6 is the ultimate test. Good luck.`
-        : `Night ${next} will be more intense...`;
-      titleEl.textContent      = `🌙 Night ${nightJustDone} Survived!`;
-      msgEl.textContent        = `It was ${target.name}! ${teaser}`;
-      playAgainBtn.textContent = `▶ Continue — Night ${next}`;
+        ? T('extreme.teaser6')
+        : T('extreme.teaser', { n: next });
+      titleEl.textContent      = T('extreme.nightSurvived', { n: nightJustDone });
+      msgEl.textContent        = T('extreme.nightSurvivedMsg', { name: target.name, teaser });
+      playAgainBtn.textContent = T('extreme.continueNight', { n: next });
+      lastNightResult          = { won: true, nightJustDone };
       currentNight = next;
       saveNight();
     }
   } else {
     banner.classList.add('lose');
     const reason = loseReason === 'time'
-      ? '⏰ 6 AM — time ran out!'
+      ? T('extreme.loseTime')
       : loseReason === 'battery'
-        ? '🔦 Power outage — Freddy got you!'
-        : '💀 Out of attempts!';
+        ? T('extreme.loseBattery')
+        : T('extreme.loseGuesses');
     titleEl.textContent      = reason;
-    msgEl.textContent        = `It was ${target.name}. Try Night ${nightJustDone} again.`;
-    playAgainBtn.textContent = `↩ Retry Night ${nightJustDone}`;
+    msgEl.textContent        = T('extreme.loseMsg', { name: target.name, n: nightJustDone });
+    playAgainBtn.textContent = T('extreme.retryNight', { n: nightJustDone });
+    lastNightResult          = { won: false, nightJustDone };
   }
 
   const imgCont = document.getElementById('result-char-container');
@@ -848,6 +862,46 @@ document.addEventListener('click', e => {
     selIdx = -1;
   }
 });
+
+window.onLangChange = function () {
+  if (!target) return;
+  document.querySelectorAll('[data-i18n]').forEach(function (el) { el.textContent = T(el.dataset.i18n); });
+  updateNightLabel();
+  updateNightWarning(currentCfg);
+  updateAttemptsLeft();
+  updateDoorBtn();
+  setupHeaders();
+  document.getElementById('guesses-container').innerHTML = '';
+  guesses.forEach(function (g) { renderGuess(g); });
+  if (gameOver && lastNightResult) {
+    const { won, nightJustDone } = lastNightResult;
+    const titleEl      = document.getElementById('result-title');
+    const msgEl        = document.getElementById('result-msg');
+    const playAgainBtn = document.getElementById('play-again-btn');
+    if (won) {
+      if (nightJustDone >= MAX_NIGHTS) {
+        titleEl.textContent      = T('extreme.allComplete');
+        msgEl.textContent        = T('extreme.allCompleteMsg', { name: target.name });
+        playAgainBtn.textContent = T('extreme.restartNight1');
+      } else {
+        const next   = nightJustDone + 1;
+        const teaser = next === 6 ? T('extreme.teaser6') : T('extreme.teaser', { n: next });
+        titleEl.textContent      = T('extreme.nightSurvived', { n: nightJustDone });
+        msgEl.textContent        = T('extreme.nightSurvivedMsg', { name: target.name, teaser });
+        playAgainBtn.textContent = T('extreme.continueNight', { n: next });
+      }
+    } else {
+      const reason = lastLoseReason === 'time'
+        ? T('extreme.loseTime')
+        : lastLoseReason === 'battery'
+          ? T('extreme.loseBattery')
+          : T('extreme.loseGuesses');
+      titleEl.textContent      = reason;
+      msgEl.textContent        = T('extreme.loseMsg', { name: target.name, n: nightJustDone });
+      playAgainBtn.textContent = T('extreme.retryNight', { n: nightJustDone });
+    }
+  }
+};
 
 document.addEventListener('DOMContentLoaded', () => {
   currentNight = loadNight();

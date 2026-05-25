@@ -74,6 +74,17 @@ function censorQuoteText(quoteText, characterName) {
   return result;
 }
 
+function getDailyQuoteProgressKey() {
+  const now = new Date();
+  return `fnaf_quote_daily_progress_${now.getFullYear()}_${now.getMonth() + 1}_${now.getDate()}`;
+}
+function saveDailyQuoteProgress() {
+  try { localStorage.setItem(getDailyQuoteProgressKey(), JSON.stringify({ guessNames: quoteGuesses.map(g => g.name) })); } catch {}
+}
+function clearDailyQuoteProgress() {
+  localStorage.removeItem(getDailyQuoteProgressKey());
+}
+
 // ─── Init ─────────────────────────────────────────────────
 
 function initQuote(mode) {
@@ -83,7 +94,7 @@ function initQuote(mode) {
   quoteSelIdx   = -1;
 
   if (quoteMode === 'daily') {
-    document.getElementById('quote-mode-badge').textContent = '📅 Quote Daily';
+    document.getElementById('quote-mode-badge').textContent = T('quote.badgeDaily');
     quoteTarget = QUOTES_FILTERED[getDailyQuoteIndex()];
 
     const previous = getDailyQuoteResult();
@@ -98,10 +109,10 @@ function initQuote(mode) {
       banner.classList.remove('lose');
       banner.classList.add('show');
       if (!previous.won) banner.classList.add('lose');
-      document.getElementById('result-title').textContent = previous.won ? '🎉 You already played today!' : '💀 You already played today!';
+      document.getElementById('result-title').textContent = previous.won ? T('quote.alreadyPlayedWon') : T('quote.alreadyPlayedLost');
       document.getElementById('result-msg').textContent = previous.won
-        ? `It was ${previous.saidName}! You got it in ${previous.guessCount} tr${previous.guessCount !== 1 ? 'ies' : 'y'}.`
-        : `It was ${previous.saidName}. Try again tomorrow!`;
+        ? T('quote.alreadyWonMsg', { said: previous.saidName, count: previous.guessCount, pl: previous.guessCount !== 1 ? 'ies' : 'y' })
+        : T('quote.alreadyLostMsg', { said: previous.saidName });
 
       renderResultChar(quoteChar);
       document.getElementById('quote-text').textContent = (function(t) {
@@ -109,8 +120,32 @@ function initQuote(mode) {
   })(censorQuoteText(quoteTarget.quote, quoteTarget.said));
       return;
     }
+
+    const qProgress = JSON.parse(localStorage.getItem(getDailyQuoteProgressKey()) || 'null');
+    if (qProgress && qProgress.guessNames && qProgress.guessNames.length > 0) {
+      quoteGuesses = [];
+      quoteGameOver = false;
+      quoteSelIdx = -1;
+      quoteChar = CHARS.find(function (c) { return c.name === quoteTarget.said; }) || null;
+      document.getElementById('guesses-list').innerHTML = '';
+      document.getElementById('result-banner').classList.remove('show', 'lose');
+      qInput.disabled = false;
+      qInput.value = '';
+      qInput.placeholder = T('quote.placeholder');
+      document.getElementById('search-area').style.display = '';
+      qDropdown.style.display = 'none';
+      document.getElementById('quote-text').textContent = (function(t) {
+        return _isAprilFools() ? t.split('').map(function(c){return (c===' '||c==='\n')?c:(Math.random()<0.95?'█':c);}).join('') : t;
+      })(censorQuoteText(quoteTarget.quote, quoteTarget.said));
+      qProgress.guessNames.forEach(function (name) {
+        const char = CHARS_WITH_QUOTES.find(function (c) { return c.name === name; });
+        if (char) { quoteGuesses.push(char); renderQuoteGuess(char, char.name === quoteTarget.said); }
+      });
+      updateQuoteAttemptsLeft();
+      return;
+    }
   } else {
-    document.getElementById('quote-mode-badge').textContent = '🎭 Quote Guesser';
+    document.getElementById('quote-mode-badge').textContent = T('quote.badgeEndless');
     quoteTarget = QUOTES_FILTERED[Math.floor(Math.random() * QUOTES_FILTERED.length)];
   }
 
@@ -125,7 +160,7 @@ function initQuote(mode) {
 
   qInput.disabled    = false;
   qInput.value       = '';
-  qInput.placeholder = 'Search for a character...';
+  qInput.placeholder = T('quote.placeholder');
   document.getElementById('search-area').style.display = '';
   qDropdown.style.display = 'none';
 
@@ -138,7 +173,7 @@ function initQuote(mode) {
 function updateQuoteAttemptsLeft() {
   const el  = document.getElementById('attempts-left');
   const rem = QUOTE_MAX_GUESSES - quoteGuesses.length;
-  el.textContent = quoteGameOver ? '' : `Tries left: ${rem} / ${QUOTE_MAX_GUESSES}`;
+  el.textContent = quoteGameOver ? '' : T('quote.triesLeft', { rem, max: QUOTE_MAX_GUESSES });
 }
 
 // ─── Dropdown ─────────────────────────────────────────────
@@ -181,13 +216,14 @@ function renderQuoteDropdown() {
 function submitQuoteGuess(char) {
   if (quoteGameOver) return;
   if (quoteGuesses.some(g => g.name === char.name)) {
-    qInput.placeholder = 'Already tried that!';
+    qInput.placeholder = T('quote.alreadyTried');
     qInput.value = '';
     qDropdown.style.display = 'none';
     return;
   }
 
   quoteGuesses.push(char);
+  if (quoteMode === 'daily') saveDailyQuoteProgress();
   qInput.value = '';
   qDropdown.style.display = 'none';
   quoteSelIdx  = -1;
@@ -254,6 +290,7 @@ function endQuoteGame(won) {
 
   if (quoteMode === 'daily') {
     saveDailyQuoteResult(won, quoteTarget.said, quoteGuesses.length);
+    clearDailyQuoteProgress();
     updateStats('daily', won, quoteGuesses.length);
   } else {
     updateStreak('quote', won);
@@ -270,16 +307,16 @@ function endQuoteGame(won) {
   banner.classList.add('show');
   if (!won) banner.classList.add('lose');
 
-  titleEl.textContent = won ? '🎉 Correct!' : '💀 Game Over';
+  titleEl.textContent = won ? T('quote.won') : T('game.gameOver');
   msgEl.textContent   = won
-    ? `It was ${quoteTarget.said}! Guessed in ${quoteGuesses.length} tr${quoteGuesses.length !== 1 ? 'ies' : 'y'}.`
-    : `It was ${quoteTarget.said}. Better luck next time!`;
+    ? T('quote.guessedIn', { said: quoteTarget.said, count: quoteGuesses.length, pl: quoteGuesses.length !== 1 ? 'ies' : 'y' })
+    : T('quote.betterLuck', { said: quoteTarget.said });
 
   const isDaily = quoteMode === 'daily';
   const switchBtn = document.getElementById('quote-play-switch-btn');
   if (switchBtn) {
     switchBtn.style.display = '';
-    switchBtn.textContent = isDaily ? '♾️ Play Endless' : '📅 Play Daily';
+    switchBtn.textContent = isDaily ? T('game.playEndless') : T('game.playDaily');
     switchBtn.onclick = () => { window.location.href = isDaily ? 'quote.html?mode=endless' : 'quote.html?mode=daily'; };
   }
 
@@ -338,6 +375,35 @@ document.addEventListener('click', e => {
     quoteSelIdx = -1;
   }
 });
+
+window.onLangChange = function () {
+  if (!quoteTarget) return;
+  document.getElementById('quote-mode-badge').textContent =
+    quoteMode === 'daily' ? T('quote.badgeDaily') : T('quote.badgeEndless');
+  updateQuoteAttemptsLeft();
+  document.getElementById('guesses-list').innerHTML = '';
+  quoteGuesses.forEach(function (g) { renderQuoteGuess(g, g.name === quoteTarget.said); });
+  if (quoteGameOver) {
+    const isDaily = quoteMode === 'daily';
+    if (isDaily && quoteGuesses.length === 0) {
+      const prev = getDailyQuoteResult();
+      if (prev) {
+        document.getElementById('result-title').textContent = prev.won ? T('quote.alreadyPlayedWon') : T('quote.alreadyPlayedLost');
+        document.getElementById('result-msg').textContent = prev.won
+          ? T('quote.alreadyWonMsg', { said: prev.saidName, count: prev.guessCount, pl: prev.guessCount !== 1 ? 'ies' : 'y' })
+          : T('quote.alreadyLostMsg', { said: prev.saidName });
+      }
+    } else {
+      const won = quoteGuesses.some(function (g) { return g.name === quoteTarget.said; });
+      document.getElementById('result-title').textContent = won ? T('quote.won') : T('game.gameOver');
+      document.getElementById('result-msg').textContent = won
+        ? T('quote.guessedIn', { said: quoteTarget.said, count: quoteGuesses.length, pl: quoteGuesses.length !== 1 ? 'ies' : 'y' })
+        : T('quote.betterLuck', { said: quoteTarget.said });
+      const sw = document.getElementById('quote-play-switch-btn');
+      if (sw && sw.style.display !== 'none') sw.textContent = isDaily ? T('game.playEndless') : T('game.playDaily');
+    }
+  }
+};
 
 // ─── Boot ─────────────────────────────────────────────────
 

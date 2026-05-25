@@ -100,7 +100,9 @@
 
   <script src="../../../backend/src/db/database.js"></script>
   <script src="../../../backend/src/db/books_database.js"></script>
-  <script src="../assets/js/core.js?v=2"></script>
+  <script src="../assets/js/translations.js"></script>
+  <script>document.addEventListener('DOMContentLoaded', function () { document.querySelectorAll('[data-i18n]').forEach(function (el) { el.textContent = T(el.dataset.i18n); }); });</script>
+  <script src="../assets/js/core.js?v=3"></script>
   <script src="../assets/js/image.js"></script>
 </body>
 

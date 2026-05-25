@@ -38,11 +38,11 @@
 
   <!-- Office top bar -->
   <div class="office-topbar">
-    <button class="back-btn office-back" onclick="goHome()">← Modes</button>
+    <button class="back-btn office-back" onclick="goHome()" data-i18n="game.backBtn">← Modes</button>
     <div class="night-label" id="night-label">☆ NIGHT 1 ☆</div>
     <div class="night-clock" id="night-clock">12 AM</div>
     <div class="power-section">
-      <span class="power-label">Power:</span>
+      <span class="power-label" data-i18n="extreme.powerLabel">Power:</span>
       <div class="power-bar-wrap"><div class="power-fill" id="power-fill" style="width:99%"></div></div>
       <span class="power-pct" id="power-pct">99%</span>
     </div>
@@ -76,7 +76,7 @@
         <!-- Movement opportunity timer -->
         <div class="opp-timer">
           <div class="opp-label-row">
-            <span class="opp-label">MOVEMENT OPP</span>
+            <span class="opp-label" data-i18n="extreme.movOpp">MOVEMENT OPP</span>
             <span class="opp-countdown" id="opp-countdown">10s</span>
           </div>
           <div class="opp-bar-wrap">
@@ -89,7 +89,7 @@
           <button class="door-btn door-open" id="door-btn" onclick="toggleDoor()">
             🚪 CLOSE DOOR
           </button>
-          <div class="door-hint">Close the door to block animatronics · drains battery faster over time</div>
+          <div class="door-hint" data-i18n="extreme.doorHint">Close the door to block animatronics · drains battery faster over time</div>
         </div>
 
       </div>
@@ -106,9 +106,9 @@
         </div>
 
         <div class="legend">
-          <div class="legend-item"><div class="legend-dot correct"></div> Correct</div>
-          <div class="legend-item"><div class="legend-dot wrong"></div> Wrong</div>
-          <div class="legend-item"><div class="legend-dot hidden-dot"></div> Corrupted</div>
+          <div class="legend-item"><div class="legend-dot correct"></div><span data-i18n="extreme.legendCorrect"> Correct</span></div>
+          <div class="legend-item"><div class="legend-dot wrong"></div><span data-i18n="extreme.legendWrong"> Wrong</span></div>
+          <div class="legend-item"><div class="legend-dot hidden-dot"></div><span data-i18n="extreme.legendCorrupted"> Corrupted</span></div>
         </div>
 
         <div class="search-area" id="search-area">
@@ -120,8 +120,8 @@
 
         <div class="table-wrapper">
           <div class="table-header">
-            <div class="col-label">Character</div>
-            <div class="col-label">Name</div>
+            <div class="col-label" data-i18n="classic.colChar">Character</div>
+            <div class="col-label" data-i18n="classic.colName">Name</div>
             <div class="col-label" id="header-animal">Animal</div>
             <div class="col-label" id="header-type">Type</div>
             <div class="col-label" id="header-color">Color</div>
@@ -149,7 +149,15 @@
 
   <script src="../../../backend/src/db/database.js"></script>
   <script src="../../../backend/src/db/books_database.js"></script>
-  <script src="../assets/js/core.js?v=2"></script>
+  <script src="../assets/js/translations.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('[data-i18n]').forEach(function (el) {
+        el.textContent = T(el.dataset.i18n);
+      });
+    });
+  </script>
+  <script src="../assets/js/core.js?v=3"></script>
   <script src="../assets/js/extreme.js?v=2"></script>
 </body>
 </html>

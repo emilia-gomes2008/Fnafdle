@@ -1,4 +1,6 @@
 // ── Constants ─────────────────────────────────────────────────────────────────
+const COIN_IMG = `<img src="../assets/images/fazcoin.png" class="fazcoin-icon" alt="coin">`;
+
 const BOARD_SIZE    = 20;  // default / easy board size
 const TOTAL_LAPS    = 5;
 const COINS_PER_PIZZA = 10;
@@ -362,14 +364,7 @@ function nextSlot(room) {
 }
 
 function moveFwd(state, slot, steps, doConvert = true, boardSize = BOARD_SIZE) {
-  const oldLaps = Math.floor(state.pos[slot] / boardSize);
   state.pos[slot] = (state.pos[slot] || 0) + steps;
-  const newLaps = Math.floor(state.pos[slot] / boardSize);
-  if (newLaps > oldLaps && doConvert) {
-    const earned = Math.floor((state.coins[slot] || 0) / COINS_PER_PIZZA);
-    state.pizzas[slot] = (state.pizzas[slot] || 0) + earned;
-    state.coins[slot]  = (state.coins[slot]  || 0) % COINS_PER_PIZZA;
-  }
 }
 function moveBack(state, slot, steps) {
   state.pos[slot] = Math.max(0, (state.pos[slot] || 0) - steps);
@@ -382,12 +377,7 @@ function moveByGraph(state, slot, steps, boardSize, nextMap) {
   for (let i = 0; i < steps; i++) {
     const nxt = (nextMap && nextMap[node] !== undefined) ? nextMap[node] : (node + 1) % boardSize;
     node = nxt;
-    if (node === 0) {
-      laps++;
-      const earned = Math.floor((state.coins[slot] || 0) / COINS_PER_PIZZA);
-      state.pizzas[slot] = (state.pizzas[slot] || 0) + earned;
-      state.coins[slot]  = (state.coins[slot]  || 0) % COINS_PER_PIZZA;
-    }
+    if (node === 0) laps++;
   }
   state.pos[slot] = laps * boardSize + node;
 }
@@ -404,11 +394,6 @@ function jumpToNode(state, slot, targetIdx, boardSize, noLap = false) {
   const oldLap = Math.floor(cur / boardSize);
   const newLap = Math.floor(newPos / boardSize);
   state.pos[slot] = newPos;
-  if (!noLap && newLap > oldLap) {
-    const earned = Math.floor((state.coins[slot] || 0) / COINS_PER_PIZZA);
-    state.pizzas[slot] = (state.pizzas[slot] || 0) + earned;
-    state.coins[slot]  = (state.coins[slot]  || 0) % COINS_PER_PIZZA;
-  }
 }
 
 function shufflePool(pool) {
@@ -585,13 +570,31 @@ function initLobby() {
   document.getElementById('copy-code-btn').addEventListener('click',   copyCode);
   document.getElementById('refresh-lobby-btn').addEventListener('click', loadPublicPartyLobby);
   document.getElementById('start-early-btn').addEventListener('click', startEarlyParty);
+
+  // Translate input placeholders
+  const lobbyName = document.getElementById('lobby-name');
+  if (lobbyName) lobbyName.placeholder = T('lobby.nameInput');
+  const joinCode = document.getElementById('join-code');
+  if (joinCode) joinCode.placeholder = T('lobby.codeInput');
+  const roomName = document.getElementById('create-room-name');
+  if (roomName) roomName.placeholder = T('lobby.roomNameExample');
+
+  // Render rules list
+  const rulesList = document.getElementById('rules-list');
+  if (rulesList) {
+    const RULE_EMOJIS = ['🎲','🔄','🏆','🪙','🎮','🐻','👥','🎲','1️⃣','🦊🐻🐔🎸🪤🎭🎀','💰'];
+    rulesList.innerHTML = Array.from({ length: 11 }, (_, i) =>
+      `<li><span class="e">${RULE_EMOJIS[i]}</span> ${T('rules.' + i)}</li>`
+    ).join('');
+  }
+
   loadPublicPartyLobby();
 }
 
 // ── Create Panel ──────────────────────────────────────────────────────────────
 function showPartyCreatePanel() {
   const name = document.getElementById('lobby-name').value.trim();
-  if (!name) { lobbyError('Enter your name!'); return; }
+  if (!name) { lobbyError(T('error.enterName')); return; }
   lobbyError('');
 
   document.getElementById('create-room-code').textContent = genCode();
@@ -612,7 +615,7 @@ function cancelPartyCreateRoom() {
 
 async function confirmCreatePartyRoom() {
   const name = document.getElementById('lobby-name').value.trim();
-  if (!name) { lobbyError('Enter your name!'); return; }
+  if (!name) { lobbyError(T('error.enterName')); return; }
 
   const code      = document.getElementById('create-room-code').textContent;
   const roomName  = document.getElementById('create-room-name').value.trim() || `${name}'s Room`;
@@ -646,7 +649,7 @@ async function confirmCreatePartyRoom() {
 async function loadPublicPartyLobby() {
   const listEl = document.getElementById('public-lobby-list');
   if (!listEl) return;
-  listEl.innerHTML = '<div class="lobby-empty">Loading...</div>';
+  listEl.innerHTML = `<div class="lobby-empty">${T('lobby.loading')}</div>`;
 
   let data, error;
   ({ data, error } = await db.from('party_rooms')
@@ -664,14 +667,14 @@ async function loadPublicPartyLobby() {
       .limit(10));
   }
 
-  if (error || !data) { listEl.innerHTML = '<div class="lobby-empty">Could not load rooms</div>'; return; }
+  if (error || !data) { listEl.innerHTML = `<div class="lobby-empty">${T('lobby.couldNotLoad')}</div>`; return; }
   renderPublicPartyLobby(data);
 }
 
 function renderPublicPartyLobby(rooms) {
   const listEl = document.getElementById('public-lobby-list');
   if (!listEl) return;
-  if (!rooms.length) { listEl.innerHTML = '<div class="lobby-empty">No public rooms available</div>'; return; }
+  if (!rooms.length) { listEl.innerHTML = `<div class="lobby-empty">${T('lobby.noRooms')}</div>`; return; }
 
   const escHtml = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   listEl.innerHTML = '';
@@ -689,14 +692,14 @@ function renderPublicPartyLobby(rooms) {
     entry.innerHTML = `
       <div class="lobby-room-info">
         <div class="lobby-room-name">${escHtml(name)}</div>
-        <div class="lobby-room-meta">${joined}/${pc} players · Fnafdle Party</div>
+        <div class="lobby-room-meta">${T('lobby.players', { joined, pc })}</div>
       </div>
       <div class="lobby-room-code">${r.code}</div>
-      <button class="mp-btn small" onclick="joinFromPartyLobby('${r.code}')">Join</button>
+      <button class="mp-btn small" onclick="joinFromPartyLobby('${r.code}')">${T('lobby.join')}</button>
     `;
     listEl.appendChild(entry);
   });
-  if (!anyShown) listEl.innerHTML = '<div class="lobby-empty">No public rooms available</div>';
+  if (!anyShown) listEl.innerHTML = `<div class="lobby-empty">${T('lobby.noRooms')}</div>`;
 }
 
 function joinFromPartyLobby(code) {
@@ -713,7 +716,7 @@ function updatePartyStartEarlyBtn(room) {
   const joined = allSlots(pc).filter(s => room[`${s}_name`]).length;
   if (playerSlot === 'player1' && joined >= 2 && joined < pc) {
     btn.style.display = '';
-    btn.textContent = `Start with ${joined} players`;
+    btn.textContent = T('lobby.startWith', { n: joined });
     btn.disabled = false;
   } else {
     btn.style.display = 'none';
@@ -734,20 +737,20 @@ async function startEarlyParty() {
 
 async function joinRoom() {
   const name = document.getElementById('lobby-name').value.trim();
-  if (!name) { lobbyError('Enter your name!'); return; }
+  if (!name) { lobbyError(T('error.enterName')); return; }
   const code = document.getElementById('join-code').value.trim().toUpperCase();
-  if (code.length < 6) { lobbyError('Invalid code!'); return; }
+  if (code.length < 6) { lobbyError(T('error.invalidCode')); return; }
 
   const { data: room, error } = await db.from('party_rooms')
     .select('*').eq('code', code).eq('state', 'waiting').single();
-  if (error || !room) { lobbyError('Room not found or already started!'); return; }
+  if (error || !room) { lobbyError(T('error.roomNotFound')); return; }
 
   const pc = room.player_count || 2;
   let slot;
   if      (!room.player2_id)           slot = 'player2';
   else if (pc >= 3 && !room.player3_id) slot = 'player3';
   else if (pc >= 4 && !room.player4_id) slot = 'player4';
-  else { lobbyError('Room is full!'); return; }
+  else { lobbyError(T('error.roomFull')); return; }
 
   const st = pState(room);
   st.pos[slot]       = 0;
@@ -797,11 +800,11 @@ function updateWaitingScreen(room) {
         const c = CHAR_CFG[char];
         const confirmed = JSON.parse(room.player_stats || '{}')[`confirmed_${s}`];
         row.innerHTML = char
-          ? `<img src="${charImg(char)}" style="width:16px;height:16px;border-radius:50%;object-fit:contain;vertical-align:middle;margin-right:4px" onerror="this.style.display='none'"/>${confirmed ? '✅' : '⏳'} ${name} <span style="color:var(--gold);font-size:.75rem">(${c ? c.name : char})</span>`
-          : `⏳ ${name} — choosing...`;
+          ? `<img src="${charImg(char)}" style="width:16px;height:16px;border-radius:50%;object-fit:contain;vertical-align:middle;margin-right:4px" onerror="this.style.display='none'"/>${confirmed ? '✅' : '⏳'} ${name} <span style="color:var(--gold);font-size:.75rem">(${c ? T('char.' + char + '.name') : char})</span>`
+          : T('waiting.choosing', { name });
         row.style.color = confirmed ? 'var(--green-text)' : char ? 'var(--yellow-text)' : 'var(--text-muted)';
       } else {
-        row.textContent = `⏳ Player ${i + 1}...`;
+        row.textContent = T('waiting.waitingSlot', { n: i + 1 });
         row.style.color = 'var(--text-muted)';
       }
       listEl.appendChild(row);
@@ -815,10 +818,10 @@ function updateWaitingScreen(room) {
   const allConfirmed = allChosen && active.every(s => stats[`confirmed_${s}`]);
   const title = document.getElementById('waiting-title');
   if (title) {
-    if (joined < pc)        title.textContent = `Waiting for players... (${joined}/${pc})`;
-    else if (!allChosen)    title.textContent = 'Choose your character!';
-    else if (!allConfirmed) title.textContent = 'Confirm your character!';
-    else                    title.textContent = 'All confirmed! Starting...';
+    if (joined < pc)        title.textContent = T('waiting.titleCount', { joined, pc });
+    else if (!allChosen)    title.textContent = T('waiting.titleChoose');
+    else if (!allConfirmed) title.textContent = T('waiting.titleConfirm');
+    else                    title.textContent = T('waiting.titleReady');
   }
 
   // Char picker (show once all players have joined)
@@ -839,7 +842,7 @@ function updateWaitingScreen(room) {
     const conflict = allSlots(pc).some(s => s !== playerSlot && room[`${s}_char`] === myChar);
     if (conflict) {
       db.from('party_rooms').update({ [`${playerSlot}_char`]: null }).eq('id', roomId);
-      showToast('Character taken! Choose another 😅');
+      showToast(T('error.charTaken'));
     }
   }
 
@@ -870,7 +873,7 @@ function renderWaitingCharPicker(room) {
       <img class="char-img" src="${charImg(k)}" alt="${c.name}"
            onerror="this.style.display='none';this.nextElementSibling.style.display='block'"/>
       <span class="char-emoji-fb" style="display:none">${c.emoji}</span>
-      <span class="char-name">${c.name}${taken ? `<br><small style="font-size:.6rem">${taken}</small>` : ''}</span>
+      <span class="char-name">${T('char.' + k + '.name')}${taken ? `<br><small style="font-size:.6rem">${taken}</small>` : ''}</span>
     </label>`;
   };
   const row1 = charEntries.filter(([k]) =>  ROW1_KEYS.includes(k));
@@ -884,7 +887,7 @@ function renderWaitingCharPicker(room) {
     opt.addEventListener('click', () => selectChar(opt.dataset.k));
   });
 
-  if (desc) desc.textContent = myChar ? CHAR_CFG[myChar].desc : 'Click a character to select it';
+  if (desc) desc.textContent = myChar ? T('char.' + myChar + '.desc') : T('waiting.clickSelect');
 
   // Confirm button
   const stats    = JSON.parse(room.player_stats || '{}');
@@ -899,9 +902,9 @@ function renderWaitingCharPicker(room) {
   if (!myChar) {
     confirmWrap.innerHTML = '';
   } else if (confirmed) {
-    confirmWrap.innerHTML = `<div style="color:var(--green-text);font-family:'Oswald',sans-serif;font-size:.85rem">✅ Confirmed — waiting for others...</div>`;
+    confirmWrap.innerHTML = `<div style="color:var(--green-text);font-family:'Oswald',sans-serif;font-size:.85rem">${T('waiting.confirmed')}</div>`;
   } else {
-    confirmWrap.innerHTML = `<button class="mp-btn primary" id="char-confirm-btn" style="margin-top:0">✅ Confirm ${CHAR_CFG[myChar].name}</button>`;
+    confirmWrap.innerHTML = `<button class="mp-btn primary" id="char-confirm-btn" style="margin-top:0">${T('waiting.confirmBtn', { name: T('char.' + myChar + '.name') })}</button>`;
     document.getElementById('char-confirm-btn')?.addEventListener('click', confirmChar, { once: true });
   }
 }
@@ -911,7 +914,7 @@ async function selectChar(charKey) {
   const { data: fresh } = await db.from('party_rooms').select('*').eq('id', roomId).single();
   if (!fresh) return;
   const takenByOther = allSlots(pc).some(s => s !== playerSlot && fresh[`${s}_char`] === charKey);
-  if (takenByOther) { showToast('Already taken! Choose another 😅'); renderWaitingCharPicker(fresh); return; }
+  if (takenByOther) { showToast(T('error.alreadyTaken')); renderWaitingCharPicker(fresh); return; }
   // Clear confirmation when changing character
   const ps = JSON.parse(fresh.player_stats || '{}');
   delete ps[`confirmed_${playerSlot}`];
@@ -946,7 +949,7 @@ async function checkAllCharsReady(room) {
     const defaultDice = CHAR_DEFAULT_DICE[char] || 'd6';
     initStats[s] = { mgWins: 0, badLucks: 0, dice: defaultDice, ownedDice: defaultDice !== 'd6' ? [defaultDice] : [], shopVisited: false };
   });
-  const firstEvent = `🎲 ${room[`${firstSlot}_name`]} goes first! (randomly chosen)`;
+  const firstEvent = T('waiting.goesFirst', { name: room[`${firstSlot}_name`] });
   await db.from('party_rooms').update({
     state: 'playing',
     current_slot: firstSlot,
@@ -959,7 +962,7 @@ async function checkAllCharsReady(room) {
 function refreshPlayerSlot(room) {
   const found = ['player1','player2','player3','player4'].find(s => room[`${s}_id`] === playerId);
   if (!found) {
-    showToast("You weren't included in the rematch");
+    showToast(T('waiting.notInRematch'));
     setTimeout(() => { roomId = null; playerSlot = null; showScreen('lobby'); }, 2500);
     return false;
   }
@@ -980,8 +983,8 @@ function copyCode() {
       document.body.removeChild(el);
     } catch (_) {}
   }
-  btn.textContent = 'Copied!';
-  setTimeout(() => { btn.textContent = 'Copy Code'; }, 2000);
+  btn.textContent = T('waiting.copied');
+  setTimeout(() => { btn.textContent = T('waiting.copyCode'); }, 2000);
 }
 
 // ── Room subscription ─────────────────────────────────────────────────────────
@@ -1078,7 +1081,7 @@ async function handleRoomUpdate(room) {
         const curName  = room[`${room.current_slot}_name`] || '?';
         const curColor = PLAYER_COLORS[slotNum(room.current_slot) - 1];
         const el = document.getElementById('current-player-action');
-        if (el) el.innerHTML = `<div class="action-card"><div class="action-waiting">🐻 <strong style="color:${curColor}">${curName}</strong> is at Freddy's Tollbooth...</div></div>`;
+        if (el) el.innerHTML = `<div class="action-card"><div class="action-waiting"><strong style="color:${curColor}">${T('action.atTollbooth', { name: curName })}</strong></div></div>`;
       }
       showDiceShop(room);
     } else if (room.turn_phase === 'mg_podium') {
@@ -1184,8 +1187,8 @@ function renderBoard(room) {
     center.style.gridRow    = `2 / ${maxRow}`;
     center.innerHTML = `
       <div class="board-center-logo">${mapIcon}</div>
-      <div class="board-center-text">FNAFDLE<br>PARTY</div>
-      <div class="board-lap-info">${laps} laps</div>`;
+      <div class="board-center-text">${T('board.center').replace('\n', '<br>')}</div>
+      <div class="board-lap-info">${T('board.laps', { n: laps })}</div>`;
     el.appendChild(center);
   }
 
@@ -1269,7 +1272,7 @@ function renderFreddyFaceBoard(el, tiles, laps, toll) {
   const lbl = document.createElement('div');
   lbl.style.cssText = 'position:absolute;left:50%;top:67%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;z-index:1;';
   lbl.innerHTML = `<div style="font-family:Creepster,cursive;font-size:1.1rem;color:#c48b14;opacity:.45;letter-spacing:2px">FREDDY</div>
-    <div style="font-size:.55rem;color:#8b5a00;opacity:.5">${laps} laps · Toll: ${toll}🪙</div>`;
+    <div style="font-size:.55rem;color:#8b5a00;opacity:.5">${laps} laps · Toll: ${toll}${COIN_IMG}</div>`;
   el.appendChild(lbl);
 }
 
@@ -1351,7 +1354,7 @@ function renderCustomBoard(el, tiles, laps, toll, nodes, skipMap, freeMap, board
   const lbl = document.createElement('div');
   lbl.style.cssText = 'position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;z-index:1;';
   lbl.innerHTML = `<div style="font-family:Creepster,cursive;font-size:1.1rem;color:#c48b14;opacity:.3;letter-spacing:2px">PARTY</div>
-    <div style="font-size:.55rem;color:#8b5a00;opacity:.4">${laps} laps · Toll: ${toll}🪙</div>`;
+    <div style="font-size:.55rem;color:#8b5a00;opacity:.4">${laps} laps · Toll: ${toll}${COIN_IMG}</div>`;
   el.appendChild(lbl);
 }
 
@@ -1428,7 +1431,7 @@ function renderPlayerSlots(room) {
     const name = room[`${slot}_name`];
     if (!name) {
       return `<div class="player-slot ps-empty">
-        <div class="ps-empty-label">Waiting...</div>
+        <div class="ps-empty-label">${T('slot.waiting')}</div>
       </div>`;
     }
     const char    = room[`${slot}_char`] || 'freddy';
@@ -1446,11 +1449,11 @@ function renderPlayerSlots(room) {
         <span class="ps-name" title="${name}">${name}</span>
       </div>
       <div class="ps-stats">
-        <span>🪙${coins}</span>
+        <span>${COIN_IMG}${coins}</span>
         <span>🍕${pizzas}</span>
         <span>🔄${lapDisp}</span>
       </div>
-      ${c.ability ? `<div class="ps-cd">${cd > 0 ? `⏳${cd}t` : '✨ Ready'}</div>` : ''}
+      ${c.ability ? `<div class="ps-cd">${cd > 0 ? T('slot.cooldown', { n: cd }) : T('slot.ready')}</div>` : ''}
     </div>`;
   }).join('');
 }
@@ -1466,7 +1469,7 @@ function renderActionUI(room) {
     const extra = room.turn_phase === 'rolled'
       ? ` — rolled <strong>🎲 ${room.dice_result}</strong>` : '';
     el.innerHTML = `<div class="action-card">
-      <div class="action-waiting"><strong style="color:${curColor}">${curName}</strong>'s turn${extra}</div>
+      <div class="action-waiting"><strong style="color:${curColor}">${room.turn_phase === 'rolled' ? T('action.otherRolled', { name: curName, n: room.dice_result }) : T('action.otherTurn', { name: curName })}</strong></div>
     </div>`;
     showDiceShop(room);
     return;
@@ -1483,36 +1486,36 @@ function renderActionUI(room) {
     const dblTag  = isDoublePhase(room) ? ' <span style="color:#f9c;font-size:.7rem">2×</span>' : '';
     const psn     = pStats(room)[playerSlot] || {};
     const forcedTag = (psn.forcedDice && (psn.forcedTurns || 0) > 0)
-      ? `<div style="font-size:.65rem;color:#f66;margin:1px 0">🔒 Forced: ${psn.forcedTurns}t</div>` : '';
+      ? `<div style="font-size:.65rem;color:#f66;margin:1px 0">${T('action.forcedTag', { n: psn.forcedTurns })}</div>` : '';
     el.innerHTML = `<div class="action-card">
       <div class="action-player-name" style="color:${me.color}">
         <img src="${charImg(me.char)}" style="width:22px;height:22px;border-radius:50%;object-fit:contain;vertical-align:middle;margin-right:5px" onerror="this.style.display='none'"/>
         ${me.name}
       </div>
-      <div class="action-pos">Space ${pos} · Lap ${Math.min(Math.floor(me.pos / boardSize) + 1, boardLaps)}/${boardLaps} · 🪙${me.coins} 🍕${me.pizzas}${dblTag}</div>
-      <div style="font-size:.7rem;color:var(--text-muted);margin:1px 0">${diceObj.emoji} ${diceObj.label}</div>
+      <div class="action-pos">${T('action.space', { n: pos })} · ${T('action.lap', { cur: Math.min(Math.floor(me.pos / boardSize) + 1, boardLaps), total: boardLaps })} · ${COIN_IMG}${me.coins} 🍕${me.pizzas}${dblTag}</div>
+      <div style="font-size:.7rem;color:var(--text-muted);margin:1px 0">${diceObj.emoji} ${T('dname.' + diceId)}</div>
       ${forcedTag}
     </div>`;
 
   } else if (room.turn_phase === 'rolled') {
     const lastDice    = pStats(room)[playerSlot]?.lastDiceId || getPlayerDice(room, playerSlot);
     const isSpringlock = lastDice === 'springlock' && room.dice_result === 0;
-    const diceDisplay  = isSpringlock ? '🪤 Springlock!' : `🎲 ${room.dice_result}`;
+    const diceDisplay  = isSpringlock ? T('action.springlockRolled') : `🎲 ${room.dice_result}`;
     el.innerHTML = `<div class="action-card">
       <div class="action-player-name" style="color:${me.color}">${me.name}</div>
       <div class="action-dice">${diceDisplay}</div>
-      ${isSpringlock ? `<div style="font-size:.7rem;color:#f66;margin:2px 0">Sent back to start!</div>` : ''}
+      ${isSpringlock ? `<div style="font-size:.7rem;color:#f66;margin:2px 0">${T('action.springlockMsg')}</div>` : ''}
     </div>`;
 
   } else if (room.turn_phase === 'moved') {
     const { tiles: bt } = parseBoard(room);
     const spType = bt[pos] || 'normal';
     const cfg    = SPACE_CFG[spType] || SPACE_CFG.normal;
-    const jackInfo = spType === 'jackpot' ? ` (${getJackpotValue(room)}🪙)` : '';
+    const jackInfo = spType === 'jackpot' ? ` (${getJackpotValue(room)}${COIN_IMG})` : '';
     el.innerHTML = `<div class="action-card">
       <div class="action-player-name" style="color:${me.color}">${me.name}</div>
       <div class="action-dice">🎲 ${room.dice_result}</div>
-      <div class="action-space">Landed: <span class="mp_emoji">${cfg.emoji || '⬜'}</span> <strong>${cfg.label}</strong>${jackInfo}</div>
+      <div class="action-space">${T('action.landed')} <span class="mp_emoji">${cfg.emoji || '⬜'}</span> <strong>${T('space.' + spType)}</strong>${jackInfo}</div>
     </div>`;
   }
   showDiceShop(room);
@@ -1543,7 +1546,7 @@ async function doRoll() {
     if (newUses === 0) {
       ns[playerSlot].ownedDice = getOwnedDice(roomData, playerSlot).filter(id => id !== diceId);
       ns[playerSlot].dice = 'd6';
-      showToast(`${shopD.label} ran out of uses! Back to d6 🎲`);
+      showToast(T('dice.expired', { name: T('dname.' + shopD.id) }));
       emitEvent(`🎲 ${roomData[`${playerSlot}_name`]}'s ${shopD.label} expired!`);
     }
   }
@@ -1561,7 +1564,7 @@ function showPickDiceUI() {
   const el = document.getElementById('current-player-action');
   if (!el) return;
   el.innerHTML = `<div class="action-card">
-    <div class="action-player-name" style="color:${me.color}">🎯 Pick your steps!</div>
+    <div class="action-player-name" style="color:${me.color}">${T('action.pickPrompt')}</div>
     <div class="pick-dice-grid">
       ${[1,2,3,4,5,6].map(n => `<button class="mp-btn pick-num-btn" data-n="${n}">${n}</button>`).join('')}
     </div>
@@ -1582,12 +1585,7 @@ function moveStepByStep(state, slot, steps, boardSize, tiles, nextMap) {
   for (let i = 0; i < steps; i++) {
     const nxt = (nextMap && nextMap[node] !== undefined) ? nextMap[node] : (node + 1) % boardSize;
     node = nxt;
-    if (node === 0) {
-      laps++;
-      const earned = Math.floor((state.coins[slot] || 0) / COINS_PER_PIZZA);
-      state.pizzas[slot] = (state.pizzas[slot] || 0) + earned;
-      state.coins[slot]  = (state.coins[slot]  || 0) % COINS_PER_PIZZA;
-    }
+    if (node === 0) laps++;
     // Stop if passing THROUGH a tollbooth (not the final step)
     if (tiles[node] === 'tollbooth' && i < steps - 1) {
       state.pos[slot] = laps * boardSize + node;
@@ -1616,7 +1614,7 @@ async function applyMove() {
   if (lastDiceId === 'springlock' && roll === 0) {
     st.pos[playerSlot] = 0;
     emitEvent(`🪤 ${room[`${playerSlot}_name`]}'s Springlock triggered! Back to start!`);
-    showToast('🪤 SPRINGLOCK! Back to start!');
+    showToast(T('toast.springlock'));
     await db.from('party_rooms').update({
       player_pos: JSON.stringify(st.pos), player_cooldowns: JSON.stringify(st.cooldowns),
       player_stats: JSON.stringify(ns), turn_phase: 'moved',
@@ -1635,7 +1633,7 @@ async function applyMove() {
     ns._musicBoxes = ns._musicBoxes.filter(mb => mb.ownerSlot !== playerSlot);
     ns._musicBoxes.push({ spaceIdx: landingNode, ownerSlot: playerSlot });
     emitEvent(`🎵 ${room[`${playerSlot}_name`]} placed a Music Box on space ${landingNode}!`);
-    showToast('🎵 Music Box placed!');
+    showToast(T('toast.musicBox'));
   }
 
   if (result.hitTollbooth) {
@@ -1680,7 +1678,7 @@ async function doFoxyReroll() {
     dice_result: roll,
     player_cooldowns: JSON.stringify(st.cooldowns),
   }).eq('id', roomId);
-  showToast('Re-rolled! 🎲');
+  showToast(T('toast.rerolled'));
 }
 
 // Returns true if slotB is within 5 board steps (either direction) of slotA
@@ -1770,7 +1768,7 @@ async function handleSpace() {
     st.coins[mb.ownerSlot]   = (st.coins[mb.ownerSlot]   || 0) + 5;
     ns._musicBoxes.splice(mbIdx, 1);
     emitEvent(`🎵 ${room[`${playerSlot}_name`]} triggered Puppet's Music Box! -5🪙 → ${room[`${mb.ownerSlot}_name`]}`);
-    showToast('🎵 Music Box trap! -5🪙');
+    showToast(T('toast.musicBoxTrap'));
   }
 
   if (type === 'coin') {
@@ -1801,7 +1799,7 @@ async function handleSpace() {
     const coins = st.coins[playerSlot] || 0;
     if (coins < 10) {
       emitEvent(`🍕 ${room[`${playerSlot}_name`]} landed on Pizza but needs 10🪙 (${coins}/10)`);
-      showToast(`Need 10🪙 to buy pizza! 🍕`);
+      showToast(T('pizza.need10'));
       await passOrMinigame(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) });
       return;
     }
@@ -1809,11 +1807,11 @@ async function handleSpace() {
     if (mbIdx !== -1) await db.from('party_rooms').update({ player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) }).eq('id', roomId);
     const el = document.getElementById('current-player-action');
     if (el) el.innerHTML = `<div class="action-card">
-      <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot)-1]}">🍕 Pizza Shop</div>
-      <div class="action-space">Buy a pizza for <strong>10🪙</strong>? You have <strong>${coins}🪙</strong>.</div>
+      <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot)-1]}">${T('pizza.shopTitle')}</div>
+      <div class="action-space">${T('pizza.buyPrompt', { coins })}</div>
       <div class="action-btns">
-        <button class="mp-btn primary" id="pizza-buy-btn">🍕 Buy (10🪙)</button>
-        <button class="mp-btn" id="pizza-skip-btn">Skip</button>
+        <button class="mp-btn primary" id="pizza-buy-btn">${T('pizza.buyBtn')}</button>
+        <button class="mp-btn" id="pizza-skip-btn">${T('pizza.skipBtn')}</button>
       </div>
     </div>`;
     document.getElementById('pizza-buy-btn').addEventListener('click', () => buyPizza(), { once: true });
@@ -1829,18 +1827,22 @@ async function handleSpace() {
     return;
   }
   if (type === 'freddy_zone') {
-    const eff = TRAP_EFFECTS[Math.floor(Math.random() * 2)];
+    const effIdx = Math.floor(Math.random() * 2);
+    const eff = TRAP_EFFECTS[effIdx];
     eff.eff(st, playerSlot, room, ns);
-    emitEvent(`😱 ${room[`${playerSlot}_name`]} entered the Freddy Zone! ${eff.text}`);
-    showToast(`😱 Freddy Zone! ${eff.text}`);
+    const effText = T('trap.' + effIdx);
+    emitEvent(`😱 ${room[`${playerSlot}_name`]} entered the Freddy Zone! ${effText}`);
+    showToast(`😱 Freddy Zone! ${effText}`);
     await resolveSpace(room, { player_pos: JSON.stringify(st.pos), player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns) }, others);
     return;
   }
   if (type === 'trap') {
-    const eff = TRAP_EFFECTS[Math.floor(Math.random() * TRAP_EFFECTS.length)];
+    const effIdx = Math.floor(Math.random() * TRAP_EFFECTS.length);
+    const eff = TRAP_EFFECTS[effIdx];
     eff.eff(st, playerSlot, room, ns);
-    emitEvent(`🪤 ${room[`${playerSlot}_name`]} hit a Trap! ${eff.text}`);
-    showToast(`🪤 Trap! ${eff.text}`);
+    const effText = T('trap.' + effIdx);
+    emitEvent(`🪤 ${room[`${playerSlot}_name`]} hit a Trap! ${effText}`);
+    showToast(`🪤 Trap! ${effText}`);
     await resolveSpace(room, { player_pos: JSON.stringify(st.pos), player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns) }, others);
     return;
   }
@@ -1873,7 +1875,8 @@ async function handleSpace() {
 }
 
 async function triggerQuestion() {
-  const ev  = QUESTION_EVENTS[Math.floor(Math.random() * QUESTION_EVENTS.length)];
+  const evIdx = Math.floor(Math.random() * QUESTION_EVENTS.length);
+  const ev  = QUESTION_EVENTS[evIdx];
   const st  = pState(roomData);
 
   const tempPlayer = { coins: st.coins[playerSlot]||0, pizzas: st.pizzas[playerSlot]||0, pos: st.pos[playerSlot]||0 };
@@ -1884,8 +1887,8 @@ async function triggerQuestion() {
 
   const extra = ev.boardShuffle ? { board: JSON.stringify(createBoard(parseBoard(roomData).mapType, parseBoard(roomData).laps)) } : {};
 
-  emitEvent(`❓ ${roomData[`${playerSlot}_name`]} got event: ${ev.text} → ${ev.desc}`);
-  showToast(`${ev.text}`);
+  emitEvent(`❓ ${roomData[`${playerSlot}_name`]} got event: ${T('qevent.' + evIdx + '.text')} → ${T('qevent.' + evIdx + '.desc')}`);
+  showToast(T('qevent.' + evIdx + '.text'));
   await passOrMinigame(roomData, {
     player_pos:    JSON.stringify(st.pos),
     player_coins:  JSON.stringify(st.coins),
@@ -1916,7 +1919,7 @@ async function buyPizza() {
   if (nextMap && Object.keys(nextMap).length) newBoard.nextMap = nextMap;
 
   emitEvent(`🍕 ${room[`${playerSlot}_name`]} bought a pizza! (-10🪙)`);
-  showToast(`🍕 Got a pizza! Pizza moves to a new spot.`);
+  showToast(T('pizza.bought'));
 
   // Resume any pending steps saved when the player was stopped at pizza mid-roll (Jackpot)
   const pendingSteps = ns[playerSlot]?.pendingSteps || 0;
@@ -1950,7 +1953,7 @@ async function skipPizza() {
   const { tiles, boardSize, nextMap } = parseBoard(room);
   const st = pState(room);
   const ns = pStats(room);
-  showToast('Skipped the pizza 🍕');
+  showToast(T('pizza.skipped'));
 
   // Resume any pending steps saved when the player was stopped at pizza mid-roll (Jackpot)
   const pendingSteps = ns[playerSlot]?.pendingSteps || 0;
@@ -2015,7 +2018,7 @@ async function doShuffle() {
   }).eq('id', roomId);
 
   emitEvent(`🎀 ${roomData[`${playerSlot}_name`]} tangled the board! Spaces shuffled!`);
-  showToast('🎀 Board spaces shuffled!');
+  showToast(T('toast.shuffled'));
   renderActionUI(roomData);
 }
 
@@ -2025,12 +2028,12 @@ function showKillTarget() {
   const pc   = room.player_count || 2;
   const targets = allSlots(pc).filter(s =>
     s !== playerSlot && room[`${s}_name`] && inRange5(room, playerSlot, s));
-  if (!targets.length) { showToast('No players in range (5 spaces)!'); return; }
+  if (!targets.length) { showToast(T('error.noRange')); return; }
 
   const el = document.getElementById('current-player-action');
   el.innerHTML = `<div class="action-card">
-    <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot)-1]}">🪤 Kill!</div>
-    <p style="font-size:.7rem;color:var(--text-muted);margin:2px 0">Send a player within 5 spaces back to start</p>
+    <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot)-1]}">${T('ability.kill.title')}</div>
+    <p style="font-size:.7rem;color:var(--text-muted);margin:2px 0">${T('ability.kill.desc')}</p>
     <div class="ability-targets">
       ${targets.map(s => {
         const char = room[`${s}_char`] || 'freddy';
@@ -2040,7 +2043,7 @@ function showKillTarget() {
         </button>`;
       }).join('')}
     </div>
-    <button class="mp-btn small" onclick="renderActionUI(roomData)" style="margin-top:4px">Cancel</button>
+    <button class="mp-btn small" onclick="renderActionUI(roomData)" style="margin-top:4px">${T('ability.kill.cancel')}</button>
   </div>`;
 }
 
@@ -2053,7 +2056,7 @@ async function executeKill(targetSlot) {
     player_cooldowns: JSON.stringify(st.cooldowns),
   }).eq('id', roomId);
   emitEvent(`🪤 ${roomData[`${playerSlot}_name`]} killed ${roomData[`${targetSlot}_name`]}! Back to start!`);
-  showToast(`🪤 ${roomData[`${targetSlot}_name`]} goes back to start!`);
+  showToast(T('toast.killed', { name: roomData[`${targetSlot}_name`] }));
   renderActionUI(roomData);
 }
 
@@ -2065,30 +2068,30 @@ function showGiftsTarget() {
     if (!room[`${s}_name`]) return false;
     return s === playerSlot || inRange5(room, playerSlot, s);
   });
-  if (!targets.length) { showToast('No players in range (5 spaces)!'); return; }
+  if (!targets.length) { showToast(T('error.noRange')); return; }
 
   const el = document.getElementById('current-player-action');
   el.innerHTML = `<div class="action-card">
-    <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot)-1]}">🎁 Gifts!</div>
-    <p style="font-size:.7rem;color:var(--text-muted);margin:2px 0">Convert 10🪙 → 1🍕 for a player within 5 spaces</p>
+    <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot)-1]}">${T('ability.gifts.title')}</div>
+    <p style="font-size:.7rem;color:var(--text-muted);margin:2px 0">${T('ability.gifts.desc')}</p>
     <div class="ability-targets">
       ${targets.map(s => {
         const char    = room[`${s}_char`] || 'freddy';
         const coins   = playerCoins(room, s);
         const canGift = coins >= 10;
-        return `<button class="mp-btn" onclick="executeGifts('${s}')" ${canGift ? '' : 'disabled'} title="${canGift ? '' : 'Needs 10🪙'}">
+        return `<button class="mp-btn" onclick="executeGifts('${s}')" ${canGift ? '' : 'disabled'} title="${canGift ? '' : `Needs 10${COIN_IMG}`}">
           <img src="${charImg(char)}" style="width:20px;height:20px;border-radius:50%;object-fit:contain;vertical-align:middle" onerror="this.style.display='none'"/>
-          ${room[`${s}_name`]} (${coins}🪙)
+          ${room[`${s}_name`]} (${coins}${COIN_IMG})
         </button>`;
       }).join('')}
     </div>
-    <button class="mp-btn small" onclick="renderActionUI(roomData)" style="margin-top:4px">Cancel</button>
+    <button class="mp-btn small" onclick="renderActionUI(roomData)" style="margin-top:4px">${T('ability.gifts.cancel')}</button>
   </div>`;
 }
 
 async function executeGifts(targetSlot) {
   const st = pState(roomData);
-  if ((st.coins[targetSlot] || 0) < 10) { showToast('Not enough coins!'); return; }
+  if ((st.coins[targetSlot] || 0) < 10) { showToast(T('error.notEnoughCoins')); return; }
   st.coins[targetSlot]  = (st.coins[targetSlot]  || 0) - 10;
   st.pizzas[targetSlot] = (st.pizzas[targetSlot] || 0) + 1;
   st.cooldowns[playerSlot] = CHAR_CFG['puppet'].cooldown;
@@ -2099,7 +2102,7 @@ async function executeGifts(targetSlot) {
   }).eq('id', roomId);
   const target = roomData[`${targetSlot}_name`];
   emitEvent(`🎁 ${roomData[`${playerSlot}_name`]} gifted a pizza to ${target}!`);
-  showToast(`🎁 Gift sent${targetSlot === playerSlot ? ' to yourself' : ` to ${target}`}!`);
+  showToast(targetSlot === playerSlot ? T('toast.giftSelf') : T('toast.giftOther', { name: target }));
   renderActionUI(roomData);
 }
 
@@ -2113,11 +2116,11 @@ function showCupcakeTarget() {
     const dist = (boardPos(room, s) - myPos + bs) % bs;
     return dist > 0 && dist <= 5;
   });
-  if (!targets.length) { showToast('No players in range!'); return; }
+  if (!targets.length) { showToast(T('error.noRangeShort')); return; }
 
   const el = document.getElementById('current-player-action');
   el.innerHTML = `<div class="action-card">
-    <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot)-1]}">🧁 Throw Cupcake!</div>
+    <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot)-1]}">${T('ability.cupcake.title')}</div>
     <div class="ability-targets">
       ${targets.map(s => {
         const char = room[`${s}_char`] || 'freddy';
@@ -2127,7 +2130,7 @@ function showCupcakeTarget() {
         </button>`;
       }).join('')}
     </div>
-    <button class="mp-btn small" onclick="renderActionUI(roomData)" style="margin-top:4px">Cancel</button>
+    <button class="mp-btn small" onclick="renderActionUI(roomData)" style="margin-top:4px">${T('ability.cupcake.cancel')}</button>
   </div>`;
 }
 
@@ -2141,7 +2144,7 @@ async function executeCupcake(targetSlot) {
     player_coins:     JSON.stringify(st.coins),
     player_cooldowns: JSON.stringify(st.cooldowns),
   }).eq('id', roomId);
-  showToast(`${roomData[`${playerSlot}_name`]} stole ${stolen} coins! 🧁`);
+  showToast(T('toast.stolen', { name: roomData[`${playerSlot}_name`], n: stolen }));
   renderActionUI(roomData);
 }
 
@@ -2160,14 +2163,14 @@ async function doJump() {
     turn_phase: 'moved', dice_result: steps,
     ...(finished ? { state: 'finished' } : {}),
   }).eq('id', roomId);
-  showToast(`${roomData[`${playerSlot}_name`]} jumped ${steps} space${steps > 1 ? 's' : ''}!`);
+  showToast(T('toast.jumped', { name: roomData[`${playerSlot}_name`], n: steps, s: steps > 1 ? 's' : '' }));
 }
 
 async function doReroll() {
   const st = pState(roomData);
   st.cooldowns[playerSlot] = CHAR_CFG[roomData[`${playerSlot}_char`]].cooldown;
   await db.from('party_rooms').update({ player_cooldowns: JSON.stringify(st.cooldowns) }).eq('id', roomId);
-  showToast('Roll again!');
+  showToast(T('toast.rollAgain'));
 }
 
 // ── Dice shop ─────────────────────────────────────────────────────────────────
@@ -2195,8 +2198,8 @@ function showDiceShop(room) {
   const isForced    = !!(forcedDie && forcedTurns > 0);
 
   const allDice = [
-    { id: 'd6', label: 'Standard Die', emoji: '🎲', desc: 'Default die. Rolls 1–6.', price: 0 },
-    ...SHOP_DICE.filter(d => !d.onlyChar || d.onlyChar === myChar),
+    { id: 'd6', label: T('dname.d6'), emoji: '🎲', desc: T('ddesc.d6'), price: 0 },
+    ...SHOP_DICE.filter(d => !d.onlyChar || d.onlyChar === myChar).map(d => ({ ...d, label: T('dname.' + d.id), desc: T('ddesc.' + d.id) })),
   ];
 
   const cards = allDice.map(d => {
@@ -2213,20 +2216,20 @@ function showDiceShop(room) {
     const cls = isEquipped ? 'dic-equipped' : (!isOwned ? 'dic-locked' : '');
 
     let usesTag = '';
-    if (usesLeft !== null) usesTag = `<span class="dic-uses">${usesLeft} use${usesLeft !== 1 ? 's' : ''} left</span>`;
-    if (isThisForced) usesTag += `<span class="dic-forced">🔒 ${forcedTurns}t forced</span>`;
+    if (usesLeft !== null) usesTag = `<span class="dic-uses">${usesLeft !== 1 ? T('dice.usesLeft', { n: usesLeft, s: 's' }) : T('dice.usesLeft1', { n: usesLeft })}</span>`;
+    if (isThisForced) usesTag += `<span class="dic-forced">${T('dice.forcedTag', { n: forcedTurns })}</span>`;
 
     let footer;
     if (isEquipped) {
       const canUnequip = d.id !== 'd6' && !isThisForced;
-      footer = `<span class="dic-status">✓ EQUIPPED</span>${canUnequip ? ` <button class="mp-btn small dic-unequip-btn">Unequip</button>` : ''}`;
+      footer = `<span class="dic-status">${T('dice.equipped')}</span>${canUnequip ? ` <button class="mp-btn small dic-unequip-btn">${T('dice.unequip')}</button>` : ''}`;
     } else if (isOwned) {
       footer = otherForced
-        ? `<button class="mp-btn small dic-equip-btn" data-id="${d.id}" disabled title="Forced die active">🔒 Locked</button>`
-        : `<button class="mp-btn small dic-equip-btn" data-id="${d.id}">Equip</button>`;
+        ? `<button class="mp-btn small dic-equip-btn" data-id="${d.id}" disabled title="${T('dice.locked')}">${T('dice.locked')}</button>`
+        : `<button class="mp-btn small dic-equip-btn" data-id="${d.id}">${T('dice.equip')}</button>`;
     } else {
-      footer = `<span class="dic-price">${d.price}🪙</span>
-        <button class="mp-btn small dic-buy-btn" data-id="${d.id}" data-price="${d.price}" ${canBuy ? '' : 'disabled'}>${coins < d.price ? `Need ${d.price}🪙` : 'Buy'}</button>`;
+      footer = `<span class="dic-price">${d.price}${COIN_IMG}</span>
+        <button class="mp-btn small dic-buy-btn" data-id="${d.id}" data-price="${d.price}" ${canBuy ? '' : 'disabled'}>${coins < d.price ? T('dice.needCoins', { n: d.price }) : T('dice.buy')}</button>`;
     }
 
     return `<div class="dic-card ${cls}">
@@ -2251,9 +2254,9 @@ function showDiceShop(room) {
       const c  = CHAR_CFG[me.char] || {};
       const canAbility = c.ability && c.ability !== 'reroll' && c.ability !== 'tollpass'
         && (pState(room).cooldowns[playerSlot] || 0) === 0;
-      const abilLabel = { cupcake:'🧁 Cupcake', jump:'🎸 Jump', kill:'🪤 Kill', gifts:'🎁 Gifts' }[c.ability] || '✨ Ability';
+      const abilLabel = { cupcake: T('action.ability.cupcake'), jump: T('action.ability.jump'), kill: T('action.ability.kill'), gifts: T('action.ability.gifts') }[c.ability] || '✨ Ability';
       actionHTML = `
-        <button class="mp-btn primary dp-action-btn" id="dp-roll-btn">${diceObj.pick ? '🎯 Pick Steps' : `${diceObj.emoji} Roll!`}</button>
+        <button class="mp-btn primary dp-action-btn" id="dp-roll-btn">${diceObj.pick ? T('action.pickSteps') : T('action.roll', { emoji: diceObj.emoji })}</button>
         ${canAbility ? `<button class="mp-btn accent dp-action-btn" id="dp-ability-btn">${abilLabel}</button>` : ''}`;
 
     } else if (room.turn_phase === 'rolled') {
@@ -2263,11 +2266,11 @@ function showDiceShop(room) {
       const lastDice    = pStats(room)[playerSlot]?.lastDiceId || getPlayerDice(room, playerSlot);
       const isSpringlock = lastDice === 'springlock' && room.dice_result === 0;
       actionHTML = `
-        <button class="mp-btn primary dp-action-btn" id="dp-apply-btn">${isSpringlock ? '🪤 Back to Start' : '→ Continue'}</button>
-        ${canReroll && !isSpringlock ? `<button class="mp-btn accent dp-action-btn" id="dp-reroll-btn">🔄 Re-Roll</button>` : ''}`;
+        <button class="mp-btn primary dp-action-btn" id="dp-apply-btn">${isSpringlock ? T('action.backToStart') : T('action.continue')}</button>
+        ${canReroll && !isSpringlock ? `<button class="mp-btn accent dp-action-btn" id="dp-reroll-btn">${T('action.reroll')}</button>` : ''}`;
 
     } else if (room.turn_phase === 'moved') {
-      actionHTML = `<button class="mp-btn primary dp-action-btn" id="dp-cont-btn">→ Continue</button>`;
+      actionHTML = `<button class="mp-btn primary dp-action-btn" id="dp-cont-btn">${T('action.contBtn')}</button>`;
 
     } else if (room.turn_phase === 'tollbooth') {
       const { toll, tollMap, skipMap, freeMap, boardSize, tiles } = parseBoard(room);
@@ -2282,21 +2285,21 @@ function showDiceShop(room) {
       const freeIdx     = freeMap[pos] !== undefined ? freeMap[pos] : null;
       const skipCfg     = SPACE_CFG[tiles[skipIdx]] || SPACE_CFG.normal;
       const freeCfg     = freeIdx !== null ? (SPACE_CFG[tiles[freeIdx]] || SPACE_CFG.normal) : null;
-      const skipLabel   = `Space ${skipIdx} ${skipCfg.emoji || ''}`;
-      const freeLabel   = freeIdx !== null ? `Space ${freeIdx} ${freeCfg.emoji || ''}` : 'Danger zone';
+      const skipLabel   = `${T('toll.spaceLabel', { n: skipIdx })} ${skipCfg.emoji || ''}`;
+      const freeLabel   = freeIdx !== null ? `${T('toll.spaceLabel', { n: freeIdx })} ${freeCfg.emoji || ''}` : T('toll.dangerZone');
       actionHTML = `
-        <div class="dp-toll-title">🐻 Freddy's Toll</div>
-        ${canPass ? `<button class="mp-btn accent dp-action-btn" id="dp-freddy-pass">🐻 Free Pass → ${skipLabel}</button>` : ''}
-        <button class="mp-btn primary dp-action-btn" id="dp-pay-toll" ${canAfford ? '' : 'disabled'}>${canAfford ? `💰 Pay ${currentToll}🪙 → ${skipLabel}` : `💰 Need ${currentToll}🪙`}</button>
-        ${currentToll < nextToll ? `<div class="dp-toll-next-info">Next: ${nextToll}🪙</div>` : `<div class="dp-toll-next-info dp-toll-max-info">MAX price</div>`}
-        <button class="mp-btn dp-action-btn" id="dp-free-path">😰 Free → ${freeLabel}</button>`;
+        <div class="dp-toll-title">${T('toll.title')}</div>
+        ${canPass ? `<button class="mp-btn accent dp-action-btn" id="dp-freddy-pass">${T('toll.freePass', { dest: skipLabel })}</button>` : ''}
+        <button class="mp-btn primary dp-action-btn" id="dp-pay-toll" ${canAfford ? '' : 'disabled'}>${canAfford ? T('toll.pay', { cost: currentToll, dest: skipLabel }) : T('toll.needCoins', { cost: currentToll })}</button>
+        ${currentToll < nextToll ? `<div class="dp-toll-next-info">${T('toll.nextPrice', { cost: nextToll })}</div>` : `<div class="dp-toll-next-info dp-toll-max-info">${T('toll.maxPrice')}</div>`}
+        <button class="mp-btn dp-action-btn" id="dp-free-path">${T('toll.freePath', { dest: freeLabel })}</button>`;
     }
   }
 
   if (btnsEl) btnsEl.innerHTML = actionHTML ? `<div class="dice-panel-actions">${actionHTML}</div>` : '';
   panel.innerHTML = `
-    <div class="dice-shop-title">🎲 Dice</div>
-    <div class="dice-shop-coins">🪙 ${coins} available</div>
+    <div class="dice-shop-title">${T('dice.title')}</div>
+    <div class="dice-shop-coins">${T('dice.coinsAvailable', { n: coins })}</div>
     <div class="dice-inv-list">${cards}</div>`;
 
   panel.querySelectorAll('.dic-buy-btn').forEach(btn => {
@@ -2311,7 +2314,7 @@ function showDiceShop(room) {
       if (!ns[playerSlot]) ns[playerSlot] = { mgWins: 0, badLucks: 0 };
       ns[playerSlot].dice = 'd6';
       await db.from('party_rooms').update({ player_stats: JSON.stringify(ns) }).eq('id', roomId);
-      showToast('Unequipped — back to d6 🎲');
+      showToast(T('dice.unequippedBack'));
     }, { once: true });
   });
 
@@ -2357,8 +2360,8 @@ async function buyDice(diceId, price) {
     player_coins: JSON.stringify(st.coins),
   }).eq('id', roomId);
   emitEvent(`🎲 ${roomData[`${playerSlot}_name`]} bought the ${DICE_TYPES[diceId].label}!`);
-  const forcedNote = shopD?.forced ? ` (forced ${shopD.forced} turns!)` : '';
-  showToast(`Bought ${DICE_TYPES[diceId].label}!${forcedNote} ${DICE_TYPES[diceId].emoji}`);
+  const forcedNote = shopD?.forced ? T('dice.boughtForced', { n: shopD.forced }) : '';
+  showToast(T('dice.bought', { name: T('dname.' + diceId), forced: forcedNote, emoji: DICE_TYPES[diceId].emoji }));
 }
 
 async function equipDice(diceId) {
@@ -2367,13 +2370,13 @@ async function equipDice(diceId) {
   const ns = pStats(roomData);
   const psn = ns[playerSlot] || {};
   if (psn.forcedDice && (psn.forcedTurns || 0) > 0 && diceId !== psn.forcedDice) {
-    showToast(`🔒 Forced die active for ${psn.forcedTurns} more turn${psn.forcedTurns > 1 ? 's' : ''}!`);
+    showToast(T('dice.forcedActive', { n: psn.forcedTurns, s: psn.forcedTurns > 1 ? 's' : '' }));
     return;
   }
   if (!ns[playerSlot]) ns[playerSlot] = { mgWins: 0, badLucks: 0 };
   ns[playerSlot].dice = diceId;
   await db.from('party_rooms').update({ player_stats: JSON.stringify(ns) }).eq('id', roomId);
-  showToast(`Equipped ${DICE_TYPES[diceId]?.label || diceId}! ${DICE_TYPES[diceId]?.emoji || '🎲'}`);
+  showToast(T('dice.equipped2', { name: T('dname.' + diceId), emoji: DICE_TYPES[diceId]?.emoji || '🎲' }));
 }
 
 // ── Tollbooth (hard mode) ─────────────────────────────────────────────────────
@@ -2387,15 +2390,15 @@ function showTollboothUI(room) {
   const freeIdx  = freeMap[pos] !== undefined ? freeMap[pos] : null;
   const skipCfg  = SPACE_CFG[tiles[skipIdx]] || SPACE_CFG.normal;
   const freeCfg  = freeIdx !== null ? (SPACE_CFG[tiles[freeIdx]] || SPACE_CFG.normal) : null;
-  const skipDesc = `Space ${skipIdx} ${skipCfg.emoji || ''}`;
-  const freeDesc = freeIdx !== null ? `Space ${freeIdx} ${freeCfg.emoji || ''}` : 'Danger zone';
+  const skipDesc = `${T('toll.spaceLabel', { n: skipIdx })} ${skipCfg.emoji || ''}`;
+  const freeDesc = freeIdx !== null ? `${T('toll.spaceLabel', { n: freeIdx })} ${freeCfg.emoji || ''}` : T('toll.dangerZone');
   const pendingSteps = pStats(room)[playerSlot]?.pendingSteps || 0;
 
   el.innerHTML = `<div class="action-card">
-    <div class="tollbooth-title">🐻 Freddy's Tollbooth</div>
-    <div class="action-pos">A: ${skipDesc} · B: ${freeDesc}</div>
-    ${pendingSteps > 0 ? `<div style="font-size:.65rem;color:var(--gold)">${pendingSteps} steps left after choice</div>` : ''}
-    <div style="font-size:.65rem;color:var(--text-muted);margin-top:2px">Choose in the panel →</div>
+    <div class="tollbooth-title">${T('toll.cardTitle')}</div>
+    <div class="action-pos">${T('toll.pathInfo', { a: skipDesc, b: freeDesc })}</div>
+    ${pendingSteps > 0 ? `<div style="font-size:.65rem;color:var(--gold)">${T('toll.stepsLeft', { n: pendingSteps })}</div>` : ''}
+    <div style="font-size:.65rem;color:var(--text-muted);margin-top:2px">${T('toll.choosePanel')}</div>
   </div>`;
 }
 
@@ -2568,8 +2571,8 @@ function showMgWaitScreen(room) {
 
   document.getElementById('mg-content').innerHTML = `<div class="minigame-intro">
     <div class="mg-emoji">${cfg.emoji}</div>
-    <h2 class="mg-title">${cfg.name}</h2>
-    <p class="mg-desc">${cfg.desc}</p>
+    <h2 class="mg-title">${T('mg.' + cfg.id + '.name')}</h2>
+    <p class="mg-desc">${T('mg.' + cfg.id + '.desc')}</p>
     <div class="mg-players" id="mg-ready-list">
       ${involved.map(s => {
         const char  = room[`${s}_char`] || 'freddy';
@@ -2582,10 +2585,10 @@ function showMgWaitScreen(room) {
         </span>`;
       }).join('')}
     </div>
-    <div class="mg-reward">🏆 Winner +${room.mg_reward}🪙 · 🤝 Tie: split equally</div>
+    <div class="mg-reward">${T('mg.reward', { n: room.mg_reward })}</div>
     ${!alreadyReady && involved.includes(playerSlot)
-      ? `<button class="mp-btn primary" id="mg-ready-btn">⚡ I'm Ready!</button>`
-      : `<p class="mg-desc" style="font-size:.8rem">Waiting for all players...</p>`}
+      ? `<button class="mp-btn primary" id="mg-ready-btn">${T('mg.imReady')}</button>`
+      : `<p class="mg-desc" style="font-size:.8rem">${T('mg.waitingAll')}</p>`}
   </div>`;
 
   if (!alreadyReady && involved.includes(playerSlot)) {
@@ -2595,7 +2598,7 @@ function showMgWaitScreen(room) {
 
 async function readyForMinigame() {
   const btn = document.getElementById('mg-ready-btn');
-  if (btn) { btn.disabled = true; btn.textContent = '✅ Ready!'; }
+  if (btn) { btn.disabled = true; btn.textContent = T('mg.readyBtn'); }
   await db.from('party_rooms').update({
     [mgDoneKey(playerSlot)]: true,
   }).eq('id', roomId);
@@ -2621,8 +2624,8 @@ function startMinigameScreen(room) {
   if (!involved.includes(playerSlot)) {
     document.getElementById('mg-content').innerHTML = `<div class="minigame-intro">
       <div class="mg-emoji">${cfg.emoji}</div>
-      <h2 class="mg-title">${cfg.name}</h2>
-      <p class="mg-desc">Minigame in progress...</p>
+      <h2 class="mg-title">${T('mg.' + mg.id + '.name')}</h2>
+      <p class="mg-desc">${T('mg.inProgress')}</p>
     </div>`;
     return;
   }
@@ -2833,23 +2836,23 @@ function showMgPodium(room) {
   const podiumHTML = podiumRows.map((p, i) => {
     const color  = PLAYER_COLORS[slotNum(p.slot) - 1];
     const isMe   = p.slot === playerSlot;
-    const change = p.coinsChange > 0 ? `<span style="color:#2ecc71">+${p.coinsChange}🪙</span>`
-                 : p.coinsChange < 0 ? `<span style="color:#e74c3c">${p.coinsChange}🪙</span>` : '';
+    const change = p.coinsChange > 0 ? `<span style="color:#2ecc71">+${p.coinsChange}${COIN_IMG}</span>`
+                 : p.coinsChange < 0 ? `<span style="color:#e74c3c">${p.coinsChange}${COIN_IMG}</span>` : '';
     return `<div class="pdm-row${isMe ? ' pdm-me' : ''}" style="border-color:${isMe ? color : 'transparent'}">
       <span class="pdm-medal">${isTie ? '🤝' : medals[i]}</span>
       <img class="pdm-avatar" src="${charImg(p.char)}" style="border-color:${color}" onerror="this.style.display='none'"/>
       <div class="pdm-info">
-        <span class="pdm-name" style="color:${color}">${p.name}${isMe ? ' (you)' : ''}</span>
-        <span class="pdm-pts">${p.score} pts ${change}</span>
+        <span class="pdm-name" style="color:${color}">${p.name}${isMe ? ` ${T('podium.you')}` : ''}</span>
+        <span class="pdm-pts">${T('podium.pts', { n: p.score })} ${change}</span>
       </div>
     </div>`;
   }).join('');
 
   const tieCoins = podiumRows[0]?.coinsChange || 0;
-  const verdict = isTie ? (tieCoins > 0 ? `🤝 Tie — +${tieCoins}🪙 each!` : '🤝 Tie — coins split!')
-    : myRank === 0 ? '🏆 You won!'
-    : myRank === podiumRows.length - 1 ? '💀 You lost!'
-    : `#${myRank + 1}`;
+  const verdict = isTie ? (tieCoins > 0 ? T('podium.tie', { n: tieCoins }) : T('podium.tieSplit'))
+    : myRank === 0 ? T('podium.youWon')
+    : myRank === podiumRows.length - 1 ? T('podium.youLost')
+    : T('podium.youRank', { n: myRank + 1 });
 
   const overlay = document.createElement('div');
   overlay.id = 'mg-result-overlay';
@@ -2860,8 +2863,8 @@ function showMgPodium(room) {
       ${isInvolved ? `<div class="mg-result-verdict ${myRank === 0 && !isTie ? 'mg-result-win' : myRank === podiumRows.length-1 && !isTie ? 'mg-result-lose' : ''}">${verdict}</div>` : ''}
       <div class="pdm-list">${podiumHTML}</div>
       ${!alreadyConfirmed && isInvolved
-        ? `<button class="mp-btn primary" id="mg-result-confirm" style="margin-top:6px;width:100%">✅ Continue</button>`
-        : `<p class="mg-result-waiting">Waiting for others...</p>`}
+        ? `<button class="mp-btn primary" id="mg-result-confirm" style="margin-top:6px;width:100%">${T('podium.continue')}</button>`
+        : `<p class="mg-result-waiting">${T('podium.waitingOthers')}</p>`}
     </div>`;
 
   document.body.appendChild(overlay);
@@ -2892,7 +2895,7 @@ function playHelpyBoop(room, mg) {
     if (done) return; done = true;
     clearInterval(countTimer); clearTimeout(spawnTimer);
     const el = document.getElementById('mg-content');
-    if (el) el.innerHTML = `<div class="mg-done-msg">⏳ Waiting for results...</div>`;
+    if (el) el.innerHTML = `<div class="mg-done-msg">${T('mg.waitingResults')}</div>`;
     submitScore(score);
   }
   mgCleanup = end;
@@ -2900,12 +2903,12 @@ function playHelpyBoop(room, mg) {
   document.getElementById('mg-content').innerHTML = `<div class="mg-play helpy-boop">
     <div class="mg-hud">
       <img src="${helpyImgSrc}" style="width:28px;height:28px;object-fit:contain;border-radius:50%" onerror="this.style.display='none'"/>
-      <span>Helpy Boop</span>
+      <span>${T('mg.helpy.hud')}</span>
       <span id="hb-score">👃 0</span>
       <span id="hb-timer">⏱ 30s</span>
     </div>
     <div class="hb-area" id="hb-area">
-      <div style="padding:20px;text-align:center;color:var(--text-muted);font-size:.85rem">Click Helpy's nose!</div>
+      <div style="padding:20px;text-align:center;color:var(--text-muted);font-size:.85rem">${T('mg.helpy.prompt')}</div>
     </div>
   </div>`;
 
@@ -2931,6 +2934,7 @@ function playHelpyBoop(room, mg) {
       if (done) return;
       score++;
       scoreEl.textContent = `👃 ${score}`;
+      try { const a = new Audio('../assets/sounds/honk.mp3'); a.volume = 0.6; a.play(); } catch(e) {}
       liveScores[playerSlot] = score; updateLiveBar();
       broadcastCh?.send({ type: 'broadcast', event: 'mg_score', payload: { slot: playerSlot, score } });
       h.classList.add('clicked');
@@ -2963,7 +2967,7 @@ function playMoneyLaundry(room, mg) {
     document.removeEventListener('touchmove', onMove);
     document.removeEventListener('touchend',  onUp);
     const el = document.getElementById('mg-content');
-    if (el) el.innerHTML = `<div class="mg-done-msg">⏳ Waiting for results...</div>`;
+    if (el) el.innerHTML = `<div class="mg-done-msg">${T('mg.waitingResults')}</div>`;
     submitScore(deposited);
   }
   mgCleanup = end;
@@ -2971,7 +2975,7 @@ function playMoneyLaundry(room, mg) {
   document.getElementById('mg-content').innerHTML = `<div class="mg-play money-laundry">
     <div class="mg-hud">
       <img src="${rfSrc}" style="width:26px;height:26px;object-fit:contain;border-radius:50%" onerror="this.style.display='none'"/>
-      <span>Money Laundering</span>
+      <span>${T('mg.money.hud')}</span>
       <span id="ml-dep">🏦 0</span>
       <span id="ml-timer">⏱ 30s</span>
     </div>
@@ -2981,7 +2985,7 @@ function playMoneyLaundry(room, mg) {
         <img src="${rfSrc}" alt="Rockstar Freddy" draggable="false" onerror="this.innerHTML='🐻'"/>
       </div>
     </div>
-    <p style="font-size:.75rem;color:var(--text-muted);text-align:center;margin:0">Drag coins to Rockstar Freddy!</p>
+    <p style="font-size:.75rem;color:var(--text-muted);text-align:center;margin:0">${T('mg.money.prompt')}</p>
   </div>`;
 
   const scene   = document.getElementById('ml-scene');
@@ -3003,7 +3007,7 @@ function playMoneyLaundry(room, mg) {
     let cx, cy, t = 0;
     do { cx = Math.random() * Math.max(w-40,40); cy = Math.random() * Math.max(h-40,40); t++; }
     while (t < 30 && Math.abs(cx-cx0) < 60 && Math.abs(cy-cy0) < 60);
-    coin.style.left = cx+'px'; coin.style.top = cy+'px'; coin.textContent = '🪙';
+    coin.style.left = cx+'px'; coin.style.top = cy+'px'; coin.innerHTML = `<img src="../assets/images/fazcoin.png" style="width:28px;height:28px;object-fit:contain;pointer-events:none;">`;
     coin.addEventListener('mousedown', startDrag);
     coin.addEventListener('touchstart', startDrag, { passive: false });
     scene.appendChild(coin);
@@ -3030,6 +3034,7 @@ function playMoneyLaundry(room, mg) {
     dragCoin.classList.remove('dragging');
     if (isOverFreddy(client.clientX, client.clientY)) {
       deposited++; depEl.textContent = `🏦 ${deposited}`;
+      try { const a = new Audio('../assets/sounds/money.mp3'); a.volume = 0.6; a.play(); } catch(e) {}
       liveScores[playerSlot] = deposited; updateLiveBar();
       broadcastCh?.send({ type: 'broadcast', event: 'mg_score', payload: { slot: playerSlot, score: deposited } });
       dragCoin.classList.add('deposited');
@@ -3065,7 +3070,7 @@ function playFeedingFrenzy(room, mg) {
     if (done) return; done = true;
     if (ct) clearInterval(ct);
     const el = document.getElementById('mg-content');
-    if (el) el.innerHTML = `<div class="mg-done-msg">⏳ Waiting for results...</div>`;
+    if (el) el.innerHTML = `<div class="mg-done-msg">${T('mg.waitingResults')}</div>`;
     submitScore(score);
   }
   mgCleanup = () => end(0);
@@ -3076,17 +3081,17 @@ function playFeedingFrenzy(room, mg) {
     document.getElementById('mg-content').innerHTML = `<div class="mg-play feeding-frenzy">
       <div class="mg-hud">
         <img class="ff-chica-img" src="${chSrc}" onerror="this.style.display='none'"/>
-        <span>Feeding Frenzy</span>
+        <span>${T('mg.feedingFrenzy.name')}</span>
         <span>${step+1}/${recipe.length}</span>
         <span id="ff-timer">⏱ 60s</span>
       </div>
       <div class="ff-recipe">
-        <div class="ff-label">Chica's Recipe</div>
+        <div class="ff-label">${T('mg.feeding.recipe')}</div>
         <div class="ff-recipe-items">
           ${recipe.map((ing,i)=>`<span class="ff-recipe-ing ${i<step?'done':i===step?'current':''}">${i<step?'✅':ing}</span>`).join('')}
         </div>
       </div>
-      <div class="ff-instruction">Click: <span class="ff-target">${recipe[step]}</span></div>
+      <div class="ff-instruction">${T('mg.feeding.click')} <span class="ff-target">${recipe[step]}</span></div>
       <div class="ff-ingredients" id="ff-grid">
         ${shuffled.map(ing=>`<button class="mp-btn ff-ing-btn" data-ing="${ing}">${ing}</button>`).join('')}
       </div>
@@ -3134,7 +3139,7 @@ function playGuitarFinder(room, mg) {
     if (done) return; done = true;
     clearInterval(ct);
     const el = document.getElementById('mg-content');
-    if (el) el.innerHTML = `<div class="mg-done-msg">⏳ Waiting for results...</div>`;
+    if (el) el.innerHTML = `<div class="mg-done-msg">${T('mg.waitingResults')}</div>`;
     submitScore(score);
   }
   mgCleanup = () => end(0);
@@ -3142,10 +3147,10 @@ function playGuitarFinder(room, mg) {
   document.getElementById('mg-content').innerHTML = `<div class="mg-play guitar-finder">
     <div class="mg-hud">
       <img class="gf-bonnie-img" src="${bnSrc}" onerror="this.style.display='none'"/>
-      <span>Guitar Finder</span>
+      <span>${T('mg.guitarFinder.name')}</span>
       <span id="gf-timer">⏱ 30s</span>
     </div>
-    <div class="gf-instruction">Find Bonnie's guitar 🎸!</div>
+    <div class="gf-instruction">${T('mg.guitar.inst')}</div>
     <div class="gf-grid" id="gf-grid">
       ${items.map((item,i) => `<button class="mp-btn gf-item" data-idx="${i}">${item}</button>`).join('')}
     </div>
@@ -3179,7 +3184,7 @@ function playPowerOut(room, mg) {
     if (done) return; done = true;
     clearInterval(reactPoll); clearInterval(dotTimer); clearTimeout(attackTimer);
     const el = document.getElementById('mg-content');
-    if (el) el.innerHTML = `<div class="mg-done-msg">⏳ Waiting for results...</div>`;
+    if (el) el.innerHTML = `<div class="mg-done-msg">${T('mg.waitingResults')}</div>`;
     submitScore(score);
   }
   mgCleanup = () => end(0);
@@ -3187,19 +3192,19 @@ function playPowerOut(room, mg) {
   document.getElementById('mg-content').innerHTML = `<div class="mg-play power-out">
     <div class="mg-hud">
       <img src="${frSrc}" style="width:26px;height:26px;border-radius:50%;object-fit:contain" onerror="this.style.display='none'"/>
-      <span>Power Out</span>
-      <span id="po-status">🌑 Waiting...</span>
+      <span>${T('mg.powerOut.name')}</span>
+      <span id="po-status">🌑 ${T('mg.power.waiting')}...</span>
     </div>
     <div class="po-scene" id="po-scene">
       <div class="po-darkness"></div>
       <div class="po-freddy-container" id="po-fc">
         <img class="po-freddy-img" src="${frSrc}" alt="Freddy" onerror="this.textContent='🐻'"/>
       </div>
-      <div class="po-instruction" id="po-inst">Wait... then close the door as fast as possible!</div>
+      <div class="po-instruction" id="po-inst">${T('mg.power.wait')}</div>
       <div id="po-bar-wrap" style="display:none;width:80%;height:8px;background:#333;border-radius:4px;z-index:3;overflow:hidden">
         <div id="po-bar" style="height:100%;background:#e74c3c;width:100%;transition:none"></div>
       </div>
-      <button class="mp-btn primary po-door-btn" id="po-door" disabled>🚪 Close Door!</button>
+      <button class="mp-btn primary po-door-btn" id="po-door" disabled>${T('mg.power.closeDoor')}</button>
     </div>
   </div>`;
 
@@ -3207,7 +3212,7 @@ function playPowerOut(room, mg) {
   dotTimer = setInterval(() => {
     dots = (dots+1) % 4;
     const s = document.getElementById('po-status');
-    if (s) s.textContent = '🌑 Waiting' + '.'.repeat(dots);
+    if (s) s.textContent = '🌑 ' + T('mg.power.waiting') + '.'.repeat(dots);
   }, 500);
 
   attackTimer = setTimeout(() => {
@@ -3223,8 +3228,8 @@ function playPowerOut(room, mg) {
 
     freddyTime = Date.now();
     scene.classList.add('freddy-incoming');
-    if (status) status.textContent = '😱 CLOSE THE DOOR!';
-    if (inst)   inst.textContent   = 'CLICK NOW! 🚪';
+    if (status) status.textContent = T('mg.power.closeNow');
+    if (inst)   inst.textContent   = T('mg.power.clickNow');
     if (door)   door.disabled = false;
     if (barWrap) barWrap.style.display = 'block';
     if (bar) { bar.style.transition = `width ${REACT_WINDOW}ms linear`; requestAnimationFrame(() => { bar.style.width = '0%'; }); }
@@ -3250,7 +3255,7 @@ function playFlashlight(room, mg) {
     if (done) return; done = true;
     clearInterval(timer); clearTimeout(foxyTimer); clearInterval(countdownTimer);
     const el = document.getElementById('mg-content');
-    if (el) el.innerHTML = `<div class="mg-done-msg">⏳ Waiting for results...</div>`;
+    if (el) el.innerHTML = `<div class="mg-done-msg">${T('mg.waitingResults')}</div>`;
     submitScore(score);
   }
   mgCleanup = () => end(clicks);
@@ -3259,16 +3264,16 @@ function playFlashlight(room, mg) {
   document.getElementById('mg-content').innerHTML = `
     <div class="mg-play" style="gap:6px">
       <div class="mg-hud">
-        <span>🔦 Flashlight</span>
+        <span>🔦 ${T('mg.flashlight.name')}</span>
         <span id="fl-time">${DURATION/1000}s</span>
-        <span id="fl-clicks">0 taps</span>
+        <span id="fl-clicks">${T('mg.flash.taps', { n: 0 })}</span>
       </div>
       <div id="fl-scene" class="fl-scene">
         <div id="fl-beam" class="fl-beam"></div>
         <div id="fl-foxy" class="fl-foxy" style="display:none">
           <img src="${wfSrc}" alt="Withered Foxy" onerror="this.textContent='🦊'" draggable="false" style="pointer-events:none;-webkit-user-drag:none"/>
         </div>
-        <div id="fl-tap-hint" class="fl-tap-hint">TAP!</div>
+        <div id="fl-tap-hint" class="fl-tap-hint">${T('mg.flash.tap')}</div>
       </div>
     </div>`;
 
@@ -3288,7 +3293,7 @@ function playFlashlight(room, mg) {
     e.preventDefault();
     if (done) return;
     clicks++;
-    document.getElementById('fl-clicks').textContent = `${clicks} taps`;
+    document.getElementById('fl-clicks').textContent = T('mg.flash.taps', { n: clicks });
     flash();
     if (hint) hint.style.opacity = '0';
   });
@@ -3359,7 +3364,7 @@ function playPizzaDough(room, mg) {
     if (done) return; done = true;
     clearInterval(countdownTimer);
     const el = document.getElementById('mg-content');
-    if (el) el.innerHTML = `<div class="mg-done-msg">⏳ Waiting for results...</div>`;
+    if (el) el.innerHTML = `<div class="mg-done-msg">${T('mg.waitingResults')}</div>`;
     submitScore(score);
   }
   mgCleanup = () => end(done ? undefined : circleScore(path));
@@ -3367,12 +3372,12 @@ function playPizzaDough(room, mg) {
   document.getElementById('mg-content').innerHTML = `
     <div class="mg-play" style="gap:6px">
       <div class="mg-hud">
-        <span>🍕 Pizza Dough</span>
+        <span>🍕 ${T('mg.pizzaDough.name')}</span>
         <span id="pd-time">${DURATION/1000}s</span>
-        <span id="pd-score">Draw a circle!</span>
+        <span id="pd-score">${T('mg.pizza.draw')}</span>
       </div>
       <canvas id="pd-canvas" class="pd-canvas" width="360" height="300"></canvas>
-      <div id="pd-hint" style="font-size:.72rem;color:var(--text-muted)">Hold & draw a circle, then release</div>
+      <div id="pd-hint" style="font-size:.72rem;color:var(--text-muted)">${T('mg.pizza.hint')}</div>
     </div>`;
 
   const canvas = document.getElementById('pd-canvas');
@@ -3397,7 +3402,7 @@ function playPizzaDough(room, mg) {
     path.push(getPos(e));
     const s = circleScore(path);
     const sc = document.getElementById('pd-score');
-    if (sc) sc.textContent = path.length > 30 ? `${s}%` : 'Keep drawing...';
+    if (sc) sc.textContent = path.length > 30 ? `${s}%` : T('mg.pizza.keep');
     drawPath(canvas, path, s);
   });
   canvas.addEventListener('pointerup', e => {
@@ -3408,7 +3413,7 @@ function playPizzaDough(room, mg) {
     const s = circleScore(path);
     drawPath(canvas, path, s);
     const sc = document.getElementById('pd-score');
-    if (sc) sc.textContent = `${s}% — ${s>80?'Perfect!':s>60?'Great!':s>40?'Not bad':'Try again!'}`;
+    if (sc) sc.textContent = `${s}% — ${s>80?T('mg.circle.perfect'):s>60?T('mg.circle.great'):s>40?T('mg.circle.notBad'):T('mg.circle.tryAgain')}`;
     // Auto-submit on release if < 5s left, otherwise let them redraw
     const elapsed2 = Date.now() - startTime;
     if (DURATION - elapsed2 < 5000) end(s);
@@ -3467,8 +3472,8 @@ function showResult(room) {
       name:   room[`${s}_name`],
       char:   room[`${s}_char`] || 'freddy',
       color:  PLAYER_COLORS[slotNum(s) - 1],
-      pizzas: (st.pizzas[s] || 0) + Math.floor((st.coins[s] || 0) / COINS_PER_PIZZA),
-      coins:  (st.coins[s]  || 0) % COINS_PER_PIZZA,
+      pizzas: (st.pizzas[s] || 0),
+      coins:  (st.coins[s]  || 0),
     }))
     .sort((a, b) => b.pizzas !== a.pizzas ? b.pizzas - a.pizzas : b.coins - a.coins);
 
@@ -3484,29 +3489,29 @@ function showResult(room) {
   rankEl.innerHTML = `
     <div class="result-winner-banner">
       <img class="rwb-avatar" src="${charImg(winner.char)}" onerror="this.style.display='none'"/>
-      <div class="rwb-name" style="color:${winner.color}">${winner.name} Wins! 🎉</div>
-      <div class="rwb-score">🍕 ${winner.pizzas} pizza${winner.pizzas !== 1 ? 's' : ''}</div>
+      <div class="rwb-name" style="color:${winner.color}">${T('result.wins', { name: winner.name })}</div>
+      <div class="rwb-score">${winner.pizzas !== 1 ? T('result.pizzas', { n: winner.pizzas }) : T('result.pizza1', { n: winner.pizzas })}</div>
     </div>
     ${ranked.map((p, i) => `
       <div class="result-rank-row${i === 0 ? ' result-winner' : ''}">
         <span class="result-medal">${['🥇','🥈','🥉','4️⃣'][i]}</span>
         <img class="result-avatar" src="${charImg(p.char)}" onerror="this.style.display='none'"/>
         <span class="result-player-name" style="color:${p.color}">${p.name}</span>
-        <span class="result-score">🍕${p.pizzas} 🪙${p.coins}</span>
+        <span class="result-score">🍕${p.pizzas} ${COIN_IMG}${p.coins}</span>
       </div>`).join('')}
     <div class="result-awards">
-      <div class="result-awards-title">🏅 Mini Awards</div>
+      <div class="result-awards-title">${T('result.awards.title')}</div>
       <div class="result-award-row">
         <span class="award-icon">🎮</span>
-        <span class="award-label">Minigame Champion</span>
+        <span class="award-label">${T('result.awards.mgChamp')}</span>
         <span class="award-winner" style="color:${mostMgWins.color}">${mostMgWins.name}</span>
-        <span class="award-detail">${statsMap[mostMgWins.slot]?.mgWins || 0} wins</span>
+        <span class="award-detail">${(statsMap[mostMgWins.slot]?.mgWins || 0) !== 1 ? T('result.awards.wins', { n: statsMap[mostMgWins.slot]?.mgWins || 0 }) : T('result.awards.wins1', { n: 1 })}</span>
       </div>
       <div class="result-award-row">
         <span class="award-icon">💀</span>
-        <span class="award-label">Most Unlucky</span>
+        <span class="award-label">${T('result.awards.badLuck')}</span>
         <span class="award-winner" style="color:${mostBadLucks.color}">${mostBadLucks.name}</span>
-        <span class="award-detail">${statsMap[mostBadLucks.slot]?.badLucks || 0} bad luck${(statsMap[mostBadLucks.slot]?.badLucks || 0) !== 1 ? 's' : ''}</span>
+        <span class="award-detail">${(statsMap[mostBadLucks.slot]?.badLucks || 0) !== 1 ? T('result.awards.badLucks', { n: statsMap[mostBadLucks.slot]?.badLucks || 0 }) : T('result.awards.badLuck1', { n: 1 })}</span>
       </div>
     </div>`;
 
@@ -3521,7 +3526,7 @@ function showResult(room) {
     const wrap = document.querySelector('.party-result-wrap');
     const jsBtn = document.createElement('button');
     jsBtn.className = 'mp-btn accent jumpscare-btn';
-    jsBtn.textContent = '🎃 Jumpscare!';
+    jsBtn.textContent = T('result.jumpscare');
 
     const picker = document.createElement('div');
     picker.className = 'jumpscare-picker';
@@ -3557,7 +3562,7 @@ function showResult(room) {
 
 async function voteRematch() {
   const btn = document.getElementById('rematch-btn');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Waiting...'; }
+  if (btn) { btn.disabled = true; btn.textContent = T('result.waiting'); }
 
   const room   = roomData;
   const pc     = room.player_count || 2;

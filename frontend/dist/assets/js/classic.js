@@ -10,12 +10,26 @@ let hintUsed = false;
 const input = document.getElementById('search-input');
 const dropdown = document.getElementById('dropdown');
 
+function getDailyProgressKey() {
+  const now = new Date();
+  return `fnaf_classic_daily_progress_${now.getFullYear()}_${now.getMonth() + 1}_${now.getDate()}`;
+}
+function saveDailyProgress() {
+  try { localStorage.setItem(getDailyProgressKey(), JSON.stringify({ guessNames: guesses.map(g => g.name), hintUsed })); } catch {}
+}
+function clearDailyProgress() {
+  localStorage.removeItem(getDailyProgressKey());
+}
+
 function initGame(mode) {
   currentMode = mode;
+  document.querySelectorAll('[data-i18n]').forEach(function(el) {
+    el.textContent = T(el.dataset.i18n);
+  });
   if (mode === 'daily') {
     MAX_GUESSES = 7;
     target = CHARS[getDailyIndex()];
-    document.getElementById('classic-mode-badge').textContent = '📅 Daily';
+    document.getElementById('classic-mode-badge').textContent = T('classic.badgeDaily');
 
     const previous = getDailyResult();
     if (previous) {
@@ -31,10 +45,10 @@ function initGame(mode) {
       banner.classList.remove('lose');
       banner.classList.add('show');
       if (!previous.won) banner.classList.add('lose');
-      document.getElementById('result-title').textContent = previous.won ? '🎉 Already played today!' : '💀 Already played today!';
+      document.getElementById('result-title').textContent = previous.won ? T('game.alreadyPlayedWon') : T('game.alreadyPlayedLost');
       document.getElementById('result-msg').textContent = previous.won
-        ? `It was ${previous.targetName}! Got it in ${previous.guessCount} tries.`
-        : `It was ${previous.targetName}. Try again tomorrow!`;
+        ? T('game.alreadyWonMsg', { name: previous.targetName, count: previous.guessCount })
+        : T('game.alreadyLostMsg', { name: previous.targetName });
 
       // Inject character image
       const char = CHARS.find(c => c.name === previous.targetName) || target;
@@ -46,10 +60,41 @@ function initGame(mode) {
       imgCont.appendChild(resImg);
       return;
     }
+
+    const progress = JSON.parse(localStorage.getItem(getDailyProgressKey()) || 'null');
+    if (progress && progress.guessNames && progress.guessNames.length > 0) {
+      guesses = [];
+      gameOver = false;
+      selectedIndex = -1;
+      hintUsed = progress.hintUsed || false;
+      document.getElementById('guesses-container').innerHTML = '';
+      document.getElementById('result-banner').classList.remove('show', 'lose');
+      input.disabled = false;
+      input.value = '';
+      input.placeholder = T('classic.placeholder');
+      document.getElementById('search-area').style.display = '';
+      dropdown.style.display = 'none';
+      progress.guessNames.forEach(function (name) {
+        const char = CHARS.find(function (c) { return c.name === name; });
+        if (char) { guesses.push(char); renderGuess(char); }
+      });
+      document.getElementById('hint-text').textContent = '';
+      document.getElementById('hint-btn').disabled = hintUsed;
+      document.getElementById('hint-btn').textContent = hintUsed ? T('game.hintUsed') : T('game.useHint');
+      if (hintUsed) {
+        document.getElementById('hint-text').textContent = T('game.hintFirstLetter', { letter: target.name[0].toUpperCase() });
+        document.getElementById('hint-area').style.display = '';
+      } else {
+        const wc = guesses.filter(function (g) { return g.name !== target.name; }).length;
+        document.getElementById('hint-area').style.display = (wc > 0 && wc % 3 === 0) ? '' : 'none';
+      }
+      updateAttemptsLeft();
+      return;
+    }
   } else {
     MAX_GUESSES = 6;
     target = CHARS[Math.floor(Math.random() * CHARS.length)];
-    document.getElementById('classic-mode-badge').textContent = '♾️ Endless';
+    document.getElementById('classic-mode-badge').textContent = T('classic.badgeEndless');
   }
 
   guesses = [];
@@ -62,14 +107,14 @@ function initGame(mode) {
   banner.classList.remove('show', 'lose');
   input.disabled = false;
   input.value = '';
-  input.placeholder = 'Write an animatronic...';
+  input.placeholder = T('classic.placeholder');
   document.getElementById('search-area').style.display = '';
   dropdown.style.display = 'none';
 
   document.getElementById('hint-area').style.display = 'none';
   document.getElementById('hint-text').textContent = '';
   document.getElementById('hint-btn').disabled = false;
-  document.getElementById('hint-btn').textContent = '💡 Use Hint (first letter)';
+  document.getElementById('hint-btn').textContent = T('game.useHint');
 
   updateAttemptsLeft();
   if (currentMode === 'endless') showStreakWidget('classic');
@@ -78,16 +123,16 @@ function initGame(mode) {
 function updateAttemptsLeft() {
   const el = document.getElementById('attempts-left');
   const remaining = MAX_GUESSES - guesses.length;
-  el.textContent = gameOver ? '' : `Tries left: ${remaining}`;
+  el.textContent = gameOver ? '' : T('game.triesLeft', { remaining });
 }
 
 function useHint() {
   if (hintUsed || !target) return;
   hintUsed = true;
   document.getElementById('hint-btn').disabled = true;
-  document.getElementById('hint-btn').textContent = '💡 Hint used';
-  document.getElementById('hint-text').textContent =
-    `First letter: ${target.name[0].toUpperCase()}`;
+  document.getElementById('hint-btn').textContent = T('game.hintUsed');
+  document.getElementById('hint-text').textContent = T('game.hintFirstLetter', { letter: target.name[0].toUpperCase() });
+  if (currentMode === 'daily') saveDailyProgress();
 }
 
 function makeSwatch(colorName) {
@@ -112,7 +157,7 @@ function makeColorLabel(colors) {
     wrap.appendChild(makeSwatch(c));
     const txt = document.createElement('span');
     txt.className = 'color-name';
-    txt.textContent = c;
+    txt.textContent = T('db.color.' + c);
     wrap.appendChild(txt);
     if (i < arr.length - 1) {
       const sep = document.createElement('span');
@@ -202,10 +247,18 @@ function renderGuess(char) {
           const arrow = gYear < tYear ? '↑' : '↓';
           label.innerHTML = `${displayChar[f.key]} <span class="year-arrow">${arrow}</span>`;
         } else {
-          label.textContent = displayChar[f.key];
+          label.textContent = isNaN(parseInt(displayChar[f.key]))
+            ? T('db.year.' + displayChar[f.key])
+            : displayChar[f.key];
         }
       } else {
-        label.textContent = displayChar[f.key];
+        let val = displayChar[f.key];
+        if (f.key === 'animal' || f.key === 'type') {
+          val = T('db.' + f.key + '.' + val);
+        } else if (f.key === 'year' && isNaN(parseInt(val))) {
+          val = T('db.year.' + val);
+        }
+        label.textContent = val;
       }
       cell.appendChild(label);
     }
@@ -219,13 +272,14 @@ function submitGuess(char) {
   if (gameOver) return;
 
   if (guesses.some(g => g.name === char.name)) {
-    input.placeholder = 'You tried that already!';
+    input.placeholder = T('game.triedAlready');
     input.value = '';
     dropdown.style.display = 'none';
     return;
   }
 
   guesses.push(char);
+  if (currentMode === 'daily') saveDailyProgress();
   renderGuess(char);
   input.value = '';
   dropdown.style.display = 'none';
@@ -259,6 +313,7 @@ function endGame(won) {
 
   if (currentMode === 'daily') {
     saveDailyResult(won, target.name, guesses.length);
+    clearDailyProgress();
   } else {
     updateStreak('classic', won);
     _renderStreakNums('classic');
@@ -273,7 +328,7 @@ function endGame(won) {
   const switchBtn = document.getElementById('play-switch-btn');
   if (switchBtn) {
     switchBtn.style.display = '';
-    switchBtn.textContent = isDaily ? '♾️ Play Endless' : '📅 Play Daily';
+    switchBtn.textContent = isDaily ? T('game.playEndless') : T('game.playDaily');
     switchBtn.onclick = () => { window.location.href = isDaily ? 'classic.html?mode=endless' : 'classic.html?mode=daily'; };
   }
   const nextBtn = document.getElementById('next-btn');
@@ -281,10 +336,10 @@ function endGame(won) {
     nextBtn.style.display = '';
     nextBtn.dataset.href = isDaily ? 'image.html?mode=daily' : 'image.html?mode=endless';
   }
-  document.getElementById('result-title').textContent = won ? '🎉 Got it!' : '💀 Game Over';
+  document.getElementById('result-title').textContent = won ? T('game.got') : T('game.gameOver');
   document.getElementById('result-msg').textContent = won
-    ? `It was ${target.name}! You guessed it in ${guesses.length} tries.`
-    : `It was ${target.name}. Better luck next time!`;
+    ? T('game.guessedIn', { name: target.name, count: guesses.length })
+    : T('game.betterLuck', { name: target.name });
 
   const imgCont = document.getElementById('result-char-container');
   imgCont.innerHTML = '';
@@ -367,6 +422,42 @@ document.addEventListener('click', e => {
     selectedIndex = -1;
   }
 });
+
+window.onLangChange = function () {
+  if (!target) return;
+  document.getElementById('classic-mode-badge').textContent =
+    currentMode === 'daily' ? T('classic.badgeDaily') : T('classic.badgeEndless');
+  if (!gameOver) input.placeholder = T('classic.placeholder');
+  updateAttemptsLeft();
+  const hintBtn = document.getElementById('hint-btn');
+  if (hintBtn) hintBtn.textContent = hintUsed ? T('game.hintUsed') : T('game.useHint');
+  const hintTxt = document.getElementById('hint-text');
+  if (hintTxt && hintUsed) hintTxt.textContent = T('game.hintFirstLetter', { letter: target.name[0].toUpperCase() });
+  // Re-render guesses
+  document.getElementById('guesses-container').innerHTML = '';
+  guesses.forEach(function (g) { renderGuess(g); });
+  // Result banner
+  if (gameOver) {
+    const isDaily = currentMode === 'daily';
+    if (isDaily && guesses.length === 0) {
+      const prev = getDailyResult();
+      if (prev) {
+        document.getElementById('result-title').textContent = prev.won ? T('game.alreadyPlayedWon') : T('game.alreadyPlayedLost');
+        document.getElementById('result-msg').textContent = prev.won
+          ? T('game.alreadyWonMsg', { name: prev.targetName, count: prev.guessCount })
+          : T('game.alreadyLostMsg', { name: prev.targetName });
+      }
+    } else {
+      const won = guesses.some(function (g) { return g.name === target.name; });
+      document.getElementById('result-title').textContent = won ? T('game.got') : T('game.gameOver');
+      document.getElementById('result-msg').textContent = won
+        ? T('game.guessedIn', { name: target.name, count: guesses.length })
+        : T('game.betterLuck', { name: target.name });
+      const sw = document.getElementById('play-switch-btn');
+      if (sw && sw.style.display !== 'none') sw.textContent = isDaily ? T('game.playEndless') : T('game.playDaily');
+    }
+  }
+};
 
 // Initialization
 document.addEventListener('DOMContentLoaded', () => {

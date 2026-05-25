@@ -43,7 +43,7 @@
     <div class="fnaf-title">
       <img src="../assets/images/title/fnafdlereborn.png" alt="Fnafdle" />
     </div>
-    <div class="fnaf-subtitle">Character Guessing</div>
+    <div class="fnaf-subtitle" data-i18n="classic.subtitle">Character Guessing</div>
   </div>
 
   <!-- ===== CLASSIC GAME SCREEN (Daily + Endless) ===== -->
@@ -52,24 +52,24 @@
     <div class="mode-badge-row">
       <span class="mode-badge" id="classic-mode-badge"></span>
       <div id="streak-widget" class="streak-widget" style="display:none">
-        <div class="streak-item"><span class="streak-label">🔥 Streak</span><span class="streak-num"
+        <div class="streak-item"><span class="streak-label" data-i18n="classic.streak">🔥 Streak</span><span class="streak-num"
             id="streak-current">0</span></div>
         <div class="streak-divider"></div>
-        <div class="streak-item"><span class="streak-label">Best</span><span class="streak-num"
+        <div class="streak-item"><span class="streak-label" data-i18n="classic.best">Best</span><span class="streak-num"
             id="streak-best">0</span></div>
       </div>
-      <button class="back-btn" onclick="goHome()">← Modes</button>
+      <button class="back-btn" onclick="goHome()" data-i18n="game.backBtn">← Modes</button>
     </div>
 
     <div class="legend">
       <div class="legend-item">
-        <div class="legend-dot correct"></div> Correct
+        <div class="legend-dot correct"></div><span data-i18n="classic.correct"> Correct</span>
       </div>
       <div class="legend-item">
-        <div class="legend-dot partial"></div> Partial
+        <div class="legend-dot partial"></div><span data-i18n="classic.partial"> Partial</span>
       </div>
       <div class="legend-item">
-        <div class="legend-dot wrong"></div> Wrong
+        <div class="legend-dot wrong"></div><span data-i18n="classic.wrong"> Wrong</span>
       </div>
     </div>
 
@@ -87,13 +87,13 @@
 
     <div class="table-wrapper">
       <div class="table-header">
-        <div class="col-label">Character</div>
-        <div class="col-label">Name</div>
-        <div class="col-label">Animal</div>
-        <div class="col-label">Type</div>
-        <div class="col-label">Color</div>
-        <div class="col-label">Eye Color</div>
-        <div class="col-label">Year</div>
+        <div class="col-label" data-i18n="classic.colChar">Character</div>
+        <div class="col-label" data-i18n="classic.colName">Name</div>
+        <div class="col-label" data-i18n="classic.colAnimal">Animal</div>
+        <div class="col-label" data-i18n="classic.colType">Type</div>
+        <div class="col-label" data-i18n="classic.colColor">Color</div>
+        <div class="col-label" data-i18n="classic.colEyeColor">Eye Color</div>
+        <div class="col-label" data-i18n="classic.colYear">Year</div>
       </div>
 
       <div id="guesses-container"></div>
@@ -106,11 +106,11 @@
         <p class="result-msg" id="result-msg"></p>
       </div>
       <div class="result-buttons">
-        <button id="next-btn" style="display:none" onclick="window.location.href=this.dataset.href">▶ Next</button>
-        <button id="daily-stats-btn" onclick="showStatsModal('daily')">📊 Daily Stats</button>
+        <button id="next-btn" style="display:none" onclick="window.location.href=this.dataset.href" data-i18n="game.next">▶ Next</button>
+        <button id="daily-stats-btn" onclick="showStatsModal('daily')" data-i18n="game.dailyStats">📊 Daily Stats</button>
         <button id="play-switch-btn" style="display:none"></button>
-        <button id="endless-stats-btn" onclick="showStatsModal('endless')">📊 Endless Stats</button>
-        <button class="btn-modes" onclick="goHome()" style="background:var(--bg-cell); border:1px solid var(--border);">← Modes</button>
+        <button id="endless-stats-btn" onclick="showStatsModal('endless')" data-i18n="game.endlessStats">📊 Endless Stats</button>
+        <button class="btn-modes" onclick="goHome()" style="background:var(--bg-cell); border:1px solid var(--border);" data-i18n="game.backBtn">← Modes</button>
       </div>
     </div>
 
@@ -118,7 +118,15 @@
 
   <script src="../../../backend/src/db/database.js"></script>
   <script src="../../../backend/src/db/books_database.js"></script>
-  <script src="../assets/js/core.js?v=2"></script>
+  <script src="../assets/js/translations.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('[data-i18n]').forEach(function (el) {
+        el.textContent = T(el.dataset.i18n);
+      });
+    });
+  </script>
+  <script src="../assets/js/core.js?v=3"></script>
   <script src="../assets/js/classic.js?v=2"></script>
 </body>
 

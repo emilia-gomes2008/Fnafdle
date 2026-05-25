@@ -8,12 +8,23 @@ let bookSelectedIndex = -1;
 const bookInput = document.getElementById('book-search-input');
 const bookDropdown = document.getElementById('book-dropdown');
 
+function getDailyBookProgressKey() {
+  const now = new Date();
+  return `fnaf_book_daily_progress_${now.getFullYear()}_${now.getMonth() + 1}_${now.getDate()}`;
+}
+function saveDailyBookProgress() {
+  try { localStorage.setItem(getDailyBookProgressKey(), JSON.stringify({ bookTitles: bookGuesses.map(g => g.title) })); } catch {}
+}
+function clearDailyBookProgress() {
+  localStorage.removeItem(getDailyBookProgressKey());
+}
+
 function initBookGame(mode) {
   currentMode = mode;
   if (mode === 'book_daily') {
     BOOK_MAX_GUESSES = 7;
     bookTarget = BOOKS[getDailyBookIndex()];
-    document.getElementById('book-mode-badge').textContent = '📅 Books Daily';
+    document.getElementById('book-mode-badge').textContent = T('book.badgeDaily');
 
     const previous = getDailyBookResult();
     if (previous) {
@@ -28,10 +39,10 @@ function initBookGame(mode) {
       banner.classList.remove('lose');
       banner.classList.add('show');
       if (!previous.won) banner.classList.add('lose');
-      document.getElementById('book-result-title').textContent = previous.won ? '🎉 Already played today!' : '💀 Already played today!';
+      document.getElementById('book-result-title').textContent = previous.won ? T('game.alreadyPlayedWon') : T('game.alreadyPlayedLost');
       document.getElementById('book-result-msg').textContent = previous.won
-        ? `It was "${previous.targetTitle}"! Got it in ${previous.guessCount} tries.`
-        : `It was "${previous.targetTitle}". Try again tomorrow!`;
+        ? T('book.alreadyWonMsg', { title: previous.targetTitle, count: previous.guessCount })
+        : T('book.alreadyLostMsg', { title: previous.targetTitle });
 
       // Inject book image
       const book = BOOKS.find(b => b.title === previous.targetTitle) || bookTarget;
@@ -47,10 +58,30 @@ function initBookGame(mode) {
       }
       return;
     }
+
+    const bookProgress = JSON.parse(localStorage.getItem(getDailyBookProgressKey()) || 'null');
+    if (bookProgress && bookProgress.bookTitles && bookProgress.bookTitles.length > 0) {
+      bookGuesses = [];
+      bookGameOver = false;
+      bookSelectedIndex = -1;
+      document.getElementById('book-guesses-container').innerHTML = '';
+      document.getElementById('book-result-banner').classList.remove('show', 'lose');
+      bookInput.disabled = false;
+      bookInput.value = '';
+      bookInput.placeholder = T('book.placeholder');
+      document.getElementById('book-search-area').style.display = '';
+      bookDropdown.style.display = 'none';
+      bookProgress.bookTitles.forEach(function (title) {
+        const book = BOOKS.find(function (b) { return b.title === title; });
+        if (book) { bookGuesses.push(book); renderBookGuess(book); }
+      });
+      updateBookAttemptsLeft();
+      return;
+    }
   } else {
     BOOK_MAX_GUESSES = 6;
     bookTarget = BOOKS[Math.floor(Math.random() * BOOKS.length)];
-    document.getElementById('book-mode-badge').textContent = '♾️ Books Endless';
+    document.getElementById('book-mode-badge').textContent = T('book.badgeEndless');
   }
 
   bookGuesses = [];
@@ -62,7 +93,7 @@ function initBookGame(mode) {
   banner.classList.remove('show', 'lose');
   bookInput.disabled = false;
   bookInput.value = '';
-  bookInput.placeholder = 'Write a book title...';
+  bookInput.placeholder = T('book.placeholder');
   document.getElementById('book-search-area').style.display = '';
   bookDropdown.style.display = 'none';
 
@@ -73,7 +104,7 @@ function initBookGame(mode) {
 function updateBookAttemptsLeft() {
   const el = document.getElementById('book-attempts-left');
   const remaining = BOOK_MAX_GUESSES - bookGuesses.length;
-  el.textContent = bookGameOver ? '' : `Tries left: ${remaining}`;
+  el.textContent = bookGameOver ? '' : T('game.triesLeft', { remaining });
 }
 
 function renderBookGuess(book) {
@@ -153,13 +184,14 @@ function submitBookGuess(book) {
   if (bookGameOver) return;
 
   if (bookGuesses.some(g => g.title === book.title)) {
-    bookInput.placeholder = 'You tried that already!';
+    bookInput.placeholder = T('game.triedAlready');
     bookInput.value = '';
     bookDropdown.style.display = 'none';
     return;
   }
 
   bookGuesses.push(book);
+  if (currentMode === 'book_daily') saveDailyBookProgress();
   renderBookGuess(book);
   bookInput.value = '';
   bookDropdown.style.display = 'none';
@@ -187,6 +219,7 @@ function endBookGame(won) {
 
   if (currentMode === 'book_daily') {
     saveDailyBookResult(won, bookTarget.title, bookGuesses.length);
+    clearDailyBookProgress();
   } else {
     updateStreak('book', won);
     _renderStreakNums('book');
@@ -201,7 +234,7 @@ function endBookGame(won) {
   const switchBtn = document.getElementById('book-play-switch-btn');
   if (switchBtn) {
     switchBtn.style.display = '';
-    switchBtn.textContent = isBookDaily ? '♾️ Play Endless' : '📅 Play Daily';
+    switchBtn.textContent = isBookDaily ? T('game.playEndless') : T('game.playDaily');
     switchBtn.onclick = () => { window.location.href = isBookDaily ? 'book.html?mode=book_endless' : 'book.html?mode=book_daily'; };
   }
   const nextBtn = document.getElementById('book-next-btn');
@@ -210,10 +243,10 @@ function endBookGame(won) {
     nextBtn.dataset.href = isBookDaily ? 'quote.html?mode=daily' : 'quote.html?mode=endless';
   }
 
-  document.getElementById('book-result-title').textContent = won ? '🎉 Got it!' : '💀 Game Over';
+  document.getElementById('book-result-title').textContent = won ? T('game.got') : T('game.gameOver');
   document.getElementById('book-result-msg').textContent = won
-    ? `It was "${bookTarget.title}"! Guessed in ${bookGuesses.length} tries.`
-    : `It was "${bookTarget.title}". Better luck next time!`;
+    ? T('book.guessedIn', { title: bookTarget.title, count: bookGuesses.length })
+    : T('book.betterLuck', { title: bookTarget.title });
 
   const imgCont = document.getElementById('book-result-img-container');
   imgCont.innerHTML = '';
@@ -287,6 +320,35 @@ bookInput.addEventListener('keydown', e => {
 function restartCurrent() {
   initBookGame(currentMode);
 }
+
+window.onLangChange = function () {
+  if (!bookTarget) return;
+  document.getElementById('book-mode-badge').textContent =
+    currentMode === 'book_daily' ? T('book.badgeDaily') : T('book.badgeEndless');
+  updateBookAttemptsLeft();
+  document.getElementById('book-guesses-container').innerHTML = '';
+  bookGuesses.forEach(function (b) { renderBookGuess(b); });
+  if (bookGameOver) {
+    const isDaily = currentMode === 'book_daily';
+    if (isDaily && bookGuesses.length === 0) {
+      const prev = getDailyBookResult();
+      if (prev) {
+        document.getElementById('book-result-title').textContent = prev.won ? T('game.alreadyPlayedWon') : T('game.alreadyPlayedLost');
+        document.getElementById('book-result-msg').textContent = prev.won
+          ? T('book.alreadyWonMsg', { title: prev.targetTitle, count: prev.guessCount })
+          : T('book.alreadyLostMsg', { title: prev.targetTitle });
+      }
+    } else {
+      const won = bookGuesses.some(function (b) { return b.title === bookTarget.title; });
+      document.getElementById('book-result-title').textContent = won ? T('game.got') : T('game.gameOver');
+      document.getElementById('book-result-msg').textContent = won
+        ? T('book.guessedIn', { title: bookTarget.title, count: bookGuesses.length })
+        : T('book.betterLuck', { title: bookTarget.title });
+      const sw = document.getElementById('book-play-switch-btn');
+      if (sw && sw.style.display !== 'none') sw.textContent = isDaily ? T('game.playEndless') : T('game.playDaily');
+    }
+  }
+};
 
 // Initialization
 document.addEventListener('DOMContentLoaded', () => {

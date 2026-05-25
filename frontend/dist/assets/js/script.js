@@ -463,7 +463,7 @@ function triggerFreddyJumpscare(callback) {
   overlay.appendChild(gif);
   document.body.appendChild(overlay);
 
-  try { const a = new Audio('images/jumpscare/jumpscare.mp3'); a.volume = 1.0; a.play(); } catch(e) {}
+  try { const a = new Audio('../sounds/jumpscare.mp3'); a.volume = 1.0; a.play(); } catch(e) {}
 
   const dismiss = () => {
     if (document.body.contains(overlay)) document.body.removeChild(overlay);

@@ -315,8 +315,10 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/translations.js"></script>
+  <script>document.addEventListener('DOMContentLoaded', function () { document.querySelectorAll('[data-i18n]').forEach(function (el) { el.textContent = T(el.dataset.i18n); }); });</script>
   <script src="../../../backend/src/db/database.js"></script>
-  <script src="../assets/js/core.js?v=2"></script>
+  <script src="../assets/js/core.js?v=3"></script>
   <script src="../assets/js/multiplayer.js"></script>
 </body>
 </html>
