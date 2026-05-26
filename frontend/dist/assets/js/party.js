@@ -73,7 +73,7 @@ const CHAR_CFG = {
   bonnie:    { name: 'Bonnie',    emoji: '🎸', color: '#4169e1', img: 'images/chars/classic/bonnie.png',
                desc: 'Jumps exactly 4 spaces instead of rolling the dice. Cooldown: 3 turns.', ability: 'jump', cooldown: 3 },
   chica:     { name: 'Chica',     emoji: '🐔', color: '#d4a017', img: 'images/chars/classic/chica.png',
-               desc: 'Throws the Cupcake up to 5 spaces and steals 5 coins. Cooldown: 3 turns.', ability: 'cupcake', cooldown: 3 },
+               desc: 'Throws the Cupcake within 5 spaces (any direction) and steals 5 coins. Cooldown: 3 turns.', ability: 'cupcake', cooldown: 3 },
   foxy:      { name: 'Foxy',      emoji: '🦊', color: '#cc4400', img: 'images/chars/classic/foxy.png',
                desc: 'Re-rolls the dice after the first result. Cooldown: 2 turns.', ability: 'reroll', cooldown: 2 },
   mangle:    { name: 'Mangle',    emoji: '🎀', color: '#e875b0', img: 'images/chars/toy/mangle.png',
@@ -140,6 +140,15 @@ const TRAP_EFFECTS = [
   }},
 ];
 
+const ITEM_CFG = [
+  { id: 'microphone', emoji: '🎤', price: 10 },
+  { id: 'battery',    emoji: '🔋', price: 25 },
+  { id: 'helpy',      emoji: '🐰', price: 5  },
+  { id: 'swap',       emoji: '🔃', price: 3  },
+  { id: 'ballpit',    emoji: '🎊', price: 5  },
+  { id: 'm2',         emoji: '🤖', price: 7  },
+];
+
 const MINIGAME_LIST = [
   { id: 'helpyBoop',     name: 'Helpy Boop',       emoji: '👃', desc: 'Click Helpy\'s nose as many times as you can in 30 seconds!' },
   { id: 'moneyLaundry',  name: 'Money Laundering',  emoji: '💰', desc: 'Drag coins to Rockstar Freddy! Most coins deposited in 30s wins.' },
@@ -162,6 +171,7 @@ const QUESTION_EVENTS = [
   { text: 'Mangle fixed everything! 🔧',    desc: '+2 coins',            eff: p => { p.coins += 2; } },
   { text: 'Withered Bonnie scared you! 😰', desc: 'Lose half your coins', eff: p => { p.coins = Math.floor(p.coins / 2); } },
   { text: 'Mangle shuffled the board! 🔀',  desc: 'All spaces reshuffled!', eff: p => {}, boardShuffle: true },
+  { text: 'Found a free item! 🎁',          desc: 'Got a random item!',     eff: p => {}, giveItem: true },
 ];
 
 // ── Supabase ──────────────────────────────────────────────────────────────────
@@ -188,9 +198,11 @@ let roomId, playerSlot, roomData;
 let broadcastCh;
 let liveScores   = {};
 let mgDoneLocal          = {};   // tracks submitted slots via broadcast
+let mgReadyLocal         = new Set(); // tracks p5/p6 ready-for-minigame via broadcast
 let podiumConfirmedLocal = new Set(); // tracks podium-confirmed slots via broadcast
 let activeMgId   = null;
 let mgWaitKey    = null;
+let isHopping    = false; // true during animateHops — blocks updateTokens interference
 let mgCleanup    = null;
 let mgPoller     = null;
 let pendingRoll  = null;
@@ -292,6 +304,23 @@ function startMgPoller() {
 }
 function stopMgPoller() {
   if (mgPoller) { clearInterval(mgPoller); mgPoller = null; }
+}
+
+// Broadcast-based allReady: fires when p5/p6 send mg_ready via broadcast.
+function checkMgAllReadyLocal() {
+  const room = roomData;
+  if (!room || room.turn_phase !== 'mg_waiting') return;
+  const involved = JSON.parse(room.mg_players || '[]');
+  if (!involved.length) return;
+  const allReady = involved.every(s =>
+    slotNum(s) <= 4 ? room[mgDoneKey(s)] : mgReadyLocal.has(s)
+  );
+  if (allReady && involved[0] === playerSlot) {
+    db.from('party_rooms').update({
+      turn_phase: 'minigame',
+      mg_done_p1: false, mg_done_p2: false, mg_done_p3: false, mg_done_p4: false,
+    }).eq('id', roomId).eq('turn_phase', 'mg_waiting').then(() => {}, () => {});
+  }
 }
 
 // Broadcast-based allDone: fires when all involved players sent mg_done via broadcast.
@@ -455,8 +484,8 @@ function createBoard(mapType = 'easy', laps = TOTAL_LAPS) {
       ],
     };
   }
-  if (mapType === 'hard') {
-    // 58-node custom hard map · 3 tollbooths · complex paths
+  if (mapType === 'freddy') {
+    // 58-node Freddy map · 3 tollbooths · complex paths
     const FIXED = new Set(['tollbooth', 'freddy_zone', 'jackpot']);
     const template = [
       'normal','tollbooth','normal','normal','normal','normal','normal','normal','normal','normal',
@@ -477,7 +506,7 @@ function createBoard(mapType = 'easy', laps = TOTAL_LAPS) {
       return pool[pi++ % pool.length];
     });
     return {
-      tiles, laps, boardSize: 58, mapType: 'hard', toll: 5,
+      tiles, laps, boardSize: 58, mapType: 'freddy', toll: 5,
       skipMap: { 1: 2,  10: 11, 34: 44 },
       freeMap: { 1: 23, 10: 14, 34: 35 },
       nextMap: { 22: 0 },
@@ -495,6 +524,102 @@ function createBoard(mapType = 'easy', laps = TOTAL_LAPS) {
         {x:64.7,y:19.5},{x:59.5,y:12.2},{x:60.2,y:3.7},{x:52.4,y:3.4},{x:51.7,y:18.8},
         {x:51.5,y:27.4},{x:52.5,y:39.9},{x:56.0,y:34.5},{x:62.5,y:32.7},{x:68.1,y:40.2},
         {x:60.0,y:39.7},{x:66.8,y:46.6},{x:55.6,y:47.2},
+      ],
+    };
+  }
+  if (mapType === 'bonnie') {
+    // 38-node Bonnie map · 2 tollbooths · branching jackpot paths
+    const FIXED = new Set(['tollbooth', 'jackpot']);
+    const template = [
+      'jackpot','normal','normal','normal','jackpot','normal','normal','normal','jackpot','normal',
+      'normal','tollbooth','normal','tollbooth','jackpot','normal','normal','normal','jackpot','normal',
+      'normal','normal','normal','normal','jackpot','normal','jackpot','normal','normal','normal',
+      'normal','jackpot','normal','jackpot','normal','normal','normal','jackpot',
+    ];
+    const pool = shufflePool([
+      ...Array(7).fill('normal'), ...Array(5).fill('coin'), ...Array(4).fill('pizza'),
+      ...Array(4).fill('minigame'), ...Array(3).fill('badluck'), ...Array(2).fill('trap'),
+      'challenge',
+    ]);
+    let pi = 0;
+    const tiles = template.map((t, i) => {
+      if (i === 0) return 'normal';
+      if (FIXED.has(t)) return t;
+      return pool[pi++ % pool.length];
+    });
+    return {
+      tiles, laps, boardSize: 38, mapType: 'bonnie', toll: 5,
+      skipMap: { 11: 12, 13: 14 },
+      freeMap: { 11: 37, 13: 25 },
+      nextMap: { 21: 31, 24: 12, 28: 14, 36: 0, 37: 22 },
+      boardAspect: '1:1',
+      nodes: [
+        {x:48,y:88.4},{x:30.2,y:78.2},{x:63.1,y:78.5},{x:66.4,y:72.3},{x:59.5,y:62.5},
+        {x:47.5,y:65.4},{x:47.2,y:58.6},{x:40.7,y:61.8},{x:29.9,y:70.2},{x:16.8,y:57.9},
+        {x:22.2,y:44.4},{x:34.2,y:29.6},{x:46,y:25.8},{x:61.3,y:29.9},{x:72.3,y:42.8},
+        {x:78,y:54.7},{x:76,y:68.4},{x:71.4,y:85.6},{x:55.7,y:98.3},{x:36.6,y:98.1},
+        {x:23.7,y:85.8},{x:18,y:67},{x:8.6,y:13.8},{x:26.5,y:30.4},{x:39.8,y:22.8},
+        {x:56.9,y:24.9},{x:75,y:0},{x:87.7,y:18.6},{x:68.3,y:32.4},{x:44.6,y:51.2},
+        {x:36.6,y:45.1},{x:29.8,y:52.3},{x:38.1,y:57.9},{x:57.9,y:45.3},{x:64.6,y:53.4},
+        {x:58.3,y:59.4},{x:50.5,y:51.8},{x:23.3,y:0},
+      ],
+    };
+  }
+  if (mapType === 'chica') {
+    // 28-node Chica map · 1 tollbooth · looping paths
+    const template = Array(28).fill('normal');
+    template[11] = 'tollbooth';
+    const pool = shufflePool([
+      ...Array(7).fill('normal'), ...Array(5).fill('coin'), ...Array(4).fill('pizza'),
+      ...Array(4).fill('minigame'), ...Array(3).fill('badluck'), 'trap',
+      'challenge', 'question',
+    ]);
+    let pi = 0;
+    const tiles = template.map((t, i) => {
+      if (i === 0) return 'normal';
+      if (t === 'tollbooth') return 'tollbooth';
+      return pool[pi++ % pool.length];
+    });
+    return {
+      tiles, laps, boardSize: 28, mapType: 'chica', toll: 5,
+      skipMap: { 11: 12 },
+      freeMap: { 11: 24 },
+      nextMap: { 15: 27, 23: 0, 26: 12, 27: 16 },
+      boardAspect: '1:1',
+      nodes: [
+        {x:44.9,y:56.6},{x:35.7,y:70.7},{x:61.2,y:70.6},{x:49.8,y:57},{x:34.9,y:78.9},
+        {x:47.6,y:94},{x:61.4,y:80.1},{x:24,y:80.4},{x:14.1,y:57.2},{x:24.4,y:28.3},
+        {x:36.2,y:21.6},{x:47.1,y:25.1},{x:58.5,y:21.2},{x:68.3,y:26.9},{x:79.9,y:53.1},
+        {x:69.2,y:81.2},{x:35.9,y:59.4},{x:29.2,y:50.9},{x:38.2,y:46.3},{x:44.5,y:52.2},
+        {x:51.5,y:52.7},{x:57.4,y:46.9},{x:66.2,y:53},{x:58.9,y:58.8},{x:29,y:8.6},
+        {x:46.4,y:21.7},{x:61.7,y:9},{x:47.8,y:87.9},
+      ],
+    };
+  }
+  if (mapType === 'foxy') {
+    // 48-node Foxy map · no tollbooths · pure random tiles
+    const pool = shufflePool([
+      ...Array(11).fill('normal'), ...Array(8).fill('coin'), ...Array(6).fill('pizza'),
+      ...Array(6).fill('minigame'), ...Array(6).fill('badluck'), ...Array(4).fill('trap'),
+      ...Array(3).fill('challenge'), ...Array(2).fill('question'), 'jackpot',
+    ]);
+    let pi = 0;
+    const tiles = Array(48).fill(null).map((_, i) => i === 0 ? 'normal' : pool[pi++ % pool.length]);
+    return {
+      tiles, laps, boardSize: 48, mapType: 'foxy', toll: 5,
+      nextMap: {}, skipMap: {}, freeMap: {},
+      boardAspect: '1:1',
+      nodes: [
+        {x:40.9,y:35.9},{x:48.6,y:42.2},{x:40.9,y:48.2},{x:33.3,y:39.6},{x:27.1,y:35.6},
+        {x:27.5,y:46.9},{x:20.4,y:48.5},{x:25.1,y:52.1},{x:11.7,y:55.5},{x:37.8,y:60.7},
+        {x:62.8,y:55.3},{x:50.1,y:47.3},{x:37,y:54.8},{x:49.7,y:53.5},{x:50.4,y:63.3},
+        {x:84.6,y:56.6},{x:76.6,y:51.6},{x:79.2,y:47.6},{x:71.4,y:46.2},{x:71,y:33.7},
+        {x:62.5,y:24.3},{x:65.2,y:18.9},{x:77.6,y:4.9},{x:90.2,y:4.1},{x:87.3,y:17.5},
+        {x:74.6,y:29},{x:67.5,y:26.6},{x:55,y:20.7},{x:47.9,y:22.1},{x:43.4,y:15},
+        {x:49.6,y:19.2},{x:56.2,y:14},{x:37.2,y:22.5},{x:33.7,y:27.1},{x:34.3,y:20.8},
+        {x:18.1,y:5.1},{x:9.5,y:5},{x:10.4,y:16.7},{x:25.6,y:30.1},{x:34.6,y:62.1},
+        {x:36,y:88.5},{x:50.1,y:98.7},{x:64.3,y:89.9},{x:64,y:60.9},{x:56.9,y:36.4},
+        {x:63.3,y:42.6},{x:56.1,y:47.7},{x:51.7,y:41.7},
       ],
     };
   }
@@ -653,7 +778,7 @@ async function loadPublicPartyLobby() {
 
   let data, error;
   ({ data, error } = await db.from('party_rooms')
-    .select('id, code, room_name, player_count, player1_name, player2_name, player3_name, player4_name')
+    .select('id, code, room_name, player_count, player1_name, player2_name, player3_name, player4_name, player5_name, player6_name')
     .eq('state', 'waiting')
     .or('is_private.eq.false,is_private.is.null')
     .order('created_at', { ascending: false })
@@ -661,7 +786,7 @@ async function loadPublicPartyLobby() {
 
   if (error) {
     ({ data, error } = await db.from('party_rooms')
-      .select('id, code, player_count, player1_name, player2_name, player3_name, player4_name')
+      .select('id, code, player_count, player1_name, player2_name, player3_name, player4_name, player5_name, player6_name')
       .eq('state', 'waiting')
       .order('created_at', { ascending: false })
       .limit(10));
@@ -681,8 +806,7 @@ function renderPublicPartyLobby(rooms) {
   let anyShown = false;
   rooms.forEach(r => {
     const pc = r.player_count || 2;
-    const joined = ['player1','player2','player3','player4'].slice(0, pc)
-      .filter(s => r[`${s}_name`]).length;
+    const joined = allSlots(pc).filter(s => r[`${s}_name`]).length;
     if (joined === 0) return;
     anyShown = true;
     const name = r.room_name || (r.player1_name ? `${r.player1_name}'s Room` : 'Room');
@@ -747,9 +871,11 @@ async function joinRoom() {
 
   const pc = room.player_count || 2;
   let slot;
-  if      (!room.player2_id)           slot = 'player2';
+  if      (!room.player2_id)            slot = 'player2';
   else if (pc >= 3 && !room.player3_id) slot = 'player3';
   else if (pc >= 4 && !room.player4_id) slot = 'player4';
+  else if (pc >= 5 && !room.player5_id) slot = 'player5';
+  else if (pc >= 6 && !room.player6_id) slot = 'player6';
   else { lobbyError(T('error.roomFull')); return; }
 
   const st = pState(room);
@@ -960,7 +1086,7 @@ async function checkAllCharsReady(room) {
 
 // Find my slot in the current room (needed after slot compaction on rematch)
 function refreshPlayerSlot(room) {
-  const found = ['player1','player2','player3','player4'].find(s => room[`${s}_id`] === playerId);
+  const found = allSlots(6).find(s => room[`${s}_id`] === playerId);
   if (!found) {
     showToast(T('waiting.notInRematch'));
     setTimeout(() => { roomId = null; playerSlot = null; showScreen('lobby'); }, 2500);
@@ -1007,6 +1133,10 @@ function subscribeRoom() {
       updateLiveBar();
       checkMgAllDoneLocal();
     })
+    .on('broadcast', { event: 'mg_ready' }, ({ payload }) => {
+      mgReadyLocal.add(payload.slot);
+      checkMgAllReadyLocal();
+    })
     .on('broadcast', { event: 'podium_confirm' }, ({ payload }) => {
       podiumConfirmedLocal.add(payload.slot);
       checkPodiumAllConfirmedLocal();
@@ -1049,7 +1179,9 @@ async function handleRoomUpdate(room) {
         liveScores = {};
       }
       const involved = JSON.parse(room.mg_players || '[]');
-      const allReady  = involved.every(s => room[mgDoneKey(s)]);
+      const allReady  = involved.every(s =>
+        slotNum(s) <= 4 ? room[mgDoneKey(s)] : mgReadyLocal.has(s)
+      );
       if (allReady && involved[0] === playerSlot) {
         // All players ready — lowest slot kicks off the actual game
         await db.from('party_rooms').update({
@@ -1090,7 +1222,9 @@ async function handleRoomUpdate(room) {
       renderStatusBar(room);
       updateTokens(room);
       const involved = JSON.parse(room.mg_players || '[]');
-      const allConfirmed = involved.every(s => room[mgDoneKey(s)]);
+      const allConfirmed = involved.every(s =>
+        slotNum(s) <= 4 ? room[mgDoneKey(s)] : podiumConfirmedLocal.has(s)
+      );
       if (allConfirmed) {
         let nextPlayer;
         try { nextPlayer = JSON.parse(room.mg_config || '{}').nextPlayer; } catch {}
@@ -1152,7 +1286,7 @@ function renderBoard(room) {
 
   if (nodes && nodes.length > 0) {
     renderCustomBoard(el, tiles, laps, toll, nodes, skipMap, freeMap, boardAspect);
-  } else if (mapType === 'hard') {
+  } else if (mapType === 'freddy') {
     renderFreddyFaceBoard(el, tiles, laps, toll);
   } else {
     const grid = getBoardGrid(mapType);
@@ -1257,7 +1391,7 @@ function renderFreddyFaceBoard(el, tiles, laps, toll) {
   FREDDY_HEAD_NODES.forEach(({x, y}, idx) => {
     const type = tiles[idx] || 'normal';
     const cfg  = SPACE_CFG[type] || SPACE_CFG.normal;
-    const jackLabel = type === 'jackpot' ? `<span class="space-jack-val">${getJackpotValue({board: JSON.stringify({tiles, laps, boardSize: 20, mapType: 'hard', toll})})}</span>` : '';
+    const jackLabel = type === 'jackpot' ? `<span class="space-jack-val">${getJackpotValue({board: JSON.stringify({tiles, laps, boardSize: 20, mapType: 'freddy', toll})})}</span>` : '';
     const sp = document.createElement('div');
     sp.className = `board-space board-node ${cfg.cls}${idx === 0 ? ' space-start' : ''}`;
     sp.style.cssText = `position:absolute;left:${x}%;top:${y}%;transform:translate(-50%,-50%);width:11%;aspect-ratio:1;z-index:2;`;
@@ -1364,9 +1498,12 @@ const TOKEN_OFFSET_PATTERNS = [
   [[-1, 0], [1, 0]],
   [[0, -1.1], [-1, 0.7], [1, 0.7]],
   [[-1, -1], [1, -1], [-1, 1], [1, 1]],
+  [[0, -1.2], [-1.1, -0.4], [1.1, -0.4], [-0.7, 1], [0.7, 1]],
+  [[-1, -1], [1, -1], [-1.4, 0], [1.4, 0], [-1, 1], [1, 1]],
 ];
 
 function updateTokens(room) {
+  if (isHopping) return;
   const { boardSize, nodes } = parseBoard(room);
   // Node boards use compact 16px tokens; grid boards use 24px — scale offsets accordingly
   const spread = nodes && nodes.length > 0 ? 10 : 14;
@@ -1391,7 +1528,7 @@ function updateTokens(room) {
     const el = document.getElementById(`tok-${posStr}`);
     if (!el) return;
     const count   = players.length;
-    const pattern = TOKEN_OFFSET_PATTERNS[Math.min(count, 4) - 1];
+    const pattern = TOKEN_OFFSET_PATTERNS[Math.min(count, 6) - 1];
 
     players.forEach(({ slot, slotIdx }, tokIdx) => {
       const char  = room[`${slot}_char`] || 'freddy';
@@ -1413,6 +1550,43 @@ function updateTokens(room) {
   });
 
   prevPlayerPos = JSON.parse(room.player_pos || '{}');
+}
+
+async function animateHops(slot, char, fromNode, steps, boardSize, tiles, nextMap) {
+  const HOP_MS = 140;
+
+  // Hide real token(s) at the start cell immediately so they don't show during animation
+  const startEl = document.getElementById(`tok-${fromNode}`);
+  if (startEl) {
+    startEl.querySelectorAll('.player-token:not(.token-hopping)').forEach(t => {
+      t.style.visibility = 'hidden';
+    });
+  }
+
+  let node = fromNode;
+  let prevHopEl = null;
+  for (let i = 0; i < steps; i++) {
+    const nxt = (nextMap && nextMap[node] !== undefined) ? nextMap[node] : (node + 1) % boardSize;
+    if (prevHopEl) prevHopEl.remove();
+
+    const el = document.getElementById(`tok-${nxt}`);
+    if (el) {
+      const tok = document.createElement('div');
+      tok.className = 'player-token token-hopping';
+      tok.style.borderColor = PLAYER_COLORS[slotNum(slot) - 1];
+      const img = document.createElement('img');
+      img.src = charImg(char);
+      tok.appendChild(img);
+      el.appendChild(tok);
+      prevHopEl = tok;
+    }
+
+    await new Promise(r => setTimeout(r, HOP_MS));
+    node = nxt;
+    if (i < steps - 1 && tiles[node] === 'tollbooth') break;
+  }
+  // Leave final ghost at landing cell — updateTokens clears it when isHopping goes false
+  // NOTE: caller owns isHopping — must set false AFTER its DB write
 }
 
 function renderStatusBar(room) {
@@ -1572,7 +1746,22 @@ function showPickDiceUI() {
   el.querySelectorAll('.pick-num-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       el.querySelectorAll('.pick-num-btn').forEach(b => b.disabled = true);
-      await db.from('party_rooms').update({ turn_phase: 'rolled', dice_result: +btn.dataset.n }).eq('id', roomId);
+      const ns = pStats(roomData);
+      if (!ns[playerSlot]) ns[playerSlot] = { mgWins: 0, badLucks: 0 };
+      const shopD = SHOP_DICE.find(d => d.id === 'pick');
+      if (!ns[playerSlot].diceUses) ns[playerSlot].diceUses = {};
+      const newUses = Math.max(0, (ns[playerSlot].diceUses['pick'] ?? shopD.maxUses) - 1);
+      ns[playerSlot].diceUses['pick'] = newUses;
+      ns[playerSlot].lastDiceId = 'pick';
+      if (newUses === 0) {
+        ns[playerSlot].ownedDice = getOwnedDice(roomData, playerSlot).filter(id => id !== 'pick');
+        ns[playerSlot].dice = 'd6';
+        showToast(T('dice.expired', { name: T('dname.pick') }));
+      }
+      await db.from('party_rooms').update({
+        turn_phase: 'rolled', dice_result: +btn.dataset.n,
+        player_stats: JSON.stringify(ns),
+      }).eq('id', roomId);
     }, { once: true });
   });
 }
@@ -1622,41 +1811,49 @@ async function applyMove() {
     return;
   }
 
+  const fromNodeIdx = (st.pos[playerSlot] || 0) % boardSize;
   const result = moveStepByStep(st, playerSlot, roll, boardSize, tiles, nextMap);
   if (result.completedLap) { ns[playerSlot].lapCompleted = true; lapCompletedLocal = true; }
 
-  // Music Box: on roll 6 with musicbox die, place a trap on the landing space
-  if (lastDiceId === 'musicbox' && roll === 6 && !result.hitTollbooth) {
-    const landingNode = st.pos[playerSlot] % boardSize;
-    if (!ns._musicBoxes) ns._musicBoxes = [];
-    // Replace any existing box by this player (only one active at a time)
-    ns._musicBoxes = ns._musicBoxes.filter(mb => mb.ownerSlot !== playerSlot);
-    ns._musicBoxes.push({ spaceIdx: landingNode, ownerSlot: playerSlot });
-    emitEvent(`🎵 ${room[`${playerSlot}_name`]} placed a Music Box on space ${landingNode}!`);
-    showToast(T('toast.musicBox'));
-  }
+  const stepsActual = result.hitTollbooth ? (roll - result.remainingSteps) : roll;
+  isHopping = true;
+  try {
+    await animateHops(playerSlot, room[`${playerSlot}_char`] || 'freddy', fromNodeIdx, stepsActual, boardSize, tiles, nextMap || {});
 
-  if (result.hitTollbooth) {
-    ns[playerSlot].pendingSteps = result.remainingSteps;
-    emitEvent(`🐻 ${room[`${playerSlot}_name`]} hit Freddy's Tollbooth! (${result.remainingSteps} steps left)`);
+    // Music Box: on roll 6 with musicbox die, place a trap on the landing space
+    if (lastDiceId === 'musicbox' && roll === 6 && !result.hitTollbooth) {
+      const landingNode = st.pos[playerSlot] % boardSize;
+      if (!ns._musicBoxes) ns._musicBoxes = [];
+      ns._musicBoxes = ns._musicBoxes.filter(mb => mb.ownerSlot !== playerSlot);
+      ns._musicBoxes.push({ spaceIdx: landingNode, ownerSlot: playerSlot });
+      emitEvent(`🎵 ${room[`${playerSlot}_name`]} placed a Music Box on space ${landingNode}!`);
+      showToast(T('toast.musicBox'));
+    }
+
+    if (result.hitTollbooth) {
+      ns[playerSlot].pendingSteps = result.remainingSteps;
+      emitEvent(`🐻 ${room[`${playerSlot}_name`]} hit Freddy's Tollbooth! (${result.remainingSteps} steps left)`);
+      await db.from('party_rooms').update({
+        player_pos: JSON.stringify(st.pos), player_coins: JSON.stringify(st.coins),
+        player_pizzas: JSON.stringify(st.pizzas), player_cooldowns: JSON.stringify(st.cooldowns),
+        player_stats: JSON.stringify(ns), turn_phase: 'tollbooth',
+      }).eq('id', roomId);
+      return;
+    }
+
+    const finished = Math.floor(st.pos[playerSlot] / boardSize) >= laps;
     await db.from('party_rooms').update({
-      player_pos: JSON.stringify(st.pos), player_coins: JSON.stringify(st.coins),
-      player_pizzas: JSON.stringify(st.pizzas), player_cooldowns: JSON.stringify(st.cooldowns),
-      player_stats: JSON.stringify(ns), turn_phase: 'tollbooth',
+      player_pos:       JSON.stringify(st.pos),
+      player_coins:     JSON.stringify(st.coins),
+      player_pizzas:    JSON.stringify(st.pizzas),
+      player_cooldowns: JSON.stringify(st.cooldowns),
+      player_stats:     JSON.stringify(ns),
+      turn_phase: finished ? undefined : 'moved',
+      ...(finished ? { state: 'finished' } : {}),
     }).eq('id', roomId);
-    return;
+  } finally {
+    isHopping = false;
   }
-
-  const finished = Math.floor(st.pos[playerSlot] / boardSize) >= laps;
-  await db.from('party_rooms').update({
-    player_pos:       JSON.stringify(st.pos),
-    player_coins:     JSON.stringify(st.coins),
-    player_pizzas:    JSON.stringify(st.pizzas),
-    player_cooldowns: JSON.stringify(st.cooldowns),
-    player_stats:     JSON.stringify(ns),
-    turn_phase: finished ? undefined : 'moved',
-    ...(finished ? { state: 'finished' } : {}),
-  }).eq('id', roomId);
 }
 
 async function doFoxyReroll() {
@@ -1699,7 +1896,9 @@ async function passOrMinigame(room, extraUpdates = {}) {
   const ns = extraUpdates.player_stats
     ? JSON.parse(extraUpdates.player_stats)
     : pStats(room);
+
   if (ns[playerSlot]?.lapCompleted) {
+    // DON'T clear microphoneActive here — finishMinigame will clear it after applying the reward
     if (ns[playerSlot]) ns[playerSlot].lapCompleted = false;
     const allPlayers = allSlots(room.player_count || 2).filter(s => room[`${s}_name`]);
     await db.from('party_rooms').update({
@@ -1707,7 +1906,22 @@ async function passOrMinigame(room, extraUpdates = {}) {
       player_stats: JSON.stringify(ns),
     }).eq('id', roomId);
     await triggerMinigame(allPlayers, { nextPlayer: nextSlot(room) });
+  } else if (ns[playerSlot]?.extraTurn) {
+    ns[playerSlot].extraTurn = false;
+    // Clear microphone: turn ends without entering a minigame
+    if (ns[playerSlot]?.microphoneActive) ns[playerSlot].microphoneActive = false;
+    emitEvent(`🔋 ${room[`${playerSlot}_name`]} activated the Battery — extra turn!`);
+    await db.from('party_rooms').update({
+      turn_phase: 'roll', current_slot: playerSlot,
+      ...extraUpdates,
+      player_stats: JSON.stringify(ns),
+    }).eq('id', roomId);
   } else {
+    // Clear microphone: normal turn end
+    if (ns[playerSlot]?.microphoneActive) {
+      ns[playerSlot].microphoneActive = false;
+      extraUpdates = { ...extraUpdates, player_stats: JSON.stringify(ns) };
+    }
     await db.from('party_rooms').update({
       turn_phase: 'roll', current_slot: nextSlot(room),
       ...extraUpdates,
@@ -1772,26 +1986,31 @@ async function handleSpace() {
   }
 
   if (type === 'coin') {
-    st.coins[playerSlot] = (st.coins[playerSlot] || 0) + 2 * mul;
-    emitEvent(`🪙 ${room[`${playerSlot}_name`]} got ${2*mul} coins!`);
-    showToast(`+${2*mul} coins! 🪙`);
+    const gain = micMultiplied(ns, playerSlot, 2 * mul);
+    st.coins[playerSlot] = (st.coins[playerSlot] || 0) + gain;
+    const micTag = ns[playerSlot]?.microphoneActive ? ' 🎤×2' : '';
+    emitEvent(`🪙 ${room[`${playerSlot}_name`]} got ${gain} coins!${micTag}`);
+    showToast(`+${gain} coins! 🪙${micTag}`);
     await resolveSpace(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) }, others);
     return;
   }
   if (type === 'jackpot') {
-    const jackVal = getJackpotValue(room) * mul;
+    const jackVal = micMultiplied(ns, playerSlot, getJackpotValue(room) * mul);
     st.coins[playerSlot] = (st.coins[playerSlot] || 0) + jackVal;
-    emitEvent(`💰 ${room[`${playerSlot}_name`]} hit the JACKPOT for ${jackVal} coins!`);
-    showToast(`💰 JACKPOT! +${jackVal} coins!`);
+    const micTag = ns[playerSlot]?.microphoneActive ? ' 🎤×2' : '';
+    emitEvent(`💰 ${room[`${playerSlot}_name`]} hit the JACKPOT for ${jackVal} coins!${micTag}`);
+    showToast(`💰 JACKPOT! +${jackVal} coins!${micTag}`);
     await resolveSpace(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) }, others);
     return;
   }
   if (type === 'badluck') {
-    st.coins[playerSlot] = Math.max(0, (st.coins[playerSlot] || 0) - 3 * mul);
+    const loss = micMultiplied(ns, playerSlot, -(3 * mul));
+    st.coins[playerSlot] = Math.max(0, (st.coins[playerSlot] || 0) + loss); // loss is negative
     if (!ns[playerSlot]) ns[playerSlot] = { mgWins: 0, badLucks: 0 };
     ns[playerSlot].badLucks = (ns[playerSlot].badLucks || 0) + 1;
-    emitEvent(`💀 ${room[`${playerSlot}_name`]} hit bad luck! -${3*mul} coins`);
-    showToast(`-${3*mul} coins 💀${mul>1?' ×2':''}`);
+    const micTag = ns[playerSlot]?.microphoneActive ? ' 🎤×4' : '';
+    emitEvent(`💀 ${room[`${playerSlot}_name`]} hit bad luck! ${loss} coins${micTag}`);
+    showToast(`${loss} coins 💀${mul>1?' ×2':''}${micTag}`);
     await resolveSpace(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) }, others);
     return;
   }
@@ -1878,6 +2097,7 @@ async function triggerQuestion() {
   const evIdx = Math.floor(Math.random() * QUESTION_EVENTS.length);
   const ev  = QUESTION_EVENTS[evIdx];
   const st  = pState(roomData);
+  const ns  = pStats(roomData);
 
   const tempPlayer = { coins: st.coins[playerSlot]||0, pizzas: st.pizzas[playerSlot]||0, pos: st.pos[playerSlot]||0 };
   ev.eff(tempPlayer);
@@ -1887,12 +2107,22 @@ async function triggerQuestion() {
 
   const extra = ev.boardShuffle ? { board: JSON.stringify(createBoard(parseBoard(roomData).mapType, parseBoard(roomData).laps)) } : {};
 
-  emitEvent(`❓ ${roomData[`${playerSlot}_name`]} got event: ${T('qevent.' + evIdx + '.text')} → ${T('qevent.' + evIdx + '.desc')}`);
-  showToast(T('qevent.' + evIdx + '.text'));
+  if (ev.giveItem) {
+    const item = ITEM_CFG[Math.floor(Math.random() * ITEM_CFG.length)];
+    if (!ns[playerSlot]) ns[playerSlot] = { mgWins: 0, badLucks: 0 };
+    (ns[playerSlot].ownedItems = ns[playerSlot].ownedItems || []).push(item.id);
+    emitEvent(`🎁 ${roomData[`${playerSlot}_name`]} got a free ${item.emoji} ${T('item.' + item.id + '.name')}!`);
+    showToast(`🎁 Free ${item.emoji} ${T('item.' + item.id + '.name')}!`);
+  } else {
+    emitEvent(`❓ ${roomData[`${playerSlot}_name`]} got event: ${T('qevent.' + evIdx + '.text')} → ${T('qevent.' + evIdx + '.desc')}`);
+    showToast(T('qevent.' + evIdx + '.text'));
+  }
+
   await passOrMinigame(roomData, {
     player_pos:    JSON.stringify(st.pos),
     player_coins:  JSON.stringify(st.coins),
     player_pizzas: JSON.stringify(st.pizzas),
+    player_stats:  JSON.stringify(ns),
     ...extra,
   });
 }
@@ -1982,13 +2212,22 @@ async function skipPizza() {
 // ── Character abilities ───────────────────────────────────────────────────────
 function useAbility() {
   const me = myPlayer(roomData);
-  switch (CHAR_CFG[me.char].ability) {
+  const copiedAb = pStats(roomData)[playerSlot]?.copiedAbility;
+  const ability = copiedAb?.ability || CHAR_CFG[me.char]?.ability;
+  switch (ability) {
     case 'cupcake': showCupcakeTarget(); break;
     case 'jump':    doJump();            break;
     case 'reroll':  doReroll();          break;
     case 'kill':    showKillTarget();    break;
     case 'gifts':   showGiftsTarget();   break;
     case 'shuffle': doShuffle();         break;
+  }
+  if (copiedAb) {
+    // consume M2 copied ability after use
+    const ns = pStats(roomData);
+    if (!ns[playerSlot]) ns[playerSlot] = { mgWins: 0, badLucks: 0 };
+    delete ns[playerSlot].copiedAbility;
+    db.from('party_rooms').update({ player_stats: JSON.stringify(ns) }).eq('id', roomId).then(() => {}, () => {});
   }
 }
 
@@ -2019,6 +2258,45 @@ async function doShuffle() {
 
   emitEvent(`🎀 ${roomData[`${playerSlot}_name`]} tangled the board! Spaces shuffled!`);
   showToast(T('toast.shuffled'));
+  renderActionUI(roomData);
+}
+
+// ── Microphone item: pick target ──────────────────────────────────────────────
+function showMicrophoneTarget(targets) {
+  const room = roomData;
+  const el   = document.getElementById('current-player-action');
+  if (!el) return;
+  el.innerHTML = `<div class="action-card">
+    <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot)-1]}">🎤 ${T('item.microphone.name')}</div>
+    <p style="font-size:.7rem;color:var(--text-muted);margin:2px 0">${T('item.microphone.pickDesc')}</p>
+    <div class="ability-targets">
+      ${targets.map(s => {
+        const char = room[`${s}_char`] || 'freddy';
+        return `<button class="mp-btn" onclick="applyMicrophone('${s}')">
+          <img src="${charImg(char)}" style="width:20px;height:20px;border-radius:50%;object-fit:contain;vertical-align:middle" onerror="this.style.display='none'"/>
+          ${room[`${s}_name`]}${s === playerSlot ? ' (você)' : ''}
+        </button>`;
+      }).join('')}
+    </div>
+    <button class="mp-btn small" onclick="renderActionUI(roomData)" style="margin-top:4px">${T('ability.kill.cancel')}</button>
+  </div>`;
+}
+
+async function applyMicrophone(target) {
+  const ns = pStats(roomData);
+  if (!ns[playerSlot]) ns[playerSlot] = { mgWins: 0, badLucks: 0 };
+  // Consume the item
+  const items = (ns[playerSlot].ownedItems || []);
+  const idx = items.indexOf('microphone');
+  if (idx === -1) return;
+  items.splice(idx, 1);
+  ns[playerSlot].ownedItems = items;
+  if (!ns[target]) ns[target] = { mgWins: 0, badLucks: 0 };
+  ns[target].microphoneActive = true;
+  await db.from('party_rooms').update({ player_stats: JSON.stringify(ns) }).eq('id', roomId);
+  const targetName = roomData[`${target}_name`];
+  emitEvent(`🎤 ${roomData[`${playerSlot}_name`]} used Microphone on ${targetName}! Gains ×2 · Losses ×4 until turn ends`);
+  showToast(`🎤 ${T('item.microphone.name')} → ${targetName}!`);
   renderActionUI(roomData);
 }
 
@@ -2107,15 +2385,10 @@ async function executeGifts(targetSlot) {
 }
 
 function showCupcakeTarget() {
-  const room   = roomData;
-  const pc     = room.player_count || 2;
-  const { boardSize: bs } = parseBoard(room);
-  const myPos  = boardPos(room, playerSlot);
-  const targets = allSlots(pc).filter(s => {
-    if (s === playerSlot || !room[`${s}_name`]) return false;
-    const dist = (boardPos(room, s) - myPos + bs) % bs;
-    return dist > 0 && dist <= 5;
-  });
+  const room    = roomData;
+  const pc      = room.player_count || 2;
+  const targets = allSlots(pc).filter(s =>
+    s !== playerSlot && room[`${s}_name`] && inRange5(room, playerSlot, s));
   if (!targets.length) { showToast(T('error.noRangeShort')); return; }
 
   const el = document.getElementById('current-player-action');
@@ -2150,19 +2423,27 @@ async function executeCupcake(targetSlot) {
 
 async function doJump() {
   const steps = 4;
-  const st    = pState(roomData);
-  const { laps, boardSize } = parseBoard(roomData);
-  st.cooldowns[playerSlot] = CHAR_CFG[roomData[`${playerSlot}_char`]].cooldown;
+  const room  = roomData;
+  const st    = pState(room);
+  const { laps, boardSize, tiles, nextMap } = parseBoard(room);
+  const fromNodeIdx = (st.pos[playerSlot] || 0) % boardSize;
+  st.cooldowns[playerSlot] = CHAR_CFG[room[`${playerSlot}_char`]].cooldown;
   moveFwd(st, playerSlot, steps, true, boardSize);
-  const finished = Math.floor(st.pos[playerSlot] / boardSize) >= laps;
-  await db.from('party_rooms').update({
-    player_pos:       JSON.stringify(st.pos),
-    player_coins:     JSON.stringify(st.coins),
-    player_pizzas:    JSON.stringify(st.pizzas),
-    player_cooldowns: JSON.stringify(st.cooldowns),
-    turn_phase: 'moved', dice_result: steps,
-    ...(finished ? { state: 'finished' } : {}),
-  }).eq('id', roomId);
+  isHopping = true;
+  try {
+    await animateHops(playerSlot, room[`${playerSlot}_char`] || 'freddy', fromNodeIdx, steps, boardSize, tiles, nextMap || {});
+    const finished = Math.floor(st.pos[playerSlot] / boardSize) >= laps;
+    await db.from('party_rooms').update({
+      player_pos:       JSON.stringify(st.pos),
+      player_coins:     JSON.stringify(st.coins),
+      player_pizzas:    JSON.stringify(st.pizzas),
+      player_cooldowns: JSON.stringify(st.cooldowns),
+      turn_phase: 'moved', dice_result: steps,
+      ...(finished ? { state: 'finished' } : {}),
+    }).eq('id', roomId);
+  } finally {
+    isHopping = false;
+  }
   showToast(T('toast.jumped', { name: roomData[`${playerSlot}_name`], n: steps, s: steps > 1 ? 's' : '' }));
 }
 
@@ -2181,6 +2462,16 @@ function getOwnedDice(room, slot) {
   // backwards compat: own d6 + whatever was equipped
   const cur = stats.dice || 'd6';
   return cur === 'd6' ? ['d6'] : ['d6', cur];
+}
+
+function getOwnedItems(room, slot) {
+  const stats = pStats(room)[slot] || {};
+  return Array.isArray(stats.ownedItems) ? [...stats.ownedItems] : [];
+}
+
+function micMultiplied(ns, slot, delta) {
+  if (!ns[slot]?.microphoneActive) return delta;
+  return delta > 0 ? Math.round(delta * 2) : Math.round(delta * 4);
 }
 
 function showDiceShop(room) {
@@ -2252,9 +2543,11 @@ function showDiceShop(room) {
     if (room.turn_phase === 'roll') {
       const me = myPlayer(room);
       const c  = CHAR_CFG[me.char] || {};
-      const canAbility = c.ability && c.ability !== 'reroll' && c.ability !== 'tollpass'
+      const copiedAb = pStats(room)[playerSlot]?.copiedAbility;
+      const effectiveAbility = copiedAb?.ability || c.ability;
+      const canAbility = effectiveAbility && effectiveAbility !== 'reroll' && effectiveAbility !== 'tollpass'
         && (pState(room).cooldowns[playerSlot] || 0) === 0;
-      const abilLabel = { cupcake: T('action.ability.cupcake'), jump: T('action.ability.jump'), kill: T('action.ability.kill'), gifts: T('action.ability.gifts') }[c.ability] || '✨ Ability';
+      const abilLabel = { cupcake: T('action.ability.cupcake'), jump: T('action.ability.jump'), kill: T('action.ability.kill'), gifts: T('action.ability.gifts'), shuffle: T('action.ability.shuffle') }[effectiveAbility] || '✨ Ability';
       actionHTML = `
         <button class="mp-btn primary dp-action-btn" id="dp-roll-btn">${diceObj.pick ? T('action.pickSteps') : T('action.roll', { emoji: diceObj.emoji })}</button>
         ${canAbility ? `<button class="mp-btn accent dp-action-btn" id="dp-ability-btn">${abilLabel}</button>` : ''}`;
@@ -2296,11 +2589,49 @@ function showDiceShop(room) {
     }
   }
 
+  // ── Items section ─────────────────────────────────────
+  const ownedItems = getOwnedItems(room, playerSlot);
+  const myTurnForItems = isMyTurn(room) && ['roll','rolled','moved','tollbooth'].includes(room.turn_phase);
+  const ns_items = pStats(room);
+
+  const itemShopCards = ITEM_CFG.map(it => {
+    const count = ownedItems.filter(id => id === it.id).length;
+    const canBuy = coins >= it.price;
+    const isBattery = it.id === 'battery';
+    const batteryUsed = isBattery && !!(ns_items[playerSlot]?.batteryUsed);
+    const activeEffects = [];
+    if (it.id === 'battery' && ns_items[playerSlot]?.extraTurn) activeEffects.push('⚡');
+    if (it.id === 'helpy'   && ns_items[playerSlot]?.helpyActive) activeEffects.push('✨');
+    if (it.id === 'm2'      && ns_items[playerSlot]?.copiedAbility) activeEffects.push('🔮');
+
+    const batteryLocked = isBattery && (batteryUsed || count > 0);
+    const canBuyItem    = canBuy && !batteryLocked;
+    const useBtn = count > 0 && myTurnForItems && !(isBattery && batteryUsed)
+      ? `<button class="mp-btn small itm-use-btn" data-id="${it.id}">${T('item.use')}</button>` : '';
+    const countTag = count > 0 ? `<span class="itm-count">${count > 1 ? '×' + count : '●'}</span>` : '';
+    const activeTag = activeEffects.length ? `<span class="itm-active">${activeEffects.join('')}</span>` : '';
+    return `<div class="itm-card ${count > 0 ? 'itm-owned' : 'itm-locked'}">
+      <div class="itm-header">
+        <span class="itm-emoji">${it.emoji}</span>
+        <span class="itm-name">${T('item.' + it.id + '.name')}</span>
+        ${countTag}${activeTag}
+      </div>
+      <span class="itm-desc">${T('item.' + it.id + '.desc')}</span>
+      <div class="itm-footer">
+        ${useBtn}
+        <span class="itm-price">${it.price}${COIN_IMG}</span>
+        <button class="mp-btn small itm-buy-btn" data-id="${it.id}" data-price="${it.price}" ${canBuyItem ? '' : 'disabled'}>${!canBuyItem && batteryLocked ? T('item.battery.used') : coins < it.price ? T('dice.needCoins', { n: it.price }) : T('item.buy')}</button>
+      </div>
+    </div>`;
+  }).join('');
+
   if (btnsEl) btnsEl.innerHTML = actionHTML ? `<div class="dice-panel-actions">${actionHTML}</div>` : '';
   panel.innerHTML = `
     <div class="dice-shop-title">${T('dice.title')}</div>
     <div class="dice-shop-coins">${T('dice.coinsAvailable', { n: coins })}</div>
-    <div class="dice-inv-list">${cards}</div>`;
+    <div class="dice-inv-list">${cards}</div>
+    <div class="dice-shop-title" style="margin-top:10px">${T('item.shopTitle')}</div>
+    <div class="itm-list">${itemShopCards}</div>`;
 
   panel.querySelectorAll('.dic-buy-btn').forEach(btn => {
     if (!btn.disabled) btn.addEventListener('click', () => buyDice(btn.dataset.id, +btn.dataset.price), { once: true });
@@ -2316,6 +2647,12 @@ function showDiceShop(room) {
       await db.from('party_rooms').update({ player_stats: JSON.stringify(ns) }).eq('id', roomId);
       showToast(T('dice.unequippedBack'));
     }, { once: true });
+  });
+  panel.querySelectorAll('.itm-buy-btn:not([disabled])').forEach(btn => {
+    btn.addEventListener('click', () => buyItem(btn.dataset.id, +btn.dataset.price), { once: true });
+  });
+  panel.querySelectorAll('.itm-use-btn').forEach(btn => {
+    btn.addEventListener('click', () => useItem(btn.dataset.id), { once: true });
   });
 
   // ── action button wires ──────────────────────────────────
@@ -2377,6 +2714,110 @@ async function equipDice(diceId) {
   ns[playerSlot].dice = diceId;
   await db.from('party_rooms').update({ player_stats: JSON.stringify(ns) }).eq('id', roomId);
   showToast(T('dice.equipped2', { name: T('dname.' + diceId), emoji: DICE_TYPES[diceId]?.emoji || '🎲' }));
+}
+
+// ── Item shop ─────────────────────────────────────────────────────────────────
+async function buyItem(itemId) {
+  const item = ITEM_CFG.find(i => i.id === itemId);
+  if (!item) return;
+  const ns = pStats(roomData);
+  if (!ns[playerSlot]) ns[playerSlot] = { mgWins: 0, badLucks: 0 };
+  (ns[playerSlot].ownedItems = ns[playerSlot].ownedItems || []).push(itemId);
+  const st = pState(roomData);
+  st.coins[playerSlot] = Math.max(0, (st.coins[playerSlot] || 0) - item.price);
+  await db.from('party_rooms').update({
+    player_stats: JSON.stringify(ns),
+    player_coins: JSON.stringify(st.coins),
+  }).eq('id', roomId);
+  emitEvent(`${item.emoji} ${roomData[`${playerSlot}_name`]} bought ${T('item.' + itemId + '.name')}!`);
+  showToast(`${item.emoji} ${T('item.' + itemId + '.name')} purchased!`);
+}
+
+async function useItem(itemId) {
+  const item = ITEM_CFG.find(i => i.id === itemId);
+  if (!item) return;
+  const ns = pStats(roomData);
+  if (!ns[playerSlot]) ns[playerSlot] = { mgWins: 0, badLucks: 0 };
+  const items = (ns[playerSlot].ownedItems || []);
+  const idx = items.indexOf(itemId);
+  if (idx === -1) return;
+  items.splice(idx, 1);
+  ns[playerSlot].ownedItems = items;
+
+  const st = pState(roomData);
+  const pc = roomData.player_count || 2;
+  const others = allSlots(pc).filter(s => s !== playerSlot && roomData[`${s}_name`]);
+
+  switch (itemId) {
+    case 'microphone': {
+      const allActive = allSlots(pc).filter(s => roomData[`${s}_name`]);
+      if (!allActive.length) { showToast(T('error.noRange')); return; }
+      showMicrophoneTarget(allActive);
+      return; // target picker handles the rest
+    }
+    case 'battery': {
+      if (ns[playerSlot].batteryUsed) { showToast(T('item.battery.used')); return; }
+      ns[playerSlot].batteryUsed = true;
+      ns[playerSlot].extraTurn   = true;
+      await db.from('party_rooms').update({ player_stats: JSON.stringify(ns) }).eq('id', roomId);
+      emitEvent(`🔋 ${roomData[`${playerSlot}_name`]} activated the Battery — extra turn coming!`);
+      showToast(`🔋 ${T('item.battery.name')} activated!`);
+      break;
+    }
+    case 'helpy': {
+      ns[playerSlot].helpyActive = true;
+      await db.from('party_rooms').update({ player_stats: JSON.stringify(ns) }).eq('id', roomId);
+      emitEvent(`🐰 ${roomData[`${playerSlot}_name`]} used Helpy — next minigame score ×2!`);
+      showToast(`🐰 ${T('item.helpy.name')} activated!`);
+      break;
+    }
+    case 'swap': {
+      if (!others.length) { showToast(T('error.noRange')); return; }
+      const target = others[Math.floor(Math.random() * others.length)];
+      const posA = st.pos[playerSlot] || 0;
+      const posB = st.pos[target]     || 0;
+      st.pos[playerSlot] = posB;
+      st.pos[target]     = posA;
+      await db.from('party_rooms').update({
+        player_pos:   JSON.stringify(st.pos),
+        player_stats: JSON.stringify(ns),
+      }).eq('id', roomId);
+      emitEvent(`🔃 ${roomData[`${playerSlot}_name`]} swapped positions with ${roomData[`${target}_name`]}!`);
+      showToast(`🔃 Swapped with ${roomData[`${target}_name`]}!`);
+      break;
+    }
+    case 'ballpit': {
+      const { boardSize } = parseBoard(roomData);
+      const currentLap = Math.floor((st.pos[playerSlot] || 0) / boardSize);
+      const randomNode = Math.floor(Math.random() * boardSize);
+      st.pos[playerSlot] = currentLap * boardSize + randomNode;
+      await db.from('party_rooms').update({
+        player_pos:   JSON.stringify(st.pos),
+        player_stats: JSON.stringify(ns),
+      }).eq('id', roomId);
+      emitEvent(`🎊 ${roomData[`${playerSlot}_name`]} used Ball Pit — teleported to space ${randomNode}!`);
+      showToast(`🎊 Teleported to space ${randomNode}!`);
+      break;
+    }
+    case 'm2': {
+      if (!others.length) { showToast(T('error.noRange')); return; }
+      const target = others[Math.floor(Math.random() * others.length)];
+      const targetChar    = roomData[`${target}_char`] || 'freddy';
+      const targetAbility = CHAR_CFG[targetChar]?.ability;
+      if (!targetAbility || targetAbility === 'tollpass') {
+        await db.from('party_rooms').update({ player_stats: JSON.stringify(ns) }).eq('id', roomId);
+        emitEvent(`🤖 ${roomData[`${playerSlot}_name`]} copied ${roomData[`${target}_name`]}'s style — nothing useful!`);
+        showToast(`🤖 Nothing to copy from ${roomData[`${target}_name`]}!`);
+        break;
+      }
+      ns[playerSlot].copiedAbility = { ability: targetAbility, cooldown: CHAR_CFG[targetChar].cooldown };
+      await db.from('party_rooms').update({ player_stats: JSON.stringify(ns) }).eq('id', roomId);
+      emitEvent(`🤖 ${roomData[`${playerSlot}_name`]} copied ${CHAR_CFG[targetChar]?.name}'s ability from ${roomData[`${target}_name`]}!`);
+      showToast(`🤖 Copied ${CHAR_CFG[targetChar]?.name}'s ability!`);
+      break;
+    }
+  }
+  showDiceShop(roomData);
 }
 
 // ── Tollbooth (hard mode) ─────────────────────────────────────────────────────
@@ -2511,8 +2952,6 @@ async function freddyTollPass() {
 
 // ── Minigame trigger ──────────────────────────────────────────────────────────
 async function triggerMinigame(involvedSlots, extraCfg = {}) {
-  // Only p1-p4 have mg_done/mg_score DB columns — cap participants at 4
-  involvedSlots = involvedSlots.slice(0, 4);
   const cfg = MINIGAME_LIST[Math.floor(Math.random() * MINIGAME_LIST.length)];
   let reward = extraCfg.challengeReward !== undefined ? extraCfg.challengeReward : Math.floor(Math.random() * 3) + 1;
 
@@ -2564,7 +3003,8 @@ function showMgWaitScreen(room) {
   const cfg      = MINIGAME_LIST.find(m => m.id === room.mg_id);
   if (!cfg) return;
 
-  const alreadyReady = room[mgDoneKey(playerSlot)];
+  const isP56 = slotNum(playerSlot) > 4;
+  const alreadyReady = isP56 ? mgReadyLocal.has(playerSlot) : room[mgDoneKey(playerSlot)];
   showScreen('minigame');
   const livebar = document.getElementById('mg-live-bar');
   if (livebar) livebar.style.display = 'none';
@@ -2577,7 +3017,7 @@ function showMgWaitScreen(room) {
       ${involved.map(s => {
         const char  = room[`${s}_char`] || 'freddy';
         const color = PLAYER_COLORS[slotNum(s) - 1];
-        const ready = room[mgDoneKey(s)];
+        const ready = slotNum(s) <= 4 ? room[mgDoneKey(s)] : mgReadyLocal.has(s);
         return `<span class="mg-player-tag" id="ready-tag-${s}"
             style="border-color:${color};background:${ready ? color + '40' : color + '15'}">
           <img src="${charImg(char)}" style="width:16px;height:16px;border-radius:50%;object-fit:contain;vertical-align:middle;margin-right:4px" onerror="this.style.display='none'"/>
@@ -2599,9 +3039,13 @@ function showMgWaitScreen(room) {
 async function readyForMinigame() {
   const btn = document.getElementById('mg-ready-btn');
   if (btn) { btn.disabled = true; btn.textContent = T('mg.readyBtn'); }
-  await db.from('party_rooms').update({
-    [mgDoneKey(playerSlot)]: true,
-  }).eq('id', roomId);
+  if (slotNum(playerSlot) <= 4) {
+    await db.from('party_rooms').update({ [mgDoneKey(playerSlot)]: true }).eq('id', roomId);
+  } else {
+    mgReadyLocal.add(playerSlot);
+    broadcastCh?.send({ type: 'broadcast', event: 'mg_ready', payload: { slot: playerSlot } });
+    checkMgAllReadyLocal();
+  }
 }
 
 // ── Minigame screen (auto-starts when all ready) ──────────────────────────────
@@ -2609,6 +3053,7 @@ function startMinigameScreen(room) {
   if (mgCleanup) { mgCleanup(); mgCleanup = null; }
   stopMgPoller();
   mgDoneLocal          = {};
+  mgReadyLocal         = new Set();
   podiumConfirmedLocal = new Set();
   const mg       = { id: room.mg_id, config: JSON.parse(room.mg_config || '{}'), reward: room.mg_reward };
   const involved = JSON.parse(room.mg_players || '[]');
@@ -2717,19 +3162,32 @@ async function finishMinigame(room) {
     .map(s => ({ slot: s, score: mgDoneLocal[s] ?? room[mgScoreKey(s)] ?? 0 }))
     .sort((a, b) => b.score - a.score);
 
+  const st       = pState(room);
+  const ns       = pStats(room);
+
+  // Helpy: double score of affected player in this minigame
+  let helpyApplied = false;
+  ranked.forEach(r => {
+    if (ns[r.slot]?.helpyActive) {
+      r.score = r.score * 2;
+      ns[r.slot].helpyActive = false;
+      helpyApplied = true;
+    }
+  });
+  if (helpyApplied) ranked.sort((a, b) => b.score - a.score);
+
   const winner   = ranked[0].slot;
   const loser    = ranked[ranked.length - 1].slot;
   const topScore = ranked[0].score;
   const isTie    = ranked.length > 1 && ranked.every(r => r.score === topScore);
-  const st       = pState(room);
-  const ns       = pStats(room);
 
   let mgConfig = {};
   try { mgConfig = JSON.parse(room.mg_config || '{}'); } catch {}
   const isChallenge = !!mgConfig.isChallenge;
   const rewardMul   = mgConfig.rewardMul || 1;
-  const reward      = room.mg_reward || 0; // hoisted so podiumRows can use it
-  let challengeCoinsChange = {}; // populated below for podium display
+  const reward      = room.mg_reward || 0;
+  let challengeCoinsChange = {};
+  const actualCoinsChange  = {}; // tracks real coin deltas for podium display
 
   if (isChallenge) {
     const challenger      = mgConfig.challenger;
@@ -2740,24 +3198,31 @@ async function finishMinigame(room) {
 
     if (!isTie) {
       if (challengerWon) {
-        if (isPizzaReward) st.pizzas[challenger] = (st.pizzas[challenger] || 0) + 1;
-        else               st.coins[challenger]  = (st.coins[challenger]  || 0) + challengeReward;
+        if (isPizzaReward) {
+          st.pizzas[challenger] = (st.pizzas[challenger] || 0) + 1;
+        } else {
+          const actualReward = micMultiplied(ns, challenger, challengeReward);
+          st.coins[challenger] = (st.coins[challenger] || 0) + actualReward;
+          challengeCoinsChange[challenger] = actualReward;
+        }
         if (!ns[challenger]) ns[challenger] = { mgWins: 0, badLucks: 0 };
         ns[challenger].mgWins = (ns[challenger].mgWins || 0) + 1;
-        challengeCoinsChange[challenger] = isPizzaReward ? 0 : +challengeReward;
-        emitEvent(`⚔️ ${room[`${challenger}_name`]} won the Challenge! ${isPizzaReward ? '+🍕' : '+' + challengeReward + '🪙'}`);
+        if (!isPizzaReward) challengeCoinsChange[challenger] = micMultiplied(ns, challenger, challengeReward);
+        emitEvent(`⚔️ ${room[`${challenger}_name`]} won the Challenge! ${isPizzaReward ? '+🍕' : '+' + challengeCoinsChange[challenger] + '🪙'}`);
       } else {
         // Challenger loses: deduct from challenger, split among others
-        st.coins[challenger] = Math.max(0, (st.coins[challenger] || 0) - challengeReward);
-        challengeCoinsChange[challenger] = -challengeReward;
+        const actualLoss = micMultiplied(ns, challenger, -challengeReward);
+        st.coins[challenger] = Math.max(0, (st.coins[challenger] || 0) + actualLoss);
+        challengeCoinsChange[challenger] = actualLoss;
         const split = Math.ceil(challengeReward / Math.max(1, others.length));
         others.forEach(s => {
-          st.coins[s] = (st.coins[s] || 0) + split;
-          challengeCoinsChange[s] = +split;
+          const actualSplit = micMultiplied(ns, s, split);
+          st.coins[s] = (st.coins[s] || 0) + actualSplit;
+          challengeCoinsChange[s] = actualSplit;
         });
         if (!ns[winner]) ns[winner] = { mgWins: 0, badLucks: 0 };
         ns[winner].mgWins = (ns[winner].mgWins || 0) + 1;
-        emitEvent(`⚔️ ${room[`${challenger}_name`]} lost the Challenge! -${challengeReward}🪙 split among others`);
+        emitEvent(`⚔️ ${room[`${challenger}_name`]} lost the Challenge! Coins split among others`);
       }
     }
   } else {
@@ -2765,23 +3230,32 @@ async function finishMinigame(room) {
     if (isTie) {
       const perPlayer = reward > 0 ? Math.max(1, Math.ceil(reward / ranked.length)) : 0;
       if (perPlayer > 0) {
-        ranked.forEach(r => { st.coins[r.slot] = (st.coins[r.slot] || 0) + perPlayer; });
+        ranked.forEach(r => {
+          const actual = micMultiplied(ns, r.slot, perPlayer);
+          st.coins[r.slot] = (st.coins[r.slot] || 0) + actual;
+          actualCoinsChange[r.slot] = actual;
+        });
         emitEvent(`🎮 Minigame tied! Each player gets ${perPlayer}🪙`);
       } else {
         emitEvent(`🎮 Minigame tied!`);
       }
     } else {
-      st.coins[winner] = (st.coins[winner] || 0) + reward;
+      const actualReward = micMultiplied(ns, winner, reward);
+      st.coins[winner] = (st.coins[winner] || 0) + actualReward;
+      actualCoinsChange[winner] = actualReward;
       if (!ns[winner]) ns[winner] = { mgWins: 0, badLucks: 0 };
       ns[winner].mgWins = (ns[winner].mgWins || 0) + 1;
-      emitEvent(`🎮 ${room[`${winner}_name`]} won the minigame!${mulTag}`);
+      const micTag = ns[winner]?.microphoneActive ? ' 🎤×2' : '';
+      emitEvent(`🎮 ${room[`${winner}_name`]} won the minigame! +${actualReward}🪙${mulTag}${micTag}`);
     }
   }
 
-  const perTie = (isTie && reward > 0) ? Math.max(1, Math.ceil(reward / ranked.length)) : 0;
+  // Clear microphone effect for all involved players now that rewards are computed
+  involved.forEach(s => { if (ns[s]?.microphoneActive) ns[s].microphoneActive = false; });
+
   const podiumRows = ranked.map(r => ({
     slot: r.slot, name: room[`${r.slot}_name`], char: room[`${r.slot}_char`] || 'freddy', score: r.score,
-    coinsChange: isChallenge ? (challengeCoinsChange[r.slot] || 0) : isTie ? perTie : r.slot === winner ? +reward : 0,
+    coinsChange: isChallenge ? (challengeCoinsChange[r.slot] || 0) : (actualCoinsChange[r.slot] || 0),
   }));
   const nextPlayer = nextSlot(room);
   const mgCfg = MINIGAME_LIST.find(m => m.id === room.mg_id);
@@ -3611,7 +4085,7 @@ async function triggerPartyRematch(room) {
     pos[ns] = p; coins[ns] = 0; pizzas[ns] = 0; cooldowns[ns] = 0;
   });
   // Clear unused slots
-  for (let i = newCount + 1; i <= 4; i++) {
+  for (let i = newCount + 1; i <= 6; i++) {
     const ns = `player${i}`;
     update[`${ns}_id`] = null; update[`${ns}_name`] = null; update[`${ns}_char`] = null;
   }

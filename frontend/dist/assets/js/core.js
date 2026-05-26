@@ -273,13 +273,15 @@ async function _getGifDurationMs(src) {
 }
 
 const _JUMPSCARE_EXT = { freddy: 'webp', bonnie: 'webp', chica: 'webp', foxy: 'webp', golden_freddy: 'webp' };
+const _JUMPSCARE_FILE = { freddy: 'freddy_optimized', bonnie: 'bonnie_optimized', chica: 'chica_optimized', foxy: 'foxy_optimized', golden_freddy: 'golden_freddy_optimized' };
 const _jumpscarePreloaded = {};
 
 (function _preloadJumpscares() {
   var names = Object.keys(_JUMPSCARE_EXT);
   names.forEach(function(name) {
     var ext = _JUMPSCARE_EXT[name];
-    var src = `../assets/images/jumpscare/${name}.${ext}`;
+    var base = _JUMPSCARE_FILE[name] || name;
+    var src = `../assets/images/jumpscare/${base}.${ext}`;
     var img = new Image();
     img.src = src;
     _jumpscarePreloaded[name] = img;
@@ -289,7 +291,8 @@ const _jumpscarePreloaded = {};
 
 function triggerJumpscare(gifName, callback) {
   const ext = _JUMPSCARE_EXT[gifName] || 'gif';
-  const src = `../assets/images/jumpscare/${gifName}.${ext}`;
+  const base = _JUMPSCARE_FILE[gifName] || gifName;
+  const src = `../assets/images/jumpscare/${base}.${ext}`;
 
   const overlay = document.createElement('div');
   overlay.id = 'freddy-jumpscare';

@@ -1,9 +1,9 @@
-// ── Fnafdle Party — Translation file ─────────────────────────────────────────
+// ── Fnafdle Party - Translation file ─────────────────────────────────────────
 // Supported languages: en (English 🇬🇧) | pt (Português 🇵🇹) | es (Español 🇪🇸) | moo (🐄 Moo)
 //
 // Usage:
-//   T('key')           — returns translated string
-//   T('key', {n:5})    — returns translated string with {n} replaced by 5
+//   T('key')           - returns translated string
+//   T('key', {n:5})    - returns translated string with {n} replaced by 5
 //
 // To switch language at runtime: window.PARTY_LANG = 'pt'; location.reload();
 // The selected language is persisted in localStorage under 'party_lang'.
@@ -78,9 +78,9 @@
       'waiting.chooseChar':    'Choose your character',
       'waiting.clickSelect':   'Click a character to select it',
       'waiting.confirmBtn':    '✅ Confirm {name}',
-      'waiting.confirmed':     '✅ Confirmed — waiting for others...',
+      'waiting.confirmed':     '✅ Confirmed - waiting for others...',
       'waiting.waitingSlot':   '⏳ Player {n}...',
-      'waiting.choosing':      '⏳ {name} — choosing...',
+      'waiting.choosing':      '⏳ {name} - choosing...',
       'waiting.goesFirst':     '🎲 {name} goes first! (randomly chosen)',
       'waiting.notInRematch':  "You weren't included in the rematch",
 
@@ -93,7 +93,7 @@
       'rules.5': 'Tollbooth: path splits. Pay coins → Path A (shortcut) or take Path B free (setback). Price rises each visit!',
       'rules.6': 'Two players on the same space = instant minigame between them!',
       'rules.7': 'Dice Shop: buy special dice with limited uses (3–5). Each die can be equipped any time from the panel.',
-      'rules.8': "All-Ones Die: always rolls 1, but you're forced to use it for 5 turns — can't unequip!",
+      'rules.8': "All-Ones Die: always rolls 1, but you're forced to use it for 5 turns - can't unequip!",
       'rules.9': 'Characters each have a unique ability. Freddy: take Path A free at tollbooths (cd:3). Foxy: re-roll once (cd:2). Chica: steal 5 coins from nearby player (cd:3). Bonnie: jump 4 spaces (cd:3). Springtrap: send a nearby player back to start (cd:5). Puppet: convert 10 coins → pizza for any nearby player (cd:5). Mangle: shuffle all non-locked board spaces (cd:5).',
       'rules.10': 'Jackpot map: minigame every round. Jackpot spaces grow until claimed!',
 
@@ -114,12 +114,18 @@
       // ── Map names & descriptions ──────────────────────────────────────────
       'map.easy.name':    'Easy',
       'map.easy.desc':    '20 spaces · mixed tiles',
-      'map.jackpot.name': 'Jackpot 💰',
+      'map.jackpot.name': 'Jackpot',
       'map.jackpot.desc': '39 spaces · minigame every lap',
       'map.normal.name':  'Normal',
       'map.normal.desc':  '46 spaces · split paths · random tiles',
-      'map.hard.name':    'Hard 🐻',
-      'map.hard.desc':    '58 spaces · 3 tollbooths · complex paths',
+      'map.freddy.name':  'Freddy',
+      'map.freddy.desc':  '58 spaces · 3 tollbooths · complex paths',
+      'map.bonnie.name':  'Bonnie',
+      'map.bonnie.desc':  '38 spaces · 2 tollbooths · jackpot branches',
+      'map.chica.name':   'Chica',
+      'map.chica.desc':   '28 spaces · 1 tollbooth · looping paths',
+      'map.foxy.name':    'Foxy',
+      'map.foxy.desc':    '48 spaces · no tollbooths · random tiles',
 
       // ── Board ─────────────────────────────────────────────────────────────
       'board.center':     'FNAFDLE\nPARTY',
@@ -143,7 +149,7 @@
       'slot.ready':    '✨ Ready',
       'slot.cooldown': '⏳{n}t',
 
-      // ── Action UI — roll phase ────────────────────────────────────────────
+      // ── Action UI - roll phase ────────────────────────────────────────────
       'action.roll':          '{emoji} Roll!',
       'action.pickSteps':     '🎯 Pick Steps',
       'action.pickPrompt':    '🎯 Pick your steps!',
@@ -151,24 +157,25 @@
       'action.ability.jump':    '🎸 Jump',
       'action.ability.kill':    '🪤 Kill',
       'action.ability.gifts':   '🎁 Gifts',
+      'action.ability.shuffle': '🎀 Shuffle',
       'action.space':         'Space {n}',
       'action.lap':           'Lap {cur}/{total}',
       'action.forcedTag':     '🔒 Forced: {n}t',
 
-      // ── Action UI — rolled phase ──────────────────────────────────────────
+      // ── Action UI - rolled phase ──────────────────────────────────────────
       'action.continue':         '→ Continue',
       'action.backToStart':      '🪤 Back to Start',
       'action.springlockMsg':    'Sent back to start!',
       'action.reroll':           '🔄 Re-Roll',
       'action.springlockRolled': '🪤 Springlock!',
 
-      // ── Action UI — moved phase ───────────────────────────────────────────
+      // ── Action UI - moved phase ───────────────────────────────────────────
       'action.landed':        'Landed:',
       'action.contBtn':       '→ Continue',
 
-      // ── Action UI — other turn ────────────────────────────────────────────
+      // ── Action UI - other turn ────────────────────────────────────────────
       'action.otherTurn':     "{name}'s turn",
-      'action.otherRolled':   "{name}'s turn — rolled 🎲 {n}",
+      'action.otherRolled':   "{name}'s turn - rolled 🎲 {n}",
       'action.atTollbooth':   "{name} is at Freddy's Tollbooth...",
 
       // ── Tollbooth ─────────────────────────────────────────────────────────
@@ -217,7 +224,7 @@
       'dice.buy':            'Buy',
       'dice.locked':         '🔒 Locked',
       'dice.forcedTag':      '🔒 {n}t forced',
-      'dice.unequippedBack': 'Unequipped — back to d6 🎲',
+      'dice.unequippedBack': 'Unequipped - back to d6 🎲',
       'dice.expired':        '{name} ran out of uses! Back to d6 🎲',
       'dice.bought':         'Bought {name}!{forced} {emoji}',
       'dice.boughtForced':   ' (forced {n} turns!)',
@@ -242,7 +249,7 @@
       'ddesc.chef':       'Rolls 2-2-3-3-4-5. Chica only. · 4 uses.',
       'ddesc.rocker':     'Rolls 1-1-3-4-6-6. Bonnie only. · 4 uses.',
       'ddesc.2d6':        'Roll 2d6 and add results (2–12). · 3 uses.',
-      'ddesc.all1':       'Always rolls 1. FORCED for 5 turns — cannot unequip!',
+      'ddesc.all1':       'Always rolls 1. FORCED for 5 turns - cannot unequip!',
       'ddesc.lucky7':     'Rolls 6 or 7... or 0. High risk, high reward. · 4 uses.',
       'ddesc.pick':       'Choose exactly how many spaces to move (1–6). · 3 uses.',
       'ddesc.springlock': 'Rolls 6-10 or Springlock (no move + back to start!). Springtrap only. · 3 uses.',
@@ -312,8 +319,8 @@
       'mg.pizza.keep':      'Keep drawing...',
 
       // ── Podium ────────────────────────────────────────────────────────────
-      'podium.tie':          '🤝 Tie — +{n}🪙 each!',
-      'podium.tieSplit':     '🤝 Tie — coins split!',
+      'podium.tie':          '🤝 Tie - +{n}🪙 each!',
+      'podium.tieSplit':     '🤝 Tie - coins split!',
       'podium.youWon':       '🏆 You won!',
       'podium.youLost':      '💀 You lost!',
       'podium.youRank':      '#{n}',
@@ -363,6 +370,27 @@
       'qevent.9.desc':  'Lose half your coins',
       'qevent.10.text': 'Mangle shuffled the board! 🔀',
       'qevent.10.desc': 'All spaces reshuffled!',
+      'qevent.11.text': 'Found a free item! 🎁',
+      'qevent.11.desc': 'Got a random item!',
+
+      // ── Items ─────────────────────────────────────────────────────────────
+      'item.shopTitle':           '🎒 Items',
+      'item.buy':                 'Buy',
+      'item.use':                 'Use',
+      'item.battery.used':        'Battery already used this game!',
+      'item.microphone.name':     'Microphone',
+      'item.microphone.desc':     'Gains ×2 / Losses ×4 for a chosen player until their turn ends.',
+      'item.microphone.pickDesc': 'Choose who gets the Microphone effect:',
+      'item.battery.name':        'Battery',
+      'item.battery.desc':        'Grants an extra turn. One use per game.',
+      'item.helpy.name':          'Helpy',
+      'item.helpy.desc':          'Doubles your score in the next minigame you play.',
+      'item.swap.name':           'Swap',
+      'item.swap.desc':           'Swaps your position with a random other player.',
+      'item.ballpit.name':        'Ball Pit',
+      'item.ballpit.desc':        'Teleports you to a random space on the current lap.',
+      'item.m2.name':             'M2',
+      'item.m2.desc':             'Copies the ability of a random other player (one use).',
 
       // ── Trap effects ──────────────────────────────────────────────────────
       'trap.0': 'Lost 5 coins! 💸',
@@ -465,9 +493,9 @@
       'extreme.restartNight1':   '↩ Restart (Night 1)',
       'extreme.nightSurvived':   '🌙 Night {n} Survived!',
       'extreme.nightSurvivedMsg':'It was {name}! {teaser}',
-      'extreme.continueNight':   '▶ Continue — Night {n}',
-      'extreme.loseTime':        '⏰ 6 AM — time ran out!',
-      'extreme.loseBattery':     '🔦 Power outage — Freddy got you!',
+      'extreme.continueNight':   '▶ Continue - Night {n}',
+      'extreme.loseTime':        '⏰ 6 AM - time ran out!',
+      'extreme.loseBattery':     '🔦 Power outage - Freddy got you!',
       'extreme.loseGuesses':     '💀 Out of attempts!',
       'extreme.loseMsg':         'It was {name}. Try Night {n} again.',
       'extreme.retryNight':      '↩ Retry Night {n}',
@@ -538,7 +566,7 @@
       'index.statsDaily':       '📊 Daily Stats',
       'index.statsEndless':     '📊 Endless Stats',
 
-      // ── Database — Animals ────────────────────────────────────────────────────
+      // ── Database - Animals ────────────────────────────────────────────────────
       'db.animal.Aligator':       'Aligator',
       'db.animal.Alligator':      'Alligator',
       'db.animal.Badger':         'Badger',
@@ -597,7 +625,7 @@
       'db.animal.Vacuum':         'Vacuum',
       'db.animal.Wolf':           'Wolf',
 
-      // ── Database — Types ──────────────────────────────────────────────────────
+      // ── Database - Types ──────────────────────────────────────────────────────
       'db.type.Classic':           'Classic',
       'db.type.Endo':              'Endo',
       'db.type.Enemy':             'Enemy',
@@ -626,7 +654,7 @@
       'db.type.Welcome Show':      'Welcome Show',
       'db.type.Withered':          'Withered',
 
-      // ── Database — Colors ─────────────────────────────────────────────────────
+      // ── Database - Colors ─────────────────────────────────────────────────────
       'db.color.Beige':          'Beige',
       'db.color.Black':          'Black',
       'db.color.Blue':           'Blue',
@@ -703,9 +731,9 @@
       'waiting.chooseChar':    'Escolhe a tua personagem',
       'waiting.clickSelect':   'Clica numa personagem para selecionar',
       'waiting.confirmBtn':    '✅ Confirmar {name}',
-      'waiting.confirmed':     '✅ Confirmado — à espera dos outros...',
+      'waiting.confirmed':     '✅ Confirmado - à espera dos outros...',
       'waiting.waitingSlot':   '⏳ Jogador {n}...',
-      'waiting.choosing':      '⏳ {name} — a escolher...',
+      'waiting.choosing':      '⏳ {name} - a escolher...',
       'waiting.goesFirst':     '🎲 {name} vai primeiro! (escolhido aleatoriamente)',
       'waiting.notInRematch':  'Não foste incluído na revanche',
 
@@ -717,7 +745,7 @@
       'rules.5':  'Portagem: caminho divide-se. Pagar moedas → Caminho A (atalho) ou seguir Caminho B grátis (penalidade). Preço aumenta a cada visita!',
       'rules.6':  'Dois jogadores na mesma casa = minijogo imediato entre eles!',
       'rules.7':  'Loja de Dados: compra dados especiais com usos limitados (3–5). Cada dado pode ser equipado a qualquer momento.',
-      'rules.8':  'Dado All-Ones: dá sempre 1, mas és obrigado a usá-lo durante 5 turnos — não o podes desequipar!',
+      'rules.8':  'Dado All-Ones: dá sempre 1, mas és obrigado a usá-lo durante 5 turnos - não o podes desequipar!',
       'rules.9':  'Cada personagem tem uma habilidade única. Freddy: Caminho A grátis nas portagens (cd:3). Foxy: lança de novo (cd:2). Chica: rouba 5 moedas de um jogador próximo (cd:3). Bonnie: salta 4 casas (cd:3). Springtrap: envia jogador próximo para o início (cd:5). Puppet: converte 10 moedas → pizza para jogador próximo (cd:5). Mangle: embaralha casas do tabuleiro (cd:5).',
       'rules.10': 'Mapa Jackpot: minijogo a cada ronda. As casas Jackpot crescem até serem reclamadas!',
 
@@ -736,12 +764,18 @@
 
       'map.easy.name':    'Fácil',
       'map.easy.desc':    '20 casas · casas variadas',
-      'map.jackpot.name': 'Jackpot 💰',
+      'map.jackpot.name': 'Jackpot',
       'map.jackpot.desc': '39 casas · minijogo a cada volta',
       'map.normal.name':  'Normal',
       'map.normal.desc':  '46 casas · caminhos divididos · casas aleatórias',
-      'map.hard.name':    'Difícil 🐻',
-      'map.hard.desc':    '58 casas · 3 portagens · caminhos complexos',
+      'map.freddy.name':  'Freddy',
+      'map.freddy.desc':  '58 casas · 3 portagens · caminhos complexos',
+      'map.bonnie.name':  'Bonnie',
+      'map.bonnie.desc':  '38 casas · 2 portagens · ramos de jackpot',
+      'map.chica.name':   'Chica',
+      'map.chica.desc':   '28 casas · 1 portagem · caminhos em loop',
+      'map.foxy.name':    'Foxy',
+      'map.foxy.desc':    '48 casas · sem portagens · casas aleatórias',
 
       'board.center':     'FNAFDLE\nPARTY',
       'board.laps':       '{n} voltas',
@@ -769,6 +803,7 @@
       'action.ability.jump':    '🎸 Saltar',
       'action.ability.kill':    '🪤 Matar',
       'action.ability.gifts':   '🎁 Presentes',
+      'action.ability.shuffle': '🎀 Embaralhar',
       'action.space':           'Casa {n}',
       'action.lap':             'Volta {cur}/{total}',
       'action.forcedTag':       '🔒 Forçado: {n}t',
@@ -783,7 +818,7 @@
       'action.contBtn':       '→ Continuar',
 
       'action.otherTurn':     'Turno de {name}',
-      'action.otherRolled':   'Turno de {name} — lançou 🎲 {n}',
+      'action.otherRolled':   'Turno de {name} - lançou 🎲 {n}',
       'action.atTollbooth':   '{name} está na Portagem do Freddy...',
 
       'toll.title':         '🐻 Portagem do Freddy',
@@ -828,7 +863,7 @@
       'dice.buy':            'Comprar',
       'dice.locked':         '🔒 Bloqueado',
       'dice.forcedTag':      '🔒 {n}t forçado',
-      'dice.unequippedBack': 'Desequipado — de volta ao d6 🎲',
+      'dice.unequippedBack': 'Desequipado - de volta ao d6 🎲',
       'dice.expired':        '{name} ficou sem usos! De volta ao d6 🎲',
       'dice.bought':         'Comprado {name}!{forced} {emoji}',
       'dice.boughtForced':   ' (forçado {n} turnos!)',
@@ -852,7 +887,7 @@
       'ddesc.chef':       'Dá 2-2-3-3-4-5. Só Chica. · 4 usos.',
       'ddesc.rocker':     'Dá 1-1-3-4-6-6. Só Bonnie. · 4 usos.',
       'ddesc.2d6':        'Lança 2d6 e soma os resultados (2–12). · 3 usos.',
-      'ddesc.all1':       'Dá sempre 1. FORÇADO durante 5 turnos — não podes desequipar!',
+      'ddesc.all1':       'Dá sempre 1. FORÇADO durante 5 turnos - não podes desequipar!',
       'ddesc.lucky7':     'Dá 6 ou 7... ou 0. Alto risco, alta recompensa. · 4 usos.',
       'ddesc.pick':       'Escolhe exatamente quantas casas mover (1–6). · 3 usos.',
       'ddesc.springlock': 'Dá 6-10 ou Mola (sem movimento + volta ao início!). Só Springtrap. · 3 usos.',
@@ -918,8 +953,8 @@
       'mg.pizza.hint':      'Mantém e desenha um círculo, depois solta',
       'mg.pizza.keep':      'Continua a desenhar...',
 
-      'podium.tie':          '🤝 Empate — +{n}🪙 cada!',
-      'podium.tieSplit':     '🤝 Empate — moedas divididas!',
+      'podium.tie':          '🤝 Empate - +{n}🪙 cada!',
+      'podium.tieSplit':     '🤝 Empate - moedas divididas!',
       'podium.youWon':       '🏆 Ganhaste!',
       'podium.youLost':      '💀 Perdeste!',
       'podium.youRank':      '#{n}',
@@ -967,6 +1002,26 @@
       'qevent.9.desc':  'Perde metade das tuas moedas',
       'qevent.10.text': 'A Mangle embaralhou o tabuleiro! 🔀',
       'qevent.10.desc': 'Todas as casas foram embaralhadas!',
+      'qevent.11.text': 'Encontraste um item grátis! 🎁',
+      'qevent.11.desc': 'Recebeste um item aleatório!',
+
+      'item.shopTitle':           '🎒 Itens',
+      'item.buy':                 'Comprar',
+      'item.use':                 'Usar',
+      'item.battery.used':        'Bateria já usada neste jogo!',
+      'item.microphone.name':     'Microfone',
+      'item.microphone.desc':     'Ganhos ×2 / Perdas ×4 para um jogador à escolha até o turno dele acabar.',
+      'item.microphone.pickDesc': 'Escolhe quem recebe o efeito do Microfone:',
+      'item.battery.name':        'Bateria',
+      'item.battery.desc':        'Ganha um turno extra. Apenas uma vez por jogo.',
+      'item.helpy.name':          'Helpy',
+      'item.helpy.desc':          'Duplica a tua pontuação no próximo minijogo em que participares.',
+      'item.swap.name':           'Troca',
+      'item.swap.desc':           'Troca a tua posição com outro jogador aleatório.',
+      'item.ballpit.name':        'Piscina de Bolinhas',
+      'item.ballpit.desc':        'Teleporta-te para uma casa aleatória na volta atual.',
+      'item.m2.name':             'M2',
+      'item.m2.desc':             'Copia a habilidade de outro jogador aleatório (uma vez).',
 
       'trap.0': 'Perdeste 5 moedas! 💸',
       'trap.1': 'Perdeste 1 pizza! 🍕',
@@ -1066,9 +1121,9 @@
       'extreme.restartNight1':   '↩ Reiniciar (Noite 1)',
       'extreme.nightSurvived':   '🌙 Noite {n} Sobrevivida!',
       'extreme.nightSurvivedMsg':'Era {name}! {teaser}',
-      'extreme.continueNight':   '▶ Continuar — Noite {n}',
-      'extreme.loseTime':        '⏰ 6 AM — sem tempo!',
-      'extreme.loseBattery':     '🔦 Sem energia — o Freddy apanhou-te!',
+      'extreme.continueNight':   '▶ Continuar - Noite {n}',
+      'extreme.loseTime':        '⏰ 6 AM - sem tempo!',
+      'extreme.loseBattery':     '🔦 Sem energia - o Freddy apanhou-te!',
       'extreme.loseGuesses':     '💀 Sem tentativas!',
       'extreme.loseMsg':         'Era {name}. Tenta a Noite {n} de novo.',
       'extreme.retryNight':      '↩ Tentar Noite {n} de Novo',
@@ -1130,16 +1185,16 @@
       'index.quoteDesc':        'Adivinha quem disse · 6 tentativas',
       'index.extreme':          'Extremo',
       'index.extremeDesc':      '6 noites · tempo real · movimento de IA · 3 tentativas',
-      'index.guessWho':         'Quem é?',
-      'index.guessWhoDesc':     'Multijogador Quem é? · 2-4 jogadores online',
+      'index.guessWho':         'Guess Who?',
+      'index.guessWhoDesc':     'Guess Who? Multijogador · 2-4 jogadores online',
       'index.party':            'Fnafdle Party',
       'index.partyDesc':        'Jogo de tabuleiro · 2-4 jogadores · Online',
       'index.encyclopedia':     'Quem é este?',
       'index.encyclopediaDesc': 'Ver todos os animatrónicos · pesquisa & filtro',
       'index.statsDaily':       '📊 Estatísticas Diárias',
-      'index.statsEndless':     '📊 Estatísticas Sem Fim',
+      'index.statsEndless':     '📊 Estatísticas Infinito',
 
-      // ── Database — Animals ────────────────────────────────────────────────────
+      // ── Database - Animals ────────────────────────────────────────────────────
       'db.animal.Aligator':       'Caimão',
       'db.animal.Alligator':      'Crocodilo',
       'db.animal.Badger':         'Texugo',
@@ -1198,7 +1253,7 @@
       'db.animal.Vacuum':         'Aspirador',
       'db.animal.Wolf':           'Lobo',
 
-      // ── Database — Types ──────────────────────────────────────────────────────
+      // ── Database - Types ──────────────────────────────────────────────────────
       'db.type.Classic':           'Classic',
       'db.type.Endo':              'Endo',
       'db.type.Enemy':             'Enemy',
@@ -1227,7 +1282,7 @@
       'db.type.Welcome Show':      'Welcome Show',
       'db.type.Withered':          'Withered',
 
-      // ── Database — Colors ─────────────────────────────────────────────────────
+      // ── Database - Colors ─────────────────────────────────────────────────────
       'db.color.Beige':          'Bege',
       'db.color.Black':          'Preto',
       'db.color.Blue':           'Azul',
@@ -1304,9 +1359,9 @@
       'waiting.chooseChar':    'Elige tu personaje',
       'waiting.clickSelect':   'Haz clic en un personaje para seleccionarlo',
       'waiting.confirmBtn':    '✅ Confirmar {name}',
-      'waiting.confirmed':     '✅ Confirmado — esperando a los demás...',
+      'waiting.confirmed':     '✅ Confirmado - esperando a los demás...',
       'waiting.waitingSlot':   '⏳ Jugador {n}...',
-      'waiting.choosing':      '⏳ {name} — eligiendo...',
+      'waiting.choosing':      '⏳ {name} - eligiendo...',
       'waiting.goesFirst':     '🎲 ¡{name} va primero! (elegido aleatoriamente)',
       'waiting.notInRematch':  'No fuiste incluido en la revancha',
 
@@ -1318,7 +1373,7 @@
       'rules.5':  'Peaje: el camino se divide. Pagar monedas → Camino A (atajo) o tomar el Camino B gratis (penalización). ¡El precio sube con cada visita!',
       'rules.6':  '¡Dos jugadores en la misma casilla = minijuego instantáneo entre ellos!',
       'rules.7':  'Tienda de Dados: compra dados especiales con usos limitados (3–5). Cada dado se puede equipar en cualquier momento.',
-      'rules.8':  'Dado All-Ones: siempre saca 1, pero estás obligado a usarlo durante 5 turnos — ¡no puedes desequiparlo!',
+      'rules.8':  'Dado All-Ones: siempre saca 1, pero estás obligado a usarlo durante 5 turnos - ¡no puedes desequiparlo!',
       'rules.9':  'Cada personaje tiene una habilidad única. Freddy: Camino A gratis en peajes (cd:3). Foxy: vuelve a tirar (cd:2). Chica: roba 5 monedas de un jugador cercano (cd:3). Bonnie: salta 4 casillas (cd:3). Springtrap: envía a un jugador cercano al inicio (cd:5). Puppet: convierte 10 monedas → pizza para jugador cercano (cd:5). Mangle: baraja casillas del tablero (cd:5).',
       'rules.10': '¡Mapa Jackpot: minijuego cada ronda. Las casillas Jackpot crecen hasta que alguien las reclama!',
 
@@ -1341,8 +1396,14 @@
       'map.jackpot.desc': '39 casillas · minijuego cada vuelta',
       'map.normal.name':  'Normal',
       'map.normal.desc':  '46 casillas · caminos divididos · tiles aleatorios',
-      'map.hard.name':    'Difícil 🐻',
-      'map.hard.desc':    '58 casillas · 3 peajes · caminos complejos',
+      'map.freddy.name':  'Freddy 🐻',
+      'map.freddy.desc':  '58 casillas · 3 peajes · caminos complejos',
+      'map.bonnie.name':  'Bonnie 🎸',
+      'map.bonnie.desc':  '38 casillas · 2 peajes · ramas de jackpot',
+      'map.chica.name':   'Chica 🐔',
+      'map.chica.desc':   '28 casillas · 1 peaje · caminos en bucle',
+      'map.foxy.name':    'Foxy 🦊',
+      'map.foxy.desc':    '48 casillas · sin peajes · casillas aleatorias',
 
       'board.center':     'FNAFDLE\nPARTY',
       'board.laps':       '{n} vueltas',
@@ -1370,6 +1431,7 @@
       'action.ability.jump':    '🎸 Saltar',
       'action.ability.kill':    '🪤 Matar',
       'action.ability.gifts':   '🎁 Regalos',
+      'action.ability.shuffle': '🎀 Mezclar',
       'action.space':           'Casilla {n}',
       'action.lap':             'Vuelta {cur}/{total}',
       'action.forcedTag':       '🔒 Forzado: {n}t',
@@ -1384,7 +1446,7 @@
       'action.contBtn':       '→ Continuar',
 
       'action.otherTurn':     'Turno de {name}',
-      'action.otherRolled':   'Turno de {name} — lanzó 🎲 {n}',
+      'action.otherRolled':   'Turno de {name} - lanzó 🎲 {n}',
       'action.atTollbooth':   '{name} está en el Peaje de Freddy...',
 
       'toll.title':         '🐻 Peaje de Freddy',
@@ -1429,7 +1491,7 @@
       'dice.buy':            'Comprar',
       'dice.locked':         '🔒 Bloqueado',
       'dice.forcedTag':      '🔒 {n}t forzado',
-      'dice.unequippedBack': 'Desequipado — volviendo al d6 🎲',
+      'dice.unequippedBack': 'Desequipado - volviendo al d6 🎲',
       'dice.expired':        '¡{name} se quedó sin usos! Volviendo al d6 🎲',
       'dice.bought':         '¡Comprado {name}!{forced} {emoji}',
       'dice.boughtForced':   ' (¡forzado {n} turnos!)',
@@ -1453,7 +1515,7 @@
       'ddesc.chef':       'Saca 2-2-3-3-4-5. Solo Chica. · 4 usos.',
       'ddesc.rocker':     'Saca 1-1-3-4-6-6. Solo Bonnie. · 4 usos.',
       'ddesc.2d6':        'Lanza 2d6 y suma los resultados (2–12). · 3 usos.',
-      'ddesc.all1':       'Siempre saca 1. FORZADO durante 5 turnos — ¡no puedes desequiparlo!',
+      'ddesc.all1':       'Siempre saca 1. FORZADO durante 5 turnos - ¡no puedes desequiparlo!',
       'ddesc.lucky7':     'Saca 6 o 7... o 0. Alto riesgo, alta recompensa. · 4 usos.',
       'ddesc.pick':       'Elige exactamente cuántas casillas moverte (1–6). · 3 usos.',
       'ddesc.springlock': 'Saca 6-10 o Resorte (sin movimiento + volver al inicio!). Solo Springtrap. · 3 usos.',
@@ -1519,8 +1581,8 @@
       'mg.pizza.hint':      'Mantén y dibuja un círculo, luego suelta',
       'mg.pizza.keep':      'Sigue dibujando...',
 
-      'podium.tie':          '🤝 Empate — +{n}🪙 cada uno!',
-      'podium.tieSplit':     '🤝 Empate — ¡monedas divididas!',
+      'podium.tie':          '🤝 Empate - +{n}🪙 cada uno!',
+      'podium.tieSplit':     '🤝 Empate - ¡monedas divididas!',
       'podium.youWon':       '🏆 ¡Ganaste!',
       'podium.youLost':      '💀 ¡Perdiste!',
       'podium.youRank':      '#{n}',
@@ -1568,6 +1630,26 @@
       'qevent.9.desc':  'Pierde la mitad de tus monedas',
       'qevent.10.text': '¡Mangle barajó el tablero! 🔀',
       'qevent.10.desc': '¡Todas las casillas fueron barajadas!',
+      'qevent.11.text': '¡Encontraste un ítem gratis! 🎁',
+      'qevent.11.desc': '¡Obtuviste un ítem aleatorio!',
+
+      'item.shopTitle':           '🎒 Ítems',
+      'item.buy':                 'Comprar',
+      'item.use':                 'Usar',
+      'item.battery.used':        '¡Batería ya usada en este juego!',
+      'item.microphone.name':     'Micrófono',
+      'item.microphone.desc':     'Ganancias ×2 / Pérdidas ×4 para un jugador elegido hasta que termine su turno.',
+      'item.microphone.pickDesc': 'Elige quién recibe el efecto del Micrófono:',
+      'item.battery.name':        'Batería',
+      'item.battery.desc':        'Gana un turno extra. Solo una vez por juego.',
+      'item.helpy.name':          'Helpy',
+      'item.helpy.desc':          'Duplica tu puntuación en el siguiente minijuego.',
+      'item.swap.name':           'Intercambio',
+      'item.swap.desc':           'Intercambia tu posición con un jugador aleatorio.',
+      'item.ballpit.name':        'Piscina de Bolas',
+      'item.ballpit.desc':        'Te teletransporta a un espacio aleatorio en la vuelta actual.',
+      'item.m2.name':             'M2',
+      'item.m2.desc':             'Copia la habilidad de un jugador aleatorio (un uso).',
 
       'trap.0': '¡Perdiste 5 monedas! 💸',
       'trap.1': '¡Perdiste 1 pizza! 🍕',
@@ -1667,9 +1749,9 @@
       'extreme.restartNight1':   '↩ Reiniciar (Noche 1)',
       'extreme.nightSurvived':   '🌙 ¡Noche {n} Superada!',
       'extreme.nightSurvivedMsg':'¡Era {name}! {teaser}',
-      'extreme.continueNight':   '▶ Continuar — Noche {n}',
-      'extreme.loseTime':        '⏰ 6 AM — ¡sin tiempo!',
-      'extreme.loseBattery':     '🔦 Apagón — ¡Freddy te atrapó!',
+      'extreme.continueNight':   '▶ Continuar - Noche {n}',
+      'extreme.loseTime':        '⏰ 6 AM - ¡sin tiempo!',
+      'extreme.loseBattery':     '🔦 Apagón - ¡Freddy te atrapó!',
       'extreme.loseGuesses':     '💀 ¡Sin intentos!',
       'extreme.loseMsg':         'Era {name}. Intenta la Noche {n} de nuevo.',
       'extreme.retryNight':      '↩ Reintentar Noche {n}',
@@ -1731,8 +1813,8 @@
       'index.quoteDesc':        'Adivina quién lo dijo · 6 intentos',
       'index.extreme':          'Extremo',
       'index.extremeDesc':      '6 noches · tiempo real · movimiento IA · 3 intentos',
-      'index.guessWho':         '¿Quién es?',
-      'index.guessWhoDesc':     'Multijugador ¿Quién es? · 2-4 jugadores online',
+      'index.guessWho':         'Guess Who?',
+      'index.guessWhoDesc':     'Guess Who? Multijugador · 2-4 jugadores online',
       'index.party':            'Fnafdle Party',
       'index.partyDesc':        'Juego de mesa · 2-4 jugadores · Online',
       'index.encyclopedia':     '¿Quién es éste?',
@@ -1740,7 +1822,7 @@
       'index.statsDaily':       '📊 Estadísticas Diarias',
       'index.statsEndless':     '📊 Estadísticas Infinito',
 
-      // ── Database — Animals ────────────────────────────────────────────────────
+      // ── Database - Animals ────────────────────────────────────────────────────
       'db.animal.Aligator':       'Caimán',
       'db.animal.Alligator':      'Cocodrilo',
       'db.animal.Badger':         'Tejón',
@@ -1799,7 +1881,7 @@
       'db.animal.Vacuum':         'Aspiradora',
       'db.animal.Wolf':           'Lobo',
 
-      // ── Database — Types ──────────────────────────────────────────────────────
+      // ── Database - Types ──────────────────────────────────────────────────────
       'db.type.Classic':           'Classic',
       'db.type.Endo':              'Endo',
       'db.type.Enemy':             'Enemy',
@@ -1828,7 +1910,7 @@
       'db.type.Welcome Show':      'Welcome Show',
       'db.type.Withered':          'Withered',
 
-      // ── Database — Colors ─────────────────────────────────────────────────────
+      // ── Database - Colors ─────────────────────────────────────────────────────
       'db.color.Beige':          'Beige',
       'db.color.Black':          'Negro',
       'db.color.Blue':           'Azul',
@@ -1858,7 +1940,7 @@
       'lang.es':  '🇪🇸 ES',
       'lang.moo': '🐄 Moo',
 
-      'lobby.title':           'Moo Party 🐄',
+      'lobby.title':           'Moo moo 🐄',
       'lobby.subtitle':        'Moo moo moo · 2–6 moos · Moo moo moo moo!',
       'lobby.nameInput':       'Moo moo...',
       'lobby.playerCount':     'Moo Moo (moo moo)',
@@ -1905,9 +1987,9 @@
       'waiting.chooseChar':    'Moo moo moo',
       'waiting.clickSelect':   'Moo moo moo moo',
       'waiting.confirmBtn':    '✅ Moo {name}',
-      'waiting.confirmed':     '✅ Moo — moo moo moo...',
+      'waiting.confirmed':     '✅ Moo - moo moo moo...',
       'waiting.waitingSlot':   '⏳ Moo {n}...',
-      'waiting.choosing':      '⏳ {name} — moo...',
+      'waiting.choosing':      '⏳ {name} - moo...',
       'waiting.goesFirst':     '🎲 {name} moo moo! (moo moo)',
       'waiting.notInRematch':  'Moo moo moo moo moo',
 
@@ -1919,7 +2001,7 @@
       'rules.5':  'Moo moo: moo moo moo. Moo moos → Moo A (moo) moo Moo B moo (moo). Moo moo moo moo!',
       'rules.6':  'Moo moos moo moo moo = moo moo moo!',
       'rules.7':  'Moo Moo: moo moo moos (3–5). Moo moo moo moo moo moo.',
-      'rules.8':  'Moo-Moo: moo moo 1. MOO moo 5 moos — moo moo!',
+      'rules.8':  'Moo-Moo: moo moo 1. MOO moo 5 moos - moo moo!',
       'rules.9':  'Moo moo moo moo moo. Moo: Moo A moo (cd:3). Moo: moo moo (cd:2). Moo: moo 5 moos (cd:3). Moo: moo 4 moos (cd:3). Moo: moo moo moo moo (cd:5). Moo: moo 10 moos → moo (cd:5). Moo: moo moo moo (cd:5).',
       'rules.10': 'Moo Moo: moo moo moo. Moo moo moo!',
 
@@ -1938,12 +2020,18 @@
 
       'map.easy.name':    'Moo',
       'map.easy.desc':    '20 moos · moo moos',
-      'map.jackpot.name': 'Moo 💰',
+      'map.jackpot.name': 'Moo',
       'map.jackpot.desc': '39 moos · moo moo moo',
       'map.normal.name':  'Moo Moo',
       'map.normal.desc':  '46 moos · moo moos · moo moos',
-      'map.hard.name':    'MOO 🐄',
-      'map.hard.desc':    '58 moos · 3 moos · moo moos',
+      'map.freddy.name':  'MOO',
+      'map.freddy.desc':  '58 moos · 3 moos · moo moos',
+      'map.bonnie.name':  'Moo',
+      'map.bonnie.desc':  '38 moos · 2 moos · moo mOooOooOo',
+      'map.chica.name':   'MOo',
+      'map.chica.desc':   '28 moos · 1 moo · moo loop',
+      'map.foxy.name':    'MoO',
+      'map.foxy.desc':    '48 moos · mOo moos · moo moos',
 
       'board.center':     'MOOOOO\nMOO',
       'board.laps':       '{n} moos',
@@ -1971,6 +2059,7 @@
       'action.ability.jump':    '🎸 Moo',
       'action.ability.kill':    '🪤 Moo',
       'action.ability.gifts':   '🎁 Moo',
+      'action.ability.shuffle': '🎀 Moo',
       'action.space':           'Moo {n}',
       'action.lap':             'Moo {cur}/{total}',
       'action.forcedTag':       '🔒 Moo: {n}t',
@@ -1984,12 +2073,12 @@
       'action.landed':        'Moo:',
       'action.contBtn':       '→ Moo',
 
-      'action.otherTurn':     'Moo de {name}',
-      'action.otherRolled':   'Moo de {name} — moo 🎲 {n}',
+      'action.otherTurn':     'Moo moo {name}',
+      'action.otherRolled':   'Moo mOo {name} - moo 🎲 {n}',
       'action.atTollbooth':   '{name} moo moo moo...',
 
-      'toll.title':         '🐻 Moo do Moo',
-      'toll.cardTitle':     '🐻 Moo do Moo',
+      'toll.title':         '🐻 Moo moO Moo',
+      'toll.cardTitle':     '🐻 Moo MoO Moo',
       'toll.pathInfo':      'Moo: {a} · Moo: {b}',
       'toll.stepsLeft':     '{n} moos moo moo moo',
       'toll.choosePanel':   'Moo moo moo →',
@@ -2030,7 +2119,7 @@
       'dice.buy':            'Moo',
       'dice.locked':         '🔒 Moo',
       'dice.forcedTag':      '🔒 {n}t moo',
-      'dice.unequippedBack': 'Desmoo — moo moo d6 🎲',
+      'dice.unequippedBack': 'Desmoo - moo moo d6 🎲',
       'dice.expired':        '{name} moo moo! Moo moo d6 🎲',
       'dice.bought':         'Moo {name}!{forced} {emoji}',
       'dice.boughtForced':   ' (moo {n} moos!)',
@@ -2038,9 +2127,9 @@
       'dice.forcedActive':   '🔒 Moo moo moo {n} moo{s}!',
 
       'dname.d6':         'Moo Moo',
-      'dname.d8':         'Moo do Moo (d8)',
-      'dname.chef':       'Moo Moo da Moo',
-      'dname.rocker':     'Moo Moo do Moo',
+      'dname.d8':         'Moo mOo Moo (d8)',
+      'dname.chef':       'Moo Moo mOo Moo',
+      'dname.rocker':     'Moo Moo moo Moo',
       'dname.2d6':        'Moo Moo (2d6)',
       'dname.all1':       'Moo-Moo',
       'dname.lucky7':     'Moo Moo Moo',
@@ -2054,7 +2143,7 @@
       'ddesc.chef':       'Moo 2-2-3-3-4-5. Moo moo. · 4 moos.',
       'ddesc.rocker':     'Moo 1-1-3-4-6-6. Moo moo. · 4 moos.',
       'ddesc.2d6':        'Moo 2d6 moo moo (2–12). · 3 moos.',
-      'ddesc.all1':       'Moo moo 1. MOO moo 5 moos — moo moo!',
+      'ddesc.all1':       'Moo moo 1. MOO moo 5 moos - moo moo!',
       'ddesc.lucky7':     'Moo 6 moo 7... moo 0. Moo moo, moo moo. · 4 moos.',
       'ddesc.pick':       'Moo moo moo moo moos (1–6). · 3 moos.',
       'ddesc.springlock': 'Moo 6-10 moo Moo (moo moo + moo moo!). Moo moo. · 3 moos.',
@@ -2120,8 +2209,8 @@
       'mg.pizza.hint':      'Moo moo moo moo moo moo',
       'mg.pizza.keep':      'Moo moo...',
 
-      'podium.tie':          '🤝 Moo — +{n}🪙 moo!',
-      'podium.tieSplit':     '🤝 Moo — moos moo!',
+      'podium.tie':          '🤝 Moo - +{n}🪙 moo!',
+      'podium.tieSplit':     '🤝 Moo - moos moo!',
       'podium.youWon':       '🏆 MOO!!',
       'podium.youLost':      '💀 Moo moo.',
       'podium.youRank':      '#{n}',
@@ -2147,7 +2236,7 @@
       'result.jumpscare':       '🎃 MOO!!',
       'result.waiting':         '⏳ Moo moo...',
 
-      'qevent.0.text':  'Moo do Moo! 🎂',
+      'qevent.0.text':  'Moo mOo Moo! 🎂',
       'qevent.0.desc':  '+3 moos',
       'qevent.1.text':  'Moo Moo moo moos! 😱',
       'qevent.1.desc':  '-3 moos',
@@ -2169,6 +2258,26 @@
       'qevent.9.desc':  'Moo moo moo moos',
       'qevent.10.text': 'Moo moo moo! 🔀',
       'qevent.10.desc': 'Moo moos moo!',
+      'qevent.11.text': 'Moo moo moo! 🎁',
+      'qevent.11.desc': 'Moo moo moo!',
+
+      'item.shopTitle':           '🎒 Moos',
+      'item.buy':                 'Moo',
+      'item.use':                 'Moo',
+      'item.battery.used':        'Moo moo moo moo moo!',
+      'item.microphone.name':     'Moo',
+      'item.microphone.desc':     'Moos ×2 / Moos ×4 moo moo moo moo.',
+      'item.microphone.pickDesc': 'Moo moo moo moo:',
+      'item.battery.name':        'Moo',
+      'item.battery.desc':        'Moo moo moo. Moo moo moo moo.',
+      'item.helpy.name':          'Moo',
+      'item.helpy.desc':          'Moo moo moo moo moo moo.',
+      'item.swap.name':           'Moo',
+      'item.swap.desc':           'Moo moo moo moo moo.',
+      'item.ballpit.name':        'Moo Moo Moo',
+      'item.ballpit.desc':        'Moo moo moo moo.',
+      'item.m2.name':             'M2',
+      'item.m2.desc':             'Moo moo moo moo moo moo (moo moo).',
 
       'trap.0': 'Moo 5 moos! 💸',
       'trap.1': 'Moo 1 moo! 🍕',
@@ -2268,9 +2377,9 @@
       'extreme.restartNight1':   '↩ Moo Moo (Moo 1)',
       'extreme.nightSurvived':   '🌙 Moo {n} Moo!',
       'extreme.nightSurvivedMsg':'Moo {name}! {teaser}',
-      'extreme.continueNight':   '▶ Moo — Moo {n}',
-      'extreme.loseTime':        '⏰ 6 AM — moo moo!',
-      'extreme.loseBattery':     '🔦 Moo moo — Moo moo moo!',
+      'extreme.continueNight':   '▶ Moo - Moo {n}',
+      'extreme.loseTime':        '⏰ 6 AM - moo moo!',
+      'extreme.loseBattery':     '🔦 Moo moo - Moo moo moo!',
       'extreme.loseGuesses':     '💀 Moo moo moo!',
       'extreme.loseMsg':         'Moo {name}. Moo Moo {n} moo.',
       'extreme.retryNight':      '↩ Moo Moo {n}',
@@ -2341,7 +2450,7 @@
       'index.statsDaily':       '📊 Moo Moo',
       'index.statsEndless':     '📊 Moooo Moo',
 
-      // ── Database — Animals ────────────────────────────────────────────────────
+      // ── Database - Animals ────────────────────────────────────────────────────
       'db.animal.Aligator':       'Moo',
       'db.animal.Alligator':      'Moo',
       'db.animal.Badger':         'Moo',
@@ -2400,7 +2509,7 @@
       'db.animal.Vacuum':         'Moo',
       'db.animal.Wolf':           'Moo',
 
-      // ── Database — Types ──────────────────────────────────────────────────────
+      // ── Database - Types ──────────────────────────────────────────────────────
       'db.type.Classic':           'Moo',
       'db.type.Endo':              'Moo',
       'db.type.Enemy':             'Moo',
@@ -2429,7 +2538,7 @@
       'db.type.Welcome Show':      'Moo Moo',
       'db.type.Withered':          'Moo',
 
-      // ── Database — Colors ─────────────────────────────────────────────────────
+      // ── Database - Colors ─────────────────────────────────────────────────────
       'db.color.Beige':          'Moo',
       'db.color.Black':          'Moo',
       'db.color.Blue':           'Moo',
