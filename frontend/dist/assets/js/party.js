@@ -73,7 +73,7 @@ const CHAR_CFG = {
   bonnie:    { name: 'Bonnie',    emoji: '🎸', color: '#4169e1', img: 'images/chars/classic/bonnie.png',
                desc: 'Jumps exactly 4 spaces instead of rolling the dice. Cooldown: 3 turns.', ability: 'jump', cooldown: 3 },
   chica:     { name: 'Chica',     emoji: '🐔', color: '#d4a017', img: 'images/chars/classic/chica.png',
-               desc: 'Throws the Cupcake within 5 spaces (any direction) and steals 5 coins. Cooldown: 3 turns.', ability: 'cupcake', cooldown: 3 },
+               desc: 'Places a Cupcake trap on any board space. Anyone who lands there loses 1 pizza to Chica. Disappears after 1 lap. Cooldown: 3 turns.', ability: 'boardCupcake', cooldown: 3 },
   foxy:      { name: 'Foxy',      emoji: '🦊', color: '#cc4400', img: 'images/chars/classic/foxy.png',
                desc: 'Re-rolls the dice after the first result. Cooldown: 2 turns.', ability: 'reroll', cooldown: 2 },
   mangle:    { name: 'Mangle',    emoji: '🎀', color: '#e875b0', img: 'images/chars/toy/mangle.png',
@@ -82,6 +82,8 @@ const CHAR_CFG = {
                desc: 'Gifts: converts 10 coins → 1 pizza for any player within 5 spaces (including self). Cooldown: 5 turns.', ability: 'gifts', cooldown: 5 },
   springtrap:{ name: 'Springtrap',emoji: '🪤', color: '#3a6a2a', img: 'images/chars/springlock/springtrap.png',
                desc: 'Kill: sends a player within 5 spaces back to start (resets laps, keeps coins & pizzas). Cooldown: 5 turns.', ability: 'kill', cooldown: 5 },
+  bb:        { name: 'Balloon Boy',emoji: '🎈', color: '#4488cc', img: 'images/chars/toy/bb.png',
+               desc: 'Hi! Every time BB rolls the dice, a random opponent automatically loses 1 coin. Ability: steal up to 5 coins from any player within 5 spaces. Cooldown: 3 turns.', ability: 'steal', cooldown: 3 },
 };
 
 const PLAYER_COLORS = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#1abca8', '#e67e22'];
@@ -102,15 +104,18 @@ const DICE_TYPES = {
   musicbox:   { label: 'Music Box Die',            emoji: '🎭🎲', roll: () => [3,3,4,4,5,6][Math.floor(Math.random()*6)], musicbox: true },
   // Mangle: 2d5 (2–10)
   '2d5':      { label: "Mangle's 2d5",             emoji: '🎀🎲', roll: () => Math.floor(Math.random()*5)+1 + Math.floor(Math.random()*5)+1 },
+  // BB: 1-2-3-1-2-3 + passive coin steal on every roll
+  balloon:    { label: "BB's Balloon Die",          emoji: '🎈🎲', roll: () => [1,2,3,1,2,3][Math.floor(Math.random()*6)], bbPassive: true },
 };
 
-const CHAR_DEFAULT_DICE = { freddy: 'd6', bonnie: 'd6', chica: 'd6', foxy: 'd6', mangle: 'd6', puppet: 'd6', springtrap: 'd6' };
+const CHAR_DEFAULT_DICE = { freddy: 'd6', bonnie: 'd6', chica: 'd6', foxy: 'd6', mangle: 'd6', puppet: 'd6', springtrap: 'd6', bb: 'd6' };
 
 const SHOP_DICE = [
   { id: 'd8',         price: 8,  maxUses: 4, label: "Foxy's Die (d8)",      emoji: '🦊🎲', desc: 'Rolls 1–8. Foxy only. · 4 uses.',                             onlyChar: 'foxy'       },
   { id: 'chef',       price: 8,  maxUses: 4, label: "Chica's Chef Die",      emoji: '🍗🎲', desc: 'Rolls 2-2-3-3-4-5. Chica only. · 4 uses.',                   onlyChar: 'chica'      },
   { id: 'rocker',     price: 8,  maxUses: 4, label: "Bonnie's Rocker Die",   emoji: '🎸🎲', desc: 'Rolls 1-1-3-4-6-6. Bonnie only. · 4 uses.',                  onlyChar: 'bonnie'     },
   { id: '2d5',        price: 8,  maxUses: 4, label: "Mangle's 2d5",        emoji: '🎀🎲', desc: 'Rolls 2d5 (2–10). Mangle only. · 4 uses.',                    onlyChar: 'mangle'     },
+  { id: 'balloon',    price: 8,  maxUses: 4, label: "BB's Balloon Die",      emoji: '🎈🎲', desc: 'Rolls 1-2-3-1-2-3. Passive: steals 1 coin from a random opponent every roll! BB only. · 4 uses.', onlyChar: 'bb' },
   { id: 'springlock', price: 8,  maxUses: 3, label: 'Springlock Die',        emoji: '🪤🎲', desc: 'Rolls 6-10 or Springlock (no move + back to start!). Springtrap only. · 3 uses.', onlyChar: 'springtrap' },
   { id: 'musicbox',   price: 8,  maxUses: 3, label: 'Music Box Die',         emoji: '🎭🎲', desc: 'Rolls 3-3-4-4-5-6. On 6: places a Music Box trap! Puppet only. · 3 uses.',       onlyChar: 'puppet'     },
   { id: '2d6',        price: 8,  maxUses: 3, label: 'Double Die (2d6)',       emoji: '🎲🎲', desc: 'Roll 2d6 and add results (2–12). · 3 uses.' },
@@ -1552,17 +1557,27 @@ function updateTokens(room) {
 
   prevPlayerPos = JSON.parse(room.player_pos || '{}');
 
-  // Springlock overlays
+  // Springlock & cupcake overlays
   const ns_tok = pStats(room);
   (ns_tok._springlocks_ || []).forEach(sl => {
     const el = document.getElementById(`tok-${sl.spaceIdx}`);
     if (!el) return;
-    const overlay = document.createElement('span');
-    overlay.title = `🔒 Springlock (${room[`${sl.ownerSlot}_name`]})`;
-    overlay.style.cssText = 'position:absolute;top:-4px;right:-4px;font-size:.55rem;z-index:5;pointer-events:none;';
-    overlay.textContent = '🔒';
+    const ov = document.createElement('span');
+    ov.title = `🔒 Springlock (${room[`${sl.ownerSlot}_name`]})`;
+    ov.style.cssText = 'position:absolute;top:-4px;right:-4px;font-size:.55rem;z-index:5;pointer-events:none;';
+    ov.textContent = '🔒';
     el.style.position = 'relative';
-    el.appendChild(overlay);
+    el.appendChild(ov);
+  });
+  (ns_tok._cupcakes_ || []).forEach(c => {
+    const el = document.getElementById(`tok-${c.spaceIdx}`);
+    if (!el) return;
+    const ov = document.createElement('span');
+    ov.title = `🧁 Cupcake (${room[`${c.ownerSlot}_name`]})`;
+    ov.style.cssText = 'position:absolute;top:-4px;left:-4px;font-size:.55rem;z-index:5;pointer-events:none;';
+    ov.textContent = '🧁';
+    el.style.position = 'relative';
+    el.appendChild(ov);
   });
 }
 
@@ -1742,8 +1757,31 @@ async function doRoll() {
   ns[playerSlot].lastDiceId = diceId;
   const rollLabel = (diceId === 'springlock' && roll === 0) ? '🪤 SPRINGLOCK!' : String(roll);
   emitEvent(`🎲 ${roomData[`${playerSlot}_name`]} rolled ${rollLabel} (${dice.label})`);
+
+  // BB passive: "Hi!" — only triggers when using the Balloon Die
+  // Randomly either steals 1 coin OR pushes the target back 1 space
+  const bbExtra = {};
+  if (dice.bbPassive && (roomData[`${playerSlot}_char`] || 'freddy') === 'bb') {
+    const pc  = roomData.player_count || 2;
+    const opp = allSlots(pc).filter(s => s !== playerSlot && roomData[`${s}_name`]);
+    if (opp.length) {
+      const target = opp[Math.floor(Math.random() * opp.length)];
+      const st     = pState(roomData);
+      if (Math.random() < 0.5) {
+        st.coins[target]     = Math.max(0, (st.coins[target] || 0) - 1);
+        st.coins[playerSlot] = (st.coins[playerSlot] || 0) + 1;
+        bbExtra.player_coins = JSON.stringify(st.coins);
+        emitEvent(`🎈 Hi! BB annoyed ${roomData[`${target}_name`]}! -1🪙`);
+      } else {
+        st.pos[target] = Math.max(0, (st.pos[target] || 0) - 1);
+        bbExtra.player_pos = JSON.stringify(st.pos);
+        emitEvent(`🎈 Hi! BB annoyed ${roomData[`${target}_name`]}! -1 space ⬅️`);
+      }
+    }
+  }
+
   await db.from('party_rooms').update({
-    turn_phase: 'rolled', dice_result: roll, player_stats: JSON.stringify(ns),
+    turn_phase: 'rolled', dice_result: roll, player_stats: JSON.stringify(ns), ...bbExtra,
   }).eq('id', roomId);
 }
 
@@ -1923,6 +1961,15 @@ async function passOrMinigame(room, extraUpdates = {}) {
     extraUpdates = { ...extraUpdates, player_stats: JSON.stringify(ns) };
   }
 
+  // Expire cupcakes: disappear when owner completes 1 full lap from placement
+  if (ns._cupcakes_?.length) {
+    const before = ns._cupcakes_.length;
+    ns._cupcakes_ = ns._cupcakes_.filter(c => playerLaps(room, c.ownerSlot) <= c.lapAtPlacement);
+    if (ns._cupcakes_.length < before)
+      emitEvent(`🧁 A Cupcake trap expired!`);
+    extraUpdates = { ...extraUpdates, player_stats: JSON.stringify(ns) };
+  }
+
   if (ns[playerSlot]?.lapCompleted) {
     // Clear Freddy Mask on lap completion
     if (ns[playerSlot]?.maskActive) ns[playerSlot].maskActive = false;
@@ -2019,6 +2066,22 @@ async function handleSpace() {
     }
   }
 
+  // Board cupcake trap (Chica ability)
+  const cupIdx = (ns._cupcakes_ || []).findIndex(c => c.spaceIdx === currentNode && c.ownerSlot !== playerSlot && room[`${c.ownerSlot}_name`]);
+  if (cupIdx !== -1) {
+    const cup = ns._cupcakes_[cupIdx];
+    ns._cupcakes_.splice(cupIdx, 1);
+    if (masked) {
+      emitEvent(`🧁 ${room[`${playerSlot}_name`]} landed on Chica's Cupcake — 🎭 Mask blocked it!`);
+      showToast('🎭 Mask blocked Cupcake!');
+    } else {
+      st.pizzas[playerSlot]      = (st.pizzas[playerSlot]      || 0) - 1; // can go negative
+      st.pizzas[cup.ownerSlot]   = (st.pizzas[cup.ownerSlot]   || 0) + 1;
+      emitEvent(`🧁 ${room[`${playerSlot}_name`]} ate Chica's Cupcake! -1🍕 → ${room[`${cup.ownerSlot}_name`]}`);
+      showToast('🧁 Cupcake! -1🍕');
+    }
+  }
+
   // Springlock trap: if any player placed a springlock on this node
   const slIdx = (ns._springlocks_ || []).findIndex(sl => sl.spaceIdx === currentNode && sl.ownerSlot !== playerSlot && room[`${sl.ownerSlot}_name`]);
   if (slIdx !== -1) {
@@ -2041,7 +2104,7 @@ async function handleSpace() {
     const micTag = ns[playerSlot]?.microphoneActive ? ' 🎤×2' : '';
     emitEvent(`🪙 ${room[`${playerSlot}_name`]} got ${gain} coins!${micTag}`);
     showToast(`+${gain} coins! 🪙${micTag}`);
-    await resolveSpace(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) }, others);
+    await resolveSpace(room, { player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns) }, others);
     return;
   }
   if (type === 'jackpot') {
@@ -2050,14 +2113,14 @@ async function handleSpace() {
     const micTag = ns[playerSlot]?.microphoneActive ? ' 🎤×2' : '';
     emitEvent(`💰 ${room[`${playerSlot}_name`]} hit the JACKPOT for ${jackVal} coins!${micTag}`);
     showToast(`💰 JACKPOT! +${jackVal} coins!${micTag}`);
-    await resolveSpace(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) }, others);
+    await resolveSpace(room, { player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns) }, others);
     return;
   }
   if (type === 'badluck') {
     if (masked) {
       emitEvent(`💀 ${room[`${playerSlot}_name`]} hit Bad Luck — 🎭 Mask blocked it!`);
       showToast('🎭 Mask blocked Bad Luck!');
-      await resolveSpace(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) }, others);
+      await resolveSpace(room, { player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns) }, others);
       return;
     }
     const loss = micMultiplied(ns, playerSlot, -(3 * mul));
@@ -2067,7 +2130,7 @@ async function handleSpace() {
     const micTag = ns[playerSlot]?.microphoneActive ? ' 🎤×4' : '';
     emitEvent(`💀 ${room[`${playerSlot}_name`]} hit bad luck! ${loss} coins${micTag}`);
     showToast(`${loss} coins 💀${mul>1?' ×2':''}${micTag}`);
-    await resolveSpace(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) }, others);
+    await resolveSpace(room, { player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns) }, others);
     return;
   }
   if (type === 'pizza') {
@@ -2075,11 +2138,11 @@ async function handleSpace() {
     if (coins < 10) {
       emitEvent(`🍕 ${room[`${playerSlot}_name`]} landed on Pizza but needs 10🪙 (${coins}/10)`);
       showToast(T('pizza.need10'));
-      await passOrMinigame(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) });
+      await passOrMinigame(room, { player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns) });
       return;
     }
     // Save music box state now (before player makes a choice)
-    if (mbIdx !== -1) await db.from('party_rooms').update({ player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) }).eq('id', roomId);
+    if (mbIdx !== -1) await db.from('party_rooms').update({ player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns) }).eq('id', roomId);
     const el = document.getElementById('current-player-action');
     if (el) el.innerHTML = `<div class="action-card">
       <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot)-1]}">${T('pizza.shopTitle')}</div>
@@ -2095,7 +2158,7 @@ async function handleSpace() {
   }
   if (type === 'tollbooth') {
     // Save music box state before toll choice UI
-    if (mbIdx !== -1) await db.from('party_rooms').update({ player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) }).eq('id', roomId);
+    if (mbIdx !== -1) await db.from('party_rooms').update({ player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns) }).eq('id', roomId);
     const _tb = parseBoard(room); const _tbToll = (_tb.tollMap[boardPos(room, playerSlot)] !== undefined ? _tb.tollMap[boardPos(room, playerSlot)] : _tb.toll);
     emitEvent(`🐻 ${room[`${playerSlot}_name`]} reached Freddy's Tollbooth! (toll: ${_tbToll}🪙)`);
     await db.from('party_rooms').update({ turn_phase: 'tollbooth' }).eq('id', roomId);
@@ -2105,7 +2168,7 @@ async function handleSpace() {
     if (masked) {
       emitEvent(`😱 ${room[`${playerSlot}_name`]} entered the Freddy Zone — 🎭 Mask blocked it!`);
       showToast('🎭 Mask blocked Freddy Zone!');
-      await resolveSpace(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) }, others);
+      await resolveSpace(room, { player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns) }, others);
       return;
     }
     const effIdx = Math.floor(Math.random() * 2);
@@ -2121,7 +2184,7 @@ async function handleSpace() {
     if (masked) {
       emitEvent(`🪤 ${room[`${playerSlot}_name`]} hit a Trap — 🎭 Mask blocked it!`);
       showToast('🎭 Mask blocked Trap!');
-      await resolveSpace(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) }, others);
+      await resolveSpace(room, { player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns) }, others);
       return;
     }
     const effIdx = Math.floor(Math.random() * TRAP_EFFECTS.length);
@@ -2136,9 +2199,11 @@ async function handleSpace() {
   if (type === 'challenge') {
     const active = allSlots(pc).filter(s => room[`${s}_name`]);
     if (active.length < 2) {
-      await passOrMinigame(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) });
+      await passOrMinigame(room, { player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns) });
       return;
     }
+    // Save trap effects (cupcake, springlock, musicbox) before entering minigame
+    await db.from('party_rooms').update({ player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns) }).eq('id', roomId);
     const reward = active.length === 2 ? 5 : active.length === 3 ? 10 : 0;
     emitEvent(`⚔️ ${room[`${playerSlot}_name`]} issued a Challenge! (1v${active.length - 1})`);
     await triggerMinigame(active, { isChallenge: true, challenger: playerSlot, challengeReward: reward, isPizzaReward: active.length >= 4 });
@@ -2146,19 +2211,22 @@ async function handleSpace() {
   }
   if (type === 'minigame') {
     const involved = allSlots(pc).filter(s => room[`${s}_name`]);
+    // Save trap effects (cupcake, springlock, musicbox) before entering minigame
+    await db.from('party_rooms').update({ player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns) }).eq('id', roomId);
     emitEvent(`🎮 Minigame triggered by ${room[`${playerSlot}_name`]}!`);
     await triggerMinigame(involved);
     return;
   }
   if (type === 'question') {
-    if (mbIdx !== -1) await db.from('party_rooms').update({ player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) }).eq('id', roomId);
+    // Always save trap effects before triggering the event
+    await db.from('party_rooms').update({ player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns) }).eq('id', roomId);
     emitEvent(`❓ ${room[`${playerSlot}_name`]} landed on Event!`);
     await triggerQuestion();
     return;
   }
   // Normal space (collision handled by resolveSpace)
   emitEvent(`⬜ ${room[`${playerSlot}_name`]} landed on Normal (space ${pos})`);
-  await resolveSpace(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) }, others);
+  await resolveSpace(room, { player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns) }, others);
 }
 
 async function triggerQuestion() {
@@ -2295,12 +2363,14 @@ function useAbility() {
   const copiedAb = pStats(roomData)[playerSlot]?.copiedAbility;
   const ability = copiedAb?.ability || CHAR_CFG[me.char]?.ability;
   switch (ability) {
-    case 'cupcake': showCupcakeTarget(); break;
-    case 'jump':    doJump();            break;
-    case 'reroll':  doReroll();          break;
-    case 'kill':    showKillTarget();    break;
-    case 'gifts':   showGiftsTarget();   break;
-    case 'shuffle': doShuffle();         break;
+    case 'cupcake':
+    case 'steal':        showCupcakeTarget();    break;
+    case 'boardCupcake': showBoardCupcakeUI();   break;
+    case 'jump':         doJump();               break;
+    case 'reroll':       doReroll();             break;
+    case 'kill':         showKillTarget();        break;
+    case 'gifts':        showGiftsTarget();       break;
+    case 'shuffle':      doShuffle();             break;
   }
   if (copiedAb) {
     // consume M2 copied ability after use
@@ -2447,6 +2517,76 @@ async function placeSpringlock(spaceIdx) {
   showDiceShop(roomData);
 }
 
+// ── Chica: Board Cupcake placement ───────────────────────────────────────────
+let cupcakeBoardClickHandler = null;
+
+function showBoardCupcakeUI() {
+  const { boardSize } = parseBoard(roomData);
+  const pc = roomData.player_count || 2;
+  const occupied = allSlots(pc).map(s => boardPos(roomData, s) % boardSize);
+
+  const el = document.getElementById('current-player-action');
+  if (el) el.innerHTML = `<div class="action-card">
+    <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot)-1]}">🧁 ${T('ability.boardCupcake.title')}</div>
+    <p style="font-size:.7rem;color:var(--text-muted);margin:2px 0">${T('ability.boardCupcake.pickDesc')}</p>
+    <button class="mp-btn small" onclick="cancelBoardCupcakePlacement()">${T('ability.kill.cancel')}</button>
+  </div>`;
+
+  document.querySelectorAll('[data-node]').forEach(node => {
+    const i = parseInt(node.dataset.node);
+    if (i === 0 || occupied.includes(i)) node.classList.add('cup-invalid');
+    else node.classList.add('cup-available');
+  });
+
+  const boardEl = document.getElementById('party-board');
+  cupcakeBoardClickHandler = e => {
+    const node = e.target.closest('[data-node]');
+    if (!node) return;
+    const i = parseInt(node.dataset.node);
+    if (i === 0 || occupied.includes(i)) return;
+    placeBoardCupcake(i);
+  };
+  boardEl?.addEventListener('click', cupcakeBoardClickHandler);
+}
+
+function cancelBoardCupcakePlacement() {
+  exitBoardCupcakePlacement();
+  renderActionUI(roomData);
+}
+
+function exitBoardCupcakePlacement() {
+  const boardEl = document.getElementById('party-board');
+  if (cupcakeBoardClickHandler) {
+    boardEl?.removeEventListener('click', cupcakeBoardClickHandler);
+    cupcakeBoardClickHandler = null;
+  }
+  document.querySelectorAll('.cup-available, .cup-invalid').forEach(n => {
+    n.classList.remove('cup-available', 'cup-invalid');
+  });
+}
+
+async function placeBoardCupcake(spaceIdx) {
+  exitBoardCupcakePlacement();
+  const ns = pStats(roomData);
+  const st = pState(roomData);
+  if (!ns[playerSlot]) ns[playerSlot] = { mgWins: 0, badLucks: 0 };
+  const charCfg = CHAR_CFG[roomData[`${playerSlot}_char`] || 'freddy'];
+  if (!ns._cupcakes_) ns._cupcakes_ = [];
+  ns._cupcakes_.push({
+    spaceIdx,
+    ownerSlot: playerSlot,
+    lapAtPlacement: playerLaps(roomData, playerSlot),
+  });
+  st.cooldowns[playerSlot] = charCfg?.cooldown || 3;
+  await db.from('party_rooms').update({
+    player_stats: JSON.stringify(ns),
+    player_cooldowns: JSON.stringify(st.cooldowns),
+  }).eq('id', roomId);
+  emitEvent(`🧁 ${roomData[`${playerSlot}_name`]} placed a Cupcake trap on space ${spaceIdx}!`);
+  showToast(`🧁 Cupcake placed on space ${spaceIdx}!`);
+  showDiceShop(roomData);
+}
+
 // ── Springtrap: Kill ability ──────────────────────────────────────────────────
 function showKillTarget() {
   const room = roomData;
@@ -2538,9 +2678,10 @@ function showCupcakeTarget() {
     s !== playerSlot && room[`${s}_name`] && inRange5(room, playerSlot, s));
   if (!targets.length) { showToast(T('error.noRangeShort')); return; }
 
+  const abilKey = (CHAR_CFG[room[`${playerSlot}_char`] || 'freddy']?.ability === 'steal') ? 'steal' : 'cupcake';
   const el = document.getElementById('current-player-action');
   el.innerHTML = `<div class="action-card">
-    <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot)-1]}">${T('ability.cupcake.title')}</div>
+    <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot)-1]}">${T('ability.' + abilKey + '.title')}</div>
     <div class="ability-targets">
       ${targets.map(s => {
         const char = room[`${s}_char`] || 'freddy';
@@ -2550,7 +2691,7 @@ function showCupcakeTarget() {
         </button>`;
       }).join('')}
     </div>
-    <button class="mp-btn small" onclick="renderActionUI(roomData)" style="margin-top:4px">${T('ability.cupcake.cancel')}</button>
+    <button class="mp-btn small" onclick="renderActionUI(roomData)" style="margin-top:4px">${T('ability.' + abilKey + '.cancel')}</button>
   </div>`;
 }
 
@@ -2694,7 +2835,7 @@ function showDiceShop(room) {
       const effectiveAbility = copiedAb?.ability || c.ability;
       const canAbility = effectiveAbility && effectiveAbility !== 'reroll' && effectiveAbility !== 'tollpass'
         && (pState(room).cooldowns[playerSlot] || 0) === 0;
-      const abilLabel = { cupcake: T('action.ability.cupcake'), jump: T('action.ability.jump'), kill: T('action.ability.kill'), gifts: T('action.ability.gifts'), shuffle: T('action.ability.shuffle') }[effectiveAbility] || '✨ Ability';
+      const abilLabel = { cupcake: T('action.ability.cupcake'), steal: T('action.ability.steal'), boardCupcake: T('action.ability.boardCupcake'), jump: T('action.ability.jump'), kill: T('action.ability.kill'), gifts: T('action.ability.gifts'), shuffle: T('action.ability.shuffle') }[effectiveAbility] || '✨ Ability';
       actionHTML = `
         <button class="mp-btn primary dp-action-btn" id="dp-roll-btn">${diceObj.pick ? T('action.pickSteps') : T('action.roll', { emoji: diceObj.emoji })}</button>
         ${canAbility ? `<button class="mp-btn accent dp-action-btn" id="dp-ability-btn">${abilLabel}</button>` : ''}`;

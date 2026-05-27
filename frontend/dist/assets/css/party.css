@@ -2,6 +2,13 @@
    Fnafdle Party
    ===================================================== */
 
+/* ── No text selection ───────────────────────────────── */
+.party-outer-layout, #party-container, #screen-minigame,
+#player-slots-panel, #dice-action-panel, #dice-shop-panel {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 /* ── Header override ─────────────────────────────────── */
 .fnaf-header { padding: .4rem 0 .2rem; }
 .fnaf-title img { max-width: 160px; }
@@ -169,9 +176,12 @@
 .board-node .space-num    { font-size: .35rem; }
 
 /* Springlock placement mode */
-.sl-available { cursor: pointer; box-shadow: 0 0 0 2px #f93, 0 0 8px #f930 !important; animation: sl-pulse .9s infinite alternate; }
-.sl-invalid   { opacity: .35; cursor: not-allowed; }
+.sl-available  { cursor: pointer; box-shadow: 0 0 0 2px #f93, 0 0 8px #f930 !important; animation: sl-pulse .9s infinite alternate; }
+.sl-invalid    { opacity: .35; cursor: not-allowed; }
 @keyframes sl-pulse { from { box-shadow: 0 0 0 2px #f93; } to { box-shadow: 0 0 0 3px #fa6, 0 0 10px #f936; } }
+.cup-available { cursor: pointer; box-shadow: 0 0 0 2px #d4a017, 0 0 8px #d4a0170 !important; animation: cup-pulse .9s infinite alternate; }
+.cup-invalid   { opacity: .35; cursor: not-allowed; }
+@keyframes cup-pulse { from { box-shadow: 0 0 0 2px #d4a017; } to { box-shadow: 0 0 0 3px #e8b820, 0 0 10px #d4a01760; } }
 
 /* Board center */
 .board-center {
