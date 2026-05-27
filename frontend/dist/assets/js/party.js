@@ -141,12 +141,16 @@ const TRAP_EFFECTS = [
 ];
 
 const ITEM_CFG = [
-  { id: 'microphone', emoji: '🎤', price: 10 },
-  { id: 'battery',    emoji: '🔋', price: 25 },
-  { id: 'helpy',      emoji: '🐰', price: 5  },
-  { id: 'swap',       emoji: '🔃', price: 3  },
-  { id: 'ballpit',    emoji: '🎊', price: 5  },
-  { id: 'm2',         emoji: '🤖', price: 7  },
+  { id: 'microphone',  emoji: '🎤', price: 10 },
+  { id: 'battery',     emoji: '🔋', price: 25 },
+  { id: 'helpy',       emoji: '🐰', price: 5  },
+  { id: 'swap',        emoji: '🔃', price: 3  },
+  { id: 'ballpit',     emoji: '🎊', price: 5  },
+  { id: 'm2',          emoji: '🤖', price: 7  },
+  { id: 'faz_mixer',   emoji: '🎰', price: 2  },
+  { id: 'glitchtrap',  emoji: '🐇', price: 15 },
+  { id: 'springlock',  emoji: '🔒', price: 8  },
+  { id: 'freddy_mask', emoji: '🎭', price: 22 },
 ];
 
 const MINIGAME_LIST = [
@@ -170,8 +174,9 @@ const QUESTION_EVENTS = [
   { text: 'Nightmare Freddy invaded! 😨',   desc: '-5 coins',            eff: p => { p.coins = Math.max(0, p.coins - 5); } },
   { text: 'Mangle fixed everything! 🔧',    desc: '+2 coins',            eff: p => { p.coins += 2; } },
   { text: 'Withered Bonnie scared you! 😰', desc: 'Lose half your coins', eff: p => { p.coins = Math.floor(p.coins / 2); } },
-  { text: 'Mangle shuffled the board! 🔀',  desc: 'All spaces reshuffled!', eff: p => {}, boardShuffle: true },
-  { text: 'Found a free item! 🎁',          desc: 'Got a random item!',     eff: p => {}, giveItem: true },
+  { text: 'Mangle shuffled the board! 🔀',  desc: 'All spaces reshuffled!',          eff: p => {}, boardShuffle: true },
+  { text: 'Found a free item! 🎁',          desc: 'Got a random item!',               eff: p => {}, giveItem: true },
+  { text: 'Faz-Blender activated! 🎰',      desc: 'All coins & pizzas scrambled!',    eff: p => {}, fazMix: true  },
 ];
 
 // ── Supabase ──────────────────────────────────────────────────────────────────
@@ -207,6 +212,7 @@ let mgCleanup    = null;
 let mgPoller     = null;
 let pendingRoll  = null;
 let lapCompletedLocal = false;     // local backup so lap-minigame survives Supabase race conditions
+let devScoreBonus    = 0;
 let eventLog    = [];              // local event history (broadcast to all clients)
 let prevPlayerPos = {};            // track positions for movement animation
 
@@ -251,9 +257,8 @@ function pStats(room) {
 }
 function isDoublePhase(room) {
   const { laps } = parseBoard(room);
-  const half = Math.floor(laps / 2);
-  const pc   = room.player_count || 2;
-  return allSlots(pc).some(s => room[`${s}_name`] && playerLaps(room, s) >= half);
+  const pc = room.player_count || 2;
+  return allSlots(pc).some(s => room[`${s}_name`] && playerLaps(room, s) >= laps - 1);
 }
 function getPlayerDice(room, slot) {
   const ns = pStats(room)[slot] || {};
@@ -528,40 +533,33 @@ function createBoard(mapType = 'easy', laps = TOTAL_LAPS) {
     };
   }
   if (mapType === 'bonnie') {
-    // 38-node Bonnie map · 2 tollbooths · branching jackpot paths
-    const FIXED = new Set(['tollbooth', 'jackpot']);
+    // 26-node Bonnie silhouette map · single loop
+    const FIXED = new Set(['jackpot']);
     const template = [
-      'jackpot','normal','normal','normal','jackpot','normal','normal','normal','jackpot','normal',
-      'normal','tollbooth','normal','tollbooth','jackpot','normal','normal','normal','jackpot','normal',
-      'normal','normal','normal','normal','jackpot','normal','jackpot','normal','normal','normal',
-      'normal','jackpot','normal','jackpot','normal','normal','normal','jackpot',
+      'jackpot','normal','normal','normal','jackpot','normal',
+      'normal','normal','jackpot','normal','normal','normal',
+      'jackpot','normal','normal','normal','jackpot','normal',
+      'normal','normal','jackpot','normal','normal','normal',
+      'jackpot','normal',
     ];
     const pool = shufflePool([
-      ...Array(7).fill('normal'), ...Array(5).fill('coin'), ...Array(4).fill('pizza'),
-      ...Array(4).fill('minigame'), ...Array(3).fill('badluck'), ...Array(2).fill('trap'),
-      'challenge',
+      'normal','normal','normal','coin','coin','coin',
+      'pizza','pizza','minigame','minigame','badluck','badluck','trap','challenge','question',
     ]);
     let pi = 0;
-    const tiles = template.map((t, i) => {
-      if (i === 0) return 'normal';
-      if (FIXED.has(t)) return t;
-      return pool[pi++ % pool.length];
-    });
+    const tiles = template.map(t => FIXED.has(t) ? t : (pool[pi++ % pool.length] || t));
     return {
-      tiles, laps, boardSize: 38, mapType: 'bonnie', toll: 5,
-      skipMap: { 11: 12, 13: 14 },
-      freeMap: { 11: 37, 13: 25 },
-      nextMap: { 21: 31, 24: 12, 28: 14, 36: 0, 37: 22 },
+      tiles, laps, boardSize: 26, mapType: 'bonnie', toll: 5,
+      skipMap: {}, freeMap: {}, nextMap: {},
       boardAspect: '1:1',
       nodes: [
-        {x:48,y:88.4},{x:30.2,y:78.2},{x:63.1,y:78.5},{x:66.4,y:72.3},{x:59.5,y:62.5},
-        {x:47.5,y:65.4},{x:47.2,y:58.6},{x:40.7,y:61.8},{x:29.9,y:70.2},{x:16.8,y:57.9},
-        {x:22.2,y:44.4},{x:34.2,y:29.6},{x:46,y:25.8},{x:61.3,y:29.9},{x:72.3,y:42.8},
-        {x:78,y:54.7},{x:76,y:68.4},{x:71.4,y:85.6},{x:55.7,y:98.3},{x:36.6,y:98.1},
-        {x:23.7,y:85.8},{x:18,y:67},{x:8.6,y:13.8},{x:26.5,y:30.4},{x:39.8,y:22.8},
-        {x:56.9,y:24.9},{x:75,y:0},{x:87.7,y:18.6},{x:68.3,y:32.4},{x:44.6,y:51.2},
-        {x:36.6,y:45.1},{x:29.8,y:52.3},{x:38.1,y:57.9},{x:57.9,y:45.3},{x:64.6,y:53.4},
-        {x:58.3,y:59.4},{x:50.5,y:51.8},{x:23.3,y:0},
+        {x:17.6,y:21.4},{x:30.1,y:21.4},{x:40.5,y:27.8},{x:44.5,y:38.4},
+        {x:44.1,y:48.5},{x:49.8,y:47.6},{x:57.8,y:48.2},{x:57.4,y:38},
+        {x:58.9,y:24.5},{x:59.6,y:10.6},{x:68.5,y:4},{x:70.7,y:12.7},
+        {x:71.4,y:24.9},{x:68.8,y:35.4},{x:63.6,y:50.7},{x:68.4,y:64.3},
+        {x:69.7,y:79.5},{x:60.8,y:96.7},{x:48.1,y:97.4},{x:36.4,y:90.8},
+        {x:31.4,y:79.6},{x:32.3,y:68.3},{x:37.2,y:52.9},{x:33.9,y:41.9},
+        {x:31.3,y:32.4},{x:23,y:29.7},
       ],
     };
   }
@@ -1305,6 +1303,7 @@ function renderBoard(room) {
       const jackLabel = type === 'jackpot' ? `<span class="space-jack-val">${getJackpotValue(room)}</span>` : '';
       const sp   = document.createElement('div');
       sp.className = `board-space ${cfg.cls}${idx === 0 ? ' space-start' : ''}`;
+      sp.dataset.node = String(idx);
       sp.style.gridRow    = row;
       sp.style.gridColumn = col;
       sp.innerHTML = `
@@ -1394,6 +1393,7 @@ function renderFreddyFaceBoard(el, tiles, laps, toll) {
     const jackLabel = type === 'jackpot' ? `<span class="space-jack-val">${getJackpotValue({board: JSON.stringify({tiles, laps, boardSize: 20, mapType: 'freddy', toll})})}</span>` : '';
     const sp = document.createElement('div');
     sp.className = `board-space board-node ${cfg.cls}${idx === 0 ? ' space-start' : ''}`;
+    sp.dataset.node = String(idx);
     sp.style.cssText = `position:absolute;left:${x}%;top:${y}%;transform:translate(-50%,-50%);width:11%;aspect-ratio:1;z-index:2;`;
     sp.innerHTML = `
       <span class="space-num">${idx === 0 ? '🏁' : idx}</span>
@@ -1477,6 +1477,7 @@ function renderCustomBoard(el, tiles, laps, toll, nodes, skipMap, freeMap, board
     const jackLabel = type === 'jackpot' ? `<span class="space-jack-val">${getJackpotValue({ board: JSON.stringify({ tiles, laps, boardSize: nodes.length, mapType: 'custom', toll }) })}</span>` : '';
     const sp = document.createElement('div');
     sp.className = `board-space board-node ${cfg.cls}${idx === 0 ? ' space-start' : ''}`;
+    sp.dataset.node = String(idx);
     sp.style.cssText = `position:absolute;left:${nx(x)}%;top:${ny(y)}%;transform:translate(-50%,-50%);width:${nodeW}%;aspect-ratio:1;z-index:2;`;
     sp.innerHTML = `
       <span class="space-num">${idx === 0 ? '🏁' : idx}</span>
@@ -1550,6 +1551,19 @@ function updateTokens(room) {
   });
 
   prevPlayerPos = JSON.parse(room.player_pos || '{}');
+
+  // Springlock overlays
+  const ns_tok = pStats(room);
+  (ns_tok._springlocks_ || []).forEach(sl => {
+    const el = document.getElementById(`tok-${sl.spaceIdx}`);
+    if (!el) return;
+    const overlay = document.createElement('span');
+    overlay.title = `🔒 Springlock (${room[`${sl.ownerSlot}_name`]})`;
+    overlay.style.cssText = 'position:absolute;top:-4px;right:-4px;font-size:.55rem;z-index:5;pointer-events:none;';
+    overlay.textContent = '🔒';
+    el.style.position = 'relative';
+    el.appendChild(overlay);
+  });
 }
 
 async function animateHops(slot, char, fromNode, steps, boardSize, tiles, nextMap) {
@@ -1897,7 +1911,21 @@ async function passOrMinigame(room, extraUpdates = {}) {
     ? JSON.parse(extraUpdates.player_stats)
     : pStats(room);
 
+  // Expire springlocks: decrement turnsLeft, remove expired ones
+  if (ns._springlocks_?.length) {
+    const before = ns._springlocks_.length;
+    ns._springlocks_ = ns._springlocks_.filter(sl => {
+      sl.turnsLeft = (sl.turnsLeft ?? 1) - 1;
+      return sl.turnsLeft > 0;
+    });
+    if (ns._springlocks_.length < before)
+      emitEvent(`🔒 A Springlock trap expired!`);
+    extraUpdates = { ...extraUpdates, player_stats: JSON.stringify(ns) };
+  }
+
   if (ns[playerSlot]?.lapCompleted) {
+    // Clear Freddy Mask on lap completion
+    if (ns[playerSlot]?.maskActive) ns[playerSlot].maskActive = false;
     // DON'T clear microphoneActive here — finishMinigame will clear it after applying the reward
     if (ns[playerSlot]) ns[playerSlot].lapCompleted = false;
     const allPlayers = allSlots(room.player_count || 2).filter(s => room[`${s}_name`]);
@@ -1975,14 +2003,36 @@ async function handleSpace() {
 
   // Music Box trap: if an opponent placed a box on this node
   const currentNode = pos % bs;
+  const masked = !!(ns[playerSlot]?.maskActive);
   const mbIdx = (ns._musicBoxes || []).findIndex(mb => mb.spaceIdx === currentNode && mb.ownerSlot !== playerSlot && room[`${mb.ownerSlot}_name`]);
   if (mbIdx !== -1) {
     const mb = ns._musicBoxes[mbIdx];
-    st.coins[playerSlot]     = (st.coins[playerSlot]     || 0) - 5; // can go negative
-    st.coins[mb.ownerSlot]   = (st.coins[mb.ownerSlot]   || 0) + 5;
     ns._musicBoxes.splice(mbIdx, 1);
-    emitEvent(`🎵 ${room[`${playerSlot}_name`]} triggered Puppet's Music Box! -5🪙 → ${room[`${mb.ownerSlot}_name`]}`);
-    showToast(T('toast.musicBoxTrap'));
+    if (masked) {
+      emitEvent(`🎵 ${room[`${playerSlot}_name`]} triggered Puppet's Music Box — 🎭 Mask blocked it!`);
+      showToast('🎭 Mask blocked Music Box!');
+    } else {
+      st.coins[playerSlot]   = (st.coins[playerSlot]   || 0) - 5; // can go negative
+      st.coins[mb.ownerSlot] = (st.coins[mb.ownerSlot] || 0) + 5;
+      emitEvent(`🎵 ${room[`${playerSlot}_name`]} triggered Puppet's Music Box! -5🪙 → ${room[`${mb.ownerSlot}_name`]}`);
+      showToast(T('toast.musicBoxTrap'));
+    }
+  }
+
+  // Springlock trap: if any player placed a springlock on this node
+  const slIdx = (ns._springlocks_ || []).findIndex(sl => sl.spaceIdx === currentNode && sl.ownerSlot !== playerSlot && room[`${sl.ownerSlot}_name`]);
+  if (slIdx !== -1) {
+    const sl = ns._springlocks_[slIdx];
+    ns._springlocks_.splice(slIdx, 1);
+    if (masked) {
+      emitEvent(`🔒 ${room[`${playerSlot}_name`]} triggered a Springlock — 🎭 Mask blocked it!`);
+      showToast('🎭 Mask blocked Springlock!');
+    } else {
+      st.coins[playerSlot]   = (st.coins[playerSlot]   || 0) - 5; // can go negative
+      st.coins[sl.ownerSlot] = (st.coins[sl.ownerSlot] || 0) + 5;
+      emitEvent(`🔒 ${room[`${playerSlot}_name`]} triggered ${room[`${sl.ownerSlot}_name`]}'s Springlock! -5🪙 → ${room[`${sl.ownerSlot}_name`]}`);
+      showToast('🔒 Springlock! -5🪙');
+    }
   }
 
   if (type === 'coin') {
@@ -2004,6 +2054,12 @@ async function handleSpace() {
     return;
   }
   if (type === 'badluck') {
+    if (masked) {
+      emitEvent(`💀 ${room[`${playerSlot}_name`]} hit Bad Luck — 🎭 Mask blocked it!`);
+      showToast('🎭 Mask blocked Bad Luck!');
+      await resolveSpace(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) }, others);
+      return;
+    }
     const loss = micMultiplied(ns, playerSlot, -(3 * mul));
     st.coins[playerSlot] = Math.max(0, (st.coins[playerSlot] || 0) + loss); // loss is negative
     if (!ns[playerSlot]) ns[playerSlot] = { mgWins: 0, badLucks: 0 };
@@ -2046,6 +2102,12 @@ async function handleSpace() {
     return;
   }
   if (type === 'freddy_zone') {
+    if (masked) {
+      emitEvent(`😱 ${room[`${playerSlot}_name`]} entered the Freddy Zone — 🎭 Mask blocked it!`);
+      showToast('🎭 Mask blocked Freddy Zone!');
+      await resolveSpace(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) }, others);
+      return;
+    }
     const effIdx = Math.floor(Math.random() * 2);
     const eff = TRAP_EFFECTS[effIdx];
     eff.eff(st, playerSlot, room, ns);
@@ -2056,6 +2118,12 @@ async function handleSpace() {
     return;
   }
   if (type === 'trap') {
+    if (masked) {
+      emitEvent(`🪤 ${room[`${playerSlot}_name`]} hit a Trap — 🎭 Mask blocked it!`);
+      showToast('🎭 Mask blocked Trap!');
+      await resolveSpace(room, { player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns) }, others);
+      return;
+    }
     const effIdx = Math.floor(Math.random() * TRAP_EFFECTS.length);
     const eff = TRAP_EFFECTS[effIdx];
     eff.eff(st, playerSlot, room, ns);
@@ -2113,6 +2181,18 @@ async function triggerQuestion() {
     (ns[playerSlot].ownedItems = ns[playerSlot].ownedItems || []).push(item.id);
     emitEvent(`🎁 ${roomData[`${playerSlot}_name`]} got a free ${item.emoji} ${T('item.' + item.id + '.name')}!`);
     showToast(`🎁 Free ${item.emoji} ${T('item.' + item.id + '.name')}!`);
+  } else if (ev.fazMix) {
+    const active = allSlots(roomData.player_count || 2).filter(s => roomData[`${s}_name`]);
+    const pool = [];
+    active.forEach(s => { pool.push(st.coins[s] || 0); pool.push(st.pizzas[s] || 0); });
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    let pi = 0;
+    active.forEach(s => { st.coins[s] = pool[pi++]; st.pizzas[s] = pool[pi++]; });
+    emitEvent(`🎰 Faz-Blender activated! Everyone's coins & pizzas were scrambled!`);
+    showToast('🎰 Faz-Blender!');
   } else {
     emitEvent(`❓ ${roomData[`${playerSlot}_name`]} got event: ${T('qevent.' + evIdx + '.text')} → ${T('qevent.' + evIdx + '.desc')}`);
     showToast(T('qevent.' + evIdx + '.text'));
@@ -2298,6 +2378,73 @@ async function applyMicrophone(target) {
   emitEvent(`🎤 ${roomData[`${playerSlot}_name`]} used Microphone on ${targetName}! Gains ×2 · Losses ×4 until turn ends`);
   showToast(`🎤 ${T('item.microphone.name')} → ${targetName}!`);
   renderActionUI(roomData);
+}
+
+// ── Springlock placement UI ───────────────────────────────────────────────────
+let springlockBoardClickHandler = null;
+
+function enterSpringlockPlacement() {
+  const { boardSize } = parseBoard(roomData);
+  const pc = roomData.player_count || 2;
+  const currentNode = boardPos(roomData, playerSlot) % boardSize;
+  const occupied = allSlots(pc).map(s => boardPos(roomData, s) % boardSize);
+
+  const el = document.getElementById('current-player-action');
+  if (el) el.innerHTML = `<div class="action-card">
+    <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot)-1]}">🔒 ${T('item.springlock.name')}</div>
+    <p style="font-size:.7rem;color:var(--text-muted);margin:2px 0">${T('item.springlock.pickDesc')}</p>
+    <button class="mp-btn small" onclick="cancelSpringlockPlacement()">${T('ability.kill.cancel')}</button>
+  </div>`;
+
+  // Highlight valid spaces
+  document.querySelectorAll('[data-node]').forEach(node => {
+    const i = parseInt(node.dataset.node);
+    if (i === 0 || occupied.includes(i)) node.classList.add('sl-invalid');
+    else node.classList.add('sl-available');
+  });
+
+  const boardEl = document.getElementById('party-board');
+  springlockBoardClickHandler = e => {
+    const node = e.target.closest('[data-node]');
+    if (!node) return;
+    const i = parseInt(node.dataset.node);
+    if (i === 0 || occupied.includes(i)) return;
+    placeSpringlock(i);
+  };
+  boardEl?.addEventListener('click', springlockBoardClickHandler);
+}
+
+function cancelSpringlockPlacement() {
+  exitSpringlockPlacement();
+  renderActionUI(roomData);
+}
+
+function exitSpringlockPlacement() {
+  const boardEl = document.getElementById('party-board');
+  if (springlockBoardClickHandler) {
+    boardEl?.removeEventListener('click', springlockBoardClickHandler);
+    springlockBoardClickHandler = null;
+  }
+  document.querySelectorAll('.sl-available, .sl-invalid').forEach(n => {
+    n.classList.remove('sl-available', 'sl-invalid');
+  });
+}
+
+async function placeSpringlock(spaceIdx) {
+  exitSpringlockPlacement();
+  const ns = pStats(roomData);
+  if (!ns[playerSlot]) ns[playerSlot] = { mgWins: 0, badLucks: 0 };
+  const items = (ns[playerSlot].ownedItems || []);
+  const itmIdx = items.indexOf('springlock');
+  if (itmIdx === -1) return;
+  items.splice(itmIdx, 1);
+  ns[playerSlot].ownedItems = items;
+  if (!ns._springlocks_) ns._springlocks_ = [];
+  ns._springlocks_.push({ spaceIdx, ownerSlot: playerSlot, turnsLeft: roomData.player_count || 2 });
+  await db.from('party_rooms').update({ player_stats: JSON.stringify(ns) }).eq('id', roomId);
+  emitEvent(`🔒 ${roomData[`${playerSlot}_name`]} set a Springlock on space ${spaceIdx}! Anyone who lands there pays 5🪙!`);
+  showToast(`🔒 Springlock on space ${spaceIdx}!`);
+  showDiceShop(roomData);
 }
 
 // ── Springtrap: Kill ability ──────────────────────────────────────────────────
@@ -2597,19 +2744,29 @@ function showDiceShop(room) {
   const itemShopCards = ITEM_CFG.map(it => {
     const count = ownedItems.filter(id => id === it.id).length;
     const canBuy = coins >= it.price;
-    const isBattery = it.id === 'battery';
-    const batteryUsed = isBattery && !!(ns_items[playerSlot]?.batteryUsed);
+    const isBattery        = it.id === 'battery';
+    const isFazMixer       = it.id === 'faz_mixer';
+    const isMask           = it.id === 'freddy_mask';
+    const batteryUsed      = isBattery  && !!(ns_items[playerSlot]?.batteryUsed);
+    const fazMixerBought   = isFazMixer ? (ns_items[playerSlot]?.fazMixerBought || 0) : 0;
+    const maskUsed         = isMask     && !!(ns_items[playerSlot]?.maskUsed);
     const activeEffects = [];
-    if (it.id === 'battery' && ns_items[playerSlot]?.extraTurn) activeEffects.push('⚡');
-    if (it.id === 'helpy'   && ns_items[playerSlot]?.helpyActive) activeEffects.push('✨');
-    if (it.id === 'm2'      && ns_items[playerSlot]?.copiedAbility) activeEffects.push('🔮');
+    if (it.id === 'battery'     && ns_items[playerSlot]?.extraTurn)      activeEffects.push('⚡');
+    if (it.id === 'helpy'       && ns_items[playerSlot]?.helpyActive)     activeEffects.push('✨');
+    if (it.id === 'm2'          && ns_items[playerSlot]?.copiedAbility)   activeEffects.push('🔮');
+    if (it.id === 'freddy_mask' && ns_items[playerSlot]?.maskActive)      activeEffects.push('🛡️');
+    if (it.id === 'faz_mixer')  activeEffects.push(`${fazMixerBought}/3`);
 
-    const batteryLocked = isBattery && (batteryUsed || count > 0);
-    const canBuyItem    = canBuy && !batteryLocked;
-    const useBtn = count > 0 && myTurnForItems && !(isBattery && batteryUsed)
+    const onceLocked = (isBattery && (batteryUsed || count > 0))
+                    || (isFazMixer && fazMixerBought >= 3)
+                    || (isMask && (maskUsed || count > 0));
+    const canBuyItem  = canBuy && !onceLocked;
+    const isUsed      = (isBattery && batteryUsed) || (isMask && maskUsed);
+    const useBtn = count > 0 && myTurnForItems && !isUsed
       ? `<button class="mp-btn small itm-use-btn" data-id="${it.id}">${T('item.use')}</button>` : '';
     const countTag = count > 0 ? `<span class="itm-count">${count > 1 ? '×' + count : '●'}</span>` : '';
     const activeTag = activeEffects.length ? `<span class="itm-active">${activeEffects.join('')}</span>` : '';
+    const buyLabel = !canBuyItem && onceLocked ? T('item.battery.used') : coins < it.price ? T('dice.needCoins', { n: it.price }) : T('item.buy');
     return `<div class="itm-card ${count > 0 ? 'itm-owned' : 'itm-locked'}">
       <div class="itm-header">
         <span class="itm-emoji">${it.emoji}</span>
@@ -2620,7 +2777,7 @@ function showDiceShop(room) {
       <div class="itm-footer">
         ${useBtn}
         <span class="itm-price">${it.price}${COIN_IMG}</span>
-        <button class="mp-btn small itm-buy-btn" data-id="${it.id}" data-price="${it.price}" ${canBuyItem ? '' : 'disabled'}>${!canBuyItem && batteryLocked ? T('item.battery.used') : coins < it.price ? T('dice.needCoins', { n: it.price }) : T('item.buy')}</button>
+        <button class="mp-btn small itm-buy-btn" data-id="${it.id}" data-price="${it.price}" ${canBuyItem ? '' : 'disabled'}>${buyLabel}</button>
       </div>
     </div>`;
   }).join('');
@@ -2723,6 +2880,8 @@ async function buyItem(itemId) {
   const ns = pStats(roomData);
   if (!ns[playerSlot]) ns[playerSlot] = { mgWins: 0, badLucks: 0 };
   (ns[playerSlot].ownedItems = ns[playerSlot].ownedItems || []).push(itemId);
+  // Track faz_mixer purchase count for the 3-buy cap
+  if (itemId === 'faz_mixer') ns[playerSlot].fazMixerBought = (ns[playerSlot].fazMixerBought || 0) + 1;
   const st = pState(roomData);
   st.coins[playerSlot] = Math.max(0, (st.coins[playerSlot] || 0) - item.price);
   await db.from('party_rooms').update({
@@ -2814,6 +2973,56 @@ async function useItem(itemId) {
       await db.from('party_rooms').update({ player_stats: JSON.stringify(ns) }).eq('id', roomId);
       emitEvent(`🤖 ${roomData[`${playerSlot}_name`]} copied ${CHAR_CFG[targetChar]?.name}'s ability from ${roomData[`${target}_name`]}!`);
       showToast(`🤖 Copied ${CHAR_CFG[targetChar]?.name}'s ability!`);
+      break;
+    }
+    case 'faz_mixer': {
+      const active = allSlots(pc).filter(s => roomData[`${s}_name`]);
+      const pool = [];
+      active.forEach(s => { pool.push(st.coins[s] || 0); pool.push(st.pizzas[s] || 0); });
+      for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+      let pi = 0;
+      active.forEach(s => { st.coins[s] = pool[pi++]; st.pizzas[s] = pool[pi++]; });
+      await db.from('party_rooms').update({
+        player_coins:  JSON.stringify(st.coins),
+        player_pizzas: JSON.stringify(st.pizzas),
+        player_stats:  JSON.stringify(ns),
+      }).eq('id', roomId);
+      emitEvent(`🎰 ${roomData[`${playerSlot}_name`]} used Faz-Blender — everyone's coins & pizzas scrambled!`);
+      showToast('🎰 Faz-Blender! Everything scrambled!');
+      break;
+    }
+    case 'glitchtrap': {
+      const board = parseBoard(roomData);
+      const shuffled = [...board.tiles];
+      // Shuffle all tiles except index 0 (start always stays normal)
+      for (let i = shuffled.length - 1; i > 1; i--) {
+        const j = 1 + Math.floor(Math.random() * i);
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      shuffled[0] = 'normal';
+      const newBoard = { ...board, tiles: shuffled };
+      await db.from('party_rooms').update({
+        board:        JSON.stringify(newBoard),
+        player_stats: JSON.stringify(ns),
+      }).eq('id', roomId);
+      emitEvent(`🐇 ${roomData[`${playerSlot}_name`]} used Glitchtrap — the board has been corrupted!`);
+      showToast('🐇 Board shuffled!');
+      break;
+    }
+    case 'springlock': {
+      enterSpringlockPlacement();
+      return; // placement UI handles item removal + DB write
+    }
+    case 'freddy_mask': {
+      if (ns[playerSlot]?.maskUsed) { showToast(T('item.battery.used')); return; }
+      ns[playerSlot].maskUsed   = true;
+      ns[playerSlot].maskActive = true;
+      await db.from('party_rooms').update({ player_stats: JSON.stringify(ns) }).eq('id', roomId);
+      emitEvent(`🎭 ${roomData[`${playerSlot}_name`]} put on the Freddy Mask — immune to negative effects for 1 lap!`);
+      showToast('🎭 Freddy Mask active! Immune for 1 lap!');
       break;
     }
   }
@@ -2952,7 +3161,9 @@ async function freddyTollPass() {
 
 // ── Minigame trigger ──────────────────────────────────────────────────────────
 async function triggerMinigame(involvedSlots, extraCfg = {}) {
-  const cfg = MINIGAME_LIST[Math.floor(Math.random() * MINIGAME_LIST.length)];
+  const lastMgId = roomData?.mg_id;
+  const mgPool   = MINIGAME_LIST.filter(m => m.id !== lastMgId);
+  const cfg      = (mgPool.length > 0 ? mgPool : MINIGAME_LIST)[Math.floor(Math.random() * (mgPool.length || MINIGAME_LIST.length))];
   let reward = extraCfg.challengeReward !== undefined ? extraCfg.challengeReward : Math.floor(Math.random() * 3) + 1;
 
   // Double multiplier: last-lap double phase OR triggering player has 2d6 equipped
@@ -3109,7 +3320,9 @@ function updateLiveBar() {
   });
 }
 
-async function submitScore(score) {
+async function submitScore(rawScore) {
+  const score = rawScore + devScoreBonus;
+  devScoreBonus = 0;
   mgDoneLocal[playerSlot] = score;
   liveScores[playerSlot]  = score;
   updateLiveBar();
@@ -4214,6 +4427,7 @@ window.addEventListener('beforeunload', () => {
     keepalive: true,
   });
 });
+
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {

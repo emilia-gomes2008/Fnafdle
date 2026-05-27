@@ -168,6 +168,11 @@
 .board-node .space-emoji  { font-size: .5rem; }
 .board-node .space-num    { font-size: .35rem; }
 
+/* Springlock placement mode */
+.sl-available { cursor: pointer; box-shadow: 0 0 0 2px #f93, 0 0 8px #f930 !important; animation: sl-pulse .9s infinite alternate; }
+.sl-invalid   { opacity: .35; cursor: not-allowed; }
+@keyframes sl-pulse { from { box-shadow: 0 0 0 2px #f93; } to { box-shadow: 0 0 0 3px #fa6, 0 0 10px #f936; } }
+
 /* Board center */
 .board-center {
   grid-column: 2 / 6; grid-row: 2 / 6;
