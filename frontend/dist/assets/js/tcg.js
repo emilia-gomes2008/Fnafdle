@@ -41,78 +41,82 @@ const GENERATOR_PRESETS = {
    ═══════════════════════════════════════════════════════ */
 const STARTER_DECKS = {
   fnaf1: {
-    name:'Freddy and the Gang', generator:'remnant', classCard:'class_classic',
+    name:'The First Night (FNAF 1)', generator:'remnant', classCard:'class_classic',
     list:[
-      ['endo_01',6],['freddy',2],['bonnie',1],['chica',1],['foxy',2],['golden_freddy',1],
-      ['energy_remnant',6],['energy_agony',1],
-      ['cupcake',2],['power_out',1],['dee_dee_pearl',3],['birthday_cake',3],['system_corrupt',2],['energy_recharge',3],
-      ['phone_guy',3],['henry_emily',1],['fazbear_tech',2]
-    ]
-  },
-  fnaf2_toys: {
-    name:'Renewed', generator:'remnant', classCard:'class_toy',
-    list:[
-      ['endo_02',6],['toy_freddy',1],['toy_bonnie',2],['toy_chica',1],['mangle',2],['bb',1],['puppet',1],
-      ['energy_remnant',6],
-      ['dee_dee_pearl',3],['birthday_cake',3],['system_corrupt',2],['energy_recharge',2],
-      ['puppet_box',2],['springlock_device',1],['hat_mic',2],
-      ['phone_guy',3],['henry_emily',1],['fazbear_tech',1]
-    ]
-  },
-  fnaf2_withereds: {
-    name:'Old and Ready', generator:'remnant', classCard:'class_withered',
-    list:[
-      ['endo_02',6],['withered_freddy',2],['withered_bonnie',1],['withered_chica',2],['withered_foxy',1],['withered_golden',1],
-      ['shadow_freddy',2],['rwqfsfasxc',1],
+      ['endo_01',6],['freddy',1],['bonnie',1],['chica',1],['foxy',1],['golden_freddy',1],
+      ['hat_mic',2],['hook',1],['freddy_mask',1],
       ['energy_remnant',6],['energy_agony',2],
-      ['birthday_cake',3],['system_corrupt',2],['energy_recharge',2],['dee_dee_pearl',3],
-      ['mendos_endos',2],['puppet_box',1],
-      ['phone_guy',3]
+      ['cupcake',2],['mini_cupcake',2],['birthday_cake',1],['security_tape',1],['energy_recharge',1],['power_battery',1],
+      ['phone_guy',2],['fazbear_tech',2],['henry_emily',1],['william_afton',1],['william_search',1],['dee_dee_pearl',1],['night_guard',1]
+    ]
+  },
+  fnaf2: {
+    name:'New Toys (FNAF 2)', generator:'remnant', classCard:'class_toy',
+    list:[
+      ['endo_02',6],['toy_freddy',1],['toy_bonnie',1],['toy_chica',1],['mangle',1],['bb',1],['puppet',1],
+      ['freddy_mask',2],
+      ['energy_remnant',6],
+      ['cupcake',2],['mini_cupcake',3],['power_battery',1],
+      ['phone_guy',2],['mrs_afton',1],['fazbear_tech',2],
+      ['henry_emily',2],['birthday_cake',1],['energy_recharge',1],['william_search',1],['william_afton',1],['night_guard',1],['lantern',1],['dee_dee_pearl',1]
     ]
   },
   fnaf3: {
-    name:'Phantom Menace', generator:'remnant', classCard:'class_phantom',
+    name:'The Past Never Dies (FNAF 3)', generator:'phantom', classCard:'class_phantom',
     list:[
-      ['spring_endo',3],['springtrap',3],['springbonnie',3],
-      ['p_freddy',1],['p_chica',1],['p_bb',1],['p_foxy',1],['p_mangle',1],['p_puppet',1],
-      ['purple_guy',3],
-      ['energy_agony',3],
-      ['dee_dee_pearl',3],['birthday_cake',3],['system_corrupt',2],['energy_recharge',2],
-      ['phone_guy',3],['henry_emily',3],['fazbear_tech',2],['william_search',1]
+      ['spring_endo',4],['springbonnie',1],['springtrap',1],['fredbear',1],
+      ['p_freddy',1],['p_chica',2],['p_bb',2],['p_foxy',2],['p_mangle',2],['p_puppet',2],
+      ['purple_guy',2],['springlock_device',2],
+      ['security_tape',1],
+      ['energy_agony',4],['energy_phantom_agony',6],['energy_recharge',1],
+      ['phone_guy',1],['lantern',1],['dee_dee_pearl',1],['mrs_afton',1],['birthday_cake',1],['night_guard',1]
     ]
   },
   fnaf4: {
-    name:'Sleepless Nights', generator:'remnant', classCard:'class_jacko',
+    name:'The Nightmares (FNAF 4)', generator:'agony', classCard:'class_nightmare',
     list:[
       ['endo_nm',6],
-      ['nightmare_freddy',2],['nightmare_bonnie',1],['nightmare_fredbear',2],['nightmare_chica',1],['nightmare_bb',1],['nightmare_foxy',1],['nightmarionne',1],
-      ['jacko_bonnie',2],['jacko_lantern',1],['jacko_chica',1],
+      ['nightmare_freddy',1],['nightmare_bonnie',1],['nightmare_chica',1],['nightmare_foxy',1],
+      ['nightmare_fredbear',1],['nightmare_bb',1],['nightmarionne',1],
+      ['jacko_bonnie',1],['jacko_chica',1],['jacko_lantern',1],
+      ['springlock_device',1],
       ['energy_agony',6],
-      ['dee_dee_pearl',3],['birthday_cake',3],['system_corrupt',3],['energy_recharge',2],
-      ['hat_mic',1],['puppet_box',1],
-      ['phone_guy',2]
+      ['cupcake',2],['mini_cupcake',2],['birthday_cake',1],['dee_dee_pearl',1],['energy_recharge',1],['power_battery',1],
+      ['phone_guy',1],['mrs_afton',1],['fazbear_tech',2],['henry_emily',2],['william_afton',2],['night_guard',1]
     ]
   },
-  sl: {
-    name:'Showtime', generator:'remnant', classCard:'class_funtime',
+  sl_control: {
+    name:'Scooping Room (Sister Location - Control)', generator:'mixed', classCard:'class_funtime',
     list:[
-      ['yenndo',6],['baby',2],['ballora',1],['funtime_freddy',1],['funtime_foxy',1],['lolbit',2],
-      ['ennard_summon',1],['ennard',1],
-      ['energy_agony',6],
-      ['birthday_cake',3],['system_corrupt',3],['data_escape',1],['energy_recharge',1],['dee_dee_pearl',3],
-      ['mendos_endos',2],['static_dampener',1],['fireproof_suit',1],
-      ['phone_guy',3],['henry_emily',1]
+      ['yenndo',5],
+      ['baby',2],['funtime_freddy',2],['lolbit',2],['funtime_foxy',1],['ballora',1],
+      ['hat_mic',1],['mendos_endos',1],['puppet_box',1],
+      ['energy_agony',4],['energy_remnant',4],
+      ['cupcake',2],['birthday_cake',2],['security_tape',1],['energy_recharge',1],['data_escape',2],
+      ['phone_guy',2],['henry_emily',2],['fazbear_tech',1],['mrs_afton',1],['dee_dee_pearl',1],['night_guard',1]
+    ]
+  },
+  sl_aggro: {
+    name:'Amalgamation (Sister Location - Aggro)', generator:'mixed', classCard:'class_funtime',
+    list:[
+      ['yenndo',4],
+      ['ennard',1],['ennard_summon',1],['ballora',2],['funtime_foxy',2],['baby',1],['lolbit',1],
+      ['hat_mic',2],['hook',1],['springlock_device',1],
+      ['energy_agony',4],['energy_remnant',4],
+      ['cupcake',1],['birthday_cake',2],['power_battery',2],['energy_recharge',1],['data_escape',2],['system_corrupt',2],
+      ['phone_guy',1],['henry_emily',2],['fazbear_tech',2],['night_guard',1],['dee_dee_pearl',1]
     ]
   },
   fnaf6: {
-    name:'Remnants of the Past', generator:'remnant', classCard:'class_scrap',
+    name:'Remnants (FNaF 6 - Scraps)', generator:'mixed', classCard:'class_scrap',
     list:[
+      ['spring_endo',4],['yenndo',3],
+      ['springbonnie',1],['springtrap',1],
+      ['baby',1],['funtime_freddy',1],['puppet',1],
       ['scraptrap',1],['scrap_baby',1],['molten_freddy',1],['lefty',1],
-      ['spring_endo',1],['springbonnie',1],['springtrap',1],['yenndo',2],['baby',1],['funtime_freddy',1],['endo_02',1],['puppet',1],
-      ['purple_guy',2],['fragmento_remnant',3],['mendos_endos',2],
-      ['energy_agony',3],['energy_remnant',1],
-      ['birthday_cake',3],['system_corrupt',2],['data_escape',1],['energy_recharge',2],['dee_dee_pearl',1],
-      ['phone_guy',3],['william_search',2],['fazbear_tech',2]
+      ['fragmento_remnant',4],['purple_guy',2],
+      ['energy_agony',3],['energy_remnant',3],
+      ['cupcake',2],['birthday_cake',2],['security_tape',2],['energy_recharge',1],['data_escape',2],['system_corrupt',2],['phone_guy',1]
     ]
   }
 };
@@ -1266,6 +1270,8 @@ function launchItemSearch(handIdx,card,pidx) {
   if(card.effect==='power_out'){
     if(p.energyPool<2){addLog(T('tcg.search.needPowerOut'));return;}
     p.energyPool-=2;
+    p.discard.push({id:'energy_spent',name:'Energy',type:'energy',energyType:'generic',img:GENERIC});
+    p.discard.push({id:'energy_spent',name:'Energy',type:'energy',energyType:'generic',img:GENERIC});
     if(!p.deck.length){addLog(T('tcg.log.deckEmpty'));consume();return;}
     startDeckSearch(T('tcg.search.powerout'),[...p.deck],1,pidx,(sel)=>{
       sel.forEach(c=>{const i=p.deck.indexOf(c);if(i>=0)p.deck.splice(i,1);p.hand.push(c);});
@@ -1319,11 +1325,6 @@ function launchItemSearch(handIdx,card,pidx) {
 function startEquipTool(handIdx,card) {
   const p=G.players[G.activePlayer];
   if(!p.party.some(s=>s)){addLog(T('tcg.log.noEquipSlot'));return;}
-  // Tools with toolTarget can only be equipped to specific animatronics
-  if(card.toolTarget){
-    const hasValid=p.party.some(s=>s&&card.toolTarget.includes(s.card.id));
-    if(!hasValid){addLog(`${card.name} can only be equipped to: ${card.toolTarget.join(', ')}. None in play.`,'ko');return;}
-  }
   G.pendingTarget={action:'equipTool',handIdx,card};
   addLog(T('tcg.log.clickEquip',{card:card.name}),'info');
   renderGame();
@@ -1333,6 +1334,18 @@ function startEquipTool(handIdx,card) {
 function playSupporter(handIdx,card) {
   const p=G.players[G.activePlayer];
   if(p.supporterPlayedThisTurn){addLog(T('tcg.log.noSupporters'));return;}
+  if(card.effect==='equip_william_on_springbonnie'){
+    G.pendingTarget={action:'williamTarget',handIdx,card};
+    addLog(T('tcg.log.clickSpringbonnie'),'info');
+    renderGame(); return;
+  }
+  if(card.effect==='scrap_target'){
+    const valid=['springtrap','baby','funtime_freddy','puppet'];
+    if(!p.party.some(s=>s&&valid.includes(s.card.id))){addLog(T('tcg.search.needFragment'));return;}
+    G.pendingTarget={action:'scrapTarget',handIdx,card};
+    addLog(T('tcg.log.clickFragment'),'info');
+    renderGame(); return;
+  }
   if(card.effect==='william_gamble'){
     p.supporterPlayedThisTurn=true;
     const ap=G.activePlayer, op=1-ap;
@@ -1440,8 +1453,8 @@ function clickSlot(pidx, slotIdx) {
   if(pt?.action==='equipTool') {
     if(!isOwn||!slot)return;
     const tool=pt.card;
-    // Generic toolTarget restriction
-    if(tool.toolTarget&&!tool.toolTarget.includes(slot.card.id)){addLog(`${tool.name} can only be equipped to: ${tool.toolTarget.join(', ')}.`,'ko');return;}
+    if(tool.passive==='william'&&slot.card.id!=='springbonnie'){addLog('Purple Guy can only be equipped to Springbonnie.');return;}
+    if(tool.passive==='scrap'){const valid=['springtrap','baby','funtime_freddy','puppet','rockstar_lefty'];if(!valid.includes(slot.card.id)){addLog('Invalid target for Remnant Fragment.');return;}}
     if(slot.tools.length>=1){addLog(T('tcg.log.alreadyTool'));return;}
     slot.tools.push({...tool});
     if(tool.passive==='hp+40'){slot.hp+=40;slot.card={...slot.card,hp:slot.card.hp+40};}
@@ -1679,7 +1692,7 @@ function consumeEnergy(attackerSlot,cost,pidx) {
   const actual=Math.min(attackerSlot.elec,cost);
   attackerSlot.elec-=actual;
   const p=G.players[pidx];
-  for(let i=0;i<actual;i++) p.discard.push({id:'energy_spent',name:'Energia',type:'energy',energyType:'generic',img:GENERIC});
+  for(let i=0;i<actual;i++) p.discard.push({id:'energy_spent',name:'Energy',type:'energy',energyType:'generic',img:GENERIC});
   checkAwake(attackerSlot);
 }
 
@@ -2572,8 +2585,7 @@ function renderSlot(slot,pidx,slotIdx,pt){
   const isClassEnemyTarget=pt?.action==='classCardTarget'&&['class_shadow_drain','class_jacko_burn','class_phantom_stall'].includes(pt?.ability);
   const isClassAllyTarget=pt?.action==='classCardTarget'&&['class_toy_heal','class_withered_def'].includes(pt?.ability);
   if(isEnemy&&pt&&(['selectSingleTarget','selectMultiTarget','selectStallTargets'].includes(pt.action)||isEnemyAbility||isClassEnemyTarget))cls+=' enemy-target';
-  const isEquipToolValid = pt?.action==='equipTool' && (!pt.card.toolTarget || (slot && pt.card.toolTarget.includes(slot.card.id)));
-  if(!isEnemy&&pt&&((['selectHealTargets','evolve','attachEnergy','ennardGeneratorBoost','removeBurnTarget'].includes(pt.action))||(pt.action==='equipTool'&&isEquipToolValid)||(pt.action==='abilityTarget'&&!isEnemyAbility)||isClassAllyTarget))cls+=' ally-target';
+  if(!isEnemy&&pt&&(['selectHealTargets','equipTool','evolve','attachEnergy','ennardGeneratorBoost','removeBurnTarget'].includes(pt.action)||(pt.action==='abilityTarget'&&!isEnemyAbility)||isClassAllyTarget))cls+=' ally-target';
 
   div.className=cls; div.onclick=()=>clickSlot(pidx,slotIdx);
 
@@ -2767,6 +2779,7 @@ function applyClassCardEffect(pidx, effectId, targetInfo) {
         let heal=10;
         if(p.energyPool>=1&&confirm('Discard 1⚡ from the Pool to heal 30 instead of 10?')){
           p.energyPool-=1; heal=30;
+          p.discard.push({id:'energy_spent',name:'Energy',type:'energy',energyType:'generic',img:GENERIC});
         }
         slot.hp=Math.min(slot.card.hp,slot.hp+heal);
         addLog(T('tcg.log.classHeal',{name:p.name, card:cc.name, slot:slot.card.name, n:heal}),'info');
@@ -2789,6 +2802,7 @@ function applyClassCardEffect(pidx, effectId, targetInfo) {
         if(!slot){addLog(T('tcg.log.classNeedEnemy'),'info');return;}
         if(p.energyPool<1){addLog(T('tcg.log.classNoEnergyPool'),'info');return;}
         p.energyPool-=1;
+        p.discard.push({id:'energy_spent',name:'Energy',type:'energy',energyType:'generic',img:GENERIC});
         slot.burn=(slot.burn||0)+1;
         addLog(T('tcg.log.classJackoBurn',{name:p.name, card:cc.name, slot:slot.card.name}),'info');
       }
@@ -2810,6 +2824,7 @@ function applyClassCardEffect(pidx, effectId, targetInfo) {
         if(!slot){addLog(T('tcg.log.classNeedEnemy'),'info');return;}
         if(p.energyPool<1){addLog(T('tcg.log.classNoEnergyPool'),'info');return;}
         p.energyPool-=1;
+        p.discard.push({id:'energy_spent',name:'Energy',type:'energy',energyType:'generic',img:GENERIC});
         slot.stalledTurns=Math.max(slot.stalledTurns,2);
         addLog(T('tcg.log.classPhantomStall',{name:p.name, card:cc.name, slot:slot.card.name}),'info');
       }
