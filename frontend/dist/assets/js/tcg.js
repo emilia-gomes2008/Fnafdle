@@ -300,7 +300,7 @@ function buildCardFace(card, count, max) {
     face.innerHTML = `
       <div class="cf-header">
         <span class="cf-name">${card.name}</span>
-        <span class="cf-type-badge">${T('tcg.card.energy')}</span>
+        <span class="cf-type-badge">Energy</span>
       </div>
       <div class="cf-energy-body">
         <div class="cf-energy-sym" style="color:${eMeta.color}">${eMeta.sym}</div>
@@ -2766,7 +2766,7 @@ function applyClassCardEffect(pidx, effectId, targetInfo) {
         if(!slot){addLog(T('tcg.log.classSelectAlly',{card:cc.name}),'info');return;}
         let heal=10;
         if(p.energyPool>=1&&confirm('Discard 1⚡ from the Pool to heal 30 instead of 10?')){
-          p.energyPool-=1; heal=30;
+          p.energyPool-=1; p.discard.push({id:'energy_spent',name:'Energy',type:'energy',energyType:'generic',img:GENERIC}); heal=30;
         }
         slot.hp=Math.min(slot.card.hp,slot.hp+heal);
         addLog(T('tcg.log.classHeal',{name:p.name, card:cc.name, slot:slot.card.name, n:heal}),'info');
@@ -2789,6 +2789,7 @@ function applyClassCardEffect(pidx, effectId, targetInfo) {
         if(!slot){addLog(T('tcg.log.classNeedEnemy'),'info');return;}
         if(p.energyPool<1){addLog(T('tcg.log.classNoEnergyPool'),'info');return;}
         p.energyPool-=1;
+        p.discard.push({id:'energy_spent',name:'Energy',type:'energy',energyType:'generic',img:GENERIC});
         slot.burn=(slot.burn||0)+1;
         addLog(T('tcg.log.classJackoBurn',{name:p.name, card:cc.name, slot:slot.card.name}),'info');
       }
@@ -2810,6 +2811,7 @@ function applyClassCardEffect(pidx, effectId, targetInfo) {
         if(!slot){addLog(T('tcg.log.classNeedEnemy'),'info');return;}
         if(p.energyPool<1){addLog(T('tcg.log.classNoEnergyPool'),'info');return;}
         p.energyPool-=1;
+        p.discard.push({id:'energy_spent',name:'Energy',type:'energy',energyType:'generic',img:GENERIC});
         slot.stalledTurns=Math.max(slot.stalledTurns,2);
         addLog(T('tcg.log.classPhantomStall',{name:p.name, card:cc.name, slot:slot.card.name}),'info');
       }
