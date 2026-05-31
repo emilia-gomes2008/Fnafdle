@@ -662,10 +662,11 @@ window.CARDS_DB = {
     effect: 'search_animatronic'
   },
   purple_guy: {
-    id: 'purple_guy', name: 'Purple Guy', type: 'supporter', class: 'neutral',
+    id: 'purple_guy', name: 'Purple Guy', type: 'tool', class: 'neutral',
     img: 'human/afton.png',
-    desc: 'Equip on Springbonnie: enables transformation into Springtrap and free summoning of Phantoms. While active, discards 1 random card from the opponent\'s hand.',
-    effect: 'equip_william_on_springbonnie'
+    desc: 'Equip on Springbonnie only: enables transformation into Springtrap and free summoning of Phantoms. While active, discards 1 random card from the opponent\'s hand.',
+    passive: 'william',
+    toolTarget: ['springbonnie']
   },
   william_afton: {
     id: 'william_afton', name: 'William Afton', type: 'supporter', class: 'neutral',
@@ -698,10 +699,11 @@ window.CARDS_DB = {
     effect: 'defense_guard'
   },
   fragmento_remnant: {
-    id: 'fragmento_remnant', name: 'Remnant Fragment', type: 'supporter', class: 'neutral',
+    id: 'fragmento_remnant', name: 'Remnant Fragment', type: 'tool', class: 'neutral',
     img: null,
-    desc: 'Links to Springtrap, Circus Baby, Funtime Freddy or Marionette. When that animatronic is KO, it transforms into the corresponding Scrap (if available in hand or deck).',
-    effect: 'scrap_target'
+    desc: 'Equip on Springtrap, Circus Baby, Funtime Freddy or Marionette only. When that animatronic is KO, it transforms into the corresponding Scrap (if available in hand or deck).',
+    passive: 'scrap',
+    toolTarget: ['springtrap', 'baby', 'funtime_freddy', 'puppet']
   },
 
   /* ─── CLASS CARDS ───────────────────────────────── */
