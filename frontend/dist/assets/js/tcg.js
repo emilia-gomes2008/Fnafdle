@@ -1679,7 +1679,7 @@ function consumeEnergy(attackerSlot,cost,pidx) {
   const actual=Math.min(attackerSlot.elec,cost);
   attackerSlot.elec-=actual;
   const p=G.players[pidx];
-  for(let i=0;i<actual;i++) p.discard.push({id:'energy_spent',name:'Energia',type:'energy',energyType:'generic',img:GENERIC});
+  for(let i=0;i<actual;i++) p.discard.push({id:'energy_spent',name:'Energy',type:'energy',energyType:'generic',img:GENERIC});
   checkAwake(attackerSlot);
 }
 
