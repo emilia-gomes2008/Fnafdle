@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-MY3EVSV9FB"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag("js", new Date());
+    gtag("config", "G-MY3EVSV9FB");
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FNAFdle Reborn - FNAF TCG</title>
+  <link rel="icon" type="icon/png" href="../assets/images/default.png">
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Oswald:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/global.css" />
+  <link rel="stylesheet" href="../assets/css/tcg.css?v=10" />
+  <style>#lang-switcher{display:none!important}</style>
+</head>
+<body>
+
+  <div class="fnaf-header">
+    <div class="fnaf-title">
+      <img src="../assets/images/title/fnafdlereborn.png" alt="Fnafdle" />
+    </div>
+    <div class="fnaf-subtitle">FNAF TCG</div>
+  </div>
+
+  <div id="tcg-root">
+
+    <!-- LOBBY -->
+    <div id="screen-lobby" class="tcg-screen">
+      <div class="tcg-lobby-wrap">
+        <h2 class="tcg-title">FNAF TCG</h2>
+        <p class="tcg-sub" data-i18n="tcg.lobby.subtitle">Card Game · Pass &amp; Play · 2 players · 4 KOs to win · 1 Tool per animatronic</p>
+
+        <div class="lobby-tabs">
+          <button class="lobby-tab active" onclick="switchTab('play')" id="tab-play" data-i18n="tcg.tab.play">Play</button>
+          <button class="lobby-tab" onclick="switchTab('online')" id="tab-online" data-i18n="tcg.tab.online">Online</button>
+          <button class="lobby-tab" onclick="switchTab('deck')" id="tab-deck" data-i18n="tcg.tab.deck">Deck Builder</button>
+          <button class="lobby-tab" onclick="switchTab('rules')" id="tab-rules" data-i18n="tcg.tab.rules">Rules</button>
+        </div>
+
+        <div id="tab-content-play" class="tab-content">
+          <div class="player-setup">
+            <div class="player-setup-block">
+              <div class="setup-label" data-i18n="tcg.lobby.player1">Player 1</div>
+              <input id="p1-name" class="tcg-input" type="text" data-i18n-placeholder="tcg.lobby.namePlaceholder" placeholder="Name" value="Player 1" maxlength="20" />
+              <div class="setup-label" style="margin-top:10px" data-i18n="tcg.lobby.deck">Deck</div>
+              <select id="p1-deck" class="tcg-select"></select>
+              <div id="p1-class-info" class="setup-class-info"></div>
+            </div>
+            <div class="vs-divider">VS</div>
+            <div class="player-setup-block">
+              <div class="setup-label" data-i18n="tcg.lobby.player2">Player 2</div>
+              <input id="p2-name" class="tcg-input" type="text" data-i18n-placeholder="tcg.lobby.namePlaceholder" placeholder="Name" value="Player 2" maxlength="20" />
+              <div class="setup-label" style="margin-top:10px" data-i18n="tcg.lobby.deck">Deck</div>
+              <select id="p2-deck" class="tcg-select"></select>
+              <div id="p2-class-info" class="setup-class-info"></div>
+            </div>
+          </div>
+          <button class="tcg-btn primary" onclick="startGame()" style="margin-top:20px;width:100%;max-width:300px" data-i18n="tcg.lobby.startGame">Start Game</button>
+        </div>
+
+        <div id="tab-content-online" class="tab-content" style="display:none">
+          <p class="tcg-sub" style="margin-bottom:8px" data-i18n="tcg.lobby.onlineDesc">Play with a friend online via room code. Works across two separate windows/devices.</p>
+        </div>
+
+        <div id="tab-content-deck" class="tab-content" style="display:none">
+          <div class="deck-builder-wrap">
+            <div class="deck-builder-left">
+              <div class="setup-label" data-i18n="tcg.db.deckName">Deck Name</div>
+              <input id="db-name" class="tcg-input" type="text" placeholder="My Deck" maxlength="30" style="width:100%;max-width:none" />
+              <div class="setup-label" style="margin-top:8px" data-i18n="tcg.db.generator">Generator</div>
+              <select id="db-generator" class="tcg-select" style="width:100%;max-width:none;margin-bottom:8px">
+                <option value="remnant">Generator ⚡ - 30 Generic Energies</option>
+              </select>
+              <div style="font-size:.68rem;color:var(--text-muted);margin-bottom:8px" data-i18n="tcg.db.generatorDesc">The Generator produces 1 Energy per turn, accumulating if unused. Energy cards in the deck (○●◆) are for evolving and summoning Phantoms.</div>
+              <div class="setup-label" data-i18n="tcg.db.filter">Filter</div>
+              <div class="class-filter-row">
+                <button class="class-filter-btn active" data-class="all" onclick="filterCards('all',this)" data-i18n="tcg.db.filterAll">All</button>
+                <button class="class-filter-btn" data-class="endo" onclick="filterCards('endo',this)" data-i18n="tcg.db.filterEndo">Endos</button>
+                <button class="class-filter-btn" data-class="classic" onclick="filterCards('classic',this)">Classic</button>
+                <button class="class-filter-btn" data-class="toy" onclick="filterCards('toy',this)">Toy</button>
+                <button class="class-filter-btn" data-class="withered" onclick="filterCards('withered',this)">Withered</button>
+                <button class="class-filter-btn" data-class="phantom" onclick="filterCards('phantom',this)">Phantom</button>
+                <button class="class-filter-btn" data-class="nightmare" onclick="filterCards('nightmare',this)">Nightmare</button>
+                <button class="class-filter-btn" data-class="jacko" onclick="filterCards('jacko',this)">Jack-O</button>
+                <button class="class-filter-btn" data-class="shadow" onclick="filterCards('shadow',this)">Shadow</button>
+                <button class="class-filter-btn" data-class="scrap" onclick="filterCards('scrap',this)">Scrap</button>
+                <button class="class-filter-btn" data-class="funtime" onclick="filterCards('funtime',this)">Funtime</button>
+                <button class="class-filter-btn" data-class="item" onclick="filterCards('item',this)">Items</button>
+                <button class="class-filter-btn" data-class="tool" onclick="filterCards('tool',this)">Tools</button>
+                <button class="class-filter-btn" data-class="supporter" onclick="filterCards('supporter',this)" data-i18n="tcg.db.filterSupporter">Supporters</button>
+                <button class="class-filter-btn" data-class="energy" onclick="filterCards('energy',this)" data-i18n="tcg.db.filterEnergy">Energies</button>
+                <button class="class-filter-btn" data-class="class" onclick="filterCards('class',this)" style="border-color:var(--gold);color:var(--gold)" data-i18n="tcg.db.filterClass">★ Class</button>
+              </div>
+              <div id="db-card-pool" class="db-card-pool"></div>
+            </div>
+            <div class="deck-builder-right">
+              <div class="db-deck-header">
+                <span id="db-count">0/30</span>
+                <div class="db-deck-actions">
+                  <button class="tcg-btn small" onclick="saveDeck()" data-i18n="tcg.db.save">Save</button>
+                  <button class="tcg-btn small" onclick="clearDeck()" data-i18n="tcg.db.clear">Clear</button>
+                  <button class="tcg-btn small" onclick="exportCurrentDeck()" title="Export deck code">↑ Export</button>
+                  <button class="tcg-btn small" onclick="importDeck()" title="Import deck from code">↓ Import</button>
+                </div>
+              </div>
+              <div id="db-deck-list" class="db-deck-list"></div>
+              <div class="setup-label" style="margin-top:10px" data-i18n="tcg.db.saved">Saved</div>
+              <div id="db-saved-decks" class="db-saved-decks"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="tab-content-rules" class="tab-content" style="display:none">
+          <div class="rules-content">
+            <h3>Summary</h3>
+            <p>Main Deck: 30 cards · Generator: 30 Energies ⚡ · Starting hand: 5 cards (needs 1 Endo) · Active Zone: 4 Animatronics · First to 4 KOs wins.</p>
+
+            <h3>Generator Energy ⚡</h3>
+            <p>Each turn the Generator gives 1 Energy to your <strong>Pool</strong>. Energies accumulate if unused (turn 1 → 1 available, turn 2 → 2 if unspent, etc.). Attach energy to an animatronic by clicking the Pool then the slot. Energy spent in attacks goes to the <strong>Blob Pile</strong>. If an animatronic reaches 0 energy after attacking → returns to Standby.</p>
+
+            <h3>Deck Energy Cards</h3>
+            <p>○ Remnant, ● Agony and ◆ Phantom Agony are main deck cards. <strong>They are not played directly</strong> - they are consumed automatically when evolving or summoning Phantoms:</p>
+            <ul>
+              <li><span style="color:#7ad">○ Remnant</span> - required to evolve Classic, Toy and Withered animatronics</li>
+              <li><span style="color:#d77">● Agony</span> - required to evolve Nightmare, Jack-O, Shadow, Fredbear and Spring Bonnie</li>
+              <li><span style="color:#a7d">◆ Phantom Agony</span> - required to summon Phantoms (1 per summon)</li>
+            </ul>
+
+            <h3>Endos</h3>
+            <p>Played for free from hand to the Active Zone (max 4 slots). Limit of 6 copies per deck. Available Endos:</p>
+            <ul>
+              <li><strong>Endo-01</strong> - evolves into Classic and Withered animatronics (uses ○ Remnant)</li>
+              <li><strong>Endo-02</strong> - evolves into Toy animatronics (uses ○ Remnant)</li>
+              <li><strong>Nightmare Endo</strong> - evolves into Nightmare and Jack-O (uses ● Agony)</li>
+              <li><strong>Springlock Endo</strong> - evolves into Spring Bonnie or Fredbear (uses ● Agony)</li>
+            </ul>
+
+            <h3>Evolution</h3>
+            <p>The Endo must have been on the field ≥ 1 turn (cannot evolve the turn it was played). To evolve, you need in hand: the <strong>Shell</strong> + 1 card of the <strong>correct Energy type</strong>. Play the Shell → click the compatible Endo → the Energy card is consumed automatically to the Blob Pile.</p>
+
+            <h3>Standby vs Awake</h3>
+            <p>An animatronic wakes when attached energy ⚡ ≥ its Wake Threshold (shown on the slot). Animatronics in Standby cannot attack. If it drops to 0 energy after attacking → returns to Standby.</p>
+
+            <h3>Tools</h3>
+            <p>Each animatronic can have <strong>at most 1 tool</strong> equipped. Tools are permanent and go to the Blob Pile when the animatronic is defeated.</p>
+
+            <h3>Phantoms</h3>
+            <p>Summoned by playing a Phantom Shell from hand - consumes 1 ◆ Phantom Agony card from hand automatically (no Endo needed). If Purple Guy is equipped on Spring Bonnie, summoning is <strong>free</strong>.</p>
+
+            <h3>Spring Bonnie → Springtrap</h3>
+            <p>Equip Purple Guy on Spring Bonnie. When Spring Bonnie dies (including by gambling failure), the opponent gains 1 KO but you can search your deck for Springtrap and summon it with remaining energies. Springtrap can attack the same turn.</p>
+
+            <h3>Blob Pile</h3>
+            <p>Pile of used/discarded cards. Contains ⚡ energy spent in attacks and Energy cards (○●◆) consumed in evolutions. Some cards interact with the Blob Pile - click "Blob" to view it.</p>
+
+            <h3>End of Turn</h3>
+            <p>Automatic when all Awake animatronics have attacked. Or pass manually with "End Turn".</p>
+
+            <h3>Mulligan</h3>
+            <p>If your starting hand has no Endo, it is automatically replaced (2 attempts). From the 2nd attempt on, the opponent draws 1 extra card. After 2 failed attempts, the game finds 1 Endo in the deck, places it in hand, shuffles the rest and deals 4 more cards.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DICE PHASE -->
+    <div id="screen-dice" class="tcg-screen" style="display:none">
+      <div class="mulligan-wrap" id="dice-wrap">
+        <!-- rendered dynamically by renderDiceScreen() -->
+      </div>
+    </div>
+
+    <!-- MULLIGAN / SETUP -->
+    <div id="screen-mulligan" class="tcg-screen" style="display:none">
+      <div class="mulligan-wrap">
+        <h2 class="tcg-title" id="mulligan-title">Starting Hand</h2>
+        <p class="tcg-sub" id="mulligan-sub"></p>
+        <div id="mulligan-hand" class="mulligan-hand"></div>
+        <div id="mulligan-buttons" class="mulligan-buttons"></div>
+      </div>
+    </div>
+
+    <!-- GAME -->
+    <div id="screen-game" class="tcg-screen" style="display:none">
+      <div id="turn-banner" class="turn-banner"></div>
+
+      <div class="game-top-bar">
+        <button class="tcg-btn small" id="undo-btn" onclick="undoAction()" style="display:none" data-i18n="tcg.game.undo">↩ Undo</button>
+        <button class="tcg-btn small danger" onclick="confirmConcede()" data-i18n="tcg.game.concede">Concede</button>
+        <span id="ko-score" class="ko-score-inline"></span>
+        <button class="tcg-btn primary" id="end-turn-btn" onclick="endTurn()" data-i18n="tcg.game.endTurn">End Turn →</button>
+      </div>
+
+      <div class="game-layout">
+        <!-- Enemy -->
+        <div class="field-zone" id="zone-enemy">
+          <div class="zone-header">
+            <span id="enemy-label"></span>
+            <span id="enemy-stats" class="zone-stats"></span>
+          </div>
+          <div class="zone-body">
+            <div id="ko-badge-enemy" class="ko-badge-zone"></div>
+            <div id="class-zone-enemy" class="class-zone"></div>
+            <div class="field-party" id="party-enemy"></div>
+          </div>
+          <div class="zone-footer" id="enemy-deck-info"></div>
+        </div>
+
+        <!-- Center -->
+        <div class="game-center">
+          <div class="gen-area">
+            <div class="gen-label" data-i18n="tcg.game.generatorsLabel">Generators</div>
+            <div id="gen-active" class="gen-row"></div>
+            <div id="gen-enemy" class="gen-row"></div>
+          </div>
+          <div id="pending-hint" class="pending-hint" style="display:none"></div>
+          <div id="target-counter" class="target-counter" style="display:none"></div>
+          <button class="tcg-btn small" id="cancel-pending-btn" onclick="cancelPending()" style="display:none">✕ Cancelar</button>
+          <div id="class-card-info" style="display:none;font-size:1rem;color:var(--text);margin-top:8px;padding:10px 12px;background:var(--bg-card);border:1px solid var(--gold);border-radius:8px;width:100%;box-sizing:border-box;line-height:1.6;position:relative;flex:1;min-height:60px;max-height:160px;overflow-y:auto"></div>
+        </div>
+
+        <!-- Active player -->
+        <div class="field-zone" id="zone-active">
+          <div class="zone-body">
+            <div class="field-party" id="party-active"></div>
+            <div id="class-zone-active" class="class-zone"></div>
+            <div id="ko-badge-active" class="ko-badge-zone"></div>
+          </div>
+          <div class="zone-header" style="flex-direction:row-reverse">
+            <span id="active-label"></span>
+            <span id="active-stats" class="zone-stats"></span>
+          </div>
+          <!-- Energy pool -->
+          <div class="energy-pool-area" id="energy-pool-area"></div>
+          <div class="zone-footer" id="active-deck-info"></div>
+        </div>
+      </div>
+
+      <!-- Hand -->
+      <div class="hand-area">
+        <div class="hand-label" id="hand-label">Hand (<span id="hand-count">0</span>) - click a card to see details</div>
+        <div id="hand-cards" class="hand-cards"></div>
+      </div>
+
+      <div id="game-log" class="game-log"></div>
+    </div>
+
+    <!-- RESULT -->
+    <div id="screen-result" class="tcg-screen" style="display:none">
+      <div class="tcg-result-wrap">
+        <h2 class="tcg-title" id="result-title"></h2>
+        <div id="result-details" class="result-details"></div>
+        <div class="result-btns">
+          <button class="tcg-btn primary" onclick="goLobby()" data-i18n="tcg.result.lobby">Lobby</button>
+          <button class="tcg-btn" onclick="location.href='../index.html'" data-i18n="tcg.result.modes">← Modes</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tcg-root -->
+
+  <!-- Card info panel (overlay) -->
+  <div id="card-info-panel" class="card-info-panel" style="display:none">
+    <button class="info-close-btn" onclick="closeCardInfo()">✕</button>
+    <div class="info-scroll">
+      <div id="info-actions" class="info-actions"></div>
+    </div>
+  </div>
+  <div id="card-info-overlay" onclick="closeCardInfo()" style="display:none;position:fixed;inset:0;z-index:99"></div>
+
+  <!-- Deck Search Panel -->
+  <div id="search-panel" class="search-panel" style="display:none">
+    <div class="sp-header">
+      <span id="sp-title" class="sp-title"></span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span id="sp-sel-info" class="sp-sel-info"></span>
+        <button style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1rem" title="Cancel (item not used)" onclick="closeSearch()">✕</button>
+      </div>
+    </div>
+    <div style="display:flex;flex:1;overflow:hidden;min-height:0">
+      <div id="sp-cards" class="sp-cards" style="flex:0 0 auto;width:55%"></div>
+      <div id="sp-preview" style="flex:1;padding:8px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;border-left:1px solid var(--border);min-width:0"></div>
+    </div>
+    <button id="sp-confirm" class="tcg-btn primary" style="margin:8px;align-self:center" onclick="confirmSearch()" data-i18n="tcg.db.confirm">Confirm</button>
+  </div>
+  <div id="search-bg" style="display:none;position:fixed;inset:0;z-index:199;background:rgba(0,0,0,.75)"></div>
+
+  <!-- Blob Pile Panel -->
+  <div id="blob-panel" class="search-panel" style="display:none">
+    <div class="sp-header">
+      <span id="bp-title" class="sp-title"></span>
+      <button style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1rem" onclick="closeBlobPile()">✕</button>
+    </div>
+    <div id="bp-cards" class="sp-cards"></div>
+  </div>
+  <div id="blob-bg" onclick="closeBlobPile()" style="display:none;position:fixed;inset:0;z-index:199;background:rgba(0,0,0,.75)"></div>
+
+  <div id="card-hover-preview"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/translations.js"></script>
+  <script src="../assets/js/tcg-cards.js?v=15"></script>
+  <script src="../assets/js/tcg-mp.js?v=16"></script>
+  <script src="../assets/js/tcg.js?v=55"></script>
+</body>
+</html>
