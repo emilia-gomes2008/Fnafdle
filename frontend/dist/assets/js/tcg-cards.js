@@ -767,7 +767,7 @@ window.CARDS_DB = {
     id: 'class_scrap', name: 'Remnants', type: 'class', class: 'scrap',
     img: null,
     effectId: 'class_scrap_revive', oncePer: 'game',
-    effectDesc: 'Revive 1 Scrap from the Blob Pile with full HP in an empty slot.',
+    effectDesc: 'Revive 1 random Scrap from the Blob Pile with full HP in an empty slot.',
     desc: 'What was destroyed can be rebuilt. The Scraps always come back.'
   },
 
