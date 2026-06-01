@@ -1292,9 +1292,14 @@ function launchItemSearch(handIdx,card,pidx) {
     if(handChoices.length<2){addLog(T('tcg.log.need2Discard'));return;}
     startDeckSearch(T('tcg.search.dataEscape'),handChoices,2,pidx,(sel)=>{
       if(sel.length<2){addLog(T('tcg.log.fugaCancelled'));return;}
-      sel.forEach(c=>{const i=p.hand.indexOf(c);if(i>=0)p.hand.splice(i,1);p.discard.push(c);});
-      if(!p.deck.length){addLog(T('tcg.log.deckEmpty'));consume();return;}
+      // Only discard hand cards and consume item AFTER deck search is confirmed
+      if(!p.deck.length){
+        sel.forEach(c=>{const i=p.hand.indexOf(c);if(i>=0)p.hand.splice(i,1);p.discard.push(c);});
+        addLog(T('tcg.log.deckEmpty'));consume();return;
+      }
       startDeckSearch(T('tcg.search.dataEscape2'),[...p.deck],1,pidx,(sel2)=>{
+        // Now commit the hand discard
+        sel.forEach(c=>{const i=p.hand.indexOf(c);if(i>=0)p.hand.splice(i,1);p.discard.push(c);});
         sel2.forEach(c=>{const i=p.deck.indexOf(c);if(i>=0)p.deck.splice(i,1);p.hand.push(c);});
         p.deck=shuffle(p.deck);
         addLog(T('tcg.log.fugaAdded',{cards:sel2.map(c=>c.name).join(', ')||'nothing'}),'good');
@@ -1804,9 +1809,13 @@ function resolveGamble(base,slot,atkIdx,isRepeat) {
   } else {
     addLog(T('tcg.log.gambleFail'),'ko');
     att.lastGambleFailed=true;
-    if(slot.card.id==='shadow_freddy'&&!slot.usedGambleRepeat){
-      slot.canRepeatGamble=true;
-      G.pendingTarget={action:'gambleRepeat',slotIdx:base.attackerSlotIdx,pidx:base.attackerPidx,atk:base.atk};
+    // Shadow Freddy passive: if Shadow Freddy is alive in the party and hasn't used its repeat yet,
+    // it can repeat ANY gamble that just failed (not only its own).
+    const sfSlotIdx=G.players[base.attackerPidx].party.findIndex(s=>s&&s.card.id==='shadow_freddy'&&!s.usedGambleRepeat);
+    if(sfSlotIdx!==-1){
+      const sfSlot=G.players[base.attackerPidx].party[sfSlotIdx];
+      sfSlot.canRepeatGamble=true;
+      G.pendingTarget={action:'gambleRepeat',slotIdx:base.attackerSlotIdx,pidx:base.attackerPidx,atk:base.atk,sfSlotIdx};
       renderGame(); return;
     }
     if(atk.failEffect==='springlock_failure'){
@@ -2039,9 +2048,12 @@ function useAbility(slotIdx, abilityId) {
 }
 
 function useRepeatGamble(slotIdx){
+  // Find Shadow Freddy in the party - it's the one granting the repeat
+  const sfSlotIdx=G.players[G.activePlayer].party.findIndex(s=>s&&s.card.id==='shadow_freddy'&&s.canRepeatGamble&&!s.usedGambleRepeat);
+  const sfSlot=sfSlotIdx!==-1?G.players[G.activePlayer].party[sfSlotIdx]:null;
   const att=G.players[G.activePlayer].party[slotIdx];
-  if(!att||!att.canRepeatGamble||att.usedGambleRepeat){addLog(T('tcg.log.noRepeatGamble'));return;}
-  att.usedGambleRepeat=true; att.canRepeatGamble=false;
+  if(!att||!sfSlot){addLog(T('tcg.log.noRepeatGamble'));return;}
+  sfSlot.usedGambleRepeat=true; sfSlot.canRepeatGamble=false;
   const atk=att.card.attacks.find(a=>a.type==='gamble'); if(!atk)return;
   addLog(T('tcg.log.shadowFreddy'),'info');
   resolveGamble({attackerPidx:G.activePlayer,attackerSlotIdx:slotIdx,atk},att,0,true);
@@ -2052,13 +2064,16 @@ function confirmGambleRepeat(repeat){
   if(!pt||pt.action!=='gambleRepeat')return;
   const att=G.players[pt.pidx].party[pt.slotIdx];
   if(!att)return;
+  // Shadow Freddy is the one spending its ability — mark it, not the attacker
+  const sfSlotIdx=pt.sfSlotIdx!=null?pt.sfSlotIdx:pt.slotIdx;
+  const sfSlot=G.players[pt.pidx].party[sfSlotIdx];
   G.pendingTarget=null;
   if(repeat){
-    att.usedGambleRepeat=true; att.canRepeatGamble=false;
+    if(sfSlot){sfSlot.usedGambleRepeat=true; sfSlot.canRepeatGamble=false;}
     addLog(T('tcg.log.shadowFreddy'),'info');
     resolveGamble({attackerPidx:pt.pidx,attackerSlotIdx:pt.slotIdx,atk:pt.atk},att,0,true);
   } else {
-    att.canRepeatGamble=false;
+    if(sfSlot){sfSlot.canRepeatGamble=false;}
     markAttacked(att);
     renderGame();
   }
