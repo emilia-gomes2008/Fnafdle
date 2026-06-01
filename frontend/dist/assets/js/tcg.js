@@ -1773,7 +1773,7 @@ function finalizeStallAttack(pt) {
     if(pt.atk.effect==='burn1_on_stalled')def.burn=(def.burn||0)+1;
   });
   if (pt.atk.effect === 'draw1') {
-    drawCard(G.activePlayer); 
+    drawCard(pt.attackerPidx, 1); 
     addLog(T('tcg.log.cardDrawn', { n: 1 }));
   }
   addLog(T('tcg.log.stallUsed',{card:att.card.name, move:pt.atk.name}));
