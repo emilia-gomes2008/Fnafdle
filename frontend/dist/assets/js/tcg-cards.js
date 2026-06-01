@@ -408,7 +408,7 @@ window.CARDS_DB = {
     ability: { name: 'Repeat Gambling', desc: 'Once per turn: repeats the last Gambling that failed (does not stack).', id: 'repeat_gamble' }
   },
   rwqfsfasxc: {
-    id: 'rwqfsfasxc', name: 'RXQ (Shadow Bonnie)', type: 'shell', class: 'shadow',
+    id: 'rwqfsfasxc', name: 'RWQFSFASXC', type: 'shell', class: 'shadow',
     hp: 90, wakeThreshold: 1, shadowSummon: true,
     img: 'shadow/rxq.png',
     desc: 'Summon cost: 1 Agony or Phantom Agony from hand (consumed automatically).',
