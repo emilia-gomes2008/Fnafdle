@@ -20,8 +20,8 @@ window.CARDS_DB = {
     attacks: [
       { name: 'New Circuit', cost: 1, type: 'single', damage: 15 },
       {
-        name: 'Facial Sensor', cost: 1, type: 'stall', stallTargets: 1, stallTurns: 1, effect: 'draw1',
-        desc: 'Stall 1 enemy for 1 turn + draw 1 card.'
+        name: 'Facial Sensor', cost: 1, type: 'stall', stallTargets: 1, stallTurns: 1,
+        desc: 'Stall 1 enemy for 1 turn.'
       }
     ]
   },
