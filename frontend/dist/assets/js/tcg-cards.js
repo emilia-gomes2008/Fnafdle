@@ -395,7 +395,7 @@ window.CARDS_DB = {
     ],
     ability: {
       name: 'Plush Trap',
-      desc: 'Once per turn: place a Plush Trap on 1 enemy. The next time that enemy attacks, it takes 30 damage before resolving (one-time trigger).',
+      desc: 'Once per turn: place a Plush Trap on 1 enemy. The next time that enemy attacks with a single target attack, it takes 30 damage before resolving (one-time trigger).',
       id: 'plushtrap_plush_trap'
     }
   },
@@ -594,7 +594,7 @@ window.CARDS_DB = {
     hp: 130, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'rockstar',
     img: 'rockstar/rockstar_freddy.png',
     attacks: [
-      { name: 'Please Deposit 5 Coins', cost: 3, desc:'Discards the top 3 cards of your opponent\'s deck.', type: 'single', damage: 10, effect: 'dicard5' }
+      { name: 'Please Deposit 5 Coins', cost: 4, desc:'Discards the top 5 cards of your opponent\'s deck.', type: 'single', damage: 5, effect: 'discard5' }
     ],
     ability: { name: 'Greedy Draw', desc: 'If one of your party members died the previous turn by damage from an attack, draws 3 cards.', id: 'rockstar_freddy_draw' }
   },
@@ -612,7 +612,7 @@ window.CARDS_DB = {
     hp: 130, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'rockstar',
     img: 'rockstar/rockstar_chica.png',
     attacks: [
-      { name: 'Cupcake Fest', cost: 1, desc:'Heals 30HP from all party members.', type: 'heal', heal: 50, healTargets: 4 },
+      { name: 'Cupcake Fest', cost: 1, desc:'Heals 30HP from all party members.', type: 'heal', healAmount: 30, healTargets: 4 },
       { name: 'Stall Wall', cost: 2, desc:'Stalls 2 of your opponent\'s animatronics.', type: 'stall', stallTargets: 2, stallTurns: 2 },
     ],
   },
@@ -623,7 +623,7 @@ window.CARDS_DB = {
     attacks: [
       { name: 'Captain Hook', cost: 3, type: 'single', damage: 50, targets: 1 },
     ],
-    ability: { name : "Pirate Treasure", desc: "It was friendship all along! Roll a dice, if heads choose between getting a supporter of your choice from your deck or 2 energy from your generator. If tails, a random member of your party takes 40 damage.", id: 'rockstar_foxy_treasure'}
+    ability: { name : "Pirate Treasure", desc: "It was friendship all along! Roll a dice, if heads choose a supporter from your deck and put it in your hand. If tails, a random member of your party takes 40 damage.", id: 'rockstar_foxy_treasure'}
   },
   carnie: {
     id: 'carnie', name: 'Carnie', type: 'shell', class: 'rockstar',
@@ -798,9 +798,9 @@ window.CARDS_DB = {
   fragmento_remnant: {
     id: 'fragmento_remnant', name: 'Remnant Fragment', type: 'tool', class: 'neutral',
     img: 'tcg/tools/remnant.png',
-    desc: 'Equip on Springtrap, Circus Baby, Funtime Freddy or Puppet only. When that animatronic is KO, it transforms into the corresponding Scrap (if available in hand or deck).',
+    desc: 'Equip on Springtrap, Circus Baby, Funtime Freddy, Puppet or Carnie. When that animatronic is KO, it transforms into the corresponding Scrap (if available in hand or deck).',
     passive: 'scrap',
-    toolTarget: ['springtrap', 'baby', 'funtime_freddy', 'puppet']
+    toolTarget: ['springtrap', 'baby', 'funtime_freddy', 'puppet', 'carnie']
   },
     mr_can_do: {
     id: 'mr_can_do', name: 'Mr. Can-Do', type: 'tool', class: 'neutral',
@@ -868,8 +868,8 @@ window.CARDS_DB = {
   happy_frog: {
     id: 'happy_frog', name: 'Happy Frog', type: 'supporter', class: 'neutral',
     img: 'mediocre_melodies/happy_frog.png',
-    desc: 'Look at the top 5 cards of your opponent\'s deck, rearrange them in any order you want, and put them back.',
-    effect: 'rearrange_opponent_deck'
+    desc: 'Discard your hand and draw 6 cards.',
+    effect: 'hand_reset_6'
   },
   mr_hippo: {
     id: 'mr_hippo', name: 'Mr. Hippo', type: 'supporter', class: 'neutral',
@@ -892,7 +892,7 @@ window.CARDS_DB = {
   orville_elephant: {
     id: 'orville_elephant', name: 'Orville Elephant', type: 'supporter', class: 'neutral',
     img: 'mediocre_melodies/orville_elephant.png',
-    desc: 'Choose 1 Item card from your Blob Pile and put it back into your hand.',
+    desc: 'Choose 1 random Item card from your Blob Pile and put it back into your hand.',
     effect: 'recover_item_from_blob'
   },
 

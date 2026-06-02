@@ -172,7 +172,7 @@ function newSlot(card) {
     defense:null, stalledTurns:0, burn:0, trapped:0,
     justPlaced:true, william:false, scrap:false, deathGuardUsed:false,
     canRepeatGamble:false, usedGambleRepeat:false, lastGambleFailed:false,
-    usedAbilityThisTurn:false, extraAttacks:0
+    usedAbilityThisTurn:false, extraAttacks:0, abilityDisabledTurns:0
   };
   if (card.passive === 'hp+40' || card.onEquip) { /* handled on equip */ }
   return s;
@@ -193,6 +193,7 @@ function makePlayer(name, deckList, generatorKey, classCardId) {
     discard:[], genDiscard:[],
     supporterPlayedThisTurn:false,
     blockNextAttack:false,
+    alliedDeathLastOpponentTurn:false,
     itemLocked:0, skipNextDraw:false,
     classCard: CARDS[classCardId]||CARDS['class_classic']||null,
     classCardUsed:false, classCardUsedForever:false,
@@ -977,6 +978,8 @@ function beginTurn() {
   const p=G.players[G.activePlayer];
   p.supporterPlayedThisTurn=false;
   p.classCardUsed=false;
+  // Clear the revenge flag on the opponent (they already had their chance to use it last turn)
+  G.players[1-G.activePlayer].alliedDeathLastOpponentTurn=false;
   G.pendingTarget=null; undoStack=[];
   closeCardInfo();
 
@@ -986,6 +989,8 @@ function beginTurn() {
     slot.attackedThisTurn=false; slot.usedToolThisTurn=false;
     slot.canRepeatGamble=false; slot.usedGambleRepeat=false; slot.lastGambleFailed=false;
     slot.usedAbilityThisTurn=false; slot.extraAttacks=0;
+    slot.costReductionThisTurn=0;
+    if(slot.abilityDisabledTurns>0)slot.abilityDisabledTurns--;
     if(slot.defense){slot.defense.turnsLeft--;if(slot.defense.turnsLeft<=0)slot.defense=null;}
     if(slot.stalledTurns>0)slot.stalledTurns--;
   });
@@ -1342,6 +1347,11 @@ function startEquipTool(handIdx,card) {
 function playSupporter(handIdx,card) {
   const p=G.players[G.activePlayer];
   if(p.supporterPlayedThisTurn){addLog(T('tcg.log.noSupporters'));return;}
+  const consumeSupporter=()=>{
+    const ci=p.hand.indexOf(card);
+    if(ci>=0)p.hand.splice(ci,1);
+    p.discard.push(card);
+  };
   
   if(card.effect==='william_gamble'){
     p.supporterPlayedThisTurn=true;
@@ -1355,7 +1365,7 @@ function playSupporter(handIdx,card) {
       addLog(T('tcg.log.williamFail'),'ko');
     }
     checkWin();
-    p.hand.splice(handIdx,1); p.discard.push(card);
+    consumeSupporter();
     G.pendingTarget=null; renderGame(); return;
   }
   
@@ -1383,18 +1393,18 @@ function playSupporter(handIdx,card) {
     }
     
     checkWin();
-    p.hand.splice(handIdx,1); p.discard.push(card);
+    consumeSupporter();
     G.pendingTarget=null; renderGame(); return;
   }
   
   if(card.effect==='william_search'){
     p.supporterPlayedThisTurn=true;
     const choices=p.deck.filter(c=>c.type==='energy'&&(c.energyType==='remnant'||c.energyType==='agony'));
-    if(!choices.length){addLog(T('tcg.log.aftonNoEnergy'));p.hand.splice(handIdx,1);p.discard.push(card);renderGame();return;}
+    if(!choices.length){addLog(T('tcg.log.aftonNoEnergy'));consumeSupporter();renderGame();return;}
     startDeckSearch(T('tcg.search.aftonSearch'),choices,2,G.activePlayer,(sel)=>{
       sel.forEach(c=>{const i=p.deck.indexOf(c);if(i>=0)p.deck.splice(i,1);p.hand.push(c);addLog(T('tcg.log.aftonFound',{card:c.name}),'good');});
       p.deck=shuffle(p.deck);
-      p.hand.splice(p.hand.indexOf(card),1); p.discard.push(card);
+      consumeSupporter();
       G.pendingTarget=null; renderGame();
     });
     return;
@@ -1402,19 +1412,19 @@ function playSupporter(handIdx,card) {
   if(card.effect==='search_animatronic'){
     p.supporterPlayedThisTurn=true;
     const cards=p.deck.filter(c=>c.type==='endo'||c.type==='shell');
-    if(!cards.length){addLog(T('tcg.log.noAnimatronics'));p.hand.splice(handIdx,1);p.discard.push(card);renderGame();return;}
+    if(!cards.length){addLog(T('tcg.log.noAnimatronics'));consumeSupporter();renderGame();return;}
     startDeckSearch(T('tcg.search.henryEmily'),cards,1,G.activePlayer,(sel)=>{
       sel.forEach(c=>{const i=p.deck.indexOf(c);if(i>=0)p.deck.splice(i,1);p.hand.push(c);});
       p.deck=shuffle(p.deck);
-      p.hand.splice(p.hand.indexOf(card),1);p.discard.push(card);
+      consumeSupporter();
       addLog(T('tcg.log.searchAnimatronic',{cards:sel.map(c=>c.name).join(', ')||'nothing'}),'good');
       renderGame();
     });
     return;
   }
   p.supporterPlayedThisTurn=true;
+  consumeSupporter();
   applyItemEffect(card.effect,G.activePlayer);
-  p.hand.splice(handIdx,1); p.discard.push(card);
   addLog(T('tcg.log.supporterPlayed',{name:p.name, card:card.name}),'good');
   renderGame(); pushGameState();
 }
@@ -1561,7 +1571,7 @@ function clickSlot(pidx, slotIdx) {
     if (pt?.action === 'abilityTarget' && pt.ability === 'plushtrap_plush_trap') {
     if (!isEnemy || !slot) return;
     slot.plushTrap = true;
-    addLog(`Plushtrap: Plush Trap placed on ${slot.card.name}! It will take 20 damage before its next attack.`, 'ko');
+    addLog(`Plushtrap: Plush Trap placed on ${slot.card.name}! It will take 30 damage before its next attack.`, 'ko');
     G.pendingTarget = null; renderGame(); pushGameState(); return;
   }
 
@@ -1653,10 +1663,43 @@ if (pt?.action === 'abilityTarget' && pt.ability === 'jj_switcheroo') {
     G.pendingTarget=null; renderGame(); pushGameState(); return;
   }
 
+  if(pt?.action==='itemEnemyEffect'){
+    if(!isEnemy||!slot)return;
+    const { effect }=pt;
+    if(effect==='disable_ability'){
+      slot.abilityDisabledTurns=Math.max(slot.abilityDisabledTurns,2);
+      addLog(`${slot.card.name} cannot use abilities on its next turn.`,'ko');
+    }
+    if(effect==='pan_stan')return;
+    if(effect==='trash_stall'){
+      if(!consumeStatusShield(slot,'Stall')){
+        slot.stalledTurns=Math.max(slot.stalledTurns,3);
+        addLog(`${slot.card.name} was stalled for 2 turns.`,'ko');
+      }
+    }
+    if(effect==='energy_steal'){
+      if(slot.elec>0){
+        slot.elec--; checkAwake(slot);
+        G.players[G.activePlayer].energyPool++;
+        addLog(`Stole 1 energy from ${slot.card.name}.`,'good');
+      }else addLog(`${slot.card.name} has no energy to steal.`,'info');
+    }
+    if(effect==='remove_enemy_tools'){
+      const count=slot.tools.length;
+      if(count){
+        const opp=G.players[pidx];
+        slot.tools.forEach(t=>opp.discard.push(t));
+        slot.tools=[];
+      }
+      addLog(count?`Removed ${count} tool(s) from ${slot.card.name}.`:'Target has no tools.','info');
+    }
+    G.pendingTarget=null; renderGame(); pushGameState(); return;
+  }
+
   // Class card target selection
   if(pt?.action==='classCardTarget') {
     const eid=pt.ability; const activePidx=pt.pidx;
-    const needsAlly=['class_toy_heal','class_withered_def'].includes(eid);
+    const needsAlly=['class_toy_heal','class_withered_def','class_rockstar_discount'].includes(eid);
     const needsEnemy=['class_jacko_burn','class_shadow_drain','class_phantom_stall'].includes(eid);
     if(needsAlly&&pidx===activePidx&&slot) {
       applyClassCardEffect(activePidx,eid,{slotIdx}); return;
@@ -1689,11 +1732,35 @@ function initiateAttack(slotIdx, atkIdx) {
   if(!slot.awake){addLog(T('tcg.log.standby',{card:slot.card.name}));return;}
   if(slot.attackedThisTurn){addLog(T('tcg.log.alreadyAttacked',{card:slot.card.name}));return;}
   if(slot.stalledTurns>0){addLog(T('tcg.log.stalled',{card:slot.card.name}));return;}
-  if(slot.elec<atk.cost){addLog(T('tcg.log.notEnoughEnergy',{card:slot.card.name, n:atk.cost}));return;}
+  const actualCost=Math.max(0,atk.cost-(slot.costReductionThisTurn||0));
+  if(slot.elec<actualCost){addLog(T('tcg.log.notEnoughEnergy',{card:slot.card.name, n:actualCost}));return;}
   saveUndo();
-  const base={attackerPidx:G.activePlayer,attackerSlotIdx:slotIdx,atk};
+  const base={attackerPidx:G.activePlayer,attackerSlotIdx:slotIdx,atk:{...atk,cost:actualCost}};
 
   if(atk.type==='defense'){resolveDefenseAttack(base);return;}
+  if(atk.type==='search'){
+    consumeEnergy(slot,base.atk.cost,G.activePlayer);
+    if(base.atk.effect==='rockstar_search_top'){
+      const p=G.players[G.activePlayer];
+      const options=p.deck.filter(c=>c.type==='shell'&&c.class==='rockstar');
+      if(!options.length){
+        addLog('No Rockstar shell found in deck.','info');
+        markAttacked(slot); renderGame(); pushGameState(); return;
+      }
+      startDeckSearch('Choose a Rockstar shell to place on top of deck',options,1,G.activePlayer,(sel)=>{
+        const chosen=sel[0];
+        if(chosen){
+          const i=p.deck.indexOf(chosen);
+          if(i>=0)p.deck.splice(i,1);
+          p.deck.push(chosen);
+          addLog(`${chosen.name} was placed on top of deck.`,'good');
+        }
+        markAttacked(slot); renderGame(); pushGameState();
+      });
+      return;
+    }
+    markAttacked(slot); renderGame(); pushGameState(); return;
+  }
   if(atk.type==='gamble'){resolveGamble(base,slot,atkIdx,false);return;}
   if(atk.type==='heal'){
     const allyCount=G.players[G.activePlayer].party.filter(s=>s).length;
@@ -1769,24 +1836,31 @@ function dealDamage(defSlot,raw) {
 function finalizeSingleAttack(pt,defSlot,dPidx,dSlotIdx) {
   const att=G.players[pt.attackerPidx].party[pt.attackerSlotIdx]; if(!att)return;
   if(checkMask(att.card,defSlot)){markAttacked(att);G.pendingTarget=null;renderGame();return;}
+  
+  // Check if attacker has plushTrap on them - if so, take damage before attacking
+  if (att && att.plushTrap) {
+    const trapDmg = 30;
+    att.hp = Math.max(0, att.hp - trapDmg);
+    att.plushTrap = false; // Remove the trap after triggering
+    addLog(`Plush Trap activated! ${att.card.name} took ${trapDmg} damage!`, 'ko');
+    checkKO(pt.attackerPidx, att);
+    
+    // If the attacker was KO'd by the trap, stop the attack
+    if (att.hp <= 0) { 
+      markAttacked(att); G.pendingTarget=null; checkWin(); renderGame(); pushGameState(); return; 
+    }
+  }
+  
   consumeEnergy(att,pt.atk.cost,pt.attackerPidx);
   let dmg=calcDmg(att,pt.atk);
-  if (defSlot && defSlot.plushTrap) {
-  const trapDmg = 30;
-  attSlot.hp = Math.max(0, attSlot.hp - trapDmg); // Aplica o dano ao atacante
-  defSlot.plushTrap = false; // Limpa a armadilha
-  addLog(`Plush Trap activated! \${attSlot.card.name} took \${trapDmg} damage!`, 'ko');
-  checkKO(pt.attackerPidx, attSlot); // Verifica se o atacante foi KO'd
-  
-  // Se o atacante morreu pela armadilha, interrompe o ataque
-  if (attSlot.hp <= 0) { 
-    checkWin(); renderGame(); pushGameState(); return; 
-  }
-}
   if((defSlot.trapped||0)>0){dmg+=20;defSlot.trapped--;addLog(T('tcg.log.trapBaby',{card:defSlot.card.name}),'ko');}
   const dealt=dealDamage(defSlot,dmg);
   addLog(T('tcg.log.damage',{atk:att.card.name, def:defSlot.card.name, n:dealt, move:pt.atk.name}));
   applyAttackEffect(pt.atk.effect,pt.attackerPidx,dPidx,dSlotIdx);
+  if(pt.atk.effect==='remnant_on_kill'&&defSlot.hp<=0){
+    G.players[pt.attackerPidx].energyPool++;
+    addLog(`${att.card.name} gained 1 energy for the KO.`,'good');
+  }
   checkRevenge(dPidx,defSlot,att,pt.attackerPidx);
   markAttacked(att); G.pendingTarget=null;
   checkKO(dPidx,defSlot); checkWin(); renderGame(); pushGameState();
@@ -1837,6 +1911,7 @@ function finalizeStallAttack(pt) {
   targets.forEach(({pidx:dp,slotIdx:di})=>{
     const def=G.players[dp].party[di];if(!def)return;
     if(checkMask(att.card,def))return;
+    if(consumeStatusShield(def,'Stall'))return;
     if(def.tools.some(t=>t.passive==='stall_immune')){addLog(`${def.card.name} is immune to Stall!`,'good');return;}
     def.stalledTurns=Math.max(def.stalledTurns, pt.atk.stallTurns+1); addLog(T('tcg.log.stallApplied',{card:def.card.name, n:pt.atk.stallTurns}));
     if(pt.atk.effect==='burn1_on_stalled')def.burn=(def.burn||0)+1;
@@ -1901,6 +1976,10 @@ function useAbility(slotIdx, abilityId) {
   closeCardInfo();
   const p=G.players[G.activePlayer];
   const slot=p.party[slotIdx]; if(!slot)return;
+  if(slot.abilityDisabledTurns>0){
+    addLog(`${slot.card.name} cannot use abilities this turn.`,'ko');
+    return;
+  }
   slot.usedAbilityThisTurn=true;
 
   if(abilityId==='wfreddy_blob_energy'){
@@ -1968,6 +2047,72 @@ function useAbility(slotIdx, abilityId) {
     G.pendingTarget = { action: 'abilityTarget', ability: 'plushtrap_plush_trap', slotIdx };
     addLog('Plushtrap: Click an enemy to place a Plush Trap!', 'info');
     renderGame(); return;
+  }
+  if(abilityId==='rockstar_freddy_draw'){
+    if(!p.alliedDeathLastOpponentTurn){
+      addLog('Rockstar Freddy: can only draw after an ally was KO\'d on the opponent\'s last turn.','info');
+      slot.usedAbilityThisTurn=false; return;
+    }
+    for(let i=0;i<3;i++)drawCardImmediate(G.activePlayer);
+    addLog('Rockstar Freddy drew 3 cards.','good');
+    renderGame(); pushGameState(); return;
+  }
+  if(abilityId==='rockstar_bonnie_item'){
+    if(!p.alliedDeathLastOpponentTurn){
+      addLog('Rockstar Bonnie: can only search for an item after an ally was KO\'d on the opponent\'s last turn.','info');
+      slot.usedAbilityThisTurn=false; return;
+    }
+    const items=p.deck.filter(c=>c.type==='item');
+    if(!items.length){addLog('No item cards in deck.','info');slot.usedAbilityThisTurn=false;return;}
+    startDeckSearch('Choose an item card',items,1,G.activePlayer,(sel)=>{
+      const chosen=sel[0];
+      if(chosen){
+        const i=p.deck.indexOf(chosen);
+        if(i>=0)p.deck.splice(i,1);
+        p.hand.push(chosen);
+        p.deck=shuffle(p.deck);
+        addLog(`${chosen.name} added to hand.`,'good');
+      }
+      renderGame(); pushGameState();
+    });
+    return;
+  }
+  if(abilityId==='rockstar_foxy_treasure'){
+    if(Math.random()<0.5){
+      const supporters=p.deck.filter(c=>c.type==='supporter');
+      if(supporters.length){
+        startDeckSearch('Choose a supporter',supporters,1,G.activePlayer,(sel)=>{
+          const chosen=sel[0];
+          if(chosen){
+            const i=p.deck.indexOf(chosen);
+            if(i>=0)p.deck.splice(i,1);
+            p.hand.push(chosen);
+            p.deck=shuffle(p.deck);
+            addLog(`Rockstar Foxy found ${chosen.name}.`,'good');
+          }
+          renderGame(); pushGameState();
+        });
+        return;
+      }
+      drawEnergyToPool(G.activePlayer,2);
+      addLog('Rockstar Foxy found 2 energy from Generator.','good');
+    } else {
+      const allies=p.party.filter(Boolean);
+      if(allies.length){
+        const target=allies[Math.floor(Math.random()*allies.length)];
+        target.hp=Math.max(0,target.hp-40);
+        addLog(`Rockstar Foxy bad luck! ${target.card.name} took 40 damage.`,'ko');
+        checkKO(G.activePlayer,target);
+      }
+    }
+    renderGame(); pushGameState(); return;
+  }
+  if(abilityId==='rockstar_lefty_ability'){
+    if(slot.elec<1){addLog('Carnie needs 1 energy for this ability.','info');slot.usedAbilityThisTurn=false;return;}
+    slot.elec--; checkAwake(slot);
+    slot.defense={reduction:15,turnsLeft:1};
+    addLog(`Carnie gained +15 defense for this turn.`,'good');
+    renderGame(); pushGameState(); return;
   }
 
 
@@ -2135,26 +2280,6 @@ function useAbility(slotIdx, abilityId) {
     renderGame(); pushGameState(); return;
   }
 
-// Plushtrap Counterspring: if the defender is awake and has passiveRetaliate,
-if (defSlot && defSlot.awake && defSlot.card.passiveRetaliate && attSlot) {
-  const retDmg = defSlot.card.passiveRetaliate;
-  attSlot.hp = Math.max(0, attSlot.hp - retDmg);
-  addLog(`Plushtrap: Counterspring! ${attSlot.card.name} takes ${retDmg} retaliation damage!`, 'ko');
-  checkKO(attackerPidx, attSlot);
-}
-
-// Plush Trap: if the attacker has a plushTrap pending, it fires before attack
-if (abilityId === 'plushtrap_plush_trap') {
-  if (!isEnemy || !slot) return;
-  slot.plushTrap = true; // Marca que a armadilha foi colocada
-  addLog(`Plushtrap: Trap placed on \${slot.card.name}! On their next attack, it will deal 30 damage.`, 'ko');
-  G.pendingTarget = null; // Limpa o alvo pendente
-  renderGame(); // Atualiza o jogo
-  return;
-}
-
-
-
   // ── Nightmare Freddy: Freddles (10 dmg to all standby enemies) ──
   if(abilityId==='nightmare_freddy_freddles'){
     const ep=1-G.activePlayer;
@@ -2268,11 +2393,37 @@ function applyAttackEffect(effect,aPidx,dPidx,dSlotIdx){
   if(!effect)return;
   if(effect==='item_lock'){G.players[dPidx].itemLocked=1;addLog(T('tcg.log.itemLockEffect'),'ko');}
   const def=G.players[dPidx].party[dSlotIdx];if(!def)return;
-  if(effect.startsWith('burn')){const n=parseInt(effect.replace('burn',''))||1;def.burn=(def.burn||0)+n;addLog(T('tcg.log.burnApplied',{n, card:def.card.name}));}
+  if(effect.startsWith('burn')){
+    if(consumeStatusShield(def,'Burn'))return;
+    const n=parseInt(effect.replace('burn',''))||1;
+    def.burn=(def.burn||0)+n;
+    addLog(T('tcg.log.burnApplied',{n, card:def.card.name}));
+  }
   if(effect==='discard_energy1'&&def.elec>0){def.elec--;checkAwake(def);addLog(T('tcg.log.energyRemoved'));}
   if(effect==='opponent_discard_energy1'&&def.elec>0){def.elec--;checkAwake(def);addLog(T('tcg.log.energyStolen'));}
   if(effect==='draw1')drawCardImmediate(aPidx);
-  if(effect==='stall1_1'){def.stalledTurns++;addLog(T('tcg.log.stallTurn',{card:def.card.name}));}
+  if(effect==='stall1_1'){
+    if(!consumeStatusShield(def,'Stall')){
+      def.stalledTurns++;
+      addLog(T('tcg.log.stallTurn',{card:def.card.name}));
+    }
+  }
+  if(effect==='lefty_rockstar'){
+    if(!consumeStatusShield(def,'Stall')){
+      def.stalledTurns=Math.max(def.stalledTurns,2);
+      addLog(`${def.card.name} was stalled for 1 turn.`,'ko');
+    }
+  }
+  if(effect==='discard5'){
+    const op = G.players[dPidx];
+    const num = Math.min(5, op.deck.length);
+    for(let i=0;i<num;i++){
+      if(op.deck.length > 0){
+        op.discard.push(op.deck.pop());
+      }
+    }
+    addLog(`${G.players[aPidx].name}'s attack milled ${num} cards from opponent's deck!`,'ko');
+  }
 }
 
 function applyItemEffect(effect,pidx){
@@ -2293,6 +2444,59 @@ function applyItemEffect(effect,pidx){
 
   if(effect==='defense_guard'){const s=p.party[0];if(s){s.defense={reduction:15,turnsLeft:2};addLog(`${s.card.name} -15 damage for 2 turns.`,'good');}}
   if(effect==='lantern_stall'){const ep=1-pidx;let any=false;G.players[ep].party.forEach(s=>{if(!s)return;const id=s.card.id;if(id.includes('foxy')||id==='mangle'||id==='p_mangle'){s.stalledTurns=Math.max(s.stalledTurns,2);addLog(`Lantern! ${s.card.name} stalled for 1 turn.`,'ko');any=true;}});if(!any)addLog('No enemy Foxy or Mangle.');}
+  if(effect==='pan_stan'){
+    const targets=op.party.filter(Boolean);
+    if(!targets.length){addLog('No enemy targets for Pan Stan.','info'); return;}
+    const randomTarget=targets[Math.floor(Math.random()*targets.length)];
+    randomTarget.hp=Math.max(0,randomTarget.hp-10);
+    addLog(`Pan Stan hit ${randomTarget.card.name} for 10 damage.`,'ko');
+    checkKO(1-pidx,randomTarget);
+  }
+  if(['disable_ability','trash_stall','energy_steal','remove_enemy_tools'].includes(effect)){
+    G.pendingTarget={action:'itemEnemyEffect',effect,pidx};
+    addLog('Click an enemy target for this item effect.','info');
+    return;
+  }
+  if(effect==='hand_reset_4'){
+    const pCards=[...p.hand], opCards=[...op.hand];
+    p.deck=shuffle([...p.deck,...pCards]); p.hand=[];
+    op.deck=shuffle([...op.deck,...opCards]); op.hand=[];
+    for(let i=0;i<4;i++){drawCardImmediate(pidx);drawCardImmediate(1-pidx);}
+    addLog('Both players shuffled their hands into deck and drew 4 cards.','info');
+  }
+  if(effect==='hand_reset_6'){
+    p.discard.push(...p.hand); p.hand=[];
+    for(let i=0;i<6;i++) drawCardImmediate(pidx);
+    addLog(`${p.name} discarded their hand and drew 6 cards.`,'info');
+  }
+  if(effect==='nedd_gamble'){
+    p.deck=shuffle([...p.deck,...p.hand]); p.hand=[];
+    const drawN=Math.random()<0.5?8:1;
+    for(let i=0;i<drawN;i++)drawCardImmediate(pidx);
+    addLog(`Nedd Bear effect resolved. ${p.name} drew ${drawN} card(s).`,'info');
+  }
+  if(effect==='recover_item_from_blob'){
+    const idx=p.discard.findIndex(c=>c.type==='item');
+    if(idx>=0){
+      const it=p.discard.splice(idx,1)[0];
+      p.hand.push(it);
+      addLog(`${p.name} recovered ${it.name} from Blob.`,'good');
+    }else addLog('No item card in Blob to recover.','info');
+  }
+  if(effect==='rearrange_opponent_deck'){
+    if(!op.deck.length){addLog('Opponent deck is empty.','info'); return;}
+    const peek=Math.min(5,op.deck.length);
+    const top=op.deck.slice(-peek);
+    // Create a modal/dialog for rearranging - store the cards to rearrange
+    G._deckRearrange = {
+      cards: [...top],
+      originalIndices: Array.from({length:peek}, (_,i) => op.deck.length - peek + i),
+      pidx: dPidx
+    };
+    addLog(`Happy Frog revealed the top ${peek} cards of opponent's deck. Rearrange them!`,'info');
+    // Show UI for rearranging - this will be handled in renderGame
+    showDeckRearrangeUI(top);
+  }
 }
 
 /* ── KO & Revenge ────────────────────────────────── */
@@ -2348,12 +2552,23 @@ function checkKO(pidx,slot){
     return;
   }
   const p=G.players[pidx]; const att=G.players[1-pidx];
+  // Flag that this player lost an ally this turn (used by revenge abilities)
+  if(G.activePlayer !== pidx) p.alliedDeathLastOpponentTurn = true;
   att.koPoints++;
   addLog(T('tcg.log.koPlus',{card:slot.card.name, name:att.name, pts:att.koPoints}),'ko');
   if(idx>=0){
     p.discard.push(slot.card); slot.tools.forEach(t=>p.discard.push(t)); p.party[idx]=null;
     if(slot.card.class==='funtime') syncEnnardMoveset(pidx);
   }
+}
+
+function consumeStatusShield(slot,statusName){
+  if(!slot||!slot.tools)return false;
+  const shieldIdx=slot.tools.findIndex(t=>t.effect==='status_shield');
+  if(shieldIdx<0)return false;
+  const shield=slot.tools.splice(shieldIdx,1)[0];
+  addLog(`${shield.name} blocked ${statusName} on ${slot.card.name}!`,'good');
+  return true;
 }
 
 function checkWin(){
@@ -2520,7 +2735,8 @@ function showCardInfo(card,slot,slotIdx,pidx,isHand,handIdx){
       actions.appendChild(lbl);
       card.attacks.forEach((atk,i)=>{
         const btn=document.createElement('button'); btn.className='info-attack-btn';
-        btn.disabled=slot.elec<atk.cost;
+        const actualCost=Math.max(0,atk.cost-(slot.costReductionThisTurn||0));
+        btn.disabled=slot.elec<actualCost;
         let meta='';
         if(atk.type==='single')  meta=`${atk.damage} dmg · single`;
         if(atk.type==='multi')   meta=`${atk.damage} dmg × ${atk.targets===-1?'all':atk.targets}`;
@@ -2537,7 +2753,8 @@ function showCardInfo(card,slot,slotIdx,pidx,isHand,handIdx){
           else if(atk.type==='heal')    atkDesc=`Heals ${atk.healAmount} HP on ${atk.healTargets} ally/allies.`;
           else if(atk.type==='multi'&&atk.targets===-1) atkDesc=`Deals ${atk.damage} damage to all enemies.`;
         }
-        btn.innerHTML=`<div class="iab-name">${atk.name}</div><div class="iab-meta"><span class="iab-cost">${atk.cost}⚡</span> · ${meta}</div>${atkDesc?`<div class="iab-desc" style="font-size:.63rem;color:var(--text-muted);margin-top:2px;line-height:1.3">${atkDesc}</div>`:''}`;
+        const costDisplay = actualCost < atk.cost ? `<span style="text-decoration:line-through;opacity:0.5">${atk.cost}</span><span style="color:#7ad;font-weight:bold">${actualCost}</span>⚡` : `${actualCost}⚡`;
+        btn.innerHTML=`<div class="iab-name">${atk.name}</div><div class="iab-meta"><span class="iab-cost">${costDisplay}</span> · ${meta}</div>${atkDesc?`<div class="iab-desc" style="font-size:.63rem;color:var(--text-muted);margin-top:2px;line-height:1.3">${atkDesc}</div>`:''}`;
         btn.onclick=()=>initiateAttack(slotIdx,i);
         actions.appendChild(btn);
       });
@@ -2548,6 +2765,7 @@ function showCardInfo(card,slot,slotIdx,pidx,isHand,handIdx){
     if(!slot.usedAbilityThisTurn){
       _ablList.forEach(abl=>{
         let abled=true;
+        if(slot.abilityDisabledTurns>0) abled=false;
         if(abl.id==='wfreddy_blob_energy'){abled=G.players[pidx].discard.some(c=>c.type==='energy')&&G.players[pidx].party.some(s=>s&&s.card.class==='withered');}
         if(abl.id==='wbonnie_discard_defend'){abled=G.players[pidx].generator.length>=2;}
         if(abl.id==='wchica_double_attack'){abled=slot.elec>=1&&G.players[pidx].party.some(s=>s&&s.card.class==='withered'&&s.card.id!=='withered_chica');}
@@ -2619,6 +2837,111 @@ function closeCardInfo(){
   _infoContext=null;
 }
 
+function showDeckRearrangeUI(cards) {
+  // Store the current arrangement globally for rearranging
+  G._deckRearrangeCards = [...cards];
+  
+  const container = document.createElement('div');
+  container.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(20,20,30,0.98);border:3px solid #7ad;border-radius:10px;padding:25px;z-index:10000;max-width:700px;max-height:600px;overflow-y:auto;font-family:monospace;';
+  
+  const title = document.createElement('h3');
+  title.textContent = 'Happy Frog - Rearrange Top Cards';
+  title.style.cssText = 'color:#7ad;margin:0 0 15px 0;text-align:center;';
+  container.appendChild(title);
+  
+  const info = document.createElement('p');
+  info.textContent = 'Select two cards to swap them. Top card will be drawn first.';
+  info.style.cssText = 'color:#aaa;font-size:12px;text-align:center;margin:0 0 15px 0;';
+  container.appendChild(info);
+  
+  let selectedIdx = -1;
+  const renderCards = () => {
+    // Clear existing list
+    const oldList = document.getElementById('deck-rearrange-list');
+    if(oldList) oldList.remove();
+    
+    const cardList = document.createElement('div');
+    cardList.id = 'deck-rearrange-list';
+    cardList.style.cssText = 'display:flex;flex-direction:column;gap:8px;margin:15px 0;';
+    
+    G._deckRearrangeCards.forEach((card, idx) => {
+      const cardDiv = document.createElement('div');
+      const isSelected = idx === selectedIdx;
+      cardDiv.style.cssText = `background:${isSelected ? '#7ad22' : '#333'};border:2px solid ${isSelected ? '#7ad' : '#555'};padding:12px;border-radius:5px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:all 0.2s;`;
+      
+      const text = document.createElement('span');
+      text.textContent = `${idx + 1}. ${card.name}`;
+      text.style.cssText = `color:${isSelected ? '#000' : '#ccc'};font-weight:${isSelected ? 'bold' : 'normal'};`;
+      
+      cardDiv.appendChild(text);
+      
+      cardDiv.addEventListener('click', () => {
+        if(selectedIdx === -1) {
+          selectedIdx = idx;
+          renderCards();
+        } else if(selectedIdx === idx) {
+          selectedIdx = -1;
+          renderCards();
+        } else {
+          // Swap
+          const temp = G._deckRearrangeCards[selectedIdx];
+          G._deckRearrangeCards[selectedIdx] = G._deckRearrangeCards[idx];
+          G._deckRearrangeCards[idx] = temp;
+          selectedIdx = -1;
+          renderCards();
+        }
+      });
+      
+      cardDiv.addEventListener('mouseover', () => {
+        if(selectedIdx !== idx) cardDiv.style.borderColor = '#7ad';
+      });
+      
+      cardDiv.addEventListener('mouseout', () => {
+        if(selectedIdx !== idx) cardDiv.style.borderColor = '#555';
+      });
+      
+      cardList.appendChild(cardDiv);
+    });
+    
+    container.appendChild(cardList);
+  };
+  
+  renderCards();
+  
+  const buttonContainer = document.createElement('div');
+  buttonContainer.style.cssText = 'display:flex;gap:10px;margin-top:15px;justify-content:center;flex-wrap:wrap;';
+  
+  const confirmBtn = document.createElement('button');
+  confirmBtn.textContent = '✓ Confirm';
+  confirmBtn.style.cssText = 'background:#7ad;color:#000;border:none;padding:10px 20px;border-radius:5px;font-weight:bold;cursor:pointer;font-size:14px;';
+  confirmBtn.addEventListener('click', () => {
+    const op = G.players[G._deckRearrange.pidx];
+    const peek = G._deckRearrangeCards.length;
+    // Replace the top cards in the deck with the rearranged ones
+    op.deck.splice(op.deck.length - peek, peek, ...G._deckRearrangeCards);
+    addLog(`Happy Frog rearranged the top ${peek} cards of opponent's deck!`, 'good');
+    document.body.removeChild(container);
+    G._deckRearrange = null;
+    G._deckRearrangeCards = null;
+    renderGame();
+    pushGameState();
+  });
+  buttonContainer.appendChild(confirmBtn);
+  
+  const resetBtn = document.createElement('button');
+  resetBtn.textContent = '↺ Reset';
+  resetBtn.style.cssText = 'background:#666;color:#fff;border:none;padding:10px 20px;border-radius:5px;font-weight:bold;cursor:pointer;font-size:14px;';
+  resetBtn.addEventListener('click', () => {
+    G._deckRearrangeCards = [...cards];
+    selectedIdx = -1;
+    renderCards();
+  });
+  buttonContainer.appendChild(resetBtn);
+  
+  container.appendChild(buttonContainer);
+  document.body.appendChild(container);
+}
+
 /* ═══════════════════════════════════════════════════════
    GAME RENDERING
    ═══════════════════════════════════════════════════════ */
@@ -2657,7 +2980,7 @@ function renderGame(){
       hintEl.style.display='';cancelBtn.style.display='none';
       if(tcEl)tcEl.style.display='none';
     } else {
-      const hints={attachEnergy:T('tcg.hint.attachEnergy'),evolve:T('tcg.hint.evolve'),equipTool:T('tcg.hint.equipTool'),itemTarget:T('tcg.hint.itemTarget'),selectSingleTarget:T('tcg.hint.selectSingle'),selectMultiTarget:T('tcg.hint.selectMulti'),selectHealTargets:T('tcg.hint.selectHeal'),selectStallTargets:T('tcg.hint.selectStall'),abilityTarget:T('tcg.hint.ability'),ennardGeneratorBoost:T('tcg.hint.ennard'),classCardTarget:T('tcg.hint.classCard')};
+      const hints={attachEnergy:T('tcg.hint.attachEnergy'),evolve:T('tcg.hint.evolve'),equipTool:T('tcg.hint.equipTool'),itemTarget:T('tcg.hint.itemTarget'),itemEnemyEffect:'Select an enemy target',selectSingleTarget:T('tcg.hint.selectSingle'),selectMultiTarget:T('tcg.hint.selectMulti'),selectHealTargets:T('tcg.hint.selectHeal'),selectStallTargets:T('tcg.hint.selectStall'),abilityTarget:T('tcg.hint.ability'),ennardGeneratorBoost:T('tcg.hint.ennard'),classCardTarget:T('tcg.hint.classCard')};
       if(pt.ability==='baby_trap_target')hints.abilityTarget=T('tcg.hint.babyTrap');
       if(pt.ability==='ballora_steal')hints.abilityTarget=T('tcg.hint.balloraSteal');
       hintEl.textContent=hints[pt.action]||'';hintEl.style.display='';cancelBtn.style.display='';
@@ -2710,7 +3033,7 @@ function renderSlot(slot,pidx,slotIdx,pt){
   if(selMulti)cls+=' selected-target';
   const isEnemyAbility=pt?.action==='abilityTarget'&&['baby_trap_target','ballora_steal','molten_steal','toy_freddy_stall','funtime_foxy_showstopper', 'plushtrap_plush_trap'].includes(pt?.ability);
   const isClassEnemyTarget=pt?.action==='classCardTarget'&&['class_shadow_drain','class_jacko_burn','class_phantom_stall'].includes(pt?.ability);
-  const isClassAllyTarget=pt?.action==='classCardTarget'&&['class_toy_heal','class_withered_def'].includes(pt?.ability);
+  const isClassAllyTarget=pt?.action==='classCardTarget'&&['class_toy_heal','class_withered_def','class_rockstar_discount'].includes(pt?.ability);
   if(isEnemy&&pt&&(['selectSingleTarget','selectMultiTarget','selectStallTargets'].includes(pt.action)||isEnemyAbility||isClassEnemyTarget))cls+=' enemy-target';
   const isEquipToolValid = pt?.action==='equipTool' && (!pt.card.toolTarget || (slot && pt.card.toolTarget.includes(slot.card.id)));
   if(!isEnemy&&pt&&((['selectHealTargets','evolve','attachEnergy','ennardGeneratorBoost','removeBurnTarget'].includes(pt.action))||(pt.action==='equipTool'&&isEquipToolValid)||(pt.action==='abilityTarget'&&!isEnemyAbility)||isClassAllyTarget))cls+=' ally-target';
@@ -2846,7 +3169,7 @@ function useClassCard(pidx) {
   const eid = cc.effectId;
 
   // Effects that need an allied slot target
-  if (['class_toy_heal','class_withered_def'].includes(eid)) {
+  if (['class_toy_heal','class_withered_def','class_rockstar_discount'].includes(eid)) {
     G.pendingTarget = { action:'classCardTarget', ability:eid, pidx };
     addLog(T('tcg.log.classSelectAlly',{card:cc.name}),'info');
     renderGame(); return;
@@ -2970,6 +3293,29 @@ function applyClassCardEffect(pidx, effectId, targetInfo) {
       addLog(T('tcg.log.classRevived',{name:p.name, card:cc.name, revived:toRevive.name}),'info');
       syncEnnardMoveset(pidx);
       break;
+    }
+    case 'class_rockstar_discount': {
+      if(!targetInfo){addLog('Select an ally to receive discount.','info');return;}
+      if(!p.hand.length){addLog('No cards in hand to discard for Rockstar Discount.','info');return;}
+      const slot=G.players[pidx].party[targetInfo.slotIdx];
+      if(!slot){addLog('Invalid ally target.','info');return;}
+      // Let player choose which card to discard
+      startDeckSearch('Choose a card to discard for Discount',p.hand,1,G.activePlayer,(sel)=>{
+        if(sel && sel[0]){
+          const discarded = sel[0];
+          const idx = p.hand.indexOf(discarded);
+          if(idx >= 0) p.hand.splice(idx, 1);
+          p.discard.push(discarded);
+          slot.costReductionThisTurn=Math.max(slot.costReductionThisTurn||0,1);
+          addLog(`${slot.card.name} gets -1 attack cost this turn (${discarded.name} discarded).`,'good');
+          p.classCardUsed = true;
+          if(cc.oncePer==='game') p.classCardUsedForever = true;
+          G.pendingTarget = null;
+          renderGame();
+          pushGameState();
+        }
+      });
+      return;
     }
   }
 
