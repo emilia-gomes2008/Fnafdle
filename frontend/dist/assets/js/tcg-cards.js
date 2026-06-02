@@ -8,7 +8,7 @@ window.CARDS_DB = {
   /* ─── UNIVERSAL ENDOS ───────────────────────────── */
   endo_01: {
     id: 'endo_01', name: 'Endo-01', type: 'endo', class: 'classic',
-    hp: 50, wakeThreshold: 1, maxCopies: 6, img: 'endo/endo01.png',
+    hp: 50, wakeThreshold: 1, maxCopies: 6, img: 'tcg/endo/endo01.png',
     attacks: [
       { name: 'Broken Wire', cost: 1, type: 'single', damage: 15 },
       { name: 'Inner Spring', cost: 2, type: 'defense', defenseTurns: 1, defenseReduction: 15 }
@@ -16,7 +16,7 @@ window.CARDS_DB = {
   },
   endo_02: {
     id: 'endo_02', name: 'Endo-02', type: 'endo', class: 'toy',
-    hp: 50, wakeThreshold: 1, maxCopies: 6, img: 'endo/endo02.png',
+    hp: 50, wakeThreshold: 1, maxCopies: 6, img: 'tcg/endo/endo02.png',
     attacks: [
       { name: 'New Circuit', cost: 1, type: 'single', damage: 15 },
       {
@@ -27,7 +27,7 @@ window.CARDS_DB = {
   },
   spring_endo: {
     id: 'spring_endo', name: 'Springlock Endo', type: 'endo', class: 'phantom',
-    hp: 60, wakeThreshold: 1, maxCopies: 6, img: 'endo/ghetto_endo.png',
+    hp: 60, wakeThreshold: 1, maxCopies: 6, img: 'tcg/endo/springlock.png',
     attacks: [
       { name: 'Tensioned Spring', cost: 1, type: 'single', damage: 10 },
       { name: 'Faulty Mechanism', cost: 2, type: 'stall', stallTargets: 1, stallTurns: 1 }
@@ -35,7 +35,7 @@ window.CARDS_DB = {
   },
   endo_nm: {
     id: 'endo_nm', name: 'Nightmare Endo', type: 'endo', class: 'nightmare',
-    hp: 60, wakeThreshold: 1, maxCopies: 6, img: 'endo/nightmare_endo.png',
+    hp: 60, wakeThreshold: 1, maxCopies: 6, img: 'tcg/endo/nightmare_endo.png',
     attacks: [
       { name: 'Terror Claws', cost: 1, type: 'single', damage: 15 },
       { name: 'Dark Roar', cost: 2, type: 'stall', stallTargets: 1, stallTurns: 1 }
@@ -43,7 +43,7 @@ window.CARDS_DB = {
   },
   yenndo: {
     id: 'yenndo', name: 'Funtime Endo', type: 'endo', class: 'funtime',
-    hp: 60, wakeThreshold: 1, maxCopies: 6, img: 'endo/yenndo.png',
+    hp: 60, wakeThreshold: 1, maxCopies: 6, img: 'tcg/endo/funtime_endo.png',
     attacks: [
       {
         name: 'System Lock', cost: 1, type: 'single', damage: 5, effect: 'item_lock',
@@ -51,6 +51,27 @@ window.CARDS_DB = {
       },
       { name: 'Electronic Block', cost: 1, type: 'single', damage: 10 }
     ]
+  },
+  rockstar: {
+    id: 'rockstar', name: 'Rockstar Endo', type: 'endo', class: 'rockstar',
+    hp: 60, wakeThreshold: 1, maxCopies: 6, img: 'tcg/endo/rockstar_endo.png',
+    attacks: [
+    { 
+      name: 'Tuning', 
+      cost: 1, 
+      desc: 'Search your deck for a "rockstar" class Shell card and reveal it. Shuffle your deck and place that card on top.', 
+      type: 'search', 
+      effect: 'rockstar_search_top' 
+    },
+    { 
+      name: 'Metal Scraping', 
+      cost: 1, 
+      desc: 'Deals 20 damage. If this attack defeats the target, gain 1 Remnant.', 
+      type: 'single', 
+      damage: 20, 
+      effect: 'remnant_on_kill' 
+    }
+  ]
   },
 
   /* ─── CLASSIC SHELLS ─────────────────────────────── */
@@ -146,8 +167,27 @@ window.CARDS_DB = {
       { name: 'Ha Ha Ha!', cost: 2, type: 'stall', stallTargets: 2, stallTurns: 1 }
     ]
   },
+    jj: {
+    id: 'jj', name: 'JJ', type: 'shell', class: 'toy',
+    hp: 80, wakeThreshold: 1,
+    energyType: 'remnant', requiredEndo: 'endo_02',
+    img: 'toy/jj.png',
+    attacks: [
+      {
+        name: 'Balloon Toss',
+        cost: 1, type: 'single', damage: 10,
+        effect: 'opponent_discard_energy1',
+        desc: '10 damage + removes 1 energy from the target.'
+      }
+    ],
+    ability: {
+      name: 'Switcheroo',
+      desc: 'Once per turn: swap JJ\'s bench position with an ally (both keep their HP, energy and status). Costs 0 energy.',
+      id: 'jj_switcheroo'
+    }
+  },
   puppet: {
-    id: 'puppet', name: 'Marionette', type: 'shell', class: 'toy',
+    id: 'puppet', name: 'Puppet', type: 'shell', class: 'toy',
     hp: 100, wakeThreshold: 0, energyType: 'remnant', requiredEndo: 'endo_02',
     img: 'toy/puppet.png',
     attacks: [
@@ -286,7 +326,7 @@ window.CARDS_DB = {
     ]
   },
   p_puppet: {
-    id: 'p_puppet', name: 'Phantom Marionette', type: 'shell', class: 'phantom',
+    id: 'p_puppet', name: 'Phantom Puppet', type: 'shell', class: 'phantom',
     hp: 90, wakeThreshold: 0, energyType: 'phantom_agony', phantomSummon: true,
     img: 'phantom/p_puppet.png',
     attacks: [
@@ -341,6 +381,25 @@ window.CARDS_DB = {
       { name: 'Final Nightmare', cost: 4, type: 'single', damage: 100 }
     ]
   },
+  plushtrap: {
+    id: 'plushtrap', name: 'Plushtrap', type: 'shell', class: 'nightmare',
+    hp: 90, wakeThreshold: 1,
+    energyType: 'agony', requiredEndo: 'endo_nm',
+    img: 'nightmare/creonzadoruin.png',
+    attacks: [
+      {
+        name: 'Spring Snap',
+        cost: 1, type: 'single', damage: 20,
+        desc: 'Deals 20 damage to 1 enemy.'
+      }
+    ],
+    ability: {
+      name: 'Plush Trap',
+      desc: 'Once per turn: place a Plush Trap on 1 enemy. The next time that enemy attacks, it takes 30 damage before resolving (one-time trigger).',
+      id: 'plushtrap_plush_trap'
+    }
+  },
+
   nightmare_bb: {
     id: 'nightmare_bb', name: 'Nightmare BB', type: 'shell', class: 'nightmare',
     hp: 100, wakeThreshold: 1, energyType: 'agony', requiredEndo: 'endo_nm',
@@ -455,6 +514,25 @@ window.CARDS_DB = {
     ],
     ability: { name: 'Showstopper', desc: 'Once per turn: discard 1⚡ from Funtime Foxy to stall 1 enemy for 1 turn.', id: 'funtime_foxy_showstopper' }
   },
+  yenndo_shell: {
+    id: 'yenndo_shell', name: 'Yenndo', type: 'shell', class: 'funtime',
+    hp: 110, wakeThreshold: 2,
+    energyType: 'agony', requiredEndo: 'yenndo',
+    img: 'endo/yenndo.png',
+    attacks: [
+      {
+        name: 'Electronic Surge',
+        cost: 2, type: 'multi', targets: 2, damage: 20,
+        desc: 'Deals 20 damage to up to 2 enemies.'
+      }
+    ],
+    ability: {
+      name: 'System Surge',
+      desc: 'Once per turn: draw 1 card.',
+      id: 'yenndo_system_surge'
+    }
+  },
+
   ennard: {
     id: 'ennard', name: 'Ennard', type: 'shell', class: 'funtime', itemSummonOnly: true, maxCopies: 1,
     hp: 200, wakeThreshold: 3, energyType: 'agony',
@@ -511,141 +589,224 @@ window.CARDS_DB = {
     ],
     ability: { name: 'Gift of Life', desc: 'Heals all allied animatronics by 30 HP.', id: 'lefty_heal' }
   },
+  rockstar_freddy: {
+    id: 'rockstar_freddy', name: 'Rockstar Freddy', type: 'shell', class: 'rockstar',
+    hp: 130, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'rockstar',
+    img: 'rockstar/rockstar_freddy.png',
+    attacks: [
+      { name: 'Please Deposit 5 Coins', cost: 3, desc:'Discards the top 3 cards of your opponent\'s deck.', type: 'single', damage: 10, effect: 'dicard5' }
+    ],
+    ability: { name: 'Greedy Draw', desc: 'If one of your party members died the previous turn by damage from an attack, draws 3 cards.', id: 'rockstar_freddy_draw' }
+  },
+  rockstar_bonnie: {
+    id: 'rockstar_bonnie', name: 'Rockstar Bonnie', type: 'shell', class: 'rockstar',
+    hp: 140, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'rockstar',
+    img: 'rockstar/rockstar_bonnie.png',
+    attacks: [
+      { name: 'Guitar Solo', cost: 2, desc:'Deals 40 damage to 2 of your opponent\'s animatronics.', type: 'multi', damage: 40, targets: 2 },
+    ],
+    ability: { name: 'Lead Guitarist', desc: 'If one of your party members died the previous turn by damage from an attack, search for an item card and put it in your hand.', id: 'rockstar_bonnie_item' }
+  },
+  rockstar_chica: {
+    id: 'rockstar_chica', name: 'Rockstar Chica', type: 'shell', class: 'rockstar',
+    hp: 130, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'rockstar',
+    img: 'rockstar/rockstar_chica.png',
+    attacks: [
+      { name: 'Cupcake Fest', cost: 1, desc:'Heals 30HP from all party members.', type: 'heal', heal: 50, healTargets: 4 },
+      { name: 'Stall Wall', cost: 2, desc:'Stalls 2 of your opponent\'s animatronics.', type: 'stall', stallTargets: 2, stallTurns: 2 },
+    ],
+  },
+  rockstar_foxy: {
+    id: 'rockstar_foxy', name: 'Rockstar Foxy', type: 'shell', class: 'rockstar',
+    hp: 120, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'rockstar',
+    img: 'rockstar/rockstar_foxy.png',
+    attacks: [
+      { name: 'Captain Hook', cost: 3, type: 'single', damage: 50, targets: 1 },
+    ],
+    ability: { name : "Pirate Treasure", desc: "It was friendship all along! Roll a dice, if heads choose between getting a supporter of your choice from your deck or 2 energy from your generator. If tails, a random member of your party takes 40 damage.", id: 'rockstar_foxy_treasure'}
+  },
+  carnie: {
+    id: 'carnie', name: 'Carnie', type: 'shell', class: 'rockstar',
+    hp: 90, wakeThreshold: 1, energyType: 'remnant', requiredEndo: 'rockstar',
+    img: 'rockstar/carnie.png',
+    attacks: [
+      { name: 'Prize Booth Music', cost: 3, desc: 'Deals 20 damage to 2 targets and stalls them for 1 turn.', type: 'multi', damage: 20, targets: 2, effect: 'lefty_rockstar' },
+    ],
+    ability: { name : "Fairground Defense", desc: "Discard 1⚡ to give +15 defense to Carnie for this turn.", id: 'rockstar_lefty_ability'}
+  }, //if the player has the Puppet in hand, one agony and a remnant fragment on Canrie, he can evolve to scrap lefty by hand or by dying
+  
 
   /* ─── ITEMS ──────────────────────────────────────── */
   cupcake: {
     id: 'cupcake', name: 'Cupcake', type: 'item', class: 'neutral',
-    img: 'classic/cupcake.png',
+    img: 'tcg/items/cupcake.png',
     desc: 'Restores 30 HP to 1 allied animatronic.',
     effect: 'heal30'
   },
   mini_cupcake: {
     id: 'mini_cupcake', name: 'Mini Cupcake', type: 'item', class: 'neutral',
-    img: 'classic/cupcake.png',
+    img: 'tcg/items/mini_cupcake.png',
     desc: 'Restores 15 HP to up to 2 allied animatronics.',
     effect: 'heal15x2'
   },
   lantern: {
-    id: 'lantern', name: 'Lantern', type: 'item', class: 'neutral',
-    img: null,
+    id: 'lantern', name: 'Flashlight', type: 'item', class: 'neutral',
+    img: 'tcg/items/flashlight.png',
     desc: 'Stalls all enemy Foxys and Mangles for 1 turn.',
     effect: 'lantern_stall'
   },
   power_out: {
     id: 'power_out', name: 'Power Out', type: 'item', class: 'neutral',
-    img: null,
+    img: 'tcg/items/out.png',
     desc: 'Discard 2 energies from your Pool to search any card in the deck and add it to your hand.',
     effect: 'power_out'
   },
   dee_dee_pearl: {
     id: 'dee_dee_pearl', name: "DeeDee's Pearl", type: 'item', class: 'neutral',
-    img: null,
+    img: 'trophy/pearl_tropy.png',
     desc: 'Choose up to 5 cards (animatronics or energies) from your Blob Pile and return them to your hand.',
     effect: 'dee_dee_pearl'
   },
   power_battery: {
     id: 'power_battery', name: 'Extra Battery', type: 'item', class: 'neutral',
-    img: null,
+    img: 'tcg/items/extra_battery.png',
     desc: 'Draw 2 energies from the Generator to your Pool.',
     effect: 'draw2energy'
   },
   birthday_cake: {
     id: 'birthday_cake', name: 'Birthday Cake', type: 'item', class: 'neutral',
-    img: null,
+    img: 'tcg/items/cake.png',
     desc: 'Draw 2 cards from the main deck.',
     effect: 'draw2'
   },
   security_tape: {
     id: 'security_tape', name: 'Security Tape', type: 'item', class: 'neutral',
-    img: null,
+    img: 'tcg/items/tape.png',
     desc: 'Removes stall from 1 allied animatronic.',
     effect: 'remove_stall'
   },
   antidote: {
     id: 'antidote', name: 'Fazbear Antidote', type: 'item', class: 'neutral',
-    img: null,
+    img: 'tcg/items/antidote.png',
     desc: 'Removes all Burn stacks from 1 allied animatronic.',
     effect: 'remove_burn'
   },
-  fireproof_suit: {
-    id: 'fireproof_suit', name: 'Fireproof Suit', type: 'tool', class: 'neutral',
-    img: null,
-    desc: 'The bearer is immune to Burn. If it already has Burn stacks when equipped, they are removed.',
-    passive: 'burn_immune'
-  },
-  static_dampener: {
-    id: 'static_dampener', name: 'Static Dampener', type: 'tool', class: 'neutral',
-    img: null,
-    desc: 'The bearer is immune to Stall effects.',
-    passive: 'stall_immune'
-  },
   energy_recharge: {
     id: 'energy_recharge', name: 'Energy Recharge', type: 'item', class: 'neutral',
-    img: null,
+    img: 'tcg/items/recharge.png',
     desc: 'Search the Blob Pile and recover up to 2 energies to your Pool.',
     effect: 'blob_recover2', maxCopies: 4
   },
   data_escape: {
     id: 'data_escape', name: 'Data Escape', type: 'item', class: 'neutral',
-    img: null,
+    img: 'tcg/items/data.png',
     desc: 'Discard 2 cards from your hand to search any 1 card from the deck and add it to your hand.',
     effect: 'hand_discard2_search'
   },
   system_corrupt: {
-    id: 'system_corrupt', name: 'Data Corruption', type: 'item', class: 'neutral',
-    img: null,
+    id: 'system_corrupt', name: 'System Corruption', type: 'item', class: 'neutral',
+    img: 'tcg/items/system.png',
     desc: 'Discard up to 2 cards from your deck (your choice).',
     effect: 'deck_discard3_choose'
   },
   ennard_summon: {
-    id: 'ennard_summon', name: 'The Cable Net', type: 'item', class: 'funtime', maxCopies: 1,
-    img: null,
+    id: 'ennard_summon', name: 'The Cable Net', type: 'item', maxCopies: 1,
+    img: 'tcg/items/ennard_cable.png',
     desc: 'Requires Ennard in hand and ≥2 evolved Funtime shells in Party (endos OK in other slots). Sends party Funtimes to Blob, then Ennard inherits unique attacks & abilities from ALL Funtimes in the Blob Pile.',
     effect: 'summon_ennard'
   },
-
+  bucket_bob: {
+    id: 'bucket_bob', name: 'Bucket Bob', type: 'item', class: 'neutral',
+    img: 'trash/bucket_bob.png',
+    desc: 'Choose 1 enemy animatronic. It cannot use Abilities during its next turn.',
+    effect: 'disable_ability'
+  },
+  pan_stan: {
+    id: 'pan_stan', name: 'Pan Stan', type: 'item', class: 'neutral',
+    img: 'trash/pan_stan.png',
+    desc: 'Deals 10 damage to one random animatronic from your opponent.',
+    effect: 'pan_stan'
+  },
+  no_1_crate: {
+    id: 'no_1_crate', name: '#1 Crate', type: 'item', class: 'neutral',
+    img: 'trash/no_1_crate.png',
+    desc: 'Stalls 1 enemy animatronic for 2 turns.',
+    effect: 'trash_stall'
+  },
+  mr_hugs: {
+    id: 'mr_hugs', name: 'Mr. Hugs', type: 'item', class: 'neutral',
+    img: 'trash/mr_hugs.png',
+    desc: 'Discard 1 Energy from the opponent\'s active animatronic and attach it to your Pool.',
+    effect: 'energy_steal'
+  },
+  
   /* ─── TOOLS ──────────────────────────────────────── */
   freddy_mask: {
     id: 'freddy_mask', name: 'Freddy Mask', type: 'tool', class: 'neutral',
-    img: 'classic/freddy.png',
+    img: 'tcg/tools/mask.png',
     desc: 'Immune to attacks and effects from the Toy and Withered factions - except Withered Foxy.',
     passive: 'faction_immunity'
   },
   mendos_endos: {
     id: 'mendos_endos', name: "Mendo's Endos", type: 'tool', class: 'neutral',
-    img: 'endo/mendo.png',
+    img: 'tcg/tools/mendo.png',
     desc: 'On equip: increases the bearer\'s maximum and current HP by 40.',
     passive: 'hp+40', onEquip: true
   },
   hat_mic: {
     id: 'hat_mic', name: 'Hat + Microphone', type: 'tool', class: 'neutral',
-    img: 'classic/freddy.png',
+    img: 'tcg/tools/hat.png',
     desc: '+10 damage on all of the bearer\'s attacks.',
     passive: 'attack+10'
   },
   guitar_axe: {
     id: 'guitar_axe', name: 'Guitar Axe', type: 'tool', class: 'neutral',
-    img: 'classic/bonnie.png',
+    img: 'tcg/tools/guitar.png',
     desc: 'Attacks costing ≥3 energy deal +20 damage.',
     passive: 'heavyattack+20'
   },
   hook: {
     id: 'hook', name: 'Pirate Hook', type: 'tool', class: 'neutral',
-    img: 'classic/foxy.png',
+    img: 'tcg/tools/hook.png',
     desc: '+1 extra turn on any activated defense.',
     passive: 'defense+1turn'
   },
   springlock_device: {
     id: 'springlock_device', name: 'Springlock Device', type: 'tool', class: 'neutral',
-    img: 'springlock/springbonnie.png',
+    img: 'tcg/tools/springlock.png',
     desc: 'When the bearer is KO, deals 30 damage to the animatronic that defeated it.',
     passive: 'revenge30'
   },
+  fireproof_suit: {
+    id: 'fireproof_suit', name: 'Fireproof Suit', type: 'tool', class: 'neutral',
+    img: 'tcg/tools/fire_proof.png',
+    desc: 'The bearer is immune to Burn. If it already has Burn stacks when equipped, they are removed.',
+    passive: 'burn_immune'
+  },
+  static_dampener: {
+    id: 'static_dampener', name: 'Static Dampener', type: 'tool', class: 'neutral',
+    img: 'tcg/tools/static.png',
+    desc: 'The bearer is immune to Stall effects.',
+    passive: 'stall_immune'
+  },
   puppet_box: {
     id: 'puppet_box', name: 'Music Box', type: 'tool', class: 'neutral',
-    img: 'toy/puppet.png',
+    img: 'tcg/tools/box.png',
     desc: 'Once per turn: draw 1 card from the deck.',
     once_per_turn: 'draw1'
+  },
+  fragmento_remnant: {
+    id: 'fragmento_remnant', name: 'Remnant Fragment', type: 'tool', class: 'neutral',
+    img: 'tcg/tools/remnant.png',
+    desc: 'Equip on Springtrap, Circus Baby, Funtime Freddy or Puppet only. When that animatronic is KO, it transforms into the corresponding Scrap (if available in hand or deck).',
+    passive: 'scrap',
+    toolTarget: ['springtrap', 'baby', 'funtime_freddy', 'puppet']
+  },
+    mr_can_do: {
+    id: 'mr_can_do', name: 'Mr. Can-Do', type: 'tool', class: 'neutral',
+    img: 'trash/mr_can-do.png',
+    desc: 'Attach to 1 allied animatronic. It blocks the next negative status effect (Stall or Burn) applied by the opponent, then discard Mr. Can-Do.',
+    effect: 'status_shield'
   },
 
   /* ─── SUPPORTERS ─────────────────────────────────── */
@@ -670,19 +831,25 @@ window.CARDS_DB = {
   },
   william_afton: {
     id: 'william_afton', name: 'William Afton', type: 'supporter', class: 'neutral',
-    img: 'human/afton.png',
+    img: 'tcg/supporters/afton.png',
     desc: 'Gambling - 50%: 20 damage to all enemies; 50%: 20 damage to all allies.',
     effect: 'william_gamble'
   },
+  helpy: {
+    id: 'helpy', name: 'Helpy', type: 'supporter', class: 'neutral',
+    img: 'other/helpy.gif',
+    desc: 'Gambling - 99%: does nothing; 1%: 1B damage to one random enemy.',
+    effect: 'helpy_gamble'
+  },
   william_search: {
     id: 'william_search', name: "Afton's Search", type: 'supporter', class: 'neutral',
-    img: 'human/afton.png',
+    img: 'tcg/supporters/research.png',
     desc: 'Search your deck for up to 2 Energy cards (Remnant or Agony) and add them to your hand.',
     effect: 'william_search'
   },
   mrs_afton: {
     id: 'mrs_afton', name: 'Mrs. Afton', type: 'supporter', class: 'neutral',
-    img: null,
+    img: 'tcg/supporters/mrs_afton.png',
     desc: 'Restores 20 HP to all your animatronics in play.',
     effect: 'heal_all20'
   },
@@ -694,16 +861,39 @@ window.CARDS_DB = {
   },
   night_guard: {
     id: 'night_guard', name: 'Night Guard', type: 'supporter', class: 'neutral',
-    img: null,
+    img: 'tcg/supporters/guard.png',
     desc: 'Your active animatronic reduces 15 damage for the next 2 attacks received.',
     effect: 'defense_guard'
   },
-  fragmento_remnant: {
-    id: 'fragmento_remnant', name: 'Remnant Fragment', type: 'tool', class: 'neutral',
-    img: null,
-    desc: 'Equip on Springtrap, Circus Baby, Funtime Freddy or Marionette only. When that animatronic is KO, it transforms into the corresponding Scrap (if available in hand or deck).',
-    passive: 'scrap',
-    toolTarget: ['springtrap', 'baby', 'funtime_freddy', 'puppet']
+  happy_frog: {
+    id: 'happy_frog', name: 'Happy Frog', type: 'supporter', class: 'neutral',
+    img: 'mediocre_melodies/happy_frog.png',
+    desc: 'Look at the top 5 cards of your opponent\'s deck, rearrange them in any order you want, and put them back.',
+    effect: 'rearrange_opponent_deck'
+  },
+  mr_hippo: {
+    id: 'mr_hippo', name: 'Mr. Hippo', type: 'supporter', class: 'neutral',
+    img: 'mediocre_melodies/mr_hippo.png',
+    desc: 'Both players must shuffle their hands back into their respective decks and draw 4 cards.',
+    effect: 'hand_reset_4'
+  },
+  pigpatch: {
+    id: 'pigpatch', name: 'Pigpatch', type: 'supporter', class: 'neutral',
+    img: 'mediocre_melodies/pigpatch.png',
+    desc: 'Discard all tool cards attached to 1 enemy animatronic.',
+    effect: 'remove_enemy_tools'
+  },
+  nedd_bear: {
+    id: 'nedd_bear', name: 'Nedd Bear', type: 'supporter', class: 'neutral',
+    img: 'mediocre_melodies/nedd_bear.png',
+    desc: 'Shuffle your hand into your deck and Gamble. 50%: Draw 8 cards. 50%: Draw 1 card.',
+    effect: 'nedd_gamble'
+  },
+  orville_elephant: {
+    id: 'orville_elephant', name: 'Orville Elephant', type: 'supporter', class: 'neutral',
+    img: 'mediocre_melodies/orville_elephant.png',
+    desc: 'Choose 1 Item card from your Blob Pile and put it back into your hand.',
+    effect: 'recover_item_from_blob'
   },
 
   /* ─── CLASS CARDS ───────────────────────────────── */
@@ -769,6 +959,13 @@ window.CARDS_DB = {
     effectId: 'class_scrap_revive', oncePer: 'game',
     effectDesc: 'Revive 1 random Scrap from the Blob Pile with full HP in an empty slot.',
     desc: 'What was destroyed can be rebuilt. The Scraps always come back.'
+  },
+  class_rockstar: {
+    id: 'class_rockstar', name: 'Rockstar Discount', type: 'class', class: 'rockstar',
+    img: null,
+    effectId: 'class_rockstar_discount', oncePer: 'turn',
+    effectDesc: 'Discard 1 card from your hand. Choose one of your animatronics to reduce their Attack\'s Energy cost by 1⚡ this turn.',
+    desc: 'The Rockstars know exactly how to turn a good investment into a devastating show.'
   },
 
   /* ─── ENERGY CARDS ───────────────────────────────── */

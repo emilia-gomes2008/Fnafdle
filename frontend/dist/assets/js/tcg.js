@@ -24,7 +24,7 @@ const CARDS = buildCardsFromDB(window.CARDS_DB);
 /* ═══════════════════════════════════════════════════════
    GENERATOR PRESETS
    ═══════════════════════════════════════════════════════ */
-const SCRAP_MAP = {springtrap:'scraptrap', baby:'scrap_baby', funtime_freddy:'molten_freddy', puppet:'lefty', rockstar_lefty:'lefty'};
+const SCRAP_MAP = {springtrap:'scraptrap', baby:'scrap_baby', funtime_freddy:'molten_freddy', puppet:'lefty', carnie:'lefty'};
 
 function makeEnergy(type, n) {
   return Array.from({length:n}, (_,i) => ({id:`gen_${i}`, name:'Energy', type:'energy', energyType:'generic', img:GENERIC}));
@@ -177,7 +177,11 @@ function newSlot(card) {
   if (card.passive === 'hp+40' || card.onEquip) { /* handled on equip */ }
   return s;
 }
-function checkAwake(slot) { if(slot) slot.awake = slot.elec >= slot.card.wakeThreshold; }
+function checkAwake(slot) {
+  if (slot) {
+    slot.awake = slot.elec >= slot.card.wakeThreshold;
+  }
+}
 
 function makePlayer(name, deckList, generatorKey, classCardId) {
   return {
@@ -1338,6 +1342,7 @@ function startEquipTool(handIdx,card) {
 function playSupporter(handIdx,card) {
   const p=G.players[G.activePlayer];
   if(p.supporterPlayedThisTurn){addLog(T('tcg.log.noSupporters'));return;}
+  
   if(card.effect==='william_gamble'){
     p.supporterPlayedThisTurn=true;
     const ap=G.activePlayer, op=1-ap;
@@ -1353,6 +1358,35 @@ function playSupporter(handIdx,card) {
     p.hand.splice(handIdx,1); p.discard.push(card);
     G.pendingTarget=null; renderGame(); return;
   }
+  
+  if(card.effect==='helpy_gamble'){
+    p.supporterPlayedThisTurn=true;
+    const ap=G.activePlayer, op=1-ap;
+    
+    // 1% de hipótese de sucesso (0.01)
+    const success = Math.random() < 0.01;
+    
+    if(success){
+      // Filtra apenas os alvos válidos (que não sejam null) na mesa do oponente
+      const validTargets = G.players[op].party.filter(s => s !== null);
+      
+      if(validTargets.length > 0){
+        // Escolhe um único alvo aleatório da party dele
+        const randomTarget = validTargets[Math.floor(Math.random() * validTargets.length)];
+        
+        const damage = 10000000000; // Altera para 100 se o teu "1B" for 100
+        randomTarget.hp -= damage;
+        checkKO(op, randomTarget);
+      }
+    } else {
+      //
+    }
+    
+    checkWin();
+    p.hand.splice(handIdx,1); p.discard.push(card);
+    G.pendingTarget=null; renderGame(); return;
+  }
+  
   if(card.effect==='william_search'){
     p.supporterPlayedThisTurn=true;
     const choices=p.deck.filter(c=>c.type==='energy'&&(c.energyType==='remnant'||c.energyType==='agony'));
@@ -1523,6 +1557,14 @@ function clickSlot(pidx, slotIdx) {
     addLog(T('tcg.log.wchicaDouble',{card:slot.card.name}),'good');
     G.pendingTarget=null; renderGame(); return;
   }
+
+    if (pt?.action === 'abilityTarget' && pt.ability === 'plushtrap_plush_trap') {
+    if (!isEnemy || !slot) return;
+    slot.plushTrap = true;
+    addLog(`Plushtrap: Plush Trap placed on ${slot.card.name}! It will take 20 damage before its next attack.`, 'ko');
+    G.pendingTarget = null; renderGame(); pushGameState(); return;
+  }
+
   // Ability: Baby - trap target (enemy slot)
   if(pt?.action==='abilityTarget'&&pt.ability==='baby_trap_target'){
     if(!isEnemy||!slot)return;
@@ -1530,6 +1572,21 @@ function clickSlot(pidx, slotIdx) {
     addLog(T('tcg.log.babyTrapped',{card:slot.card.name}),'ko');
     G.pendingTarget=null; renderGame(); return;
   }
+  // Ability: JJ - Switcheroo (swap bench position AND negative status with ally)
+if (pt?.action === 'abilityTarget' && pt.ability === 'jj_switcheroo') {
+  if (!isOwn || !slot || slotIdx === pt.slotIdx) return;
+  const p = G.players[pidx];
+  const jjSlot = p.party[pt.slotIdx];   // JJ (initiator)
+  const allySlot = p.party[slotIdx];    // chosen ally
+  // Swap bench positions
+  p.party[pt.slotIdx] = allySlot;
+  p.party[slotIdx] = jjSlot;
+  // JJ trades her negative status conditions (stall + burn) with the ally
+  const tmpStall = jjSlot.stalledTurns; jjSlot.stalledTurns = allySlot.stalledTurns; allySlot.stalledTurns = tmpStall;
+  const tmpBurn = jjSlot.burn || 0; jjSlot.burn = allySlot.burn || 0; allySlot.burn = tmpBurn;
+  addLog(`JJ: Switcheroo! JJ switched with ${allySlot.card.name}.`, 'good');
+  G.pendingTarget = null; renderGame(); pushGameState(); return;
+}
   // Ability: Ballora - steal 1 energy from enemy slot
   if(pt?.action==='abilityTarget'&&pt.ability==='ballora_steal'){
     if(!isEnemy||!slot||slot.elec<=0)return;
@@ -1714,6 +1771,18 @@ function finalizeSingleAttack(pt,defSlot,dPidx,dSlotIdx) {
   if(checkMask(att.card,defSlot)){markAttacked(att);G.pendingTarget=null;renderGame();return;}
   consumeEnergy(att,pt.atk.cost,pt.attackerPidx);
   let dmg=calcDmg(att,pt.atk);
+  if (defSlot && defSlot.plushTrap) {
+  const trapDmg = 30;
+  attSlot.hp = Math.max(0, attSlot.hp - trapDmg); // Aplica o dano ao atacante
+  defSlot.plushTrap = false; // Limpa a armadilha
+  addLog(`Plush Trap activated! \${attSlot.card.name} took \${trapDmg} damage!`, 'ko');
+  checkKO(pt.attackerPidx, attSlot); // Verifica se o atacante foi KO'd
+  
+  // Se o atacante morreu pela armadilha, interrompe o ataque
+  if (attSlot.hp <= 0) { 
+    checkWin(); renderGame(); pushGameState(); return; 
+  }
+}
   if((defSlot.trapped||0)>0){dmg+=20;defSlot.trapped--;addLog(T('tcg.log.trapBaby',{card:defSlot.card.name}),'ko');}
   const dealt=dealDamage(defSlot,dmg);
   addLog(T('tcg.log.damage',{atk:att.card.name, def:defSlot.card.name, n:dealt, move:pt.atk.name}));
@@ -1861,6 +1930,21 @@ function useAbility(slotIdx, abilityId) {
     addLog(T('tcg.log.clickWitheredDouble'),'info');
     renderGame(); return;
   }
+  // ── JJ: Switcheroo (swap bench position with ally) ──
+  if (abilityId === 'jj_switcheroo') {
+    const allies = p.party
+      .map((s, i) => ({ s, i }))
+      .filter(({ s, i }) => s && i !== slotIdx);
+    if (!allies.length) {
+      addLog('No allies to swap with!');
+      slot.usedAbilityThisTurn = false;
+      return;
+    }
+    G.pendingTarget = { action: 'abilityTarget', ability: 'jj_switcheroo', slotIdx };
+    addLog('JJ: Switcheroo! Click an ally to swap bench positions.', 'info');
+    renderGame(); return;
+  }
+
 
   if(abilityId==='springtrap_phantom_search'){
     const emptySlot=p.party.findIndex(s=>s===null);
@@ -1873,6 +1957,19 @@ function useAbility(slotIdx, abilityId) {
     });
     return;
   }
+
+  if (abilityId === 'plushtrap_plush_trap') {
+    const ep = 1 - G.activePlayer;
+    if (!G.players[ep].party.some(s => s)) {
+      addLog('No enemies to trap!');
+      slot.usedAbilityThisTurn = false;
+      return;
+    }
+    G.pendingTarget = { action: 'abilityTarget', ability: 'plushtrap_plush_trap', slotIdx };
+    addLog('Plushtrap: Click an enemy to place a Plush Trap!', 'info');
+    renderGame(); return;
+  }
+
 
   if(abilityId==='repeat_gamble'){
     useRepeatGamble(slotIdx);
@@ -1911,6 +2008,14 @@ function useAbility(slotIdx, abilityId) {
     addLog(T('tcg.log.lolbitBuffer',{name:G.players[1-G.activePlayer].name}),'ko');
     renderGame(); return;
   }
+
+    if (abilityId === 'yenndo_system_surge') {
+    const c = p.deck.pop();
+    if (c) { p.hand.push(c); addLog(`Yenndo: System Surge! Drew ${c.name}.`, 'good'); }
+    else    { addLog('Yenndo: System Surge! Deck empty, no card drawn.', 'info'); }
+    renderGame(); pushGameState(); return;
+  }
+
 
   if(abilityId==='ennard_generator_boost'){
     if(!p.generator.length){addLog(T('tcg.log.ennardNoGen'));slot.usedAbilityThisTurn=false;return;}
@@ -2029,6 +2134,26 @@ function useAbility(slotIdx, abilityId) {
     addLog(`${slot.card.name}: Glamour Boost! Next ally attack deals +15 damage.`,'good');
     renderGame(); pushGameState(); return;
   }
+
+// Plushtrap Counterspring: if the defender is awake and has passiveRetaliate,
+if (defSlot && defSlot.awake && defSlot.card.passiveRetaliate && attSlot) {
+  const retDmg = defSlot.card.passiveRetaliate;
+  attSlot.hp = Math.max(0, attSlot.hp - retDmg);
+  addLog(`Plushtrap: Counterspring! ${attSlot.card.name} takes ${retDmg} retaliation damage!`, 'ko');
+  checkKO(attackerPidx, attSlot);
+}
+
+// Plush Trap: if the attacker has a plushTrap pending, it fires before attack
+if (abilityId === 'plushtrap_plush_trap') {
+  if (!isEnemy || !slot) return;
+  slot.plushTrap = true; // Marca que a armadilha foi colocada
+  addLog(`Plushtrap: Trap placed on \${slot.card.name}! On their next attack, it will deal 30 damage.`, 'ko');
+  G.pendingTarget = null; // Limpa o alvo pendente
+  renderGame(); // Atualiza o jogo
+  return;
+}
+
+
 
   // ── Nightmare Freddy: Freddles (10 dmg to all standby enemies) ──
   if(abilityId==='nightmare_freddy_freddles'){
@@ -2583,7 +2708,7 @@ function renderSlot(slot,pidx,slotIdx,pt){
 
   const selMulti=pt&&['selectMultiTarget','selectStallTargets'].includes(pt.action)&&isEnemy&&pt.selected?.some(s=>s.slotIdx===slotIdx);
   if(selMulti)cls+=' selected-target';
-  const isEnemyAbility=pt?.action==='abilityTarget'&&['baby_trap_target','ballora_steal','molten_steal','toy_freddy_stall','funtime_foxy_showstopper'].includes(pt?.ability);
+  const isEnemyAbility=pt?.action==='abilityTarget'&&['baby_trap_target','ballora_steal','molten_steal','toy_freddy_stall','funtime_foxy_showstopper', 'plushtrap_plush_trap'].includes(pt?.ability);
   const isClassEnemyTarget=pt?.action==='classCardTarget'&&['class_shadow_drain','class_jacko_burn','class_phantom_stall'].includes(pt?.ability);
   const isClassAllyTarget=pt?.action==='classCardTarget'&&['class_toy_heal','class_withered_def'].includes(pt?.ability);
   if(isEnemy&&pt&&(['selectSingleTarget','selectMultiTarget','selectStallTargets'].includes(pt.action)||isEnemyAbility||isClassEnemyTarget))cls+=' enemy-target';
@@ -2596,6 +2721,7 @@ function renderSlot(slot,pidx,slotIdx,pt){
   const defStr=slot.defense?` 🛡${slot.defense.reduction}×${slot.defense.turnsLeft}T`:'';
   const stallStr=slot.stalledTurns>0?` ⚡${slot.stalledTurns}T`:'';
   const burnStr=slot.burn>0?` 🔥${slot.burn}`:'';
+  const trapStr = slot.plushTrap ? ' 🪤' : '';
   const atkIcon=slot.attackedThisTurn?' ✓':''+(slot.extraAttacks>0?` ×${slot.extraAttacks+1}`:'');
   const willIcon=slot.tools.some(t=>t.passive==='william')?' 👤':'';
   const eMeta=ENERGY_META[slot.card.energyType];
