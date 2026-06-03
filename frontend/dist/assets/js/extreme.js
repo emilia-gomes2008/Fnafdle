@@ -865,7 +865,14 @@ document.addEventListener('click', e => {
 
 window.onLangChange = function () {
   if (!target) return;
-  document.querySelectorAll('[data-i18n]').forEach(function (el) { el.textContent = T(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n]').forEach(function (el) {
+    const val = T(el.dataset.i18n);
+    if (val.includes('<') && val.includes('>')) {
+      el.innerHTML = val;
+    } else {
+      el.textContent = val;
+    }
+  });
   updateNightLabel();
   updateNightWarning(currentCfg);
   updateAttemptsLeft();

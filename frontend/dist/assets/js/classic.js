@@ -24,7 +24,12 @@ function clearDailyProgress() {
 function initGame(mode) {
   currentMode = mode;
   document.querySelectorAll('[data-i18n]').forEach(function(el) {
-    el.textContent = T(el.dataset.i18n);
+    const val = T(el.dataset.i18n);
+    if (val.includes('<') && val.includes('>')) {
+      el.innerHTML = val;
+    } else {
+      el.textContent = val;
+    }
   });
   if (mode === 'daily') {
     MAX_GUESSES = 7;

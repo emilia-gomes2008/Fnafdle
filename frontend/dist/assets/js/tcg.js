@@ -1103,11 +1103,49 @@ function playShell(handIdx,card) {
   // Scrap shell — replaces the predecessor (with Fragment) in its own party slot
   if(card.scrapFrom) {
     const p=G.players[G.activePlayer];
-    const predIdx=p.party.findIndex(s=>s&&s.card.id===card.scrapFrom&&s.tools.some(t=>t.passive==='scrap'));
+    let predIdx = -1;
+    let isCarnieEvo = false;
+    if (card.id === 'lefty') {
+      predIdx = p.party.findIndex(s=>s&&s.card.id==='puppet'&&s.tools.some(t=>t.passive==='scrap'));
+      if (predIdx < 0) {
+        predIdx = p.party.findIndex(s=>s&&s.card.id==='carnie'&&s.tools.some(t=>t.passive==='scrap'));
+        if (predIdx >= 0) {
+          isCarnieEvo = true;
+        }
+      }
+    } else {
+      predIdx = p.party.findIndex(s=>s&&s.card.id===card.scrapFrom&&s.tools.some(t=>t.passive==='scrap'));
+    }
+
     if(predIdx<0){
-      addLog(`Need ${CARDS[card.scrapFrom]?.name||card.scrapFrom} with Remnant Fragment on the field!`,'ko');
+      if (card.id === 'lefty') {
+        addLog(`Need Puppet or Carnie with Remnant Fragment on the field!`,'ko');
+      } else {
+        addLog(`Need ${CARDS[card.scrapFrom]?.name||card.scrapFrom} with Remnant Fragment on the field!`,'ko');
+      }
       return;
     }
+
+    if (isCarnieEvo) {
+      const puppetIdx = p.hand.findIndex((c, i) => c.id === 'puppet' && i !== handIdx);
+      if (puppetIdx < 0) {
+        addLog('Need Puppet in hand to evolve Carnie into Lefty!', 'ko');
+        return;
+      }
+      const agonyIdx = p.hand.findIndex((c, i) => c.type === 'energy' && c.energyType === 'agony' && i !== handIdx && i !== puppetIdx);
+      if (agonyIdx < 0) {
+        addLog('Need 1 Agony in hand to evolve Carnie into Lefty!', 'ko');
+        return;
+      }
+      
+      const indicesToSplice = [puppetIdx, agonyIdx].sort((a, b) => b - a);
+      indicesToSplice.forEach(idx => {
+        const consumed = p.hand.splice(idx, 1)[0];
+        p.discard.push(consumed);
+      });
+      handIdx = p.hand.indexOf(card);
+    }
+
     const pred=p.party[predIdx];
     p.discard.push(pred.card); pred.tools.forEach(t=>p.discard.push(t)); // predecessor to Blob
     if(pred.card.class==='funtime') syncEnnardMoveset(G.activePlayer);
@@ -2360,15 +2398,19 @@ function triggerScrapTransform(pidx,idx,dyingSlot){
   p.discard.push(dyingSlot.card); dyingSlot.tools.forEach(t=>p.discard.push(t));
   if(dyingSlot.card.class==='funtime') syncEnnardMoveset(pidx);
   
-  if(dyingSlot.card.id === 'rockstar_lefty') {
+  if(dyingSlot.card.id === 'carnie') {
     const puppetIdx = p.hand.findIndex(c => c.id === 'puppet');
-    if(puppetIdx >= 0) {
-      const consumed = p.hand.splice(puppetIdx, 1)[0];
-      p.discard.push(consumed);
-      addLog('Marionette was consumed from hand to form Lefty!', 'info');
+    const agonyIdx = p.hand.findIndex(c => c.type === 'energy' && c.energyType === 'agony');
+    if(puppetIdx >= 0 && agonyIdx >= 0) {
+      const indicesToSplice = [puppetIdx, agonyIdx].sort((a, b) => b - a);
+      indicesToSplice.forEach(idx => {
+        const consumed = p.hand.splice(idx, 1)[0];
+        p.discard.push(consumed);
+      });
+      addLog('Puppet and 1 Agony were consumed from hand to form Lefty!', 'info');
     } else {
       p.party[idx] = null;
-      addLog('Rockstar Lefty requires Marionette in hand to transform into Scrap Lefty!', 'ko');
+      addLog('Carnie requires Puppet and 1 Agony in hand to transform into Lefty!', 'ko');
       checkWin(); return;
     }
   }
@@ -3426,7 +3468,14 @@ document.addEventListener('DOMContentLoaded',()=>{
   showScreen('lobby');
   // Apply translations to all static elements
   document.querySelectorAll('[data-i18n]').forEach(el => {
-    if(el.dataset.i18n) el.textContent = T(el.dataset.i18n);
+    if(el.dataset.i18n) {
+      const val = T(el.dataset.i18n);
+      if (val.includes('<') && val.includes('>')) {
+        el.innerHTML = val;
+      } else {
+        el.textContent = val;
+      }
+    }
   });
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
     el.placeholder = T(el.dataset.i18nPlaceholder);

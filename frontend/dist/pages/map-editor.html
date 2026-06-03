@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    // Set base path and clean URL: Hide /frontend/dist/pages/ in address bar
+    (function() {
+      var base = document.createElement('base');
+      base.href = window.location.protocol + '//' + window.location.host + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+      document.head.appendChild(base);
+
+      if (window.location.pathname.includes('/frontend/dist/pages/')) {
+        var cleanPath = window.location.pathname.replace('/frontend/dist/pages/', '/');
+        window.history.replaceState(null, '', cleanPath + window.location.search);
+      }
+    })();
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Party Map Editor · FNAFdle Reborn</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0d0d0d; color: #ccc; font-family: Arial, sans-serif; display: flex; flex-direction: column; height: 100vh; overflow: hidden; user-select: none; }
+
+    /* ── Toolbar ── */
+    #toolbar {
+      background: #181818; border-bottom: 1px solid #2e2e2e;
+      padding: 6px 10px; display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+    }
+    #toolbar .title { font-size: .9rem; color: #c48b14; font-weight: bold; margin-right: 4px; white-space: nowrap; }
+    #map-name { background: #222; border: 1px solid #444; color: #ddd; border-radius: 4px; padding: 4px 8px; font-size: .8rem; width: 140px; }
+    .tb-btn {
+      background: #242424; color: #ccc; border: 1px solid #3a3a3a;
+      border-radius: 5px; padding: 5px 10px; cursor: pointer; font-size: .75rem; white-space: nowrap;
+    }
+    .tb-btn:hover { border-color: #c48b14; color: #fff; }
+    .tb-btn.primary { border-color: #c48b14; color: #c48b14; }
+    .tb-sep { width: 1px; background: #2e2e2e; height: 22px; flex-shrink: 0; }
+    #node-count { font-size: .72rem; color: #555; margin-left: auto; white-space: nowrap; }
+
+    /* ── Main layout ── */
+    #main { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── Palette ── */
+    #palette {
+      width: 152px; flex-shrink: 0; background: #131313;
+      border-right: 1px solid #222; display: flex; flex-direction: column;
+      padding: 8px 6px; gap: 2px; overflow-y: auto;
+    }
+    .pal-section { font-size: .6rem; color: #555; text-transform: uppercase; letter-spacing: 1px; padding: 8px 4px 3px; }
+    .pal-btn {
+      display: flex; align-items: center; gap: 7px; padding: 5px 7px;
+      border-radius: 5px; cursor: pointer; border: 2px solid transparent;
+      font-size: .75rem; background: transparent; color: #aaa; text-align: left; width: 100%;
+    }
+    .pal-btn:hover { background: #1c1c1c; color: #ddd; }
+    .pal-btn.active { border-color: #c48b14; background: rgba(196,139,20,.12); color: #fff; }
+    .pal-dot { width: 13px; height: 13px; border-radius: 3px; flex-shrink: 0; border: 1px solid rgba(255,255,255,.15); }
+
+    /* ── Canvas ── */
+    #canvas-area { flex: 1; display: flex; align-items: center; justify-content: center; background: #0a0a0a; overflow: hidden; }
+    #canvas-wrap { position: relative; background: #111; overflow: hidden; cursor: crosshair; flex-shrink: 0; }
+    #map-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    #canvas-hint {
+      position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+      font-size: .65rem; color: #3a3a3a; pointer-events: none;
+      background: rgba(0,0,0,.6); padding: 3px 12px; border-radius: 20px;
+    }
+    #canvas-grid-overlay { position: absolute; inset: 0; pointer-events: none; }
+
+    /* ── Properties ── */
+    #props {
+      width: 195px; flex-shrink: 0; background: #131313;
+      border-left: 1px solid #222; padding: 10px; display: flex;
+      flex-direction: column; gap: 8px; overflow-y: auto;
+    }
+    #props h3 { font-size: .72rem; color: #c48b14; text-transform: uppercase; letter-spacing: 1px; }
+    .prop-group { display: flex; flex-direction: column; gap: 3px; }
+    .prop-label { font-size: .6rem; color: #555; text-transform: uppercase; letter-spacing: .5px; }
+    .prop-input {
+      background: #1e1e1e; border: 1px solid #333; color: #ddd;
+      border-radius: 4px; padding: 4px 7px; font-size: .78rem; width: 100%;
+    }
+    .prop-input:focus { outline: none; border-color: #c48b14; }
+    select.prop-input option { background: #1e1e1e; }
+    .prop-row2 { display: flex; gap: 5px; }
+    .prop-row2 .prop-input { flex: 1; }
+    .prop-action { background: #1e1e1e; color: #aaa; border: 1px solid #333; border-radius: 4px; padding: 5px; cursor: pointer; font-size: .72rem; width: 100%; }
+    .prop-action:hover { border-color: #555; color: #ddd; }
+    .prop-delete { background: #2a0a0a; color: #e55; border: 1px solid #5a1a1a; border-radius: 4px; padding: 6px; cursor: pointer; font-size: .75rem; width: 100%; }
+    .prop-delete:hover { background: #3a0e0e; border-color: #c0392b; }
+    .prop-empty { color: #444; font-size: .75rem; line-height: 1.5; }
+    .prop-hr { border: none; border-top: 1px solid #222; }
+
+    /* ── Preview mode ── */
+    .tb-btn.preview-active { border-color: #c48b14; color: #c48b14; background: rgba(196,139,20,.12); }
+    #preview-wrap { background: #111; }
+    .pv-node { font-family: Arial, sans-serif; overflow: visible; }
+    #main.preview-mode #palette,
+    #main.preview-mode #props { display: none; }
+    #main.preview-mode #canvas-area { background: #111; }
+
+    /* ── Export panel ── */
+    #export-panel {
+      border-top: 1px solid #222; background: #0a0a0a; padding: 10px;
+      display: none; flex-direction: column; gap: 6px; max-height: 260px; flex-shrink: 0;
+    }
+    #export-panel.open { display: flex; }
+    #export-panel .exp-hdr { display: flex; align-items: center; gap: 8px; }
+    #export-panel strong { font-size: .8rem; color: #c48b14; }
+    #export-code {
+      flex: 1; background: #080808; border: 1px solid #1e1e1e;
+      color: #6ddf6d; font-family: 'Courier New', monospace; font-size: .7rem;
+      border-radius: 4px; padding: 8px; resize: none; min-height: 140px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Toolbar ── -->
+<div id="toolbar">
+  <span class="title">🗺️ Map Editor</span>
+  <input id="map-name" type="text" placeholder="Map name…" value="Custom Map" />
+  <div class="tb-sep"></div>
+  <button class="tb-btn" onclick="clearAll()">🗑 Clear</button>
+  <button class="tb-btn" onclick="saveJSON()">💾 Save</button>
+  <button class="tb-btn" onclick="document.getElementById('load-input').click()">📂 Load</button>
+  <input id="load-input" type="file" accept=".json" style="display:none" onchange="loadJSON(event)">
+  <div class="tb-sep"></div>
+  <button class="tb-btn" onclick="document.getElementById('bg-input').click()">🖼 BG Image</button>
+  <input id="bg-input" type="file" accept="image/*" style="display:none" onchange="loadBg(event)">
+  <button class="tb-btn" onclick="removeBg()">✕ BG</button>
+  <div class="tb-sep"></div>
+  <select id="preset-sel" class="prop-input" style="width:130px;font-size:.75rem" onchange="loadPreset(this.value)">
+    <option value="">Load preset…</option>
+    <option value="easy">Easy (20 spaces)</option>
+    <option value="normal">Normal (24 spaces)</option>
+    <option value="hard">Hard / Freddy Face (20)</option>
+  </select>
+  <div class="tb-sep"></div>
+  <span style="font-size:.72rem;color:#666;white-space:nowrap">Aspect</span>
+  <select id="aspect-sel" class="prop-input" style="width:80px;font-size:.75rem" onchange="previewMode ? renderPreview() : render()">
+    <option value="1:1">1:1 Square</option>
+    <option value="4:3">4:3</option>
+    <option value="3:2">3:2</option>
+    <option value="2:1">2:1 Wide</option>
+    <option value="1:2">1:2 Tall</option>
+  </select>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" onclick="randomizeSpaces()" title="Randomize all unlocked, non-start, non-tollbooth spaces">🎲 Randomize</button>
+  <span id="node-count">0 nodes</span>
+  <button class="tb-btn primary" onclick="toggleExport()">📋 Export Code</button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" id="preview-btn" onclick="togglePreview()">👁 Preview</button>
+</div>
+
+<!-- ── Main ── -->
+<div id="main">
+
+  <!-- Palette -->
+  <div id="palette">
+    <div class="pal-section">Tool</div>
+    <button class="pal-btn active" id="tool-btn-add"    onclick="setTool('add')">    ➕ Add node</button>
+    <button class="pal-btn"        id="tool-btn-move"   onclick="setTool('move')">   ✋ Move</button>
+    <button class="pal-btn"        id="tool-btn-delete" onclick="setTool('delete')"> 🗑 Delete</button>
+
+    <div class="pal-section" style="margin-top:6px">Space type</div>
+    <div id="space-pal"></div>
+  </div>
+
+  <!-- Canvas -->
+  <div id="canvas-area">
+  <div id="canvas-wrap">
+    <svg id="map-svg" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+          <path d="M0,0 L0,6 L8,3 z" fill="#444"/>
+        </marker>
+        <marker id="arr-skip" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+          <path d="M0,0 L0,6 L8,3 z" fill="#c48b14"/>
+        </marker>
+        <marker id="arr-free" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+          <path d="M0,0 L0,6 L8,3 z" fill="#cc3322"/>
+        </marker>
+        <marker id="arr-next" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+          <path d="M0,0 L0,6 L8,3 z" fill="#00aaaa"/>
+        </marker>
+        <marker id="arr-sel" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+          <path d="M0,0 L0,6 L8,3 z" fill="#666"/>
+        </marker>
+      </defs>
+      <image id="bg-img" href="" style="pointer-events:none;opacity:.35" preserveAspectRatio="xMidYMid meet"/>
+      <g id="conn-layer"></g>
+      <g id="node-layer"></g>
+    </svg>
+    <div id="canvas-hint">A = Add · M = Move · D = Delete · Del = remove selected · Right-click node = delete</div>
+  </div>
+  <!-- Preview board -->
+  <div id="preview-wrap" style="display:none;position:relative;flex-shrink:0;">
+    <div id="preview-board" style="position:absolute;inset:0;"></div>
+  </div>
+  </div>
+
+  <!-- Properties -->
+  <div id="props">
+    <h3>Properties</h3>
+    <div class="prop-empty" id="props-empty">Click a node to edit it.<br><br>
+      Right-click any node to delete it.<br><br>
+      ↑↓ buttons reorder nodes in the path.</div>
+    <div id="props-content" style="display:none">
+      <div class="prop-group">
+        <div class="prop-label">Node index</div>
+        <input class="prop-input" id="prop-index" type="text" readonly style="color:#555;cursor:default">
+      </div>
+      <div class="prop-group">
+        <div class="prop-label">Position (x%, y%)</div>
+        <div class="prop-row2">
+          <input class="prop-input" id="prop-x" type="number" min="0" max="100" step="0.5" placeholder="X" oninput="propXY()">
+          <input class="prop-input" id="prop-y" type="number" min="0" max="100" step="0.5" placeholder="Y" oninput="propXY()">
+        </div>
+      </div>
+      <div class="prop-group">
+        <div class="prop-label">Space type</div>
+        <select class="prop-input" id="prop-type" onchange="propType()"></select>
+      </div>
+      <div class="prop-group">
+        <div class="prop-label" style="color:#00aaaa">➡ Custom next → node # <span style="color:#444;font-style:normal">(leave blank = sequential)</span></div>
+        <input class="prop-input" id="prop-next" type="number" min="0" placeholder="default: i+1" oninput="propNext()">
+      </div>
+      <div class="prop-group">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.75rem;color:#aaa">
+          <input type="checkbox" id="prop-locked" onchange="propLocked()" style="accent-color:#c48b14">
+          🔒 Lock type (skip Randomize)
+        </label>
+      </div>
+      <div class="prop-group" id="prop-skip-wrap" style="display:none">
+        <div class="prop-label" style="color:#c48b14">💰 Path A — Pay → node #</div>
+        <input class="prop-input" id="prop-skip" type="number" min="0" placeholder="e.g. 9" oninput="propSkip()">
+        <div class="prop-label" style="color:#cc4433;margin-top:6px">😰 Path B — Free → node #</div>
+        <input class="prop-input" id="prop-free" type="number" min="0" placeholder="e.g. 6" oninput="propFree()">
+        <div style="font-size:.6rem;color:#444;margin-top:3px">Gold dashed = pay path · Red dashed = free path</div>
+      </div>
+      <div class="prop-group">
+        <div class="prop-label">Label (optional)</div>
+        <input class="prop-input" id="prop-label" type="text" maxlength="24" placeholder="e.g. chin" oninput="propLabel()">
+      </div>
+      <hr class="prop-hr">
+      <div class="prop-group">
+        <div class="prop-label">Reorder in path</div>
+        <div class="prop-row2">
+          <button class="prop-action" onclick="moveNodeUp()">↑ Move up</button>
+          <button class="prop-action" onclick="moveNodeDown()">↓ Move down</button>
+        </div>
+      </div>
+      <button class="prop-delete" onclick="deleteSelected()">🗑 Delete this node</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Export panel -->
+<div id="export-panel">
+  <div class="exp-hdr">
+    <strong>📋 Exported Code</strong>
+    <button class="tb-btn" onclick="copyExport()">Copy all</button>
+    <button class="tb-btn" onclick="toggleExport()" style="margin-left:auto">✕ Close</button>
+  </div>
+  <textarea id="export-code" readonly spellcheck="false"></textarea>
+</div>
+
+<script>
+'use strict';
+
+// ── Space type definitions ────────────────────────────────────────────────────
+const SPACE_TYPES = {
+  normal:      { color: '#4a4a4a', border: '#666',    emoji: '⬜', label: 'Normal'      },
+  coin:        { color: '#8a6600', border: '#c8a000', emoji: '🪙', label: 'Coin +2'     },
+  pizza:       { color: '#1a6640', border: '#27ae60', emoji: '🍕', label: 'Pizza +1'    },
+  badluck:     { color: '#5a0000', border: '#8b0000', emoji: '💀', label: 'Bad Luck -3' },
+  minigame:    { color: '#4a1a88', border: '#7d3cce', emoji: '🎮', label: 'Minigame'    },
+  question:    { color: '#7a3d00', border: '#d97700', emoji: '❓', label: 'Event'       },
+  trap:        { color: '#3d2000', border: '#8b5c00', emoji: '🪤', label: 'Trap'        },
+  challenge:   { color: '#6e0000', border: '#c0392b', emoji: '⚔️', label: 'Challenge'  },
+  tollbooth:   { color: '#6b4400', border: '#c48b14', emoji: '🐻', label: 'Tollbooth'  },
+  freddy_zone: { color: '#3a0000', border: '#aa2222', emoji: '😱', label: 'Freddy Zone' },
+  jackpot:     { color: '#555500', border: '#aaaa00', emoji: '💰', label: 'Jackpot'    },
+};
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let nodes = [];        // { x, y, type, nextTo?, skipTo?, freeTo?, label?, locked? }
+let selectedIdx = -1;
+let currentTool = 'add';
+let currentType = 'normal';
+let dragState  = null; // { idx, svgX0, svgY0, nx0, ny0 }
+
+// ── Build palette ─────────────────────────────────────────────────────────────
+const spacePal = document.getElementById('space-pal');
+Object.entries(SPACE_TYPES).forEach(([key, cfg]) => {
+  const btn = document.createElement('button');
+  btn.className = 'pal-btn' + (key === currentType ? ' active' : '');
+  btn.id = `stype-${key}`;
+  btn.innerHTML = `<span class="pal-dot" style="background:${cfg.color};border-color:${cfg.border}"></span>${cfg.label}`;
+  btn.onclick = () => setSpaceType(key);
+  spacePal.appendChild(btn);
+});
+
+// Build props type dropdown
+const propTypeEl = document.getElementById('prop-type');
+Object.entries(SPACE_TYPES).forEach(([key, cfg]) => {
+  const opt = document.createElement('option');
+  opt.value = key;
+  opt.textContent = `${cfg.emoji} ${cfg.label}`;
+  propTypeEl.appendChild(opt);
+});
+
+// ── SVG elements ──────────────────────────────────────────────────────────────
+const svg       = document.getElementById('map-svg');
+const connLayer = document.getElementById('conn-layer');
+const nodeLayer = document.getElementById('node-layer');
+const wrap      = document.getElementById('canvas-wrap');
+const canvasArea = document.getElementById('canvas-area');
+
+function applyCanvasAspect() {
+  const aspect = document.getElementById('aspect-sel').value || '1:1';
+  const [aw, ah] = aspect.split(':').map(Number);
+  const availW = canvasArea.clientWidth;
+  const availH = canvasArea.clientHeight;
+  // Fit canvas inside available space while keeping the ratio
+  let cw = availW, ch = Math.round(cw * ah / aw);
+  if (ch > availH) { ch = availH; cw = Math.round(ch * aw / ah); }
+  wrap.style.width  = cw + 'px';
+  wrap.style.height = ch + 'px';
+  void wrap.offsetWidth; // force reflow so svgRect() reads new size
+}
+
+function svgRect()  { return svg.getBoundingClientRect(); }
+function pxToPct(px, py) {
+  const r = svgRect();
+  return { x: +(px / r.width * 100).toFixed(1), y: +(py / r.height * 100).toFixed(1) };
+}
+function pctToPx(px, py) {
+  const r = svgRect();
+  return { x: px / 100 * r.width, y: py / 100 * r.height };
+}
+function svgEl(tag, attrs) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+  return el;
+}
+const NODE_R = 14; // fixed pixel radius
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function render() {
+  applyCanvasAspect();
+  const r = svgRect();
+  document.getElementById('bg-img').setAttribute('width',  r.width);
+  document.getElementById('bg-img').setAttribute('height', r.height);
+
+  connLayer.innerHTML = '';
+  nodeLayer.innerHTML = '';
+
+  if (nodes.length === 0) {
+    document.getElementById('node-count').textContent = '0 nodes';
+    return;
+  }
+
+  // ── Draw path lines (respects nextTo override) ──
+  for (let i = 0; i < nodes.length; i++) {
+    const a       = nodes[i];
+    const nextIdx = (a.nextTo !== undefined && !isNaN(a.nextTo) && nodes[a.nextTo])
+                    ? a.nextTo : (i + 1) % nodes.length;
+    const isCustomNext = a.nextTo !== undefined && !isNaN(a.nextTo) && nodes[a.nextTo];
+    const b   = nodes[nextIdx];
+    const ap  = pctToPx(a.x, a.y);
+    const bp  = pctToPx(b.x, b.y);
+    const sel = (i === selectedIdx || nextIdx === selectedIdx);
+
+    const dx   = bp.x - ap.x, dy = bp.y - ap.y;
+    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+    const shrink = NODE_R + 4;
+    const x1 = ap.x + (dx / dist) * shrink;
+    const y1 = ap.y + (dy / dist) * shrink;
+    const x2 = bp.x - (dx / dist) * (shrink + 6);
+    const y2 = bp.y - (dy / dist) * (shrink + 6);
+
+    connLayer.appendChild(svgEl('line', {
+      x1, y1, x2, y2,
+      stroke:         isCustomNext ? '#00aaaa' : (sel ? '#555' : '#2e2e2e'),
+      'stroke-width': isCustomNext ? 2 : (sel ? 2 : 1.5),
+      'stroke-dasharray': isCustomNext ? '5,2' : 'none',
+      'marker-end':   isCustomNext ? 'url(#arr-next)' : (sel ? 'url(#arr-sel)' : 'url(#arr)'),
+    }));
+
+    const mx = (ap.x + bp.x) / 2, my = (ap.y + bp.y) / 2;
+    const lbl = svgEl('text', {
+      x: mx, y: my - 4, 'text-anchor': 'middle',
+      fill: isCustomNext ? '#008888' : '#3a3a3a', 'font-size': 9,
+      style: 'pointer-events:none',
+    });
+    lbl.textContent = i;
+    connLayer.appendChild(lbl);
+  }
+
+  // ── Draw tollbooth split-path arrows ──
+  nodes.forEach((n, i) => {
+    if (n.type !== 'tollbooth') return;
+    const ap     = pctToPx(n.x, n.y);
+    const shrink = NODE_R + 4;
+
+    function drawArrow(targetIdx, stroke, marker) {
+      const idx = parseInt(targetIdx);
+      if (isNaN(idx) || !nodes[idx]) return;
+      const cp   = pctToPx(nodes[idx].x, nodes[idx].y);
+      const dx   = cp.x - ap.x, dy = cp.y - ap.y;
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      connLayer.appendChild(svgEl('line', {
+        x1: ap.x + (dx / dist) * shrink,
+        y1: ap.y + (dy / dist) * shrink,
+        x2: cp.x - (dx / dist) * (shrink + 6),
+        y2: cp.y - (dy / dist) * (shrink + 6),
+        stroke, 'stroke-width': 1.5, 'stroke-dasharray': '6,3',
+        'marker-end': `url(#${marker})`,
+      }));
+    }
+
+    drawArrow(n.skipTo, '#c48b14', 'arr-skip');  // Path A (pay) — gold
+    drawArrow(n.freeTo, '#cc3322', 'arr-free');   // Path B (free) — red
+  });
+
+  // ── Draw nodes ──
+  nodes.forEach((n, i) => {
+    const cfg = SPACE_TYPES[n.type] || SPACE_TYPES.normal;
+    const p   = pctToPx(n.x, n.y);
+    const sel = i === selectedIdx;
+    const isStart = i === 0;
+
+    const g = svgEl('g', { 'data-i': i, cursor: currentTool === 'delete' ? 'not-allowed' : 'pointer' });
+
+    // Shadow / glow for selected
+    if (sel) {
+      g.appendChild(svgEl('rect', {
+        x: p.x - (NODE_R + 5), y: p.y - (NODE_R + 5),
+        width: (NODE_R + 5) * 2, height: (NODE_R + 5) * 2, rx: 6, ry: 6,
+        fill: 'none', stroke: 'rgba(255,255,255,.18)', 'stroke-width': 4,
+      }));
+    }
+
+    // Main square
+    g.appendChild(svgEl('rect', {
+      x: p.x - NODE_R, y: p.y - NODE_R,
+      width: NODE_R * 2, height: NODE_R * 2, rx: 4, ry: 4,
+      fill: cfg.color,
+      stroke: sel ? '#fff' : (isStart ? '#c48b14' : cfg.border),
+      'stroke-width': sel ? 3 : (isStart ? 2.5 : 1.5),
+    }));
+
+    // Index number
+    const indexTxt = svgEl('text', {
+      x: p.x, y: p.y + 4.5, 'text-anchor': 'middle',
+      fill: '#fff', 'font-size': 11, 'font-weight': 'bold', 'font-family': 'Arial',
+      style: 'pointer-events:none;user-select:none',
+    });
+    indexTxt.textContent = i;
+    g.appendChild(indexTxt);
+
+    // Emoji badge (top-right of circle)
+    const emojiTxt = svgEl('text', {
+      x: p.x + NODE_R - 2, y: p.y - NODE_R + 4,
+      'text-anchor': 'middle', 'font-size': 10,
+      style: 'pointer-events:none;user-select:none',
+    });
+    emojiTxt.textContent = cfg.emoji;
+    g.appendChild(emojiTxt);
+
+    // START badge
+    if (isStart) {
+      const stl = svgEl('text', {
+        x: p.x, y: p.y - NODE_R - 5, 'text-anchor': 'middle',
+        fill: '#c48b14', 'font-size': 9, 'font-weight': 'bold',
+        style: 'pointer-events:none;user-select:none',
+      });
+      stl.textContent = 'START';
+      g.appendChild(stl);
+    }
+
+    // Lock badge (bottom-left of circle)
+    if (n.locked) {
+      const lock = svgEl('text', {
+        x: p.x - NODE_R + 3, y: p.y + NODE_R - 2,
+        'text-anchor': 'middle', 'font-size': 9,
+        style: 'pointer-events:none;user-select:none',
+      });
+      lock.textContent = '🔒';
+      g.appendChild(lock);
+    }
+
+    // Custom label
+    if (n.label) {
+      const lbl = svgEl('text', {
+        x: p.x, y: p.y + NODE_R + 11, 'text-anchor': 'middle',
+        fill: '#777', 'font-size': 8.5,
+        style: 'pointer-events:none;user-select:none',
+      });
+      lbl.textContent = n.label;
+      g.appendChild(lbl);
+    }
+
+    g.addEventListener('mousedown', e => onNodeDown(e, i));
+    g.addEventListener('contextmenu', e => { e.preventDefault(); deleteNode(i); });
+    nodeLayer.appendChild(g);
+  });
+
+  document.getElementById('node-count').textContent = `${nodes.length} node${nodes.length !== 1 ? 's' : ''}`;
+}
+
+// ── Canvas mouse ──────────────────────────────────────────────────────────────
+wrap.addEventListener('mousedown', e => {
+  if (e.button !== 0) return;
+  if (e.target.closest('[data-i]')) return;
+  if (currentTool !== 'add') { selectNode(-1); return; }
+
+  const r   = wrap.getBoundingClientRect();
+  const pct = pxToPct(e.clientX - r.left, e.clientY - r.top);
+  nodes.push({ x: pct.x, y: pct.y, type: currentType });
+  selectNode(nodes.length - 1);
+  render();
+});
+wrap.addEventListener('contextmenu', e => e.preventDefault());
+
+function onNodeDown(e, i) {
+  e.stopPropagation();
+  if (e.button !== 0) return;
+  if (currentTool === 'delete') { deleteNode(i); return; }
+  selectNode(i);
+  const r = wrap.getBoundingClientRect();
+  dragState = {
+    idx: i,
+    svgX0: e.clientX - r.left,
+    svgY0: e.clientY - r.top,
+    nx0: nodes[i].x,
+    ny0: nodes[i].y,
+    r,
+  };
+}
+
+document.addEventListener('mousemove', e => {
+  if (!dragState) return;
+  const dx = e.clientX - dragState.r.left - dragState.svgX0;
+  const dy = e.clientY - dragState.r.top  - dragState.svgY0;
+  const r  = dragState.r;
+  nodes[dragState.idx].x = +Math.min(100, Math.max(0, dragState.nx0 + dx / r.width  * 100)).toFixed(1);
+  nodes[dragState.idx].y = +Math.min(100, Math.max(0, dragState.ny0 + dy / r.height * 100)).toFixed(1);
+  updatePropsXY();
+  render();
+});
+
+document.addEventListener('mouseup', () => { dragState = null; });
+
+// ── Selection & properties ────────────────────────────────────────────────────
+function selectNode(i) {
+  selectedIdx = i;
+  const empty   = document.getElementById('props-empty');
+  const content = document.getElementById('props-content');
+  if (i < 0 || i >= nodes.length) {
+    empty.style.display   = '';
+    content.style.display = 'none';
+    render();
+    return;
+  }
+  empty.style.display   = 'none';
+  content.style.display = 'flex';
+  content.style.flexDirection = 'column';
+  content.style.gap = '8px';
+
+  const n = nodes[i];
+  document.getElementById('prop-index').value   = i;
+  document.getElementById('prop-x').value       = n.x;
+  document.getElementById('prop-y').value       = n.y;
+  document.getElementById('prop-type').value    = n.type || 'normal';
+  document.getElementById('prop-next').value    = n.nextTo ?? '';
+  document.getElementById('prop-locked').checked = !!n.locked;
+  document.getElementById('prop-skip').value    = n.skipTo ?? '';
+  document.getElementById('prop-free').value    = n.freeTo ?? '';
+  document.getElementById('prop-label').value   = n.label || '';
+  document.getElementById('prop-skip-wrap').style.display = n.type === 'tollbooth' ? '' : 'none';
+  render();
+}
+
+function updatePropsXY() {
+  if (selectedIdx < 0) return;
+  document.getElementById('prop-x').value = nodes[selectedIdx].x;
+  document.getElementById('prop-y').value = nodes[selectedIdx].y;
+}
+
+function propXY() {
+  if (selectedIdx < 0) return;
+  const x = parseFloat(document.getElementById('prop-x').value);
+  const y = parseFloat(document.getElementById('prop-y').value);
+  if (!isNaN(x)) nodes[selectedIdx].x = +Math.min(100, Math.max(0, x)).toFixed(1);
+  if (!isNaN(y)) nodes[selectedIdx].y = +Math.min(100, Math.max(0, y)).toFixed(1);
+  render();
+}
+
+function propType() {
+  if (selectedIdx < 0) return;
+  const t = document.getElementById('prop-type').value;
+  nodes[selectedIdx].type = t;
+  document.getElementById('prop-skip-wrap').style.display = t === 'tollbooth' ? '' : 'none';
+  render();
+}
+
+function propNext() {
+  if (selectedIdx < 0) return;
+  const v = document.getElementById('prop-next').value.trim();
+  nodes[selectedIdx].nextTo = v === '' ? undefined : parseInt(v);
+  render();
+}
+
+function propLocked() {
+  if (selectedIdx < 0) return;
+  nodes[selectedIdx].locked = document.getElementById('prop-locked').checked || undefined;
+  if (!nodes[selectedIdx].locked) delete nodes[selectedIdx].locked;
+  render();
+}
+
+function propSkip() {
+  if (selectedIdx < 0) return;
+  const v = document.getElementById('prop-skip').value.trim();
+  nodes[selectedIdx].skipTo = v === '' ? undefined : parseInt(v);
+  render();
+}
+
+function propFree() {
+  if (selectedIdx < 0) return;
+  const v = document.getElementById('prop-free').value.trim();
+  nodes[selectedIdx].freeTo = v === '' ? undefined : parseInt(v);
+  render();
+}
+
+function propLabel() {
+  if (selectedIdx < 0) return;
+  const v = document.getElementById('prop-label').value.trim();
+  nodes[selectedIdx].label = v || undefined;
+  render();
+}
+
+function deleteNode(i) {
+  nodes.forEach(n => {
+    const fixRef = k => {
+      if (n[k] === i) n[k] = undefined;
+      else if (typeof n[k] === 'number' && n[k] > i) n[k]--;
+    };
+    fixRef('nextTo'); fixRef('skipTo'); fixRef('freeTo');
+  });
+  nodes.splice(i, 1);
+  const newSel = Math.min(selectedIdx, nodes.length - 1);
+  selectNode(newSel);
+  render();
+}
+
+function deleteSelected() {
+  if (selectedIdx >= 0 && selectedIdx < nodes.length) deleteNode(selectedIdx);
+}
+
+function moveNodeUp() {
+  if (selectedIdx <= 0) return;
+  const i = selectedIdx;
+  [nodes[i - 1], nodes[i]] = [nodes[i], nodes[i - 1]];
+  // Fix skipTo
+  fixSkipAfterSwap(i - 1, i);
+  selectNode(i - 1);
+  render();
+}
+
+function moveNodeDown() {
+  if (selectedIdx < 0 || selectedIdx >= nodes.length - 1) return;
+  const i = selectedIdx;
+  [nodes[i], nodes[i + 1]] = [nodes[i + 1], nodes[i]];
+  fixSkipAfterSwap(i, i + 1);
+  selectNode(i + 1);
+  render();
+}
+
+function fixSkipAfterSwap(a, b) {
+  nodes.forEach(n => {
+    ['nextTo', 'skipTo', 'freeTo'].forEach(k => {
+      if (n[k] === a) n[k] = b; else if (n[k] === b) n[k] = a;
+    });
+  });
+}
+
+// ── Tool & type ───────────────────────────────────────────────────────────────
+function setTool(t) {
+  currentTool = t;
+  ['add', 'move', 'delete'].forEach(x => {
+    document.getElementById(`tool-btn-${x}`)?.classList.toggle('active', x === t);
+  });
+  wrap.style.cursor = t === 'add' ? 'crosshair' : t === 'delete' ? 'not-allowed' : 'default';
+  render();
+}
+
+function setSpaceType(type) {
+  currentType = type;
+  Object.keys(SPACE_TYPES).forEach(k => {
+    document.getElementById(`stype-${k}`)?.classList.toggle('active', k === type);
+  });
+  if (selectedIdx >= 0) {
+    nodes[selectedIdx].type = type;
+    document.getElementById('prop-type').value = type;
+    document.getElementById('prop-skip-wrap').style.display = type === 'tollbooth' ? '' : 'none';
+    render();
+  }
+}
+
+// ── File ops ──────────────────────────────────────────────────────────────────
+function clearAll() {
+  if (nodes.length === 0 || confirm('Clear all nodes?')) {
+    nodes = []; selectedIdx = -1; selectNode(-1); render();
+  }
+}
+
+function getAspect() { return document.getElementById('aspect-sel').value || '1:1'; }
+
+function saveJSON() {
+  const name = document.getElementById('map-name').value || 'map';
+  const blob = new Blob([JSON.stringify({ name, nodes, boardAspect: getAspect() }, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '') + '.json';
+  a.click();
+}
+
+function loadJSON(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const fr = new FileReader();
+  fr.onload = ev => {
+    try {
+      const d = JSON.parse(ev.target.result);
+      nodes = d.nodes || [];
+      document.getElementById('map-name').value = d.name || 'Custom Map';
+      const asp = document.getElementById('aspect-sel');
+      if (d.boardAspect) asp.value = d.boardAspect;
+      selectNode(-1); render();
+    } catch { alert('Invalid JSON'); }
+  };
+  fr.readAsText(file);
+  e.target.value = '';
+}
+
+function loadBg(e) {
+  const file = e.target.files[0]; if (!file) return;
+  document.getElementById('bg-img').setAttribute('href', URL.createObjectURL(file));
+  e.target.value = '';
+}
+function removeBg() { document.getElementById('bg-img').setAttribute('href', ''); }
+
+// ── Presets ───────────────────────────────────────────────────────────────────
+const PRESETS = {
+  easy: {
+    name: 'Easy Map',
+    // BOARD_GRID_EASY [row,col] mapped to % on a 6×6 grid (col→x, row→y, 1-indexed)
+    // col: 1→5%, 6→95%. row: 1→5%, 6→95%
+    gen: () => {
+      const grid = [
+        [1,1],[1,2],[1,3],[1,4],[1,5],[1,6],
+        [2,6],[3,6],[4,6],[5,6],
+        [6,6],[6,5],[6,4],[6,3],[6,2],[6,1],
+        [5,1],[4,1],[3,1],[2,1],
+      ];
+      const types = [
+        'normal','coin','normal','minigame','coin','normal',
+        'pizza','badluck','question','coin',
+        'normal','badluck','minigame','coin','normal','normal',
+        'pizza','question','coin','normal',
+      ];
+      return grid.map(([row,col], i) => ({
+        x: +((col - 1) / 5 * 90 + 5).toFixed(1),
+        y: +((row - 1) / 5 * 90 + 5).toFixed(1),
+        type: types[i] || 'normal',
+      }));
+    },
+  },
+  normal: {
+    name: 'Normal Map',
+    gen: () => {
+      const grid = [
+        [1,1],[1,2],[1,3],[1,4],[1,5],[1,6],[1,7],[1,8],
+        [2,8],[3,8],[4,8],[5,8],
+        [6,8],[6,7],[6,6],[6,5],[6,4],[6,3],[6,2],[6,1],
+        [5,1],[4,1],[3,1],[2,1],
+      ];
+      const types = [
+        'normal','coin','normal','question','coin','normal','minigame','normal',
+        'pizza','badluck','coin','question',
+        'normal','coin','badluck','minigame','coin','normal','challenge','normal',
+        'pizza','question','coin','normal',
+      ];
+      return grid.map(([row,col], i) => ({
+        x: +((col - 1) / 7 * 90 + 5).toFixed(1),
+        y: +((row - 1) / 5 * 90 + 5).toFixed(1),
+        type: types[i] || 'normal',
+      }));
+    },
+  },
+  hard: {
+    name: 'Freddy Face',
+    gen: () => {
+      const pts = [
+        { x:50,y:94,type:'normal',     label:'chin (START)' },
+        { x:66,y:89,type:'coin',       label:'right jaw' },
+        { x:79,y:77,type:'badluck',    label:'right cheek' },
+        { x:88,y:60,type:'normal',     label:'right cheek upper' },
+        { x:90,y:44,type:'coin',       label:'right ear',  locked:true },
+        { x:77,y:32,type:'tollbooth',  label:'right eyebrow', skipTo: 9, freeTo: 6 },
+        { x:76,y:47,type:'freddy_zone',label:'right eye upper' },
+        { x:75,y:57,type:'freddy_zone',label:'right eye mid' },
+        { x:69,y:64,type:'freddy_zone',label:'right eye lower' },
+        { x:64,y:17,type:'coin',       label:'hat brim right' },
+        { x:50,y:8, type:'jackpot',    label:'hat top' },
+        { x:36,y:17,type:'normal',     label:'hat brim left' },
+        { x:23,y:32,type:'tollbooth',  label:'left eyebrow', skipTo: 16, freeTo: 13 },
+        { x:25,y:47,type:'freddy_zone',label:'left eye upper' },
+        { x:25,y:57,type:'freddy_zone',label:'left eye mid' },
+        { x:31,y:64,type:'freddy_zone',label:'left eye lower' },
+        { x:10,y:44,type:'pizza',      label:'left ear',   locked:true },
+        { x:12,y:60,type:'question',   label:'left cheek' },
+        { x:21,y:77,type:'challenge',  label:'left cheek lower' },
+        { x:34,y:89,type:'minigame',   label:'left jaw' },
+      ];
+      return pts;
+    },
+  },
+};
+
+function loadPreset(key) {
+  if (!key) return;
+  document.getElementById('preset-sel').value = '';
+  if (nodes.length > 0 && !confirm('Replace current map with preset?')) return;
+  const preset = PRESETS[key];
+  if (!preset) return;
+  nodes = preset.gen();
+  document.getElementById('map-name').value = preset.name;
+  selectNode(-1); render();
+}
+
+// ── Export ────────────────────────────────────────────────────────────────────
+function toggleExport() {
+  const panel = document.getElementById('export-panel');
+  const open  = panel.classList.toggle('open');
+  if (open) generateExport();
+}
+
+function randomizeSpaces() {
+  const ALWAYS_FIXED = new Set(['tollbooth', 'freddy_zone']);
+  const pool = ['normal','normal','normal','coin','coin','coin',
+                'pizza','pizza','minigame','minigame','badluck','badluck',
+                'trap','challenge','question','jackpot'];
+
+  // Collect randomizable indices
+  const targets = nodes.reduce((acc, n, i) => {
+    if (i === 0) return acc;               // start always normal
+    if (ALWAYS_FIXED.has(n.type)) return acc; // tollbooth/freddy_zone never randomized
+    if (n.locked) return acc;              // user-locked nodes skip
+    acc.push(i);
+    return acc;
+  }, []);
+
+  if (targets.length === 0) return;
+
+  // Build proportional pool, shuffle, assign
+  const needed = targets.length;
+  const full   = [];
+  while (full.length < needed) full.push(...pool);
+  // Fisher-Yates shuffle
+  for (let i = full.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [full[i], full[j]] = [full[j], full[i]];
+  }
+  targets.forEach((idx, ti) => { nodes[idx].type = full[ti]; });
+  if (selectedIdx >= 0) document.getElementById('prop-type').value = nodes[selectedIdx].type;
+  render();
+}
+
+// Types that stay fixed (not randomized each game)
+const FIXED_TYPES = new Set(['tollbooth', 'freddy_zone', 'jackpot']);
+// Pool for randomizable spaces
+const RAND_POOL = ['normal','normal','normal','coin','coin','coin','pizza','pizza',
+                   'minigame','minigame','badluck','badluck','trap','challenge','question'];
+
+function generateExport() {
+  if (nodes.length === 0) {
+    document.getElementById('export-code').value = '// No nodes placed yet.';
+    return;
+  }
+
+  const rawName    = document.getElementById('map-name').value || 'Custom Map';
+  const boardAspect = getAspect();
+  const constName  = rawName.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'').toUpperCase();
+  const mapKey     = constName.toLowerCase();
+
+  // Node positions (just x,y — type info goes into tiles)
+  const nodesLines = nodes.map((n, i) => {
+    const lbl = [i === 0 ? 'START' : '', n.label].filter(Boolean).join(' · ');
+    return `  { x: ${n.x.toFixed(1)}, y: ${n.y.toFixed(1)} },${lbl ? `  // ${i}  ${lbl}` : `  // ${i}`}`;
+  }).join('\n');
+
+  // Template tiles (fixed types kept; randomizable slots marked)
+  const templateTiles = nodes.map(n => n.type || 'normal');
+  const tilesLine     = templateTiles.map(t => `'${t}'`).join(', ');
+
+  // skipMap, freeMap, nextMap
+  const skipMap = {}, freeMap = {}, nextMap = {};
+  nodes.forEach((n, i) => {
+    if (n.type === 'tollbooth') {
+      if (n.skipTo !== undefined && !isNaN(parseInt(n.skipTo))) skipMap[i] = parseInt(n.skipTo);
+      if (n.freeTo !== undefined && !isNaN(parseInt(n.freeTo))) freeMap[i] = parseInt(n.freeTo);
+    }
+    if (n.nextTo !== undefined && !isNaN(parseInt(n.nextTo))) nextMap[i] = parseInt(n.nextTo);
+  });
+
+  const skipStr    = JSON.stringify(skipMap).replace(/"/g,'');
+  const freeStr    = JSON.stringify(freeMap).replace(/"/g,'');
+  const nextStr    = JSON.stringify(nextMap).replace(/"/g,'');
+  const hasSplit   = Object.keys(freeMap).length > 0;
+  const hasNextMap = Object.keys(nextMap).length > 0;
+
+  const tollbooths = Object.entries(skipMap).map(([f, t]) => {
+    const free = freeMap[f];
+    return `//   Tollbooth ${f}: pay→${t}${free !== undefined ? `, free→${free}` : ''}`;
+  }).join('\n');
+
+  const boardJSON = JSON.stringify({
+    tiles: templateTiles,
+    nodes: nodes.map(n => ({ x: n.x, y: n.y })),
+    laps: 5,
+    boardSize: nodes.length,
+    mapType: mapKey,
+    toll: 5,
+    skipMap,
+    freeMap,
+    ...(hasNextMap ? { nextMap } : {}),
+    boardAspect,
+  });
+
+  const code =
+`// ═══════════════════════════════════════════════════════════
+// Map: "${rawName}" · ${nodes.length} nodes · Aspect ${boardAspect}
+// Generated by FNAFdle Reborn Map Editor
+// ═══════════════════════════════════════════════════════════
+
+// ━━ PASTE INTO party.js ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// ── 1. Add inside createBoard() ─────────────────────────────
+//  Tiles are auto-randomized each game; fixed types (tollbooth,
+//  freddy_zone, jackpot) always keep their positions.
+${tollbooths ? tollbooths + '\n' : ''}
+  if (mapType === '${mapKey}') {
+    const template = [${tilesLine}];
+    const fixed    = new Set(['tollbooth','freddy_zone','jackpot']);
+    const pool     = shufflePool(['normal','normal','normal','coin','coin','coin',
+      'pizza','pizza','minigame','minigame','badluck','badluck','trap','challenge','question']);
+    let pi = 0;
+    const tiles = template.map(t => fixed.has(t) ? t : (pool[pi++ % pool.length] || t));
+    const nodePositions = [
+${nodesLines}
+    ];
+    return JSON.stringify({
+      tiles,
+      nodes: nodePositions,
+      laps,
+      boardSize: nodePositions.length,
+      mapType: '${mapKey}',
+      toll: 5,
+      skipMap: ${skipStr},
+      freeMap: ${freeStr},${hasNextMap ? `\n      nextMap: ${nextStr},` : ''}
+      boardAspect: '${boardAspect}',
+    });
+  }
+
+// ── 2. In the map selector HTML (party.html) ────────────────
+//  <label class="map-select-opt">
+//    <input type="radio" name="party-map" value="${mapKey}" />
+//    <span class="map-opt-name">${rawName}</span>
+//    <span class="map-opt-desc">${nodes.length} spaces${hasSplit ? ' · split paths' : ''}</span>
+//  </label>
+
+// ── Full board JSON (for direct DB insertion / testing) ──────
+// ${boardJSON}
+`;
+
+  document.getElementById('export-code').value = code;
+}
+
+function copyExport() {
+  const ta = document.getElementById('export-code');
+  navigator.clipboard.writeText(ta.value).then(() => {
+    const btn = event.currentTarget;
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = orig, 1500);
+  });
+}
+
+// ── Keyboard shortcuts ────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  const tag = document.activeElement?.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); deleteSelected(); }
+  if (e.key === 'a') setTool('add');
+  if (e.key === 'm') setTool('move');
+  if (e.key === 'd') setTool('delete');
+  if (e.key === 'Escape') selectNode(-1);
+  if (e.key === 'ArrowUp')   { e.preventDefault(); moveNodeUp(); }
+  if (e.key === 'ArrowDown') { e.preventDefault(); moveNodeDown(); }
+});
+
+// ── Preview mode ──────────────────────────────────────────────────────────────
+let previewMode = false;
+
+function togglePreview() {
+  previewMode = !previewMode;
+  const btn       = document.getElementById('preview-btn');
+  const mainEl    = document.getElementById('main');
+  const cvWrap    = document.getElementById('canvas-wrap');
+  const pvWrap    = document.getElementById('preview-wrap');
+
+  btn.classList.toggle('preview-active', previewMode);
+  btn.textContent = previewMode ? '✏️ Edit' : '👁 Preview';
+  mainEl.classList.toggle('preview-mode', previewMode);
+  cvWrap.style.display  = previewMode ? 'none' : '';
+  pvWrap.style.display  = previewMode ? '' : 'none';
+
+  if (previewMode) renderPreview();
+}
+
+function renderPreview() {
+  const pvBoard = document.getElementById('preview-board');
+  const pvWrap  = document.getElementById('preview-wrap');
+  if (!pvBoard || !pvWrap) return;
+  pvBoard.innerHTML = '';
+
+  const aspect = document.getElementById('aspect-sel').value || '1:1';
+  const [aw, ah] = aspect.split(':').map(Number);
+  const availW = canvasArea.clientWidth;
+  const availH = canvasArea.clientHeight;
+  let cw = availW, ch = Math.round(cw * ah / aw);
+  if (ch > availH) { ch = availH; cw = Math.round(ch * aw / ah); }
+  pvWrap.style.width  = cw + 'px';
+  pvWrap.style.height = ch + 'px';
+
+  if (nodes.length === 0) {
+    pvBoard.innerHTML = '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#333;font-size:.8rem">No nodes</div>';
+    return;
+  }
+
+  // Same coordinate normalisation as the game
+  const PAD = 5;
+  const xs = nodes.map(n => n.x), ys = nodes.map(n => n.y);
+  const xMin = Math.min(...xs), xMax = Math.max(...xs);
+  const yMin = Math.min(...ys), yMax = Math.max(...ys);
+  const xSpan = (xMax - xMin) || 1, ySpan = (yMax - yMin) || 1;
+  const nx = x => +(PAD + (x - xMin) / xSpan * (100 - 2 * PAD)).toFixed(2);
+  const ny = y => +(PAD + (y - yMin) / ySpan * (100 - 2 * PAD)).toFixed(2);
+
+  const count = nodes.length;
+  const nodeW = count > 45 ? 4.5 : count > 35 ? 4 : count > 25 ? 5.5 : 8;
+
+  // SVG path lines
+  const NS  = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 100 100');
+  svg.setAttribute('preserveAspectRatio', 'none');
+  svg.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;';
+
+  const addLine = (x1, y1, x2, y2, stroke, dash, width) => {
+    const l = document.createElementNS(NS, 'line');
+    l.setAttribute('x1', x1); l.setAttribute('y1', y1);
+    l.setAttribute('x2', x2); l.setAttribute('y2', y2);
+    l.setAttribute('stroke', stroke);
+    l.setAttribute('stroke-width', width || '0.9');
+    l.setAttribute('opacity', '0.6');
+    if (dash) l.setAttribute('stroke-dasharray', dash);
+    svg.appendChild(l);
+  };
+
+  // Sequential connections
+  for (let i = 0; i < nodes.length; i++) {
+    const a = nodes[i];
+    const ni = a.nextTo !== undefined && !isNaN(a.nextTo) && nodes[a.nextTo] ? a.nextTo : (i + 1) % nodes.length;
+    const b  = nodes[ni];
+    const custom = a.nextTo !== undefined && !isNaN(a.nextTo) && nodes[a.nextTo];
+    addLine(nx(a.x), ny(a.y), nx(b.x), ny(b.y), custom ? '#00aaaa' : '#5a4a3a', custom ? '4,2' : null);
+  }
+
+  // Tollbooth split paths
+  nodes.forEach((n, i) => {
+    if (n.type !== 'tollbooth') return;
+    if (n.skipTo !== undefined && nodes[n.skipTo]) {
+      const d = nodes[n.skipTo];
+      addLine(nx(n.x), ny(n.y), nx(d.x), ny(d.y), '#c48b14', '3,2', '1.3');
+    }
+    if (n.freeTo !== undefined && nodes[n.freeTo]) {
+      const d = nodes[n.freeTo];
+      addLine(nx(n.x), ny(n.y), nx(d.x), ny(d.y), '#cc3322', '3,2', '1.3');
+    }
+  });
+
+  pvBoard.appendChild(svg);
+
+  // Node squares
+  nodes.forEach(({ x, y, type }, idx) => {
+    const cfg = SPACE_TYPES[type] || SPACE_TYPES.normal;
+    const sp  = document.createElement('div');
+    sp.style.cssText = [
+      `position:absolute`,
+      `left:${nx(x)}%`,
+      `top:${ny(y)}%`,
+      `transform:translate(-50%,-50%)`,
+      `width:${nodeW}%`,
+      `aspect-ratio:1`,
+      `z-index:2`,
+      `background:${cfg.color}`,
+      `border:2px solid ${cfg.border}`,
+      `border-radius:5px`,
+      `box-shadow:0 0 0 3px #111`,
+      `display:flex`,
+      `flex-direction:column`,
+      `align-items:center`,
+      `justify-content:center`,
+      `overflow:visible`,
+    ].join(';');
+    sp.innerHTML = `
+      <span style="font-size:.35rem;color:rgba(255,255,255,.3);position:absolute;top:2px;left:3px;font-family:Arial;line-height:1">${idx === 0 ? '🏁' : idx}</span>
+      <span style="font-size:.5rem;line-height:1;pointer-events:none">${cfg.emoji}</span>`;
+    pvBoard.appendChild(sp);
+  });
+
+  // Centre label
+  const lbl = document.createElement('div');
+  lbl.style.cssText = 'position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;z-index:0;';
+  lbl.innerHTML = `<div style="font-family:Arial;font-size:1rem;color:#333;letter-spacing:2px">${document.getElementById('map-name').value || 'MAP'}</div>
+    <div style="font-size:.55rem;color:#2a2a2a">${nodes.length} nodes</div>`;
+  pvBoard.appendChild(lbl);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+window.addEventListener('resize', () => { if (previewMode) renderPreview(); else render(); });
+render();
+</script>
+</body>
+</html>

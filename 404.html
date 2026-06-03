@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Redirecting...</title>
+  <script type="text/javascript">
+    // Single Page Apps for GitHub Pages redirection
+    (function() {
+      var path = window.location.pathname;
+      var search = window.location.search;
+      var hash = window.location.hash;
+
+      var pages = [
+        'classic.html',
+        'image.html',
+        'book.html',
+        'quote.html',
+        'extreme.html',
+        'multiplayer.html',
+        'party.html',
+        'tcg.html',
+        'encyclopedia.html',
+        'map-editor.html'
+      ];
+
+      var segments = path.split('/');
+      var fileName = segments.pop() || '';
+      
+      if (pages.indexOf(fileName) !== -1) {
+        segments.push('frontend', 'dist', 'pages', fileName);
+        var newPath = segments.join('/') + search + hash;
+        window.location.replace(newPath);
+      } else {
+        // Fallback to homepage
+        var repoPath = path.substring(0, path.length - fileName.length);
+        window.location.replace(repoPath + search + hash);
+      }
+    })();
+  </script>
+</head>
+<body>
+</body>
+</html>
