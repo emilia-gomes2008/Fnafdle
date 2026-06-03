@@ -1,6 +1,10 @@
 /* ═══════════════════════════════════════════════════════
    FNAF TCG — Online Multiplayer (tcg-mp.js)
-   Pure Realtime (no polling) — same pattern as Party mode.
+   Party/Multiplayer-style room system:
+     - Public lobby browser
+     - Room names & privacy toggle
+     - Waiting screen with live player list
+     - Realtime subscription during lobby + game
    ═══════════════════════════════════════════════════════ */
 
 /* ── Utilities ───────────────────────────────────────── */
@@ -13,14 +17,48 @@ function mpRandomCode() {
 function mpRandomId() {
   return 'p' + Math.random().toString(36).slice(2, 10);
 }
+function mpEscHtml(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 
 /* ── Persistent player id ────────────────────────────── */
 let _mpId = sessionStorage.getItem('tcg_mp_pid');
 if (!_mpId) { _mpId = mpRandomId(); sessionStorage.setItem('tcg_mp_pid', _mpId); }
 
+/* ── Module state ────────────────────────────────────── */
+// MP object lives in tcg.js — we extend it here
+// MP.db, MP.roomId, MP.roomCode, MP.myIdx, MP.mode, MP.channel
+
 /* ── Init (called when Online tab is opened) ─────────── */
-function tcgMpInit() { renderMpLobby(); }
+function tcgMpInit() {
+  if (!mpEnsureDb()) return;
+  renderMpLobby();
+}
 window.tcgMpInit = tcgMpInit;
+
+/* ── Ensure Supabase client exists ──────────────────── */
+function mpEnsureDb() {
+  const cfg = window.FNAF_CONFIG || {};
+  const wrap = document.getElementById('tab-content-online');
+  if (!cfg.SUPABASE_URL || !cfg.SUPABASE_ANON_KEY) {
+    if (wrap) wrap.innerHTML = `<p style="color:var(--red-text);padding:10px">${T('tcg.mp.noConfig')}</p>`;
+    return false;
+  }
+  if (!MP.db) {
+    if (typeof supabase === 'undefined') {
+      if (wrap) wrap.innerHTML = `<p style="color:var(--red-text);padding:10px">${T('tcg.mp.noSupabase')}</p>`;
+      return false;
+    }
+    try {
+      MP.db = supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+    } catch (e) {
+      if (wrap) wrap.innerHTML = `<p style="color:var(--red-text);padding:10px">${T('tcg.mp.supabaseError', { msg: e.message })}</p>`;
+      return false;
+    }
+  }
+  MP.myId = _mpId;
+  return true;
+}
 
 /* ── Render the online lobby UI ──────────────────────── */
 function renderMpLobby() {
@@ -28,74 +66,91 @@ function renderMpLobby() {
   if (!wrap) return;
   wrap.innerHTML = '';
 
-  const cfg = window.FNAF_CONFIG || {};
-  if (!cfg.SUPABASE_URL || !cfg.SUPABASE_ANON_KEY) {
-    wrap.innerHTML = `<p style="color:#dd6d6d;padding:10px">${T('tcg.mp.noConfig')}</p>`;
-    return;
-  }
-
-  if (!MP.db) {
-    if (typeof supabase === 'undefined') {
-      wrap.innerHTML = `<p style="color:#dd6d6d;padding:10px">${T('tcg.mp.noSupabase')}</p>`;
-      return;
-    }
-    try {
-      MP.db = supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
-    } catch(e) {
-      wrap.innerHTML = `<p style="color:#dd6d6d;padding:10px">${T('tcg.mp.supabaseError',{msg:e.message})}</p>`;
-      return;
-    }
-  }
-  MP.myId = _mpId;
-
   const decks = getDecksForSelect();
-  const container = document.createElement('div');
-  container.className = 'mp-lobby-container';
 
-  container.innerHTML = `
-    <div class="mp-form-row">
-      <div class="setup-label">${T('tcg.mp.yourName')}</div>
-      <input id="mp-name" class="tcg-input" type="text" placeholder="${T('tcg.mp.namePlaceholder')}" maxlength="20"
-        value="${sessionStorage.getItem('tcg_mp_name')||''}" style="max-width:220px" />
-    </div>
-    <div class="mp-form-row" style="margin-top:10px">
-      <div class="setup-label">${T('tcg.mp.yourDeck')}</div>
-      <select id="mp-deck" class="tcg-select" style="max-width:280px"></select>
+  wrap.innerHTML = `
+    <div class="mp-lobby-container">
+
+      <!-- Player info row -->
+      <div class="mp-form-row">
+        <div class="setup-label">${T('tcg.mp.yourName')}</div>
+        <input id="mp-name" class="tcg-input" type="text"
+          placeholder="${T('tcg.mp.namePlaceholder')}" maxlength="20"
+          value="${mpEscHtml(sessionStorage.getItem('tcg_mp_name') || '')}"
+          style="max-width:220px" />
+      </div>
+      <div class="mp-form-row" style="margin-top:10px">
+        <div class="setup-label">${T('tcg.mp.yourDeck')}</div>
+        <select id="mp-deck" class="tcg-select" style="max-width:280px"></select>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="mp-action-row" style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;align-items:center">
+        <button class="tcg-btn primary" onclick="mpShowCreatePanel()">${T('tcg.mp.createRoom')}</button>
+        <div style="display:flex;gap:6px;align-items:center">
+          <input id="mp-join-code" class="tcg-input" type="text"
+            placeholder="${T('tcg.mp.joinCode')}" maxlength="6"
+            style="max-width:130px;text-transform:uppercase" />
+          <button class="tcg-btn" onclick="mpJoinRoom()">${T('tcg.mp.joinBtn')}</button>
+        </div>
+      </div>
+
+      <!-- Create room panel (hidden by default) -->
+      <div id="mp-create-panel" style="display:none;margin-top:14px;padding:12px;border:1px solid var(--border);border-radius:8px;background:var(--card-bg)">
+        <div class="setup-label" style="margin-bottom:6px">${T('tcg.mp.roomName')}</div>
+        <input id="mp-room-name" class="tcg-input" type="text"
+          placeholder="${T('tcg.mp.roomNamePlaceholder')}" maxlength="30"
+          style="width:100%;max-width:none;margin-bottom:10px" />
+
+        <div class="setup-label" style="margin-bottom:6px">${T('tcg.mp.privacy')}</div>
+        <div style="display:flex;gap:14px;margin-bottom:10px">
+          <label style="display:flex;align-items:center;gap:5px;cursor:pointer">
+            <input type="radio" name="tcg-privacy" value="public" checked /> ${T('tcg.mp.public')}
+          </label>
+          <label style="display:flex;align-items:center;gap:5px;cursor:pointer">
+            <input type="radio" name="tcg-privacy" value="private" /> ${T('tcg.mp.private')}
+          </label>
+        </div>
+
+        <div style="display:flex;gap:8px">
+          <button class="tcg-btn primary" onclick="mpConfirmCreate()">${T('tcg.mp.confirm')}</button>
+          <button class="tcg-btn" onclick="mpCancelCreate()">${T('tcg.mp.cancel')}</button>
+        </div>
+      </div>
+
+      <!-- Status area -->
+      <div id="mp-status" class="mp-status-area"></div>
+
+      <!-- Public lobby list -->
+      <div id="mp-public-lobby" style="margin-top:18px">
+        <div class="setup-label" style="margin-bottom:6px">${T('tcg.mp.publicRooms')}</div>
+        <div id="mp-lobby-list"><div class="mp-lobby-empty">${T('tcg.mp.loadingRooms')}</div></div>
+        <button class="tcg-btn" style="margin-top:8px;font-size:.78rem" onclick="mpLoadPublicLobby()">${T('tcg.mp.refresh')}</button>
+      </div>
     </div>
   `;
 
-  const deckSel = container.querySelector('#mp-deck');
+  // Populate deck selector
+  const deckSel = wrap.querySelector('#mp-deck');
   decks.forEach(d => {
     const o = document.createElement('option');
     o.value = d.id; o.textContent = d.name; deckSel.appendChild(o);
   });
 
-  const btnRow = document.createElement('div');
-  btnRow.style.cssText = 'display:flex;gap:10px;margin-top:16px;flex-wrap:wrap';
+  mpLoadPublicLobby();
+}
 
-  const createBtn = document.createElement('button');
-  createBtn.className = 'tcg-btn primary';
-  createBtn.textContent = T('tcg.mp.createRoom');
-  createBtn.onclick = mpCreateRoom;
-  btnRow.appendChild(createBtn);
-
-  const joinSection = document.createElement('div');
-  joinSection.style.cssText = 'display:flex;gap:6px;align-items:center';
-  joinSection.innerHTML = `
-    <input id="mp-join-code" class="tcg-input" type="text" placeholder="${T('tcg.mp.joinCode')}"
-      maxlength="6" style="max-width:130px;text-transform:uppercase" />
-    <button class="tcg-btn" id="mp-join-btn">${T('tcg.mp.joinBtn')}</button>
-  `;
-  joinSection.querySelector('#mp-join-btn').onclick = mpJoinRoom;
-  btnRow.appendChild(joinSection);
-
-  container.appendChild(btnRow);
-
-  const status = document.createElement('div');
-  status.id = 'mp-status'; status.className = 'mp-status-area';
-  container.appendChild(status);
-
-  wrap.appendChild(container);
+/* ── Create panel helpers ────────────────────────────── */
+function mpShowCreatePanel() {
+  const panel = document.getElementById('mp-create-panel');
+  if (panel) panel.style.display = '';
+  const nameInput = document.getElementById('mp-room-name');
+  const playerName = document.getElementById('mp-name')?.value.trim();
+  if (nameInput && playerName) nameInput.placeholder = `${playerName}'s Room`;
+}
+function mpCancelCreate() {
+  const panel = document.getElementById('mp-create-panel');
+  if (panel) panel.style.display = 'none';
 }
 
 /* ── Helpers ─────────────────────────────────────────── */
@@ -114,60 +169,107 @@ function mpStatusHtml(html) {
 }
 
 function mpCopyCode(code, btn) {
-  const done = () => { if(btn){const o=btn.textContent;btn.textContent=T('tcg.mp.copied');setTimeout(()=>btn.textContent=o,2000);} };
-  if(navigator.clipboard) {
-    navigator.clipboard.writeText(code).then(done).catch(()=>{ prompt('Copy the room code:',code); });
+  const done = () => {
+    if (btn) { const o = btn.textContent; btn.textContent = T('tcg.mp.copied'); setTimeout(() => btn.textContent = o, 2000); }
+  };
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(code).then(done).catch(() => { prompt('Copy the room code:', code); });
   } else {
     try {
-      const ta=document.createElement('textarea'); ta.value=code;
-      ta.style.cssText='position:fixed;opacity:0'; document.body.appendChild(ta);
+      const ta = document.createElement('textarea'); ta.value = code;
+      ta.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(ta);
       ta.select(); document.execCommand('copy'); document.body.removeChild(ta); done();
-    } catch(e){ prompt('Copy the room code:',code); }
+    } catch (e) { prompt('Copy the room code:', code); }
   }
 }
 
 function mpEncodeDeck(deck) {
-  return JSON.stringify({id:deck.id,name:deck.name,list:deck.list,generator:deck.generator||'remnant',classCard:deck.classCard||'class_classic'});
+  return JSON.stringify({ id: deck.id, name: deck.name, list: deck.list, generator: deck.generator || 'remnant', classCard: deck.classCard || 'class_classic' });
 }
 
 function mpParseDeck(field) {
-  try { return JSON.parse(field); } catch(e) {
+  try { return JSON.parse(field); } catch (e) {
     const decks = getDecksForSelect();
     return decks.find(d => d.id === field) || decks[0];
   }
 }
 
+/* ── Public Lobby ────────────────────────────────────── */
+async function mpLoadPublicLobby() {
+  const listEl = document.getElementById('mp-lobby-list');
+  if (!listEl) return;
+  listEl.innerHTML = `<div class="mp-lobby-empty">${T('tcg.mp.loadingRooms')}</div>`;
+
+  const { data, error } = await MP.db
+    .from('tcg_rooms')
+    .select('id, room_code, room_name, host_name, status')
+    .eq('status', 'waiting')
+    .or('is_private.eq.false,is_private.is.null')
+    .is('game_state', null)
+    .order('created_at', { ascending: false })
+    .limit(10);
+
+  if (error || !data || !data.length) {
+    listEl.innerHTML = `<div class="mp-lobby-empty">${T('tcg.mp.noPublicRooms')}</div>`;
+    return;
+  }
+
+  listEl.innerHTML = '';
+  data.forEach(r => {
+    const name = r.room_name || `${r.host_name}'s Room`;
+    const entry = document.createElement('div');
+    entry.className = 'mp-lobby-entry';
+    entry.innerHTML = `
+      <div class="mp-lobby-info">
+        <div class="mp-lobby-name">${mpEscHtml(name)}</div>
+        <div class="mp-lobby-meta">👤 ${mpEscHtml(r.host_name)} · TCG</div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <span class="mp-lobby-code">${mpEscHtml(r.room_code)}</span>
+        <button class="tcg-btn small" onclick="mpJoinFromLobby('${mpEscHtml(r.room_code)}')">${T('tcg.mp.joinBtn')}</button>
+      </div>
+    `;
+    listEl.appendChild(entry);
+  });
+}
+
+function mpJoinFromLobby(code) {
+  const codeInput = document.getElementById('mp-join-code');
+  if (codeInput) codeInput.value = code;
+  mpJoinRoom();
+}
+
 /* ── Create Room ─────────────────────────────────────── */
-async function mpCreateRoom() {
+async function mpConfirmCreate() {
   const { name, deck } = mpGetFormData();
   const roomCode = mpRandomCode();
+  const roomNameInput = document.getElementById('mp-room-name')?.value.trim();
+  const roomName = roomNameInput || `${name}'s Room`;
+  const isPrivate = document.querySelector('input[name="tcg-privacy"]:checked')?.value === 'private';
+
+  mpCancelCreate();
   mpStatusHtml(`<div class="mp-waiting">${T('tcg.mp.creating')}</div>`);
 
   const { data, error } = await MP.db.from('tcg_rooms').insert({
-    room_code: roomCode,
-    host_id:   MP.myId,
-    host_name: name,
-    host_deck: mpEncodeDeck(deck),
-    status:    'waiting'
+    room_code:  roomCode,
+    host_id:    MP.myId,
+    host_name:  name,
+    host_deck:  mpEncodeDeck(deck),
+    status:     'waiting',
+    room_name:  roomName,
+    is_private: isPrivate,
   }).select().single();
 
-  if (error) { mpStatusHtml(`<div style="color:var(--red-text)">${T('tcg.mp.joinError',{msg:error.message})}</div>`); return; }
+  if (error) {
+    mpStatusHtml(`<div style="color:var(--red-text)">${T('tcg.mp.joinError', { msg: error.message })}</div>`);
+    return;
+  }
 
   MP.roomId   = data.id;
   MP.roomCode = roomCode;
   MP.myIdx    = 0;
 
-  mpStatusHtml(`
-    <div class="mp-room-code-block">
-      <div class="setup-label">${T('tcg.mp.roomCodeLabel')}</div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <div class="mp-room-code">${roomCode}</div>
-        <button class="tcg-btn small" onclick="mpCopyCode('${roomCode}',this)">${T('tcg.mp.copy')}</button>
-      </div>
-      <div class="mp-waiting"><span class="mp-spinner"></span> ${T('tcg.mp.waitingOpponent')}</div>
-    </div>
-  `);
-
+  mpShowWaiting(data);
   mpSubscribe(data.id, 'host');
 }
 
@@ -188,67 +290,143 @@ async function mpJoinRoom() {
   }
 
   const room = rooms[0];
-  const { error: uerr } = await MP.db.from('tcg_rooms').update({
+  const { data, error: uerr } = await MP.db.from('tcg_rooms').update({
     guest_id:   MP.myId,
     guest_name: name,
     guest_deck: mpEncodeDeck(deck),
-    status:     'ready'
-  }).eq('id', room.id);
+    status:     'ready',
+  }).eq('id', room.id).select().single();
 
-  if (uerr) { mpStatusHtml(`<div style="color:var(--red-text)">${T('tcg.mp.joinError',{msg:uerr.message})}</div>`); return; }
+  if (uerr) {
+    mpStatusHtml(`<div style="color:var(--red-text)">${T('tcg.mp.joinError', { msg: uerr.message })}</div>`);
+    return;
+  }
 
   MP.roomId   = room.id;
   MP.roomCode = code;
   MP.myIdx    = 1;
 
-  mpStatusHtml(`
-    <div class="mp-room-code-block">
-      <div class="mp-waiting">
-        <span class="mp-spinner"></span>
-        ${T('tcg.mp.waitingHost',{name:room.host_name})}
-      </div>
-    </div>
-  `);
-
+  mpShowWaiting(data || { ...room, guest_name: name, status: 'ready' });
   mpSubscribe(room.id, 'guest');
 }
 
-/* ── Shared handler: process any room row update ─────── */
-function mpHandleRow(row, role) {
-  // ── Lobby: guest joined → show Start Game button to host ──
-  if (role === 'host' && row.status === 'ready' && !row.game_state) {
-    const el = document.getElementById('mp-status');
-    if (el && el.querySelector('[data-start-btn]')) return; // already shown
-    const guestName = row.guest_name || 'Guest';
-    mpStatusHtml(`
-      <div class="mp-room-code-block">
-        <div class="setup-label">${T('tcg.mp.roomCodeLabel')}</div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <div class="mp-room-code">${MP.roomCode}</div>
-          <button class="tcg-btn small" onclick="mpCopyCode('${MP.roomCode}',this)">${T('tcg.mp.copy')}</button>
-        </div>
-        <div style="color:var(--green-text);margin:8px 0">${T('tcg.mp.guestJoined',{name:guestName})}</div>
-        <button data-start-btn class="tcg-btn primary" onclick="mpStartGame()">${T('tcg.mp.startGame')}</button>
-      </div>
-    `);
-    return;
+/* ── Waiting Screen ──────────────────────────────────── */
+function mpShowWaiting(row) {
+  // Hide lobby content, show waiting panel
+  const lobbyWrap = document.getElementById('tab-content-online');
+  if (lobbyWrap) lobbyWrap.style.display = 'none';
+
+  let waitEl = document.getElementById('tcg-mp-waiting');
+  if (!waitEl) {
+    waitEl = document.createElement('div');
+    waitEl.id = 'tcg-mp-waiting';
+    waitEl.className = 'tcg-mp-waiting-screen';
+    // Insert inside the lobby screen, after the lobby wrap
+    const lobbyScreen = document.getElementById('screen-lobby');
+    if (lobbyScreen) lobbyScreen.appendChild(waitEl);
+    else document.getElementById('tcg-root')?.appendChild(waitEl);
   }
-
-  if (!row.game_state) return;
-  const gs = row.game_state;
-
-  // Seq guard: skip if we already have this or newer state
-  const dbSeq    = gs._seq || 0;
-  const localSeq = (window.G && G) ? (G._seq || 0) : -1;
-  if (dbSeq <= localSeq) return;
-
-  if (MP.mode !== 'online') MP.mode = 'online';
-  pullGameState(gs);
+  waitEl.style.display = '';
+  mpRenderWaiting(row);
 }
 
-/* ── Realtime subscription (primary) ────────────────── */
+function mpHideWaiting() {
+  const waitEl = document.getElementById('tcg-mp-waiting');
+  if (waitEl) waitEl.style.display = 'none';
+  const lobbyWrap = document.getElementById('tab-content-online');
+  if (lobbyWrap) lobbyWrap.style.display = '';
+}
+
+function mpRenderWaiting(row) {
+  const waitEl = document.getElementById('tcg-mp-waiting');
+  if (!waitEl) return;
+
+  const roomName = row.room_name || `${row.host_name}'s Room`;
+  const isHost   = MP.myIdx === 0;
+  const guestName = row.guest_name;
+  const hasGuest  = row.status === 'ready' && !!guestName;
+
+  waitEl.innerHTML = `
+    <div class="tcg-card" style="max-width:460px;margin:0 auto">
+      <h2 class="tcg-title" style="font-size:1.3rem;margin-bottom:4px">${T('tcg.mp.waitingTitle')}</h2>
+      <div style="color:var(--gold);font-size:.85rem;margin-bottom:12px">${mpEscHtml(roomName)}</div>
+
+      <div style="margin-bottom:12px">
+        <div class="setup-label" style="margin-bottom:4px">${T('tcg.mp.roomCodeLabel')}</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="mp-room-code">${mpEscHtml(MP.roomCode)}</div>
+          <button class="tcg-btn small" onclick="mpCopyCode('${mpEscHtml(MP.roomCode)}',this)">${T('tcg.mp.copy')}</button>
+        </div>
+      </div>
+
+      <div id="tcg-waiting-players" class="tcg-waiting-players">
+        ${mpRenderPlayerSlots(row)}
+      </div>
+
+      <div id="tcg-waiting-status" style="margin-top:12px">
+        ${hasGuest && isHost
+          ? `<button class="tcg-btn primary" style="width:100%" onclick="mpStartGame()">${T('tcg.mp.startGame')}</button>`
+          : `<div class="mp-waiting"><span class="mp-spinner"></span> ${isHost ? T('tcg.mp.waitingOpponent') : T('tcg.mp.waitingHost', { name: row.host_name })}</div>`
+        }
+      </div>
+
+      <button class="tcg-btn" style="margin-top:10px;width:100%;font-size:.78rem" onclick="mpLeaveWaiting()">${T('tcg.mp.leaveRoom')}</button>
+    </div>
+  `;
+}
+
+function mpRenderPlayerSlots(row) {
+  const hostDeck  = mpParseDeck(row.host_deck || '{}');
+  const guestDeck = row.guest_deck ? mpParseDeck(row.guest_deck) : null;
+
+  const slot = (label, name, deckName, filled) => `
+    <div class="tcg-waiting-slot ${filled ? 'filled' : 'empty'}">
+      <div class="tcg-waiting-slot-label">${label}</div>
+      ${filled
+        ? `<div class="tcg-waiting-slot-name">${mpEscHtml(name)}</div>
+           <div class="tcg-waiting-slot-deck" style="font-size:.72rem;color:var(--text-muted)">${mpEscHtml(deckName || '—')}</div>`
+        : `<div class="tcg-waiting-slot-name" style="color:var(--text-muted);font-style:italic">${T('tcg.mp.waitingForPlayer')}</div>`
+      }
+    </div>
+  `;
+
+  return slot(T('tcg.mp.host'),  row.host_name,  hostDeck?.name,  true)
+       + slot(T('tcg.mp.guest'), row.guest_name, guestDeck?.name, !!row.guest_name);
+}
+
+function mpUpdateWaiting(row) {
+  const playersEl = document.getElementById('tcg-waiting-players');
+  if (playersEl) playersEl.innerHTML = mpRenderPlayerSlots(row);
+
+  const statusEl = document.getElementById('tcg-waiting-status');
+  if (!statusEl) return;
+
+  const isHost   = MP.myIdx === 0;
+  const hasGuest = row.status === 'ready' && !!row.guest_name;
+
+  if (hasGuest && isHost) {
+    if (!statusEl.querySelector('[data-mp-start]')) {
+      statusEl.innerHTML = `<button data-mp-start class="tcg-btn primary" style="width:100%" onclick="mpStartGame()">${T('tcg.mp.startGame')}</button>`;
+    }
+  } else {
+    statusEl.innerHTML = `<div class="mp-waiting"><span class="mp-spinner"></span> ${isHost ? T('tcg.mp.waitingOpponent') : T('tcg.mp.waitingHost', { name: row.host_name })}</div>`;
+  }
+}
+
+function mpLeaveWaiting() {
+  if (MP.channel) { try { MP.channel.unsubscribe(); } catch (e) {} MP.channel = null; }
+  if (MP.roomId && MP.myIdx === 0) {
+    // Host left: mark room abandoned
+    MP.db.from('tcg_rooms').update({ status: 'abandoned' }).eq('id', MP.roomId).then(() => {}, () => {});
+  }
+  MP.roomId = null; MP.roomCode = null;
+  mpHideWaiting();
+  renderMpLobby();
+}
+
+/* ── Realtime subscription ───────────────────────────── */
 function mpSubscribe(roomId, role) {
-  if (MP.channel) { try { MP.channel.unsubscribe(); } catch(e){} MP.channel = null; }
+  if (MP.channel) { try { MP.channel.unsubscribe(); } catch (e) {} MP.channel = null; }
 
   MP.channel = MP.db
     .channel('tcg_room_' + roomId)
@@ -256,11 +434,40 @@ function mpSubscribe(roomId, role) {
       event:  'UPDATE',
       schema: 'public',
       table:  'tcg_rooms',
-      filter: `id=eq.${roomId}`
+      filter: `id=eq.${roomId}`,
     }, payload => mpHandleRow(payload.new, role))
     .subscribe();
 }
 
+/* ── Handle row updates ──────────────────────────────── */
+function mpHandleRow(row, role) {
+  // Room abandoned by host
+  if (row.status === 'abandoned' && role === 'guest') {
+    mpHideWaiting();
+    renderMpLobby();
+    mpStatusHtml(`<div style="color:var(--red-text)">${T('tcg.mp.hostLeft')}</div>`);
+    return;
+  }
+
+  // Guest joined → update waiting screen for host
+  if (role === 'host' && row.status === 'ready' && !row.game_state) {
+    mpUpdateWaiting(row);
+    return;
+  }
+
+  // Game started → transition to game
+  if (!row.game_state) return;
+  const gs = row.game_state;
+
+  const dbSeq    = gs._seq || 0;
+  const localSeq = (window.G && G) ? (G._seq || 0) : -1;
+  if (dbSeq <= localSeq) return;
+
+  // Hide waiting screen, enter game
+  mpHideWaiting();
+  if (MP.mode !== 'online') MP.mode = 'online';
+  pullGameState(gs);
+}
 
 /* ── Host starts the game ────────────────────────────── */
 async function mpStartGame() {
@@ -278,9 +485,10 @@ async function mpStartGame() {
     p1Class: p1Deck.classCard || 'class_classic',
     p2Name:  room.guest_name || 'Guest',
     p2List:  p2Deck.list, p2Gen: p2Deck.generator,
-    p2Class: p2Deck.classCard || 'class_classic'
+    p2Class: p2Deck.classCard || 'class_classic',
   });
 
+  mpHideWaiting();
   await pushGameState();
 }
 
@@ -290,9 +498,8 @@ window.addEventListener('beforeunload', () => {
   if (window.G && G && !G.winner) {
     G.winner = G.players[1 - MP.myIdx];
     G.phase  = 'result';
-    navigator.sendBeacon && navigator.sendBeacon('/noop');
     try {
       MP.db.from('tcg_rooms').update({ game_state: G }).eq('id', MP.roomId);
-    } catch(e) {}
+    } catch (e) {}
   }
 });

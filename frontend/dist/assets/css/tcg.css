@@ -455,3 +455,50 @@ body { background: var(--bg-page); color: var(--text); font-family: 'Oswald', sa
   .slot-card img { width: 54px; height: 54px; }
   .card-info-panel { right: 4px; width: 72mm; max-width: calc(100vw - 8px); }
 }
+/* ══════════════════════════════════════════════════════════
+   TCG Multiplayer — Room System (party/multiplayer style)
+   Append these rules to tcg.css
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Public lobby list ─────────────────────────────────── */
+.mp-lobby-entry {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 12px; border: 1px solid var(--border); border-radius: 7px;
+  margin-bottom: 7px; background: var(--bg-card);
+  transition: border-color .15s;
+}
+.mp-lobby-entry:hover { border-color: var(--gold); }
+.mp-lobby-name { font-size: .88rem; font-weight: 600; color: var(--text); }
+.mp-lobby-meta { font-size: .72rem; color: var(--text-muted); margin-top: 2px; }
+.mp-lobby-code {
+  font-family: 'Creepster', cursive; font-size: 1rem;
+  color: var(--gold); letter-spacing: .1em;
+}
+.mp-lobby-empty { font-size: .82rem; color: var(--text-muted); padding: 10px 0; }
+
+/* ── Waiting screen ─────────────────────────────────────── */
+.tcg-mp-waiting-screen {
+  padding: 16px 8px; max-width: 520px; margin: 0 auto;
+}
+
+/* Player slots in waiting room */
+.tcg-waiting-players {
+  display: flex; flex-direction: column; gap: 8px; margin-top: 10px;
+}
+.tcg-waiting-slot {
+  display: flex; flex-direction: column;
+  padding: 10px 14px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--bg-card);
+  transition: border-color .2s;
+}
+.tcg-waiting-slot.filled { border-color: var(--gold); }
+.tcg-waiting-slot.empty  { opacity: .65; }
+.tcg-waiting-slot-label  { font-size: .7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 3px; }
+.tcg-waiting-slot-name   { font-size: .92rem; font-weight: 600; color: var(--text); }
+.tcg-waiting-slot-deck   { margin-top: 2px; }
+
+/* Room code in waiting screen */
+.tcg-mp-waiting-screen .mp-room-code {
+  font-family: 'Creepster', cursive; font-size: 2rem; letter-spacing: .18em;
+  color: var(--gold);
+}
