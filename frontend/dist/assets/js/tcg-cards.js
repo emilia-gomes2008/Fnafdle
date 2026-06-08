@@ -585,7 +585,7 @@ window.CARDS_DB = {
     hp: 140, wakeThreshold: 2, energyType: 'remnant', scrapFrom: 'puppet',
     img: 'rockstar/lefty.png',
     attacks: [
-      { name: 'Capture', cost: 1, type: 'stall', stallTargets: 1, stallTurns: 2 }
+      { name: 'Greedy Gnaw', cost: 2, type: 'multi', targets: 2, desc: "Deals 30 damage to 2 of your opponent's animatronics and draws 1 card for each.", damage: 30, effect:'draw1' }
     ],
     ability: { name: 'Gift of Life', desc: 'Heals all allied animatronics by 30 HP.', id: 'lefty_heal' }
   },
@@ -603,7 +603,7 @@ window.CARDS_DB = {
     hp: 140, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'rockstar',
     img: 'rockstar/rockstar_bonnie.png',
     attacks: [
-      { name: 'Guitar Solo', cost: 2, desc:'Deals 40 damage to 2 of your opponent\'s animatronics.', type: 'multi', damage: 40, targets: 2 },
+      { name: 'Guitar Solo', cost: 3, desc:'Deals 40 damage to 2 of your opponent\'s animatronics.', type: 'multi', damage: 40, targets: 2 },
     ],
     ability: { name: 'Lead Guitarist', desc: 'If one of your party members died the previous turn by damage from an attack, search for an item card and put it in your hand.', id: 'rockstar_bonnie_item' }
   },
@@ -612,9 +612,8 @@ window.CARDS_DB = {
     hp: 130, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'rockstar',
     img: 'rockstar/rockstar_chica.png',
     attacks: [
-      { name: 'Cupcake Fest', cost: 1, desc:'Heals 30HP from all party members.', type: 'heal', healAmount: 30, healTargets: 4 },
-      { name: 'Stall Wall', cost: 2, desc:'Stalls 2 of your opponent\'s animatronics.', type: 'stall', stallTargets: 2, stallTurns: 2 },
-    ],
+      { name: 'Cupcake Fest', cost: 2, desc:'Heals 50HP to 2 party members.', type: 'heal', healAmount: 50, healTargets: 2 },    ],
+    ability: { name: 'Cupcake Fest', desc: 'If one of your party members died the previous turn, choose one of your animatronics from your Blob pile and put them on a empty slot on your party with 50% HP.', id: 'chica_revive' }
   },
   rockstar_foxy: {
     id: 'rockstar_foxy', name: 'Rockstar Foxy', type: 'shell', class: 'rockstar',
@@ -623,7 +622,7 @@ window.CARDS_DB = {
     attacks: [
       { name: 'Captain Hook', cost: 3, type: 'single', damage: 50, targets: 1 },
     ],
-    ability: { name : "Pirate Treasure", desc: "It was friendship all along! Roll a dice, if heads choose a supporter from your deck and put it in your hand. If tails, a random member of your party takes 40 damage.", id: 'rockstar_foxy_treasure'}
+    ability: { name : "Pirate Treasure", desc: "It was friendship all along! If one of your party members died the previous turn by damage from an attack, choose a supporter from your deck and put it in your hand", id: 'rockstar_foxy_treasure'}
   },
   carnie: {
     id: 'carnie', name: 'Carnie', type: 'shell', class: 'rockstar',
@@ -842,7 +841,7 @@ window.CARDS_DB = {
     effect: 'helpy_gamble'
   },
   william_search: {
-    id: 'william_search', name: "Afton's Search", type: 'supporter', class: 'neutral',
+    id: 'william_search', name: "Afton's Research", type: 'supporter', class: 'neutral',
     img: 'tcg/supporters/research.png',
     desc: 'Search your deck for up to 2 Energy cards (Remnant or Agony) and add them to your hand.',
     effect: 'william_search'
@@ -957,7 +956,7 @@ window.CARDS_DB = {
     id: 'class_scrap', name: 'Remnants', type: 'class', class: 'scrap',
     img: null,
     effectId: 'class_scrap_revive', oncePer: 'game',
-    effectDesc: 'Revive 1 random Scrap from the Blob Pile with full HP in an empty slot.',
+    effectDesc: 'Choose 1 Scrap from the Blob Pile and put them with full HP in an empty slot.',
     desc: 'What was destroyed can be rebuilt. The Scraps always come back.'
   },
   class_rockstar: {

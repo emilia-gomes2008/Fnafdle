@@ -1132,9 +1132,9 @@ function playShell(handIdx,card) {
         addLog('Need Puppet in hand to evolve Carnie into Lefty!', 'ko');
         return;
       }
-      const agonyIdx = p.hand.findIndex((c, i) => c.type === 'energy' && c.energyType === 'agony' && i !== handIdx && i !== puppetIdx);
+      const agonyIdx = p.hand.findIndex((c, i) => c.type === 'energy' && c.energyType === 'remnant' && i !== handIdx && i !== puppetIdx);
       if (agonyIdx < 0) {
-        addLog('Need 1 Agony in hand to evolve Carnie into Lefty!', 'ko');
+        addLog('Need 1 Remnant in hand to evolve Carnie into Lefty!', 'ko');
         return;
       }
       
@@ -1226,8 +1226,9 @@ function playShell(handIdx,card) {
   if(!isSpringtrap){
     // Normal evolution: need matching energy card in hand
     const eType=card.energyType;
-    const hasEnergyCard=p.hand.some((c,i)=>c.type==='energy'&&c.energyType===eType&&i!==handIdx);
-    if(!hasEnergyCard){addLog(T('tcg.log.noEvoEnergy',{energy:ENERGY_META[eType]?.name||eType}));return;}
+    const anyEnergy=card.id==='rockstar_freddy';
+    const hasEnergyCard=p.hand.some((c,i)=>c.type==='energy'&&(anyEnergy||c.energyType===eType)&&i!==handIdx);
+    if(!hasEnergyCard){addLog(anyEnergy?'No energy card in hand to evolve Rockstar Freddy!':T('tcg.log.noEvoEnergy',{energy:ENERGY_META[eType]?.name||eType}));return;}
   }
   G.pendingTarget={action:'evolve',handIdx,card};
   addLog(isSpringtrap?T('tcg.log.clickSpringtrapEvo'):T('tcg.log.clickEvo',{card:card.name}),'info');
@@ -1504,8 +1505,9 @@ function clickSlot(pidx, slotIdx) {
     if(isSpringtrap&&!slot.tools.some(t=>t.passive==='william')){addLog(T('tcg.log.needSpringbonniePurple'));return;}
     if(!isSpringtrap){
       const type=pt.card.energyType;
-      const eCardIdx=p.hand.findIndex((c,i)=>c.type==='energy'&&c.energyType===type&&i!==pt.handIdx);
-      if(eCardIdx<0){addLog(T('tcg.log.noEvoEnergy',{energy:ENERGY_META[type]?.name||type}));return;}
+      const anyEnergy=pt.card.id==='rockstar_freddy';
+      const eCardIdx=p.hand.findIndex((c,i)=>c.type==='energy'&&(anyEnergy||c.energyType===type)&&i!==pt.handIdx);
+      if(eCardIdx<0){addLog(anyEnergy?'No energy card in hand to evolve Rockstar Freddy!':T('tcg.log.noEvoEnergy',{energy:ENERGY_META[type]?.name||type}));return;}
       p.discard.push(p.hand.splice(eCardIdx,1)[0]);
       const shellIdx=eCardIdx<pt.handIdx?pt.handIdx-1:pt.handIdx;
       p.hand.splice(shellIdx,1);
@@ -2011,7 +2013,6 @@ function resolveGamble(base,slot,atkIdx,isRepeat) {
 }
 
 function useAbility(slotIdx, abilityId) {
-  closeCardInfo();
   const p=G.players[G.activePlayer];
   const slot=p.party[slotIdx]; if(!slot)return;
   if(slot.abilityDisabledTurns>0){
@@ -2019,6 +2020,7 @@ function useAbility(slotIdx, abilityId) {
     return;
   }
   slot.usedAbilityThisTurn=true;
+  closeCardInfo();
 
   if(abilityId==='wfreddy_blob_energy'){
     const eIdx=p.discard.findIndex(c=>c.type==='energy');
@@ -2115,35 +2117,51 @@ function useAbility(slotIdx, abilityId) {
     });
     return;
   }
-  if(abilityId==='rockstar_foxy_treasure'){
-    if(Math.random()<0.5){
-      const supporters=p.deck.filter(c=>c.type==='supporter');
-      if(supporters.length){
-        startDeckSearch('Choose a supporter',supporters,1,G.activePlayer,(sel)=>{
-          const chosen=sel[0];
-          if(chosen){
-            const i=p.deck.indexOf(chosen);
-            if(i>=0)p.deck.splice(i,1);
-            p.hand.push(chosen);
-            p.deck=shuffle(p.deck);
-            addLog(`Rockstar Foxy found ${chosen.name}.`,'good');
-          }
-          renderGame(); pushGameState();
-        });
-        return;
-      }
-      drawEnergyToPool(G.activePlayer,2);
-      addLog('Rockstar Foxy found 2 energy from Generator.','good');
-    } else {
-      const allies=p.party.filter(Boolean);
-      if(allies.length){
-        const target=allies[Math.floor(Math.random()*allies.length)];
-        target.hp=Math.max(0,target.hp-40);
-        addLog(`Rockstar Foxy bad luck! ${target.card.name} took 40 damage.`,'ko');
-        checkKO(G.activePlayer,target);
-      }
+  if(abilityId==='chica_revive'){
+    if(!p.alliedDeathLastOpponentTurn){
+      addLog('Rockstar Chica: can only revive after an ally was KO\'d on the opponent\'s last turn.','info');
+      slot.usedAbilityThisTurn=false; return;
     }
-    renderGame(); pushGameState(); return;
+    const emptySlot=p.party.findIndex(s=>!s);
+    if(emptySlot===-1){addLog('No empty slot to revive into!','info');slot.usedAbilityThisTurn=false;return;}
+    const revivables=p.discard.filter(c=>c.type==='shell'||c.type==='endo');
+    if(!revivables.length){addLog('No animatronics in Blob to revive.','info');slot.usedAbilityThisTurn=false;return;}
+    startDeckSearch('Choose an animatronic to revive (50% HP)',revivables,1,G.activePlayer,(sel)=>{
+      const chosen=sel[0];
+      if(chosen){
+        const i=p.discard.indexOf(chosen);
+        if(i>=0)p.discard.splice(i,1);
+        const rs=newSlot(chosen);
+        rs.hp=Math.ceil(chosen.hp*0.5);
+        rs.justPlaced=false;
+        p.party[emptySlot]=rs;
+        addLog(`Rockstar Chica: Revived ${chosen.name} at ${rs.hp} HP!`,'good');
+        syncEnnardMoveset(G.activePlayer);
+      }
+      renderGame(); pushGameState();
+    });
+    return;
+  }
+
+  if(abilityId==='rockstar_foxy_treasure'){
+    if(!p.alliedDeathLastOpponentTurn){
+      addLog('Rockstar Foxy: can only search for a supporter after an ally was KO\'d on the opponent\'s last turn.','info');
+      slot.usedAbilityThisTurn=false; return;
+    }
+    const supporters=p.deck.filter(c=>c.type==='supporter');
+    if(!supporters.length){addLog('No supporter cards in deck.','info');slot.usedAbilityThisTurn=false;return;}
+    startDeckSearch('Choose a supporter (Pirate Treasure)',supporters,1,G.activePlayer,(sel)=>{
+      const chosen=sel[0];
+      if(chosen){
+        const i=p.deck.indexOf(chosen);
+        if(i>=0)p.deck.splice(i,1);
+        p.hand.push(chosen);
+        p.deck=shuffle(p.deck);
+        addLog(`Rockstar Foxy: Pirate Treasure! Found ${chosen.name}.`,'good');
+      }
+      renderGame(); pushGameState();
+    });
+    return;
   }
   if(abilityId==='rockstar_lefty_ability'){
     if(slot.elec<1){addLog('Carnie needs 1 energy for this ability.','info');slot.usedAbilityThisTurn=false;return;}
@@ -2378,12 +2396,15 @@ function triggerSpringtrapSearch(pidx,slotIdx,dyingSlot) {
   p.party[slotIdx]=null;
 
   if(!hasWilliam){checkWin();renderGame();return;}
-  // Search deck for Springtrap
-  const stIdx=p.deck.findIndex(c=>c.id==='springtrap');
-  if(stIdx<0&&p.discard.findIndex(c=>c.id==='springtrap')<0){addLog(T('tcg.log.springtrapNotFound'));checkWin();renderGame();return;}
+  // Search hand, deck, then discard for Springtrap
+  const stHand=p.hand.findIndex(c=>c.id==='springtrap');
+  const stDeck=p.deck.findIndex(c=>c.id==='springtrap');
+  const stDiscard=p.discard.findIndex(c=>c.id==='springtrap');
+  if(stHand<0&&stDeck<0&&stDiscard<0){addLog(T('tcg.log.springtrapNotFound'));checkWin();renderGame();return;}
   let st;
-  if(stIdx>=0){st=p.deck.splice(stIdx,1)[0];}
-  else{const di=p.discard.findIndex(c=>c.id==='springtrap');st=p.discard.splice(di,1)[0];}
+  if(stHand>=0){st=p.hand.splice(stHand,1)[0];}
+  else if(stDeck>=0){st=p.deck.splice(stDeck,1)[0];}
+  else{st=p.discard.splice(stDiscard,1)[0];}
   const newSlotSt=newSlot(st); newSlotSt.elec=elec; newSlotSt.justPlaced=false; checkAwake(newSlotSt);
   p.party[slotIdx]=newSlotSt;
   addLog(T('tcg.log.springtrapFound',{n:elec}),'good');
@@ -2400,17 +2421,17 @@ function triggerScrapTransform(pidx,idx,dyingSlot){
   
   if(dyingSlot.card.id === 'carnie') {
     const puppetIdx = p.hand.findIndex(c => c.id === 'puppet');
-    const agonyIdx = p.hand.findIndex(c => c.type === 'energy' && c.energyType === 'agony');
+    const agonyIdx = p.hand.findIndex(c => c.type === 'energy' && c.energyType === 'remnant');
     if(puppetIdx >= 0 && agonyIdx >= 0) {
       const indicesToSplice = [puppetIdx, agonyIdx].sort((a, b) => b - a);
       indicesToSplice.forEach(idx => {
         const consumed = p.hand.splice(idx, 1)[0];
         p.discard.push(consumed);
       });
-      addLog('Puppet and 1 Agony were consumed from hand to form Lefty!', 'info');
+      addLog('Puppet and 1 Remnant were consumed from hand to form Lefty!', 'info');
     } else {
       p.party[idx] = null;
-      addLog('Carnie requires Puppet and 1 Agony in hand to transform into Lefty!', 'ko');
+      addLog('Carnie requires Puppet and 1 Remnant in hand to transform into Lefty!', 'ko');
       checkWin(); return;
     }
   }
@@ -2418,7 +2439,8 @@ function triggerScrapTransform(pidx,idx,dyingSlot){
   let scrapCard=null;
   const hIdx=p.hand.findIndex(c=>c.id===scrapId);
   if(hIdx>=0){scrapCard=p.hand.splice(hIdx,1)[0];}
-  else{const dIdx=p.deck.findIndex(c=>c.id===scrapId);if(dIdx>=0){scrapCard=p.deck.splice(dIdx,1)[0];}}
+  else{const dIdx=p.deck.findIndex(c=>c.id===scrapId);if(dIdx>=0){scrapCard=p.deck.splice(dIdx,1)[0];}
+  else{const bIdx=p.discard.findIndex(c=>c.id===scrapId);if(bIdx>=0){scrapCard=p.discard.splice(bIdx,1)[0];}}}
   if(scrapCard){
     const ns=newSlot(scrapCard); ns.justPlaced=false;
     p.party[idx]=ns;
@@ -2820,6 +2842,10 @@ function showCardInfo(card,slot,slotIdx,pidx,isHand,handIdx){
         if(abl.id==='scrap_baby_scissors'){abled=G.turn>1&&!slot.attackedThisTurn&&G.players[1-pidx].party.some(s=>s);}
         if(abl.id==='molten_steal'){abled=G.players[1-pidx].party.some(s=>s&&s.elec>0);}
         if(abl.id==='lefty_heal'){abled=G.players[pidx].party.some(s=>s);}
+        if(abl.id==='chica_revive'){abled=G.players[pidx].alliedDeathLastOpponentTurn&&G.players[pidx].party.some(s=>!s)&&G.players[pidx].discard.some(c=>c.type==='shell'||c.type==='endo');}
+        if(abl.id==='rockstar_foxy_treasure'){abled=G.players[pidx].alliedDeathLastOpponentTurn&&G.players[pidx].deck.some(c=>c.type==='supporter');}
+        if(abl.id==='rockstar_freddy_draw'){abled=G.players[pidx].alliedDeathLastOpponentTurn;}
+        if(abl.id==='rockstar_bonnie_item'){abled=G.players[pidx].alliedDeathLastOpponentTurn&&G.players[pidx].deck.some(c=>c.type==='item');}
         const ablBtn=document.createElement('button'); ablBtn.className='info-attack-btn';
         ablBtn.disabled=!abled;
         ablBtn.innerHTML=`<div class="iab-name">✦ ${abl.name}</div><div class="iab-meta" style="color:#c9a">${abl.desc}</div>`;
@@ -3326,15 +3352,24 @@ function applyClassCardEffect(pidx, effectId, targetInfo) {
     case 'class_scrap_revive': {
       const emptySlot=G.players[pidx].party.findIndex(s=>!s);
       if(emptySlot===-1){addLog(T('tcg.log.classNoEmptySlot'),'info');return;}
-      const scrIdx=p.discard.slice().reverse().findIndex(c=>c.type==='shell'&&c.class==='scrap');
-      if(scrIdx===-1){addLog(T('tcg.log.classNoBlobScraps'),'info');return;}
-      const realIdx=p.discard.length-1-scrIdx;
-      const toRevive=p.discard.splice(realIdx,1)[0];
-      const rs=newSlot(toRevive); rs.hp=rs.card.hp;
-      G.players[pidx].party[emptySlot]=rs;
-      addLog(T('tcg.log.classRevived',{name:p.name, card:cc.name, revived:toRevive.name}),'info');
-      syncEnnardMoveset(pidx);
-      break;
+      const scraps=p.discard.filter(c=>c.type==='shell'&&c.class==='scrap');
+      if(!scraps.length){addLog(T('tcg.log.classNoBlobScraps'),'info');return;}
+      p.classCardUsed=true;
+      if(cc.oncePer==='game') p.classCardUsedForever=true;
+      G.pendingTarget=null;
+      startDeckSearch('Choose a Scrap to revive (Remnants)',scraps,1,pidx,(sel)=>{
+        const toRevive=sel[0];
+        if(toRevive){
+          const i=p.discard.indexOf(toRevive);
+          if(i>=0)p.discard.splice(i,1);
+          const rs=newSlot(toRevive); rs.hp=rs.card.hp;
+          G.players[pidx].party[emptySlot]=rs;
+          addLog(T('tcg.log.classRevived',{name:p.name, card:cc.name, revived:toRevive.name}),'info');
+          syncEnnardMoveset(pidx);
+        }
+        renderGame(); pushGameState();
+      });
+      return;
     }
     case 'class_rockstar_discount': {
       if(!targetInfo){addLog('Select an ally to receive discount.','info');return;}
