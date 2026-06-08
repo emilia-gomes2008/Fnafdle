@@ -2,7 +2,7 @@
 
 A browser-based guessing game collection set in the Five Nights at Freddy's universe. Inspired by Wordle, FNAFdle Reborn offers multiple game modes - from daily challenges to a fully simulated security office, a 2-player deduction battle, and a Mario Party-style online board game.
 
-No build tools. No install. Open `index.html` and play.
+No build tools. No install. Open `index.html` and play!
 
 ---
 
