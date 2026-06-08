@@ -117,19 +117,79 @@ async function tcgRegister(username, password) {
   return data;
 }
 
+// ── IP Rate Limiting ─────────────────────────────────────────
+const _IP_MAX_ATTEMPTS = 5;
+const _IP_BLOCK_MS     = 2 * 60 * 60 * 1000; // 2 hours
+
+async function _getClientIP() {
+  try {
+    const r = await fetch('https://api.ipify.org?format=json');
+    const j = await r.json();
+    return j.ip || 'unknown';
+  } catch { return 'unknown'; }
+}
+
+async function _checkIPBlock(ip) {
+  const db = _getDB(); if (!db) return { blocked: false, attempts: 0 };
+  const { data } = await db.from('tcg_ip_blocks')
+    .select('attempts, blocked_until').eq('ip', ip).maybeSingle();
+  if (!data) return { blocked: false, attempts: 0 };
+  if (data.blocked_until && new Date(data.blocked_until) > new Date()) {
+    const mins = Math.ceil((new Date(data.blocked_until) - Date.now()) / 60000);
+    return { blocked: true, minutesLeft: mins };
+  }
+  return { blocked: false, attempts: data.attempts || 0 };
+}
+
+async function _recordFailedAttempt(ip, currentAttempts) {
+  const db = _getDB(); if (!db) return;
+  const newAttempts = currentAttempts + 1;
+  const blockedUntil = newAttempts >= _IP_MAX_ATTEMPTS
+    ? new Date(Date.now() + _IP_BLOCK_MS).toISOString()
+    : null;
+  await db.from('tcg_ip_blocks')
+    .upsert({ ip, attempts: newAttempts, blocked_until: blockedUntil }, { onConflict: 'ip' });
+}
+
+async function _clearIPAttempts(ip) {
+  const db = _getDB(); if (!db) return;
+  await db.from('tcg_ip_blocks')
+    .upsert({ ip, attempts: 0, blocked_until: null }, { onConflict: 'ip' });
+}
+
 // ── Login ────────────────────────────────────────────────────
 async function tcgLogin(username, password) {
   const db = _getDB();
   if (!db) throw new Error('No database connection');
   username = username.trim().toLowerCase();
-  const hash = await tcgHash(password);
 
+  const ip = await _getClientIP();
+  const ipStatus = await _checkIPBlock(ip);
+  if (ipStatus.blocked) {
+    const h = Math.floor(ipStatus.minutesLeft / 60);
+    const m = ipStatus.minutesLeft % 60;
+    const timeStr = h > 0 ? `${h}h ${m}m` : `${m}m`;
+    throw new Error(`Too many failed attempts. Try again in ${timeStr}.`);
+  }
+
+  const hash = await tcgHash(password);
   const { data, error } = await db.from('tcg_users')
     .select('id, username, points, password_hash')
     .eq('username', username).maybeSingle();
-  if (error || !data) throw new Error('User not found');
-  if (data.password_hash !== hash) throw new Error('Wrong password');
 
+  const credentialsOk = data && !error && data.password_hash === hash;
+  if (!credentialsOk) {
+    await _recordFailedAttempt(ip, ipStatus.attempts);
+    const used = ipStatus.attempts + 1;
+    if (used >= _IP_MAX_ATTEMPTS) {
+      throw new Error('Too many failed attempts. Your IP is blocked for 2 hours.');
+    }
+    const left = _IP_MAX_ATTEMPTS - used;
+    if (!data || error) throw new Error(`User not found. ${left} attempt${left !== 1 ? 's' : ''} remaining.`);
+    throw new Error(`Wrong password. ${left} attempt${left !== 1 ? 's' : ''} remaining.`);
+  }
+
+  await _clearIPAttempts(ip);
   const session = { id: data.id, username: data.username, points: data.points };
   _authSave(session);
   window.TCG_COLLECTION = await tcgGetCollection(data.id);
