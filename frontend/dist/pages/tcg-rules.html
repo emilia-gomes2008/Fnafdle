@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<head>
+  <script>
+    (function() {
+      var base = document.createElement('base');
+      base.href = window.location.protocol + '//' + window.location.host + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+      document.head.appendChild(base);
+      if (window.location.pathname.includes('/frontend/dist/pages/')) {
+        var cleanPath = window.location.pathname.replace('/frontend/dist/pages/', '/');
+        window.history.replaceState(null, '', cleanPath + window.location.search);
+      }
+    })();
+  </script>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FNAF TCG — Official Rulebook</title>
+  <link rel="icon" type="icon/png" href="../assets/images/default.png">
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Oswald:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/global.css" />
+  <link rel="stylesheet" href="../assets/css/tcg-rules.css" />
+</head>
+
+<body>
+  <div class="fnaf-header">
+    <div class="fnaf-title">
+      <img src="../assets/images/title/fnafdlereborn.png" alt="Fnafdle Reborn" />
+    </div>
+    <div class="fnaf-subtitle">TCG · Official Rulebook</div>
+  </div>
+
+  <div class="rules-wrap" id="top">
+
+    <div class="rules-nav">
+      <h1 class="rules-page-title">FNAF TCG Rulebook</h1>
+      <button class="back-btn" onclick="window.location.href='tcg.html'">← Back</button>
+    </div>
+    <p class="rules-page-sub">Complete rules, exceptions &amp; card reference (work in progress, mistakes may be present)</p>
+
+    <!-- ── TABLE OF CONTENTS ── -->
+    <div class="rules-toc">
+      <div class="rules-toc-title">Contents</div>
+      <ol>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#card-types">Card Types</a></li>
+        <li><a href="#energy-types">Energy Types</a></li>
+        <li><a href="#deck-building">Deck Building</a></li>
+        <li><a href="#boosters">Collection &amp; Boosters</a></li>
+        <li><a href="#setup">Game Setup</a></li>
+        <li><a href="#party">Party &amp; Bench</a></li>
+        <li><a href="#turn">Turn Structure</a></li>
+        <li><a href="#energy-system">Energy System</a></li>
+        <li><a href="#evolution">Evolution</a></li>
+        <li><a href="#attacks">Attacks</a></li>
+        <li><a href="#status">Status Effects</a></li>
+        <li><a href="#abilities">Abilities</a></li>
+        <li><a href="#class-cards">Class Cards</a></li>
+        <li><a href="#tools">Tools</a></li>
+        <li><a href="#ennard">Ennard</a></li>
+        <li><a href="#win">Win Conditions</a></li>
+        <li><a href="#edge-cases">Edge Cases</a></li>
+      </ol>
+    </div>
+
+    <!-- ── 1. OVERVIEW ── -->
+    <div class="rules-section" id="overview">
+      <div class="rules-h2">1. Overview</div>
+      <p>FNAF TCG is a 1v1 trading card game based on the <em>Five Nights at Freddy's</em> universe. Each player builds a deck of at least 40 cards and tries to knock out all of the opponent's animatronics.</p>
+    </div>
+
+    <!-- ── 2. CARD TYPES ── -->
+    <div class="rules-section" id="card-types">
+      <div class="rules-h2">2. Card Types</div>
+      <table>
+        <tr><th>Type</th><th>Description</th></tr>
+        <tr><td><span class="card-type">Endo</span></td><td>The internal skeleton of each animatronic. Must be placed in a party slot first. Once the required energy (Wake Threshold) is attached, it can evolve into a Shell.</td></tr>
+        <tr><td><span class="card-type">Shell</span></td><td>A fully suited animatronic that evolves over the matching Endo. Retains all energy from the Endo. Each Shell specifies which Endo type is required.</td></tr>
+        <tr><td><span class="card-type">Energy</span></td><td>Played from hand to add 1 energy to your Pool. Three types: Remnant, Agony, Phantom Agony.</td></tr>
+        <tr><td><span class="card-type">Item</span></td><td>Single-use. Play from hand, apply effect immediately, then discard to the Blob Pile.</td></tr>
+        <tr><td><span class="card-type">Tool</span></td><td>Attaches permanently to one animatronic. Stays until removed by a card effect. Provides passive bonuses (e.g., +10 damage, +40 HP, status immunity).</td></tr>
+        <tr><td><span class="card-type">Supporter</span></td><td>Single-use with a powerful effect. Only 1 Supporter may be played per turn.</td></tr>
+        <tr><td><span class="card-type">Class</span></td><td>Rare card (5% booster drop rate) with an ongoing once-per-turn or once-per-game effect. Max 1 per deck; only 1 active per player at a time.</td></tr>
+      </table>
+    </div>
+
+    <!-- ── 3. ENERGY TYPES ── -->
+    <div class="rules-section" id="energy-types">
+      <div class="rules-h2">3. Energy Types</div>
+      <table>
+        <tr><th>Type</th><th>Symbol</th><th>Used by</th></tr>
+        <tr><td><strong>Remnant</strong></td><td>⚡R</td><td>Classic, Toy, Withered, some Funtime &amp; Rockstar</td></tr>
+        <tr><td><strong>Agony</strong></td><td>⚡A</td><td>Golden Freddy, Nightmare, Phantom, Shadow, Scrap, some Funtime</td></tr>
+        <tr><td><strong>Phantom Agony</strong></td><td>⚡PA</td><td>Phantom animatronics; also pays Shadow summon costs</td></tr>
+      </table>
+    </div>
+
+    <!-- ── 4. DECK BUILDING ── -->
+    <div class="rules-section" id="deck-building">
+      <div class="rules-h2">4. Deck Building Rules</div>
+      <ul>
+        <li>Minimum deck size: <strong>40 cards</strong>.</li>
+        <li>Maximum copies per card: as listed on the card (default: 3).</li>
+        <li>Endos: up to <strong>6 copies</strong> per Endo type.</li>
+        <li>Energy cards: up to <strong>12 copies</strong> per type.</li>
+        <li>Class cards: <strong>max 1</strong> per deck.</li>
+        <li>Ennard (shell) and The Cable Net (item): <strong>max 1 copy each</strong>.</li>
+        <li>Energy Recharge (item): <strong>max 4 copies</strong>.</li>
+        <li>Prebuilt decks are always accessible without logging in.</li>
+        <li>Custom decks require a registered account and are restricted to cards you own.</li>
+      </ul>
+    </div>
+
+    <!-- ── 5. COLLECTION & BOOSTERS ── -->
+    <div class="rules-section" id="boosters">
+      <div class="rules-h2">5. Collection &amp; Boosters</div>
+      <p>Each booster pack costs <strong>10 points</strong> and contains <strong>10 cards</strong>: 9 regular draws + 1 guaranteed Energy card last. Class cards have a <strong>5% chance</strong> per regular draw slot.</p>
+      <table>
+        <tr><th>Pack</th><th>Card Pool</th></tr>
+        <tr><td><strong>Cries of the Past</strong></td><td>Classic, Toy, Withered, Shadow, Phantom factions</td></tr>
+        <tr><td><strong>Flames of Agony</strong></td><td>Nightmare, Jack-O, Funtime, Scrap, Rockstar factions<br><em>Trash n' Gang &amp; Mediocre Melodies cards only appear here.</em></td></tr>
+      </table>
+      <p>Points earned (requires login): <strong>+5 pts</strong> for playing a match · <strong>+5 pts</strong> for winning.</p>
+    </div>
+
+    <!-- ── 6. GAME SETUP ── -->
+    <div class="rules-section" id="setup">
+      <div class="rules-h2">6. Game Setup</div>
+      <ol>
+        <li>Each player shuffles their deck and draws <strong>5 cards</strong> (Mulligan phase).</li>
+        <li><strong>Mulligan:</strong> Click any card to preview it in the side panel. Click "Mulligan" to shuffle your hand into the deck and draw 5 new cards. You may Mulligan only once.</li>
+        <li><strong>Setup:</strong> If you have Endos in hand, select which one(s) to place in the party (up to 4 slots). Unselected Endos stay in hand. If you have no Endo in hand, the game places the first available Endo from your deck automatically.</li>
+        <li>Starting player is chosen at random.</li>
+      </ol>
+    </div>
+
+    <!-- ── 7. PARTY & BENCH ── -->
+    <div class="rules-section" id="party">
+      <div class="rules-h2">7. Party &amp; Bench</div>
+      <ul>
+        <li>Each player has <strong>4 party slots</strong>. The leftmost occupied slot is the <em>active</em> animatronic.</li>
+        <li>Animatronics in other slots are on <em>standby</em>: they cannot attack but can still be targeted and take damage.</li>
+      </ul>
+    </div>
+
+    <!-- ── 8. TURN STRUCTURE ── -->
+    <div class="rules-section" id="turn">
+      <div class="rules-h2">8. Turn Structure</div>
+      <table>
+        <tr><th>Step</th><th>Action</th></tr>
+        <tr><td>1. Draw</td><td>Draw 1 card from your deck.</td></tr>
+        <tr><td>2. Energy</td><td>Play any number of Energy cards from hand to your Pool.</td></tr>
+        <tr><td>3. Play</td><td>Play Items, Tools, Supporters, or Class cards (max 1 Supporter per turn).</td></tr>
+        <tr><td>4. Attack</td><td>Your active animatronic may use 1 attack per turn, paying energy from the Pool.</td></tr>
+        <tr><td>5. Abilities</td><td>Use once-per-turn Abilities (free unless stated otherwise).</td></tr>
+        <tr><td>6. End Turn</td><td>Pass to opponent.</td></tr>
+      </table>
+      <div class="rules-note">Steps 2–5 can be done in any order within your turn. You are not forced to attack.</div>
+    </div>
+
+    <!-- ── 9. ENERGY SYSTEM ── -->
+    <div class="rules-section" id="energy-system">
+      <div class="rules-h2">9. Energy System</div>
+      <table>
+        <tr><th>Zone</th><th>Description</th></tr>
+        <tr><td><strong>Generator</strong></td><td>A side pool of extra Energy. Drawn from by specific card effects (e.g., Extra Battery, Fazbear Entertainment).</td></tr>
+        <tr><td><strong>Pool</strong></td><td>Your active energy reserve. Spend energy from here to pay attack costs. Spent energy goes to the Blob Pile.</td></tr>
+        <tr><td><strong>Blob Pile</strong></td><td>Discard pile. KO'd animatronics, used items, supporters, spent energy, and discarded cards all go here. Several effects allow you to recover cards from the Blob.</td></tr>
+      </table>
+      <p><strong>Wake Threshold:</strong> the number of Energy cards that must be attached directly onto an Endo before it can evolve into its Shell. Endos require 1; most Shells require 2–3. The energy stays on the card upon evolution.</p>
+    </div>
+
+    <!-- ── 10. EVOLUTION ── -->
+    <div class="rules-section" id="evolution">
+      <div class="rules-h2">10. Evolution</div>
+      <div class="rules-h3">Standard Evolution</div>
+      <ol>
+        <li>Attach Energy cards directly onto your Endo until you meet the Shell's Wake Threshold.</li>
+        <li>Play the matching Shell card from your hand onto that slot.</li>
+        <li>The Endo is sent to the Blob Pile; the Shell takes its place with all accumulated energy.</li>
+      </ol>
+
+      <div class="rules-h3">Exceptions</div>
+
+      <div class="rules-exception">
+        <h4>Phantom Summon (wakeThreshold: 0)</h4>
+        <p>Phantom animatronics require no Endo. Summon them directly using Phantom Agony energy, or for free via Springtrap's ability "Summon Phantoms".</p>
+      </div>
+
+      <div class="rules-exception">
+        <h4>Shadow Summon</h4>
+        <p>Shadow Freddy and RWQFSFASXC are placed by discarding 1 Agony or Phantom Agony from hand (consumed at placement). No Endo required.</p>
+      </div>
+
+      <div class="rules-exception">
+        <h4>Scrap Transformation (Remnant Fragment tool)</h4>
+        <p>Equip Remnant Fragment on one of these animatronics. When KO'd, it immediately transforms into its Scrap version (if in hand or deck):</p>
+        <ul>
+          <li>Springtrap → Scraptrap</li>
+          <li>Circus Baby → Scrap Baby</li>
+          <li>Funtime Freddy → Molten Freddy</li>
+          <li>Puppet → Lefty</li>
+          <li>Carnie → Lefty</li>
+        </ul>
+      </div>
+
+      <div class="rules-exception">
+        <h4>Springtrap Evolution (Purple Guy tool)</h4>
+        <p>Equip Purple Guy on Spring Bonnie. Enables: evolution into Springtrap (using Agony threshold), free Phantom summons, and discards 1 random opponent hand card per turn.</p>
+      </div>
+
+      <div class="rules-exception">
+        <h4>Springbonnie's "Unstable Spring"</h4>
+        <p>60%: 70 damage. 40%: Springlock failure — Spring Bonnie is immediately destroyed and sent to the Blob Pile. Remnant Fragment cannot prevent this.</p>
+      </div>
+    </div>
+
+    <!-- ── 11. ATTACKS ── -->
+    <div class="rules-section" id="attacks">
+      <div class="rules-h2">11. Attacks</div>
+      <p>Each attack lists an energy Cost. Spend that many energy from your Pool to use it. One attack per turn per animatronic.</p>
+      <table>
+        <tr><th>Type</th><th>Description</th></tr>
+        <tr><td><strong>Single</strong></td><td>Deals damage to exactly 1 enemy.</td></tr>
+        <tr><td><strong>Multi</strong></td><td>Deals damage to multiple enemies (count listed; −1 = all).</td></tr>
+        <tr><td><strong>Defense</strong></td><td>Reduces incoming damage for the specified number of turns.</td></tr>
+        <tr><td><strong>Heal</strong></td><td>Restores HP to 1 or more allied animatronics.</td></tr>
+        <tr><td><strong>Stall</strong></td><td>Prevents target(s) from attacking for N turns.</td></tr>
+        <tr><td><strong>Gamble</strong></td><td>Random outcome — success/fail chances are listed on the card.</td></tr>
+        <tr><td><strong>Search</strong></td><td>Searches the deck for a specific card type.</td></tr>
+      </table>
+    </div>
+
+    <!-- ── 12. STATUS EFFECTS ── -->
+    <div class="rules-section" id="status">
+      <div class="rules-h2">12. Status Effects</div>
+      <table>
+        <tr><th>Status</th><th>Effect</th><th>Removed by</th></tr>
+        <tr><td><strong>Burn</strong></td><td>Applied in stacks. At the start of each affected animatronic's turn: 10 damage per stack.</td><td>Fazbear Antidote (item); Fireproof Suit (tool — also grants immunity)</td></tr>
+        <tr><td><strong>Stall</strong></td><td>Cannot attack for N turns.</td><td>Security Tape (item); Static Dampener (tool — also grants immunity)</td></tr>
+        <tr><td><strong>Item Lock</strong></td><td>Opponent cannot play Item cards for 1 turn.</td><td>Applied by Funtime Endo's "System Lock" (5 dmg + lock).</td></tr>
+        <tr><td><strong>Ability Disable</strong></td><td>Target cannot use Abilities for 1 turn.</td><td>Applied by Bucket Bob (item).</td></tr>
+        <tr><td><strong>Plush Trap</strong></td><td>Next single-target attack made by the trapped animatronic deals 30 damage to itself first (one-time trigger).</td><td>Applied by Plushtrap's ability. Removed after trigger.</td></tr>
+        <tr><td><strong>Ice Cream Trap</strong></td><td>Next attack received by the chosen enemy deals +20 extra damage (one-time).</td><td>Applied by Circus Baby's ability.</td></tr>
+        <tr><td><strong>Glamour Boost</strong></td><td>Next attack from any ally deals +15 extra damage (one-time).</td><td>Applied by Toy Chica's ability.</td></tr>
+      </table>
+    </div>
+
+    <!-- ── 13. ABILITIES ── -->
+    <div class="rules-section" id="abilities">
+      <div class="rules-h2">13. Abilities</div>
+      <ul>
+        <li>Abilities on Shell cards and some Tools are optional effects, separate from attacks.</li>
+        <li><strong>Once per turn</strong> abilities can only trigger once during your turn each round.</li>
+        <li><strong>Once per game</strong> abilities can only trigger once for the entire match.</li>
+        <li>Abilities are free unless an energy cost is explicitly stated in the description.</li>
+        <li>Abilities are lost when the animatronic carrying them is KO'd.</li>
+      </ul>
+    </div>
+
+    <!-- ── 14. CLASS CARDS ── -->
+    <div class="rules-section" id="class-cards">
+      <div class="rules-h2">14. Class Cards</div>
+      <p>Class cards are rare (5% drop rate per regular booster slot). Max 1 per deck; only 1 active per player at a time. They remain in play for the entire match unless removed.</p>
+      <table>
+        <tr><th>Class Card</th><th>Faction</th><th>Effect</th><th>Freq.</th></tr>
+        <tr><td>The Original Band</td><td>Classic</td><td>Draw 1 card.</td><td>1× / turn</td></tr>
+        <tr><td>New Generation</td><td>Toy</td><td>Heal 10 HP on an ally (discard 1⚡ to heal 30 instead).</td><td>1× / turn</td></tr>
+        <tr><td>Damaged but Dangerous</td><td>Withered</td><td>Give +15 defense for 1 turn to a Withered ally.</td><td>1× / turn</td></tr>
+        <tr><td>Residual Agony</td><td>Phantom</td><td>Discard 1⚡ from Pool to Stall 1 enemy 1 turn.</td><td>1× / turn</td></tr>
+        <tr><td>Total Terror</td><td>Nightmare</td><td>15 damage to all enemies in standby.</td><td>1× / turn</td></tr>
+        <tr><td>Flame of Agony</td><td>Jack-O</td><td>Passive: +5 dmg per Burn stack. Discard 1⚡ to give Burn 1 to 1 enemy.</td><td>1× / turn</td></tr>
+        <tr><td>Devastating Shadow</td><td>Shadow</td><td>Opponent discards 1⚡ from one of their animatronics.</td><td>1× / turn</td></tr>
+        <tr><td>Scooping Protocol</td><td>Funtime</td><td>Discard 1 card from hand and draw 2 from deck.</td><td>1× / turn</td></tr>
+        <tr><td>Remnants</td><td>Scrap</td><td>Choose 1 Scrap from Blob Pile; place at full HP in an empty slot.</td><td>1× / game</td></tr>
+        <tr><td>Rockstar Discount</td><td>Rockstar</td><td>Discard 1 card from hand; reduce one animatronic's attack cost by 1⚡ this turn.</td><td>1× / turn</td></tr>
+      </table>
+    </div>
+
+    <!-- ── 15. TOOLS ── -->
+    <div class="rules-section" id="tools">
+      <div class="rules-h2">15. Tools</div>
+      <table>
+        <tr><th>Tool</th><th>Effect</th></tr>
+        <tr><td><strong>Freddy Mask</strong></td><td>Immune to Toy &amp; Withered attacks/effects. <em>Exception: Withered Foxy bypasses this.</em></td></tr>
+        <tr><td><strong>Mendo's Endos</strong></td><td>On equip: +40 to max HP and current HP.</td></tr>
+        <tr><td><strong>Hat + Microphone</strong></td><td>+10 damage on all of bearer's attacks.</td></tr>
+        <tr><td><strong>Guitar Axe</strong></td><td>Attacks costing ≥3 energy deal +20 extra damage.</td></tr>
+        <tr><td><strong>Pirate Hook</strong></td><td>+1 extra turn on any activated defense.</td></tr>
+        <tr><td><strong>Springlock Device</strong></td><td>When bearer is KO'd: deals 30 damage to the animatronic that defeated it.</td></tr>
+        <tr><td><strong>Fireproof Suit</strong></td><td>Full Burn immunity; removes existing Burn stacks on equip.</td></tr>
+        <tr><td><strong>Static Dampener</strong></td><td>Full Stall immunity.</td></tr>
+        <tr><td><strong>Music Box</strong></td><td>Once per turn: draw 1 card.</td></tr>
+        <tr><td><strong>Remnant Fragment</strong></td><td>Equip on Springtrap / Circus Baby / Funtime Freddy / Puppet / Carnie → transforms into Scrap version when KO'd.</td></tr>
+        <tr><td><strong>Purple Guy</strong></td><td>Equip on Spring Bonnie only. Enables Springtrap evolution + free Phantom summons. Discards 1 random opponent hand card per turn.</td></tr>
+        <tr><td><strong>Mr. Can-Do</strong></td><td>Blocks the next Stall or Burn applied by the opponent to the bearer, then discards itself.</td></tr>
+      </table>
+    </div>
+
+    <!-- ── 16. ENNARD ── -->
+    <div class="rules-section" id="ennard">
+      <div class="rules-h2">16. Ennard (Special Rule)</div>
+      <p><strong>Prerequisites:</strong> Ennard card in hand + at least 2 evolved Funtime Shells in your party (Endos in remaining slots are OK).</p>
+      <p><strong>How to summon:</strong> Play <strong>The Cable Net</strong> item. All Funtime Shells in the party are sent to the Blob Pile. Ennard is placed on a slot and inherits all <em>unique</em> attacks and abilities from every Funtime card in the Blob Pile — no duplicate attacks.</p>
+      <p><strong>Limits:</strong> Max 1 Ennard and 1 The Cable Net per deck.</p>
+    </div>
+
+    <!-- ── 17. WIN CONDITIONS ── -->
+    <div class="rules-section" id="win">
+      <div class="rules-h2">17. Win Conditions</div>
+      <ul>
+        <li>You <strong>WIN</strong> when all of the opponent's party slots are KO'd simultaneously (no animatronics remain in play).</li>
+        <li>If your deck runs out and you must draw, you <strong>LOSE</strong> on the next required draw.</li>
+        <li>In multiplayer: the last player with animatronics standing wins.</li>
+      </ul>
+    </div>
+
+    <!-- ── 18. EDGE CASES ── -->
+    <div class="rules-section" id="edge-cases">
+      <div class="rules-h2">18. Notable Exceptions &amp; Edge Cases</div>
+      <table>
+        <tr><th>Card / Rule</th><th>Exception</th></tr>
+        <tr><td>Phantom animatronics</td><td>wakeThreshold 0 — place directly from hand, no Endo needed.</td></tr>
+        <tr><td>Shadow animatronics</td><td>Consume 1 Agony or Phantom Agony from hand on placement (summon cost, not an energy attach).</td></tr>
+        <tr><td>Springbonnie "Unstable Spring"</td><td>40% fail → Spring Bonnie instantly destroyed. Remnant Fragment cannot save it.</td></tr>
+        <tr><td>Withered Freddy "Classic Collapse"</td><td>50%: 25 dmg to ALL enemies. 50%: nothing.</td></tr>
+        <tr><td>Helpy</td><td>99%: nothing. 1%: 1,000,000,000 damage to 1 random enemy (instant KO).</td></tr>
+        <tr><td>Rockstar Freddy "Please Deposit 5 Coins"</td><td>Discards top 5 cards of opponent's <strong>deck</strong> — not the Blob Pile.</td></tr>
+        <tr><td>Lefty "Greedy Gnaw"</td><td>Draws 1 card per enemy hit (max 2 draws total).</td></tr>
+        <tr><td>Nightmare Fredbear "Final Nightmare"</td><td>Costs 4 energy → 100 damage.</td></tr>
+        <tr><td>Shadow Freddy "Repeat Gambling"</td><td>Repeats only the last <em>failed</em> Gamble (does not stack multiple repeats).</td></tr>
+        <tr><td>Rockstar Chica (ability)</td><td>Revives 1 animatronic from Blob Pile at 50% max HP in an empty slot.</td></tr>
+        <tr><td>Rockstar Endo "Tuning"</td><td>Shuffles deck first, then places the found Rockstar Shell on top.</td></tr>
+        <tr><td>Rockstar Endo "Metal Scraping"</td><td>Gains 1 Remnant energy if the attack KOs the target.</td></tr>
+        <tr><td>JJ "Switcheroo"</td><td>Swaps bench positions with an ally for free; both keep HP, energy, and status effects.</td></tr>
+        <tr><td>Lolbit "% BUFFER"</td><td>Discard 1⚡ from Lolbit → opponent cannot draw at the start of their next turn.</td></tr>
+        <tr><td>Funtime Endo "System Lock"</td><td>5 damage + opponent cannot use Item cards for 1 turn.</td></tr>
+        <tr><td>RWQFSFASXC "Shadow Pulse"</td><td>15 damage + draw 1 card.</td></tr>
+        <tr><td>Freddy Mask (tool)</td><td>Withered Foxy is the only card that bypasses this immunity.</td></tr>
+      </table>
+    </div>
+  </div><!-- /.rules-wrap -->
+</body>
+</html>

@@ -824,7 +824,7 @@ window.CARDS_DB = {
   purple_guy: {
     id: 'purple_guy', name: 'Purple Guy', type: 'tool', class: 'neutral',
     img: 'human/afton.png',
-    desc: 'Equip on Springbonnie only: enables transformation into Springtrap and free summoning of Phantoms. While active, discards 1 random card from the opponent\'s hand.',
+    desc: 'Equip on Springbonnie only: enables transformation into Springtrap.',
     passive: 'william',
     toolTarget: ['springbonnie']
   },

@@ -57,7 +57,7 @@
           <button class="lobby-tab" onclick="switchTab('collection')" id="tab-collection">Collection</button>
           <button class="lobby-tab" onclick="switchTab('booster')" id="tab-booster">Boosters</button>
           <button class="lobby-tab" onclick="switchTab('trade')" id="tab-trade">Trades</button>
-          <button class="lobby-tab" onclick="switchTab('rules')" id="tab-rules" data-i18n="tcg.tab.rules">Rules</button>
+          <button class="lobby-tab" onclick="window.location.href='tcg-rules.html'" id="tab-rules" data-i18n="tcg.tab.rules">Rules</button>
         </div>
 
         <div id="tab-content-play" class="tab-content">
@@ -144,61 +144,6 @@
           </div>
         </div>
 
-        <div id="tab-content-rules" class="tab-content" style="display:none">
-          <div class="rules-content">
-            <h3 data-i18n="tcg.rules.title">Summary</h3>
-            <p data-i18n="tcg.rules.summary">Main Deck: 30 cards · Generator: 30 Energies ⚡ · Starting hand: 5 cards (needs 1 Endo) · Active Zone: 4 Animatronics · First to 4 KOs wins.</p>
-
-            <h3 data-i18n="tcg.rules.genTitle">Generator Energy ⚡</h3>
-            <p data-i18n="tcg.rules.genDesc">Each turn the Generator gives 1 Energy to your <strong>Pool</strong>. Energies accumulate if unused (turn 1 → 1 available, turn 2 → 2 if unspent, etc.). Attach energy to an animatronic by clicking the Pool then the slot. Energy spent in attacks goes to the <strong>Blob Pile</strong>. If an animatronic reaches 0 energy after attacking → returns to Standby.</p>
-
-            <h3 data-i18n="tcg.rules.deckEnergyTitle">Deck Energy Cards</h3>
-            <p data-i18n="tcg.rules.deckEnergyDesc">○ Remnant, ● Agony and ◆ Phantom Agony are main deck cards. <strong>They are not played directly</strong> - they are consumed automatically when evolving or summoning Phantoms:</p>
-            <ul>
-              <li><span style="color:#7ad" data-i18n="tcg.rules.remnantDesc">○ Remnant - required to evolve Classic, Toy, Withered and Rockstar animatronics</span></li>
-              <li><span style="color:#d77" data-i18n="tcg.rules.agonyDesc">● Agony - required to evolve Nightmare, Jack-O, Shadow, Fredbear and Spring Bonnie</span></li>
-              <li><span style="color:#a7d" data-i18n="tcg.rules.phantomDesc">◆ Phantom Agony - required to summon Phantoms (1 per summon)</span></li>
-            </ul>
-
-            <h3 data-i18n="tcg.rules.endosTitle">Endos</h3>
-            <p data-i18n="tcg.rules.endosDesc">Played for free from hand to the Active Zone (max 4 slots). Limit of 6 copies per deck. Available Endos:</p>
-            <ul>
-              <li data-i18n="tcg.rules.endo01"><strong>Endo-01</strong> - evolves into Classic animatronics (uses ○ Remnant)</li>
-              <li data-i18n="tcg.rules.endo02"><strong>Endo-02</strong> - evolves into Toy and Withered animatronics (uses ○ Remnant)</li>
-              <li data-i18n="tcg.rules.endoRs"><strong>Rockstar Endo</strong> - evolves into Rockstar animatronics (uses ○ Remnant)</li>
-              <li data-i18n="tcg.rules.endoFt"><strong>Funtime Endo (Yenndo)</strong> - evolves into Funtime animatronics (uses ○ Remnant or ● Agony)</li>
-              <li data-i18n="tcg.rules.endoNm"><strong>Nightmare Endo</strong> - evolves into Nightmare and Jack-O (uses ● Agony)</li>
-              <li data-i18n="tcg.rules.endoSp"><strong>Springlock Endo</strong> - evolves into Spring Bonnie or Fredbear (uses ● Agony)</li>
-            </ul>
-
-            <h3 data-i18n="tcg.rules.evoTitle">Evolution</h3>
-            <p data-i18n="tcg.rules.evoDesc">The Endo must have been on the field ≥ 1 turn (cannot evolve the turn it was played). To evolve, you need in hand: the <strong>Shell</strong> + 1 card of the <strong>correct Energy type</strong>. Play the Shell → click the compatible Endo → the Energy card is consumed automatically to the Blob Pile.</p>
-
-            <h3 data-i18n="tcg.rules.standbyTitle">Standby vs Awake</h3>
-            <p data-i18n="tcg.rules.standbyDesc">An animatronic wakes when attached energy ⚡ ≥ its Wake Threshold (shown on the slot). Animatronics in Standby cannot attack. If it drops to 0 energy after attacking → returns to Standby.</p>
-
-            <h3 data-i18n="tcg.rules.toolsTitle">Tools</h3>
-            <p data-i18n="tcg.rules.toolsDesc">Each animatronic can have <strong>at most 1 tool</strong> equipped. Tools are permanent and go to the Blob Pile when the animatronic is defeated.</p>
-
-            <h3 data-i18n="tcg.rules.phantomsTitle">Phantoms</h3>
-            <p data-i18n="tcg.rules.phantomsDesc">Summoned by playing a Phantom Shell from hand - consumes 1 ◆ Phantom Agony card from hand automatically (no Endo needed). If Purple Guy is equipped on Spring Bonnie, summoning is <strong>free</strong>.</p>
-
-            <h3 data-i18n="tcg.rules.springTitle">Spring Bonnie → Springtrap</h3>
-            <p data-i18n="tcg.rules.springDesc">Equip Purple Guy on Spring Bonnie. When Spring Bonnie dies (including by gambling failure), the opponent gains 1 KO but you can search your deck for Springtrap and summon it with remaining energies. Springtrap can attack the same turn.</p>
-
-            <h3 data-i18n="tcg.rules.scrapTitle">Scrap Transformation</h3>
-            <p data-i18n="tcg.rules.scrapDesc">Equip Remnant Fragment on Springtrap, Circus Baby, Funtime Freddy, Puppet, or Carnie. When that animatronic is KO'd, the opponent gains 1 KO but the animatronic transforms into its corresponding Scrap version from your hand or deck (Scraptrap, Scrap Baby, Molten Freddy, or Lefty), retaining its remaining energy.<br><strong>Special Carnie (Rockstar Lefty) Rule:</strong> Evolving Carnie into Scrap Lefty (either by hand or through Remnant Fragment when KO'd) requires consuming a Puppet card and 1 Agony card from your hand.</p>
-
-            <h3 data-i18n="tcg.rules.blobTitle">Blob Pile</h3>
-            <p data-i18n="tcg.rules.blobDesc">Pile of used/discarded cards. Contains ⚡ energy spent in attacks and Energy cards (○●◆) consumed in evolutions. Some cards interact with the Blob Pile - click "Blob" to view it.</p>
-
-            <h3 data-i18n="tcg.rules.endTurnTitle">End of Turn</h3>
-            <p data-i18n="tcg.rules.endTurnDesc">Automatic when all Awake animatronics have attacked. Or pass manually with "End Turn".</p>
-
-            <h3 data-i18n="tcg.rules.mulliganTitle">Mulligan</h3>
-            <p data-i18n="tcg.rules.mulliganDesc">If your starting hand has no Endo, it is automatically replaced (2 attempts). From the 2nd attempt on, the opponent draws 1 extra card. After 2 failed attempts, the game finds 1 Endo in the deck, places it in hand, shuffles the rest and deals 4 more cards.</p>
-          </div>
-        </div>
       </div>
     </div>
 
