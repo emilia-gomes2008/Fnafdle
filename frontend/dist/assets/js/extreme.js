@@ -69,7 +69,7 @@ const ENTRY_MS       = 4000;
 const RETREAT_MIN_MS = 2500;
 const RETREAT_MAX_MS = 7000;
 
-// Night timing: 4m30s total, 45s per hour, 6 hours (12AM–5AM), death at 6AM
+// Night timing: 4m30s total, 45s per hour, 6 hours (12AM-5AM), death at 6AM
 const NIGHT_TOTAL_MS = 270000;
 const HOUR_MS        = 45000;
 const HOUR_LABELS    = ['12 AM', '1 AM', '2 AM', '3 AM', '4 AM', '5 AM'];

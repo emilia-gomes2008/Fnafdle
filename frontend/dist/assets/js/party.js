@@ -102,7 +102,7 @@ const DICE_TYPES = {
   springlock: { label: 'Springlock Die',           emoji: '🪤🎲', roll: () => [6,7,8,9,10,0][Math.floor(Math.random()*6)], springlock: true },
   // Puppet: faces 3-3-4-4-5-6; 6 = place a Music Box trap
   musicbox:   { label: 'Music Box Die',            emoji: '🎭🎲', roll: () => [3,3,4,4,5,6][Math.floor(Math.random()*6)], musicbox: true },
-  // Mangle: 2d5 (2–10)
+  // Mangle: 2d5 (2-10)
   '2d5':      { label: "Mangle's 2d5",             emoji: '🎀🎲', roll: () => Math.floor(Math.random()*5)+1 + Math.floor(Math.random()*5)+1 },
   // BB: 1-2-3-1-2-3 + passive coin steal on every roll
   balloon:    { label: "BB's Balloon Die",          emoji: '🎈🎲', roll: () => [1,2,3,1,2,3][Math.floor(Math.random()*6)], bbPassive: true },
@@ -111,17 +111,17 @@ const DICE_TYPES = {
 const CHAR_DEFAULT_DICE = { freddy: 'd6', bonnie: 'd6', chica: 'd6', foxy: 'd6', mangle: 'd6', puppet: 'd6', springtrap: 'd6', bb: 'd6' };
 
 const SHOP_DICE = [
-  { id: 'd8',         price: 8,  maxUses: 4, label: "Foxy's Die (d8)",      emoji: '🦊🎲', desc: 'Rolls 1–8. Foxy only. · 4 uses.',                             onlyChar: 'foxy'       },
+  { id: 'd8',         price: 8,  maxUses: 4, label: "Foxy's Die (d8)",      emoji: '🦊🎲', desc: 'Rolls 1-8. Foxy only. · 4 uses.',                             onlyChar: 'foxy'       },
   { id: 'chef',       price: 8,  maxUses: 4, label: "Chica's Chef Die",      emoji: '🍗🎲', desc: 'Rolls 2-2-3-3-4-5. Chica only. · 4 uses.',                   onlyChar: 'chica'      },
   { id: 'rocker',     price: 8,  maxUses: 4, label: "Bonnie's Rocker Die",   emoji: '🎸🎲', desc: 'Rolls 1-1-3-4-6-6. Bonnie only. · 4 uses.',                  onlyChar: 'bonnie'     },
-  { id: '2d5',        price: 8,  maxUses: 4, label: "Mangle's 2d5",        emoji: '🎀🎲', desc: 'Rolls 2d5 (2–10). Mangle only. · 4 uses.',                    onlyChar: 'mangle'     },
+  { id: '2d5',        price: 8,  maxUses: 4, label: "Mangle's 2d5",        emoji: '🎀🎲', desc: 'Rolls 2d5 (2-10). Mangle only. · 4 uses.',                    onlyChar: 'mangle'     },
   { id: 'balloon',    price: 8,  maxUses: 4, label: "BB's Balloon Die",      emoji: '🎈🎲', desc: 'Rolls 1-2-3-1-2-3. Passive: steals 1 coin from a random opponent every roll! BB only. · 4 uses.', onlyChar: 'bb' },
   { id: 'springlock', price: 8,  maxUses: 3, label: 'Springlock Die',        emoji: '🪤🎲', desc: 'Rolls 6-10 or Springlock (no move + back to start!). Springtrap only. · 3 uses.', onlyChar: 'springtrap' },
   { id: 'musicbox',   price: 8,  maxUses: 3, label: 'Music Box Die',         emoji: '🎭🎲', desc: 'Rolls 3-3-4-4-5-6. On 6: places a Music Box trap! Puppet only. · 3 uses.',       onlyChar: 'puppet'     },
-  { id: '2d6',        price: 8,  maxUses: 3, label: 'Double Die (2d6)',       emoji: '🎲🎲', desc: 'Roll 2d6 and add results (2–12). · 3 uses.' },
+  { id: '2d6',        price: 8,  maxUses: 3, label: 'Double Die (2d6)',       emoji: '🎲🎲', desc: 'Roll 2d6 and add results (2-12). · 3 uses.' },
   { id: 'all1',       price: 3,  maxUses: 5, forced: 5, label: 'All-Ones Die', emoji: '1️⃣', desc: 'Always rolls 1. FORCED for 5 turns — cannot unequip!' },
   { id: 'lucky7',     price: 12, maxUses: 4, label: 'Lucky Seven Die',        emoji: '7️⃣',   desc: 'Rolls 6 or 7... or 0. High risk, high reward. · 4 uses.' },
-  { id: 'pick',       price: 15, maxUses: 3, label: 'Pick Your Steps Die',    emoji: '🎯',   desc: 'Choose exactly how many spaces to move (1–6). · 3 uses.' },
+  { id: 'pick',       price: 15, maxUses: 3, label: 'Pick Your Steps Die',    emoji: '🎯',   desc: 'Choose exactly how many spaces to move (1-6). · 3 uses.' },
 ];
 
 const TRAP_EFFECTS = [

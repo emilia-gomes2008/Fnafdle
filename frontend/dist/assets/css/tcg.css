@@ -182,9 +182,27 @@ body { background: var(--bg-page); color: var(--text); font-family: 'Oswald', sa
 .rules-content ul { padding-left: 18px; }
 
 /* ── Mulligan ─────────────────────────────────────── */
-.mulligan-wrap { max-width: 700px; margin: 20px auto; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 22px; text-align: center; }
-.mulligan-hand { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 14px 0; }
-.mulligan-buttons { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.mulligan-wrap { max-width: 900px; margin: 20px auto; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 22px; text-align: center; }
+.mulligan-hand { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 14px 0; max-height: 55vh; overflow-y: auto; }
+.mulligan-buttons { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; align-items: center; }
+
+/* Card face scaled down for mulligan / setup */
+.mulligan-cf {
+  width: 108px !important; min-width: 108px !important; max-width: 108px !important;
+  font-size: .65rem !important;
+  cursor: pointer;
+  transition: outline .1s;
+}
+.mulligan-cf:hover { outline: 2px solid var(--gold); }
+.mulligan-cf .cf-img img { height: 56px !important; }
+
+/* Selected endo in setup phase */
+.setup-selected {
+  outline: 2px solid var(--gold) !important;
+  box-shadow: 0 0 8px var(--gold) !important;
+}
+
+/* Keep mini-card for any legacy usage */
 .mini-card { width: 76px; background: var(--bg-card); border: 1.5px solid var(--border); border-radius: 6px; padding: 5px; text-align: center; }
 .mini-card img { width: 52px; height: 52px; object-fit: contain; display: block; margin: 0 auto 3px; }
 .mini-card .mc-name { font-size: .62rem; color: var(--text); }
@@ -501,4 +519,372 @@ body { background: var(--bg-page); color: var(--text); font-family: 'Oswald', sa
 .tcg-mp-waiting-screen .mp-room-code {
   font-family: 'Creepster', cursive; font-size: 2rem; letter-spacing: .18em;
   color: var(--gold);
+}
+
+/* ════════════════════════════════════════════════
+   AUTH BAR
+   ════════════════════════════════════════════════ */
+.tcg-auth-bar {
+  max-width: 1100px; margin: 0 auto 4px;
+  padding: 5px 10px;
+  display: flex; align-items: center; gap: 10px; justify-content: flex-end;
+  border-bottom: 1px solid var(--border);
+  font-size: .82rem;
+}
+.auth-username { color: var(--gold); font-weight: 600; }
+.auth-points   { color: #aad; }
+.auth-guest    { color: var(--text-muted); font-style: italic; }
+
+/* ── Auth Modal ───────────────────────────────── */
+.auth-modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.78);
+  z-index: 9990; display: flex; align-items: center; justify-content: center;
+}
+.auth-modal {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 22px 24px; width: 90%; max-width: 360px;
+  display: flex; flex-direction: column; gap: 10px;
+  position: relative;
+}
+.auth-modal-title { font-family: 'Creepster', cursive; color: var(--gold); font-size: 1.4rem; margin: 0; }
+.auth-tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+.auth-tab { background: none; border: none; color: var(--text-muted); font-family: 'Oswald', sans-serif; font-size: .9rem; cursor: pointer; padding: 3px 10px; }
+.auth-tab.active { color: var(--gold); border-bottom: 2px solid var(--gold); }
+.auth-form { display: flex; flex-direction: column; gap: 8px; }
+.auth-error { font-size: .78rem; color: var(--red-text); min-height: 14px; }
+.auth-gate {
+  text-align: center; padding: 30px 16px;
+  color: var(--text-muted); font-size: .9rem;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+}
+
+/* ════════════════════════════════════════════════
+   COLLECTION TAB
+   ════════════════════════════════════════════════ */
+.col-header {
+  margin-bottom: 8px; font-size: .82rem; color: var(--text-muted);
+}
+.col-header strong { color: var(--gold); }
+.col-qty-badge {
+  position: absolute; bottom: 3px; right: 4px;
+  background: #111; border: 1px solid var(--border);
+  font-size: .65rem; padding: 1px 5px; border-radius: 4px;
+  color: var(--text-muted); font-family: 'Oswald', sans-serif;
+}
+.col-qty-badge.owned {
+  background: #1a2d1a; border-color: #3a5a3a; color: #7d7;
+}
+
+/* Deck builder owned badge */
+.db-owned-badge {
+  position: absolute; top: 3px; right: 3px;
+  background: rgba(10,20,30,.9); border: 1px solid #336;
+  font-size: .6rem; padding: 1px 4px; border-radius: 3px;
+  color: #aad; font-family: 'Oswald', sans-serif;
+  pointer-events: none;
+}
+
+/* ════════════════════════════════════════════════
+   BOOSTER TAB
+   ════════════════════════════════════════════════ */
+.booster-intro {
+  text-align: center; padding: 6px 0 12px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.booster-pts-info { font-size: .85rem; color: var(--text-muted); }
+.booster-pts-info strong { color: var(--gold); }
+
+.booster-grid {
+  display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+}
+.booster-card {
+  background: var(--bb, #0a1520);
+  border: 2px solid color-mix(in srgb, var(--bc, #7ad) 60%, transparent);
+  border-radius: 12px; padding: 18px 16px;
+  width: 100%; max-width: 340px; text-align: center;
+  display: flex; flex-direction: column; gap: 8px;
+  transition: box-shadow .2s;
+}
+.booster-card:hover { box-shadow: 0 0 18px color-mix(in srgb, var(--bc, #7ad) 40%, transparent); }
+.booster-card-header { font-family: 'Creepster', cursive; font-size: 1.5rem; }
+.booster-card-sub    { font-size: .8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .1em; }
+.booster-card-desc   { font-size: .82rem; color: var(--text-muted); }
+.booster-card-classes {
+  display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; margin: 4px 0;
+}
+.booster-class-icon  { width: 32px; height: 32px; object-fit: cover; border-radius: 4px; border: 1px solid #333; }
+.booster-open-btn    { margin-top: 4px; }
+
+/* Opening animation */
+.booster-opening {
+  text-align: center; padding: 40px 20px;
+  display: flex; flex-direction: column; align-items: center; gap: 20px;
+}
+.booster-opening-title { font-family: 'Creepster', cursive; font-size: 1.6rem; }
+.booster-spinner {
+  width: 40px; height: 40px; border: 4px solid var(--border);
+  border-top-color: var(--gold); border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Reveal grid */
+.booster-reveal { display: flex; flex-direction: column; align-items: center; }
+.booster-reveal-title { font-family: 'Creepster', cursive; font-size: 1.4rem; margin-bottom: 12px; }
+.booster-reveal-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+}
+.booster-card-reveal {
+  animation: revealCard .3s ease-out both;
+  position: relative;
+}
+.booster-card-reveal.is-class {
+  filter: drop-shadow(0 0 8px var(--rc, #7ad));
+}
+.booster-energy-label {
+  position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,.85); border: 1px solid #555;
+  font-size: .58rem; padding: 1px 5px; border-radius: 3px; white-space: nowrap;
+  color: #aad;
+}
+@keyframes revealCard {
+  from { opacity: 0; transform: scale(.6) rotateY(90deg); }
+  to   { opacity: 1; transform: scale(1) rotateY(0); }
+}
+
+/* ════════════════════════════════════════════════
+   TRADE TAB
+   ════════════════════════════════════════════════ */
+.trade-layout {
+  display: flex; flex-direction: column; gap: 16px;
+}
+.trade-section-title { font-family: 'Creepster', cursive; color: var(--gold); font-size: 1.2rem; margin: 0 0 8px; }
+.trade-post-section {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 14px;
+}
+.trade-select-row {
+  display: flex; align-items: center; gap: 10px;
+}
+.trade-card-pick {
+  flex: 1; border: 1.5px dashed var(--border); border-radius: 8px;
+  padding: 10px; cursor: pointer; text-align: center;
+  transition: border-color .15s;
+}
+.trade-card-pick:hover { border-color: var(--gold); }
+.trade-card-pick-label { font-size: .7rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
+.trade-pick-preview {
+  min-height: 36px; display: flex; align-items: center;
+  justify-content: center; gap: 6px; font-size: .8rem; color: var(--text-muted);
+}
+.trade-arrow { font-size: 1.3rem; color: var(--gold); flex-shrink: 0; }
+.trade-list-section {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 14px;
+}
+.trade-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px; border-bottom: 1px solid var(--border); flex-wrap: wrap;
+}
+.trade-row.mine { background: rgba(100,80,20,.1); }
+.trade-row:last-child { border-bottom: none; }
+.trade-row-user { font-size: .75rem; color: var(--text-muted); width: 80px; flex-shrink: 0; }
+.trade-row-cards {
+  display: flex; align-items: center; gap: 8px; flex: 1; flex-wrap: wrap;
+}
+.trade-row-card { display: flex; align-items: center; gap: 5px; font-size: .8rem; }
+.trade-mini-img  { width: 30px; height: 30px; object-fit: cover; border-radius: 3px; border: 1px solid #333; }
+.trade-row-actions { margin-left: auto; }
+
+/* ── Result screen points ────────────────────────── */
+.result-points {
+  margin: 10px 0;
+  padding: 8px 16px;
+  background: rgba(100,80,10,.3);
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  text-align: center;
+  font-size: .9rem;
+  color: var(--gold);
+}
+
+/* ── Lobby tabs scrollable on small screens ──────── */
+.lobby-tabs { flex-wrap: wrap; }
+
+/* ════════════════════════════════════════════════
+   TRADE ROOM
+   ════════════════════════════════════════════════ */
+.trade-landing { max-width: 540px; margin: 0 auto; padding: 20px 8px; text-align: center; }
+.trade-landing-actions { display:flex; flex-direction:column; align-items:center; gap:12px; }
+.trade-join-row { display:flex; gap:8px; align-items:center; }
+
+/* Waiting screen */
+.trade-room-waiting { display:flex; flex-direction:column; align-items:center; padding:30px; gap:10px; }
+.trade-room-code-display { display:flex; align-items:center; gap:10px; }
+.trade-room-code { font-family:'Creepster',cursive; font-size:2rem; letter-spacing:.2em; color:var(--gold); }
+.trade-spinner {
+  width:32px; height:32px; border:3px solid var(--border); border-top-color:var(--gold);
+  border-radius:50%; animation:spin .8s linear infinite;
+}
+
+/* Room header */
+.trade-room-header {
+  display:flex; align-items:center; gap:10px; padding:8px 10px;
+  background:var(--bg-card); border-bottom:1px solid var(--border);
+  flex-wrap:wrap;
+}
+.trade-room-id { font-size:.85rem; color:var(--text-muted); }
+.trade-room-vs { font-size:.9rem; margin-left:auto; }
+
+/* Room body */
+.trade-room-body {
+  display:flex; gap:10px; padding:10px; min-height:0;
+  flex-wrap:wrap;
+}
+.trade-room-main { flex:1; min-width:0; display:flex; flex-direction:column; gap:8px; }
+
+/* Two collection columns */
+.trade-cols-row { display:flex; gap:8px; flex-wrap:wrap; }
+.trade-col-panel { flex:1; min-width:140px; }
+.trade-col-title {
+  font-size:.75rem; color:var(--text-muted); text-transform:uppercase;
+  letter-spacing:.05em; margin-bottom:4px; display:flex; align-items:center; gap:4px;
+}
+.trade-pick-badge { color:var(--gold); font-size:.7rem; }
+.trade-col-grid {
+  display:flex; flex-wrap:wrap; gap:5px;
+  max-height:220px; overflow-y:auto; padding:4px;
+  background:var(--bg); border:1px solid var(--border); border-radius:6px;
+}
+
+/* Small card items in trade grids */
+.trade-card-item {
+  width:68px; display:flex; flex-direction:column; align-items:center;
+  cursor:pointer; padding:3px; border-radius:5px; border:1.5px solid transparent;
+  transition:border-color .1s, background .1s; text-align:center;
+  background:var(--bg-card);
+}
+.trade-card-item:hover { border-color:var(--border); background:#1e1e28; }
+.trade-card-item.selected { border-color:var(--gold); background:#1e1e10; }
+.trade-card-item img { width:56px; height:56px; object-fit:cover; border-radius:3px; }
+.tci-name { font-size:.55rem; color:var(--text); margin-top:2px; line-height:1.2; word-break:break-word; }
+.tci-owned { font-size:.58rem; color:var(--text-muted); }
+.tci-controls {
+  display:flex; align-items:center; gap:3px; margin-top:3px;
+}
+.tci-btn {
+  background:#2a2b2e; border:1px solid var(--border); color:var(--text);
+  width:18px; height:18px; font-size:.75rem; border-radius:3px;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  padding:0; line-height:1;
+}
+.tci-btn:hover { background:#3a3b3e; border-color:var(--gold); }
+.tci-count { font-size:.72rem; min-width:14px; text-align:center; color:var(--gold); font-weight:700; }
+
+/* Propose bar */
+.trade-propose-bar {
+  background:var(--bg-card); border:1px solid var(--border); border-radius:7px;
+  padding:8px 10px; display:flex; flex-direction:column; gap:6px;
+}
+.trade-propose-summary {
+  display:flex; align-items:flex-start; gap:10px; flex-wrap:wrap;
+}
+.trade-propose-arrow { font-size:1.3rem; color:var(--gold); align-self:center; flex-shrink:0; }
+.trade-picks-list {
+  flex:1; display:flex; flex-wrap:wrap; gap:4px; min-width:80px;
+}
+.trade-picks-list.sm { flex-wrap:wrap; }
+.trade-pick-chip {
+  display:inline-flex; align-items:center; gap:3px;
+  background:#1a1a28; border:1px solid #333; border-radius:4px;
+  padding:2px 5px; font-size:.68rem; color:var(--text);
+}
+.trade-pick-chip img { width:18px; height:18px; object-fit:cover; border-radius:2px; }
+.trade-pick-chip.sm { font-size:.62rem; }
+.trade-pick-chip.sm img { width:14px; height:14px; }
+
+/* Offers panel */
+.trade-offers-panel {
+  background:var(--bg-card); border:1px solid var(--border); border-radius:7px;
+  padding:8px 10px; max-height:180px; overflow-y:auto;
+}
+.trade-offer-row {
+  display:flex; align-items:center; gap:8px; padding:5px 0;
+  border-bottom:1px solid var(--border); flex-wrap:wrap;
+}
+.trade-offer-row:last-child { border-bottom:none; }
+.trade-offer-by { font-size:.72rem; color:var(--text-muted); min-width:60px; }
+.trade-offer-cards { display:flex; align-items:center; gap:5px; flex:1; flex-wrap:wrap; }
+.trade-offer-status { font-size:.68rem; text-transform:uppercase; }
+.trade-offer-btns { display:flex; gap:4px; }
+
+/* Chat panel */
+.trade-room-chat {
+  width:220px; min-width:180px; display:flex; flex-direction:column;
+  background:var(--bg-card); border:1px solid var(--border); border-radius:8px;
+  padding:8px; gap:6px;
+}
+.trade-chat-msgs {
+  flex:1; min-height:150px; max-height:400px; overflow-y:auto;
+  display:flex; flex-direction:column; gap:4px;
+}
+.trade-chat-msg { font-size:.75rem; line-height:1.3; }
+.trade-chat-msg .chat-user { color:var(--gold); font-weight:600; margin-right:4px; }
+.trade-chat-msg .chat-text { color:var(--text); }
+.trade-chat-msg.mine .chat-user { color:#7ad; }
+.trade-chat-footer { display:flex; gap:5px; }
+
+/* Public/private toggle */
+.trade-visibility-toggle {
+  display:flex; align-items:center; gap:6px;
+  font-size:.8rem; color:var(--text-muted); cursor:pointer;
+}
+.trade-visibility-badge {
+  font-size:.7rem; padding:2px 7px; border-radius:10px;
+  font-weight:600;
+}
+.trade-visibility-badge.pub { background:#1a2a1a; color:#7d7; border:1px solid #3a5a3a; }
+.trade-visibility-badge.prv { background:#1a1a2a; color:#aad; border:1px solid #33366a; }
+
+/* Public rooms lobby */
+.trade-public-lobby {
+  margin-top:16px; padding-top:12px; border-top:1px solid var(--border);
+}
+.trade-public-row {
+  display:flex; align-items:center; gap:10px; padding:6px 4px;
+  border-bottom:1px solid var(--border);
+}
+.trade-public-row:last-child { border-bottom:none; }
+.trade-public-host { font-size:.8rem; color:var(--text-muted); flex:1; }
+.trade-public-code { font-family:'Creepster',cursive; font-size:1rem; color:var(--gold); letter-spacing:.1em; }
+
+/* ── Uniform card size in collection / booster grids ── */
+#col-card-grid .card-face,
+.booster-reveal-grid .card-face,
+#card-picker-overlay .card-face {
+  width: 120px;
+  min-width: 120px;
+  max-width: 120px;
+  height: 190px;
+  min-height: 190px;
+  max-height: 190px;
+  overflow: hidden;
+  font-size: .72rem;
+  flex-shrink: 0;
+}
+/* keep images proportional inside fixed boxes */
+#col-card-grid .cf-img img,
+.booster-reveal-grid .cf-img img,
+#card-picker-overlay .cf-img img {
+  width: 100%;
+  height: 60px;
+  object-fit: cover;
+}
+
+/* ── Booster quantity row ─────────────────────────── */
+.booster-qty-row {
+  display: flex; align-items: center; gap: 8px; justify-content: center;
+  margin-top: 6px;
+}
+.booster-qty-num {
+  font-size: 1.1rem; font-weight: 700; color: var(--gold);
+  min-width: 2rem; text-align: center;
 }

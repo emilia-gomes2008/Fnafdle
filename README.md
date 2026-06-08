@@ -87,7 +87,7 @@ Online 2-player mode powered by Supabase real-time.
 ---
 
 ### Fnafdle Party
-A Mario Party-inspired online board game for 2–6 players, powered by Supabase real-time.
+A Mario Party-inspired online board game for 2-6 players, powered by Supabase real-time.
 
 **Setup:** Create a room, choose a map and number of laps, then each player picks and confirms a character. The first player is chosen randomly.
 
@@ -131,7 +131,7 @@ A Mario Party-inspired online board game for 2–6 players, powered by Supabase 
 | 🔦 Flashlight | Tap as fast as you can for 15s. Watch for Withered Foxy... |
 | 🍕 Pizza Dough | Draw the most perfect circle in 5 seconds |
 
-**Minigame rewards:** winner gains coins (1–3 random, doubled in the second half). No coins lost for losing. Ties split the reward equally.
+**Minigame rewards:** winner gains coins (1-3 random, doubled in the second half). No coins lost for losing. Ties split the reward equally.
 
 **Random events** on ❓ spaces: coin bonuses/penalties, forced movement, losing a pizza, board reshuffles, and more.
 

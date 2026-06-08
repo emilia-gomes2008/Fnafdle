@@ -39,6 +39,9 @@
     <div class="fnaf-subtitle">FNAF TCG</div>
   </div>
 
+  <!-- Auth bar -->
+  <div id="tcg-auth-bar" class="tcg-auth-bar"></div>
+
   <div id="tcg-root">
 
     <!-- LOBBY -->
@@ -51,6 +54,9 @@
           <button class="lobby-tab active" onclick="switchTab('play')" id="tab-play" data-i18n="tcg.tab.play">Play</button>
           <button class="lobby-tab" onclick="switchTab('online')" id="tab-online" data-i18n="tcg.tab.online">Online</button>
           <button class="lobby-tab" onclick="switchTab('deck')" id="tab-deck" data-i18n="tcg.tab.deck">Deck Builder</button>
+          <button class="lobby-tab" onclick="switchTab('collection')" id="tab-collection">Collection</button>
+          <button class="lobby-tab" onclick="switchTab('booster')" id="tab-booster">Boosters</button>
+          <button class="lobby-tab" onclick="switchTab('trade')" id="tab-trade">Trades</button>
           <button class="lobby-tab" onclick="switchTab('rules')" id="tab-rules" data-i18n="tcg.tab.rules">Rules</button>
         </div>
 
@@ -79,8 +85,18 @@
           <p class="tcg-sub" style="margin-bottom:8px" data-i18n="tcg.lobby.onlineDesc">Play with a friend online via room code. Works across two separate windows/devices.</p>
         </div>
 
+        <!-- COLLECTION TAB -->
+        <div id="tab-content-collection" class="tab-content" style="display:none"></div>
+
+        <!-- BOOSTER TAB -->
+        <div id="tab-content-booster" class="tab-content" style="display:none"></div>
+
+        <!-- TRADE TAB -->
+        <div id="tab-content-trade" class="tab-content" style="display:none"></div>
+
         <div id="tab-content-deck" class="tab-content" style="display:none">
-          <div class="deck-builder-wrap">
+          <div id="db-login-gate"></div>
+          <div class="deck-builder-wrap" id="deck-builder-wrap">
             <div class="deck-builder-left">
               <div class="setup-label" data-i18n="tcg.db.deckName">Deck Name</div>
               <input id="db-name" class="tcg-input" type="text" placeholder="My Deck" maxlength="30" style="width:100%;max-width:none" />
@@ -273,8 +289,10 @@
       <div class="tcg-result-wrap">
         <h2 class="tcg-title" id="result-title"></h2>
         <div id="result-details" class="result-details"></div>
+        <div id="result-points" class="result-points" style="display:none"></div>
         <div class="result-btns">
           <button class="tcg-btn primary" onclick="goLobby()" data-i18n="tcg.result.lobby">Lobby</button>
+          <button class="tcg-btn" onclick="rematchGame()" data-i18n="tcg.result.rematch">Rematch</button>
           <button class="tcg-btn" onclick="location.href='../../../index.html'" data-i18n="tcg.result.modes">← Modes</button>
         </div>
       </div>
@@ -326,5 +344,6 @@
   <script src="../assets/js/tcg-cards.js?v=15"></script>
   <script src="../assets/js/tcg-mp.js?v=17"></script>
   <script src="../assets/js/tcg.js?v=55"></script>
+  <script src="../assets/js/tcg-auth.js?v=1"></script>
 </body>
 </html>

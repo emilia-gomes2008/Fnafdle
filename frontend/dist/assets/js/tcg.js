@@ -3,6 +3,7 @@
    ═══════════════════════════════════════════════════════ */
 const IMG = '../assets/images/chars/';
 const GENERIC = '../assets/images/default.png';
+window.GENERIC = GENERIC;
 
 const ENERGY_META = {
   remnant:       { name:'Remnant',        sym:'○', cls:'etype-remnant',       color:'#7ad' },
@@ -20,6 +21,7 @@ function buildCardsFromDB(db) {
   return out;
 }
 const CARDS = buildCardsFromDB(window.CARDS_DB);
+window.CARDS = CARDS; // expose for tcg-auth.js
 
 /* ═══════════════════════════════════════════════════════
    GENERATOR PRESETS
@@ -122,7 +124,17 @@ function expandDeck(list) {
   const out = [];
   for (const [id, cnt] of list) {
     const c = CARDS[id]; if (!c) { console.warn('Unknown card:', id); continue; }
-    for (let i = 0; i < cnt; i++) out.push({...c, uid:uid()});
+    for (let i = 0; i < cnt; i++) {
+      // Deep-copy mutable nested arrays so game state never mutates the shared CARDS object
+      out.push({
+        ...c,
+        attacks:   (c.attacks  || []).map(a => ({...a})),
+        // Only copy abilities array if it actually exists; cards with card.ability (singular) must keep it undefined
+        abilities: c.abilities ? c.abilities.map(a => ({...a})) : undefined,
+        tools:     [],
+        uid: uid()
+      });
+    }
   }
   return out;
 }
@@ -391,8 +403,14 @@ function buildCardFace(card, count, max) {
 
 function renderCardPool() {
   const pool=document.getElementById('db-card-pool'); if(!pool) return; pool.innerHTML='';
+  // When logged in, deck builder is restricted to owned cards
+  const isLoggedIn = !!window.TCG_USER;
+  if(isLoggedIn) {
+    const gate=document.getElementById('deck-builder-wrap');
+    if(gate) gate.style.display='';
+  }
   Object.values(CARDS).filter(c=>{
-    if(c.summonOnly) return false; // internally-used cards never shown
+    if(c.summonOnly) return false;
     if(c.type==='class') return dbFilter==='class'||dbFilter==='all';
     if(dbFilter==='class') return false;
     if(dbFilter==='all') return true;
@@ -406,8 +424,23 @@ function renderCardPool() {
   }).forEach(card=>{
     const isClassCard=card.type==='class';
     const count=isClassCard?(dbClassCard===card.id?1:0):(dbDeck[card.id]||0);
-    const max=isClassCard?1:(card.maxCopies||3);
-    const face = buildCardFace(card, count, max);
+    const cardMax=isClassCard?1:(card.maxCopies||3);
+    // Effective max: capped by owned quantity when logged in
+    const effectiveMax = (isLoggedIn && typeof window.tcgCollectionLimit==='function')
+      ? (window.tcgCollectionLimit(card.id, cardMax) ?? cardMax)
+      : cardMax;
+    const face = buildCardFace(card, count, effectiveMax);
+    // When logged in: dim unowned cards and add "Tens: X" badge
+    if(isLoggedIn) {
+      const owned=window.TCG_COLLECTION?.[card.id]||0;
+      if(!isClassCard && effectiveMax===0) face.style.opacity='0.35';
+      if(isClassCard && owned===0) face.style.opacity='0.35';
+      const badge=document.createElement('div');
+      badge.className='db-owned-badge';
+      badge.textContent=`Own: ${owned}`;
+      face.style.position='relative';
+      face.appendChild(badge);
+    }
     face.onclick=()=>showDbCardInfo(card);
     face.addEventListener('mouseenter',()=>showCardHoverPreview(card,face));
     face.addEventListener('mouseleave',hideCardHoverPreview);
@@ -454,9 +487,11 @@ function showDbCardInfo(card) {
   const refresh=()=>{
     const count=dbDeck[id]||0;
     const total=Object.values(dbDeck).reduce((a,b)=>a+b,0);
-    countLabel.textContent=`${count} / ${max}`;
+    const effectiveMax=(typeof window.tcgCollectionLimit==='function')
+      ?(window.tcgCollectionLimit(id,max)??max):max;
+    countLabel.textContent=`${count} / ${effectiveMax}`;
     minusBtn.disabled=count<=0;
-    plusBtn.disabled=count>=max||total>=40;
+    plusBtn.disabled=count>=effectiveMax||total>=40;
     renderCardPool();
     renderDeckList();
   };
@@ -480,10 +515,19 @@ function showDbCardInfo(card) {
 
 function addCardToDeck(id) {
   const c=CARDS[id]; if(!c) return;
-  if(c.summonOnly) return; // truly internal cards - not addable
-  if(c.type==='class') { dbClassCard=id; renderDeckList(); renderCardPool(); return; }
-  const max=c.maxCopies||3, count=dbDeck[id]||0, total=Object.values(dbDeck).reduce((a,b)=>a+b,0);
-  if(count>=max||total>=40) return;
+  if(c.summonOnly) return;
+  if(c.type==='class') {
+    // When logged in, check if user owns this class card
+    if(window.TCG_USER && (window.TCG_COLLECTION?.[id]||0) < 1) return;
+    dbClassCard=id; renderDeckList(); renderCardPool(); return;
+  }
+  const cardMax=c.maxCopies||3;
+  // When logged in, limit by owned quantity
+  const effectiveMax = (typeof window.tcgCollectionLimit==='function')
+    ? (window.tcgCollectionLimit(id, cardMax) ?? cardMax)
+    : cardMax;
+  const count=dbDeck[id]||0, total=Object.values(dbDeck).reduce((a,b)=>a+b,0);
+  if(count>=effectiveMax||total>=40) return;
   dbDeck[id]=count+1; renderDeckList(); renderCardPool();
 }
 function removeCardFromDeck(id) {
@@ -818,9 +862,10 @@ function renderMulligan(pidx) {
     : att>=2 ? T('tcg.mulligan.noEndoForce') : T('tcg.mulligan.noEndo');
   const handEl=document.getElementById('mulligan-hand'); handEl.innerHTML='';
   p.hand.forEach(c=>{
-    const div=document.createElement('div'); div.className='mini-card';
-    div.innerHTML=`<img src="${c.img}" onerror="this.src='${GENERIC}'" /><div class="mc-name">${c.name}</div><div class="mc-type">${c.type}</div>`;
-    handEl.appendChild(div);
+    const face = buildCardFace(c);
+    face.classList.add('mulligan-cf');
+    face.onclick = () => openCardInfoPanel(c);
+    handEl.appendChild(face);
   });
   const btns=document.getElementById('mulligan-buttons'); btns.innerHTML='';
   if(!hasEndo&&att<2){doMulliganDraw(pidx);return;}
@@ -861,12 +906,12 @@ function forceEndoSearch(pidx) {
 }
 
 function mpBeginGame() {
-  // Auto-place all endos from each player's hand into their party
+  // Online: place only the FIRST endo (minimum required), rest stay in hand
   G.players.forEach(p=>{
-    p.hand.filter(c=>c.type==='endo').forEach(endo=>{
-      const slot=p.party.findIndex(s=>!s);
-      if(slot>=0){p.party[slot]=newSlot(endo);p.hand=p.hand.filter(c=>c.uid!==endo.uid);}
-    });
+    if(!p.party.some(s=>s)){
+      const first=p.hand.find(c=>c.type==='endo');
+      if(first){const slot=p.party.findIndex(s=>!s);if(slot>=0){p.party[slot]=newSlot(first);p.hand=p.hand.filter(c=>c.uid!==first.uid);}}
+    }
   });
   G.players.forEach((p,i)=>{if(p._mulliganBonus){for(let j=0;j<p._mulliganBonus;j++)drawCardImmediate(i);delete p._mulliganBonus;}});
   beginGame();
@@ -913,34 +958,63 @@ function renderSetup(pidx) {
   const p=G.players[pidx];
   const endos=p.hand.filter(c=>c.type==='endo');
   document.getElementById('mulligan-title').textContent=T('tcg.setup.title',{name:p.name});
-  document.getElementById('mulligan-sub').textContent=T('tcg.setup.sub');
+  document.getElementById('mulligan-sub').textContent=
+    T('tcg.setup.sub')+` — Select 1–4 Endos to place (${endos.length} available). Other cards stay in hand.`;
   const handEl=document.getElementById('mulligan-hand'); handEl.innerHTML='';
   let selected=[];
-  endos.forEach(c=>{
-    const div=document.createElement('div');div.className='mini-card';div.style.cursor='pointer';
-    div.innerHTML=`<img src="${c.img}" onerror="this.src='${GENERIC}'" /><div class="mc-name">${c.name}</div>`;
-    div.onclick=()=>{
-      if(selected.some(s=>s.uid===c.uid)){selected=selected.filter(s=>s.uid!==c.uid);div.style.outline='';}
-      else if(selected.length<4){selected.push(c);div.style.outline='2px solid var(--gold)';}
-    };
-    handEl.appendChild(div);
+
+  // Show ALL hand cards; only endos are selectable
+  p.hand.forEach(c=>{
+    const face=buildCardFace(c);
+    face.classList.add('mulligan-cf');
+    const isEndo=c.type==='endo';
+    if(isEndo){
+      face.style.cursor='pointer';
+      let endoSel=false;
+      face.onclick=()=>{
+        // Double-click or first click to info, second click to select? No — one click selects/deselects
+        if(selected.some(s=>s.uid===c.uid)){
+          selected=selected.filter(s=>s.uid!==c.uid);
+          face.classList.remove('setup-selected');
+        } else if(selected.length<4){
+          selected.push(c);
+          face.classList.add('setup-selected');
+        }
+        selLabel.textContent=`${selected.length} endo${selected.length!==1?'s':''} selected`;
+        confirmBtn.disabled=selected.length===0;
+        openCardInfoPanel(c);
+      };
+    } else {
+      face.style.cursor='pointer';
+      face.style.opacity='0.65';
+      face.onclick=()=>openCardInfoPanel(c);
+    }
+    handEl.appendChild(face);
   });
-  const btns=document.getElementById('mulligan-buttons');btns.innerHTML='';
-  const firstPidx = G.activePlayer; // dice winner
-  btns.appendChild(mk('button','tcg-btn primary',T('tcg.setup.confirm'),()=>{
+
+  const btns=document.getElementById('mulligan-buttons'); btns.innerHTML='';
+  const selLabel=document.createElement('span');
+  selLabel.style.cssText='font-size:.8rem;color:var(--text-muted);align-self:center';
+  selLabel.textContent='0 selected';
+  btns.appendChild(selLabel);
+
+  const firstPidx=G.activePlayer;
+  const confirmBtn=mk('button','tcg-btn primary',T('tcg.setup.confirm'),()=>{
     if(!selected.length){alert(T('tcg.setup.needEndo'));return;}
     selected.forEach((c,i)=>{p.party[i]=newSlot(c);p.hand=p.hand.filter(h=>h.uid!==c.uid);});
     if(pidx===firstPidx) startSetupPhase(1-firstPidx); else beginGame();
-  }));
+  });
+  confirmBtn.disabled=true;
+  btns.appendChild(confirmBtn);
 }
 
 function beginGame() {
-  // Safety net: if any player still has endos in hand (setup skipped / force-search edge case), place them now
+  // Safety net: only if a player placed NO endos at all during setup (edge case)
   G.players.forEach(p=>{
-    p.hand.filter(c=>c.type==='endo').forEach(endo=>{
-      const slot=p.party.findIndex(s=>!s);
-      if(slot>=0){p.party[slot]=newSlot(endo);p.hand=p.hand.filter(h=>h.uid!==endo.uid);}
-    });
+    if(!p.party.some(s=>s)){
+      const first=p.hand.find(c=>c.type==='endo');
+      if(first){const slot=p.party.findIndex(s=>!s);if(slot>=0){p.party[slot]=newSlot(first);p.hand=p.hand.filter(h=>h.uid!==first.uid);}}
+    }
   });
   G.phase='play'; G.turn=1;
   // Show banner if this machine is the one who goes first
@@ -1511,13 +1585,17 @@ function clickSlot(pidx, slotIdx) {
       p.discard.push(p.hand.splice(eCardIdx,1)[0]);
       const shellIdx=eCardIdx<pt.handIdx?pt.handIdx-1:pt.handIdx;
       p.hand.splice(shellIdx,1);
-      const oldElec=slot.elec; const dmgTaken=slot.card.hp-slot.hp;
+      const endoCard=slot.card; // endo goes to Blob when shell evolves over it
+      const oldElec=slot.elec; const dmgTaken=endoCard.hp-slot.hp;
+      p.discard.push(endoCard);
       slot.card={...pt.card,uid:uid()}; slot.hp=Math.max(1,pt.card.hp-dmgTaken); slot.elec=oldElec; slot.justPlaced=false; checkAwake(slot);
       addLog(T('tcg.log.evolved',{name:p.name, card:pt.card.name, energy:ENERGY_META[type]?.name||type}),'good');
     } else {
       // Springtrap: Purple Guy consumed, no energy card needed
       p.hand.splice(pt.handIdx,1);
-      const oldElec=slot.elec; const dmgTakenSt=slot.card.hp-slot.hp;
+      const endoCardSt=slot.card;
+      const oldElec=slot.elec; const dmgTakenSt=endoCardSt.hp-slot.hp;
+      p.discard.push(endoCardSt);
       slot.card={...pt.card,uid:uid()}; slot.hp=Math.max(1,pt.card.hp-dmgTakenSt); slot.elec=oldElec;
       slot.justPlaced=false; slot.william=false; slot.tools=slot.tools.filter(t=>t.id!=='purple_guy');
       checkAwake(slot);
@@ -2825,7 +2903,7 @@ function showCardInfo(card,slot,slotIdx,pidx,isHand,handIdx){
       // Shadow Freddy repeat gambling (now via ability button below)
     }
     // Ability buttons (once per turn) - supports single card.ability or card.abilities array
-    const _ablList=(card.abilities||(card.ability&&card.ability.id!=='repeat_gamble'?[card.ability]:[]));
+    const _ablList=(card.abilities?.length?card.abilities:(card.ability&&card.ability.id!=='repeat_gamble'?[card.ability]:[]));
     if(!slot.usedAbilityThisTurn){
       _ablList.forEach(abl=>{
         let abled=true;
@@ -2878,6 +2956,14 @@ function showCardInfoData(card){
   actEl.id='info-actions'; actEl.className='info-actions';
   scroll.appendChild(actEl);
 }
+
+// Opens the side info panel with no action buttons — usable from any screen
+function openCardInfoPanel(card){
+  showCardInfoData(card);
+  document.getElementById('card-info-panel').style.display='';
+  document.getElementById('card-info-overlay').style.display='';
+}
+window.openCardInfoPanel = openCardInfoPanel;
 
 function showCardHoverPreview(card, sourceEl){
   const prev=document.getElementById('card-hover-preview'); if(!prev) return;
@@ -3474,11 +3560,27 @@ function renderDiceFromState() {
    SCREENS
    ═══════════════════════════════════════════════════════ */
 function showScreen(id){['lobby','dice','mulligan','game','result'].forEach(s=>{const el=document.getElementById('screen-'+s);if(el)el.style.display=s===id?'':'none';});}
-function showResult(){
+async function showResult(){
   showScreen('result');
   window.scrollTo(0,0); document.getElementById('tcg-root')?.scrollTo(0,0);
   document.getElementById('result-title').textContent=G.winner?T('tcg.result.win',{name:G.winner.name}):T('tcg.result.draw');
   document.getElementById('result-details').innerHTML=G.players.map(p=>`<div>${p.name}: ${T('tcg.result.ko',{n:p.koPoints, s:p.koPoints!==1?'s':''})}</div>`).join('');
+
+  // Award points to the logged-in user
+  const ptsEl = document.getElementById('result-points');
+  if (ptsEl && typeof window.tcgAwardMatchPoints === 'function') {
+    try {
+      const result = await window.tcgAwardMatchPoints(G.winner?.name?.toLowerCase());
+      if (result) {
+        ptsEl.style.display = '';
+        ptsEl.innerHTML = result.isWinner
+          ? `⭐ +${result.pts} pontos! (Participar +5, Vitória +5)`
+          : `⭐ +${result.pts} pontos por participar!`;
+      } else {
+        ptsEl.style.display = 'none';
+      }
+    } catch(e) { ptsEl.style.display = 'none'; }
+  }
 }
 function goLobby(){closeCardInfo();showScreen('lobby');populateDeckSelects();}
 function rematchGame(){if(_startConfig)initGame(_startConfig);}
@@ -3500,6 +3602,7 @@ document.addEventListener('keydown', e => {
 document.addEventListener('DOMContentLoaded',()=>{
   validateDecks();
   populateDeckSelects();
+  // Remove rematch button if missing (added in result screen)
   showScreen('lobby');
   // Apply translations to all static elements
   document.querySelectorAll('[data-i18n]').forEach(el => {
