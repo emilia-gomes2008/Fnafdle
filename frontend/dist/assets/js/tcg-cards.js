@@ -834,7 +834,7 @@ window.CARDS_DB = {
     hp: 165, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'm2_endo',
     img: 'sotm/jackie.png',
     attacks: [
-      { name: 'Lure Trap', cost: 2, type: 'multi', targets: 2, damage: 45, effect: 'stall1', desc: 'Deals 45 damage to 2 enemies and stalls each for 1 turn.' }
+      { name: 'Lure Trap', cost: 2, type: 'multi', targets: 2, damage: 30, effect: 'stall1', desc: 'Deals 30 damage to 2 enemies and stalls each for 1 turn.' }
     ],
     ability: { name: 'Ambush', desc: 'Once per turn: deal 30 damage to 1 stalled enemy.', id: 'jackie_ambush' }
   },
@@ -870,7 +870,7 @@ window.CARDS_DB = {
     hp: 195, wakeThreshold: 2, energyType: 'agony', requiredEndo: 'm2_endo',
     img: 'sotm/mascot/tiger_rock.png',
     attacks: [
-      { name: 'Tiger Rock', cost: 2, type: 'multi', targets: -1, damage: 25, desc: 'Deals 25 damage to ALL enemies.' }
+      { name: 'Tiger Rock', cost: 3, type: 'multi', targets: -1, damage: 20, desc: 'Deals 20 damage to ALL enemies.' }
     ],
     ability: { name: 'Claw Rend', desc: 'Once per turn: deal 20 damage to all sleeping enemies.', id: 'claw_rend' }
   },
@@ -1009,9 +1009,9 @@ window.CARDS_DB = {
     effect: 'party_hat_draw'
   },
   tilt: {
-    id: 'tilt', name: 'Tilt', type: 'item', class: 'neutral',
+    id: 'tilt', name: 'Tilt', type: 'item', class: 'neutral', maxCopies: 1,
     img: 'springlock/tilt.png',
-    desc: 'Discard 3 random cards from the opponent\'s hand.',
+    desc: 'Discard 5 random cards from the opponent\'s hand.',
     effect: 'tilt_disrupt'
   },
 

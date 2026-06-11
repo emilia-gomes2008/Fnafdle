@@ -534,12 +534,23 @@ async function mpStartGame() {
 
 /* ── Disconnect: mark opponent as winner on tab close ─── */
 window.addEventListener('beforeunload', () => {
-  if (!MP.db || !MP.roomId || MP.mode !== 'online') return;
+  if (!MP.roomId || MP.mode !== 'online') return;
   if (window.G && G && !G.winner) {
     G.winner = G.players[1 - MP.myIdx];
     G.phase = 'result';
-    try {
-      MP.db.from('tcg_rooms').update({ game_state: G }).eq('id', MP.roomId);
-    } catch (e) { }
+    const cfg = window.FNAF_CONFIG || {};
+    if (!cfg.SUPABASE_URL || !cfg.SUPABASE_ANON_KEY) return;
+    const url = `${cfg.SUPABASE_URL}/rest/v1/tcg_rooms?id=eq.${MP.roomId}`;
+    fetch(url, {
+      method: 'PATCH',
+      keepalive: true,
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': cfg.SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${cfg.SUPABASE_ANON_KEY}`,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ game_state: G })
+    });
   }
 });
