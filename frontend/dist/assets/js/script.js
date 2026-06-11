@@ -107,8 +107,10 @@ function getStats(key) {
       distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 }
     };
   } catch {
-    return { played: 0, won: 0, streak: 0, maxStreak: 0, lastWonDate: null,
-      distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 } };
+    return {
+      played: 0, won: 0, streak: 0, maxStreak: 0, lastWonDate: null,
+      distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 }
+    };
   }
 }
 
@@ -463,7 +465,7 @@ function triggerFreddyJumpscare(callback) {
   overlay.appendChild(gif);
   document.body.appendChild(overlay);
 
-  try { const a = new Audio('../sounds/jumpscare.mp3'); a.volume = 1.0; a.play(); } catch(e) {}
+  try { const a = new Audio('../sounds/jumpscare.mp3'); a.volume = 1.0; a.play(); } catch (e) { }
 
   const dismiss = () => {
     if (document.body.contains(overlay)) document.body.removeChild(overlay);
@@ -577,10 +579,10 @@ const IMG_STEPS = [
   { blur: 18, scale: 2.4, grayscale: 1 },
   { blur: 14, scale: 2.1, grayscale: 1 },
   { blur: 10, scale: 1.8, grayscale: 1 },
-  { blur: 6,  scale: 1.5, grayscale: 0.7 },
-  { blur: 3,  scale: 1.25, grayscale: 0.4 },
-  { blur: 1,  scale: 1.08, grayscale: 0.15 },
-  { blur: 0,  scale: 1,   grayscale: 0 },
+  { blur: 6, scale: 1.5, grayscale: 0.7 },
+  { blur: 3, scale: 1.25, grayscale: 0.4 },
+  { blur: 1, scale: 1.08, grayscale: 0.15 },
+  { blur: 0, scale: 1, grayscale: 0 },
 ];
 
 const imgInput = document.getElementById('img-search-input');
@@ -1078,7 +1080,7 @@ function renderEncyclopedia() {
     grid.appendChild(card);
   });
 
-  // Books section — only when type filter is not active
+  // Books section - only when type filter is not active
   if (!typeF) {
     const filteredBooks = BOOKS.filter(b =>
       !q || b.title.toLowerCase().includes(q) || b.series.toLowerCase().includes(q)
@@ -1142,9 +1144,9 @@ function showEncBookCard(book) {
     <div style="background:var(--bg-card);border:1.5px solid var(--gold);border-radius:14px;padding:28px 24px;max-width:360px;width:100%;position:relative;text-align:center;">
       <button onclick="document.getElementById('enc-modal-overlay').remove()" style="position:absolute;top:10px;right:14px;background:transparent;border:none;color:var(--text-muted);font-size:1.3rem;padding:0;margin:0;cursor:pointer;">✕</button>
       ${book.img
-        ? `<img src="${book.img}" alt="${book.title}" style="width:90px;height:130px;object-fit:cover;border-radius:8px;border:2px solid var(--gold);margin-bottom:14px;" onerror="this.style.display='none'">`
-        : `<div style="width:90px;height:130px;border-radius:8px;border:2px solid var(--border);background:var(--bg-page);display:inline-flex;align-items:center;justify-content:center;font-size:3rem;margin-bottom:14px;">📖</div>`
-      }
+      ? `<img src="${book.img}" alt="${book.title}" style="width:90px;height:130px;object-fit:cover;border-radius:8px;border:2px solid var(--gold);margin-bottom:14px;" onerror="this.style.display='none'">`
+      : `<div style="width:90px;height:130px;border-radius:8px;border:2px solid var(--border);background:var(--bg-page);display:inline-flex;align-items:center;justify-content:center;font-size:3rem;margin-bottom:14px;">📖</div>`
+    }
       <div style="font-family:'Creepster',cursive;font-size:1.4rem;color:var(--gold);letter-spacing:2px;margin-bottom:4px;">${book.title}</div>
       <div style="font-size:0.7rem;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:18px;">${book.series}</div>
       <table style="width:100%;border-collapse:collapse;text-align:left;font-size:0.82rem;">
@@ -1184,9 +1186,9 @@ function showEncCard(char) {
     <div style="background:var(--bg-card);border:1.5px solid var(--gold);border-radius:14px;padding:28px 24px;max-width:360px;width:100%;position:relative;text-align:center;">
       <button onclick="document.getElementById('enc-modal-overlay').remove()" style="position:absolute;top:10px;right:14px;background:transparent;border:none;color:var(--text-muted);font-size:1.3rem;padding:0;margin:0;cursor:pointer;">✕</button>
       ${char.img
-        ? `<img src="${char.img}" alt="${char.name}" style="width:120px;height:120px;object-fit:cover;${char.imgFocusFace ? 'object-position:top center;' : ''}border-radius:12px;border:2px solid var(--gold);margin-bottom:14px;" onerror="this.style.display='none'">`
-        : `<div style="width:120px;height:120px;border-radius:12px;border:2px solid var(--border);background:var(--bg-page);display:inline-flex;align-items:center;justify-content:center;font-size:3rem;margin-bottom:14px;">?</div>`
-      }
+      ? `<img src="${char.img}" alt="${char.name}" style="width:120px;height:120px;object-fit:cover;${char.imgFocusFace ? 'object-position:top center;' : ''}border-radius:12px;border:2px solid var(--gold);margin-bottom:14px;" onerror="this.style.display='none'">`
+      : `<div style="width:120px;height:120px;border-radius:12px;border:2px solid var(--border);background:var(--bg-page);display:inline-flex;align-items:center;justify-content:center;font-size:3rem;margin-bottom:14px;">?</div>`
+    }
       <div style="font-family:'Creepster',cursive;font-size:1.6rem;color:var(--gold);letter-spacing:2px;margin-bottom:4px;">${char.name}</div>
       <div style="font-size:0.7rem;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:18px;">${char.type}</div>
       <table style="width:100%;border-collapse:collapse;text-align:left;font-size:0.82rem;">

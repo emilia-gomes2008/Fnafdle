@@ -1,24 +1,24 @@
 // ── Constants ─────────────────────────────────────────────────────────────────
 const COIN_IMG = `<img src="../assets/images/fazcoin.png" class="fazcoin-icon" alt="coin">`;
 
-const BOARD_SIZE    = 20;  // default / easy board size
-const TOTAL_LAPS    = 5;
+const BOARD_SIZE = 20;  // default / easy board size
+const TOTAL_LAPS = 5;
 const COINS_PER_PIZZA = 10;
-const TOLL_SKIP     = 4;   // spaces skipped when paying Freddy
+const TOLL_SKIP = 4;   // spaces skipped when paying Freddy
 
 // ─── Board grids ──────────────────────────────────────────
 const BOARD_GRID_EASY = [
-  [1,1],[1,2],[1,3],[1,4],[1,5],[1,6],
-  [2,6],[3,6],[4,6],[5,6],
-  [6,6],[6,5],[6,4],[6,3],[6,2],[6,1],
-  [5,1],[4,1],[3,1],[2,1],
+  [1, 1], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6],
+  [2, 6], [3, 6], [4, 6], [5, 6],
+  [6, 6], [6, 5], [6, 4], [6, 3], [6, 2], [6, 1],
+  [5, 1], [4, 1], [3, 1], [2, 1],
 ]; // 20 spaces, 6×6
 
 const BOARD_GRID_NORMAL = [
-  [1,1],[1,2],[1,3],[1,4],[1,5],[1,6],[1,7],[1,8], // top: 8
-  [2,8],[3,8],[4,8],[5,8],                          // right: 4
-  [6,8],[6,7],[6,6],[6,5],[6,4],[6,3],[6,2],[6,1], // bottom: 8
-  [5,1],[4,1],[3,1],[2,1],                          // left: 4
+  [1, 1], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [1, 7], [1, 8], // top: 8
+  [2, 8], [3, 8], [4, 8], [5, 8],                          // right: 4
+  [6, 8], [6, 7], [6, 6], [6, 5], [6, 4], [6, 3], [6, 2], [6, 1], // bottom: 8
+  [5, 1], [4, 1], [3, 1], [2, 1],                          // left: 4
 ]; // 24 spaces, 8×6 wide racetrack
 
 function getBoardGrid(mapType) {
@@ -26,17 +26,17 @@ function getBoardGrid(mapType) {
 }
 
 const SPACE_CFG = {
-  normal:      { cls: 'space-normal',      emoji: '',   label: 'Normal' },
-  minigame:    { cls: 'space-minigame',    emoji: '🎮', label: 'Minigame' },
-  coin:        { cls: 'space-coin',        emoji: '🪙', label: '+2 Coins' },
-  pizza:       { cls: 'space-pizza',       emoji: '🍕', label: '+1 Pizza' },
-  badluck:     { cls: 'space-badluck',     emoji: '💀', label: '-3 Coins' },
-  trap:        { cls: 'space-trap',        emoji: '🪤', label: 'Trap!' },
-  challenge:   { cls: 'space-challenge',   emoji: '⚔️', label: 'Challenge!' },
-  question:    { cls: 'space-question',    emoji: '❓', label: 'Event' },
-  tollbooth:   { cls: 'space-tollbooth',   emoji: '🐻', label: "Freddy's Toll" },
+  normal: { cls: 'space-normal', emoji: '', label: 'Normal' },
+  minigame: { cls: 'space-minigame', emoji: '🎮', label: 'Minigame' },
+  coin: { cls: 'space-coin', emoji: '🪙', label: '+2 Coins' },
+  pizza: { cls: 'space-pizza', emoji: '🍕', label: '+1 Pizza' },
+  badluck: { cls: 'space-badluck', emoji: '💀', label: '-3 Coins' },
+  trap: { cls: 'space-trap', emoji: '🪤', label: 'Trap!' },
+  challenge: { cls: 'space-challenge', emoji: '⚔️', label: 'Challenge!' },
+  question: { cls: 'space-question', emoji: '❓', label: 'Event' },
+  tollbooth: { cls: 'space-tollbooth', emoji: '🐻', label: "Freddy's Toll" },
   freddy_zone: { cls: 'space-freddy-zone', emoji: '😱', label: 'Freddy Zone' },
-  jackpot:     { cls: 'space-jackpot',     emoji: '💰', label: 'Jackpot!' },
+  jackpot: { cls: 'space-jackpot', emoji: '💰', label: 'Jackpot!' },
 };
 
 // ─── Freddy face hard board ───────────────────────────────
@@ -55,7 +55,7 @@ const FREDDY_HEAD_NODES = [
   { x: 75, y: 57 }, // 7  right eye mid    (freddy_zone)
   { x: 69, y: 64 }, // 8  right eye lower  (freddy_zone)
   { x: 64, y: 17 }, // 9  hat brim right   (skip dest 5+4)
-  { x: 50, y: 8  }, // 10 hat top          (JACKPOT)
+  { x: 50, y: 8 }, // 10 hat top          (JACKPOT)
   { x: 36, y: 17 }, // 11 hat brim left
   { x: 23, y: 32 }, // 12 TOLLBOOTH left eyebrow    (skip → 16)
   { x: 25, y: 47 }, // 13 left eye upper   (freddy_zone)
@@ -68,127 +68,147 @@ const FREDDY_HEAD_NODES = [
 ];
 
 const CHAR_CFG = {
-  freddy:    { name: 'Freddy',    emoji: '🐻', color: '#c48b14', img: 'images/chars/classic/freddy.png',
-               desc: "At Freddy's Tollbooths, can take Path A for free (ignores toll cost). Cooldown: 3 turns.", ability: 'tollpass', cooldown: 3 },
-  bonnie:    { name: 'Bonnie',    emoji: '🎸', color: '#4169e1', img: 'images/chars/classic/bonnie.png',
-               desc: 'Jumps exactly 4 spaces instead of rolling the dice. Cooldown: 3 turns.', ability: 'jump', cooldown: 3 },
-  chica:     { name: 'Chica',     emoji: '🐔', color: '#d4a017', img: 'images/chars/classic/chica.png',
-               desc: 'Places a Cupcake trap on any board space. Anyone who lands there loses 1 pizza to Chica. Disappears after 1 lap. Cooldown: 3 turns.', ability: 'boardCupcake', cooldown: 3 },
-  foxy:      { name: 'Foxy',      emoji: '🦊', color: '#cc4400', img: 'images/chars/classic/foxy.png',
-               desc: 'Re-rolls the dice after the first result. Cooldown: 2 turns.', ability: 'reroll', cooldown: 2 },
-  mangle:    { name: 'Mangle',    emoji: '🎀', color: '#e875b0', img: 'images/chars/toy/mangle.png',
-               desc: 'Shuffles all non-locked board spaces. Cooldown: 5 turns.', ability: 'shuffle', cooldown: 5 },
-  puppet:    { name: 'Puppet',    emoji: '🎭', color: '#9a3ab0', img: 'images/chars/toy/puppet.png',
-               desc: 'Gifts: converts 10 coins → 1 pizza for any player within 5 spaces (including self). Cooldown: 5 turns.', ability: 'gifts', cooldown: 5 },
-  springtrap:{ name: 'Springtrap',emoji: '🪤', color: '#3a6a2a', img: 'images/chars/springlock/springtrap.png',
-               desc: 'Kill: sends a player within 5 spaces back to start (resets laps, keeps coins & pizzas). Cooldown: 5 turns.', ability: 'kill', cooldown: 5 },
-  bb:        { name: 'Balloon Boy',emoji: '🎈', color: '#4488cc', img: 'images/chars/toy/bb.png',
-               desc: 'Hi! Every time BB rolls the dice, a random opponent automatically loses 1 coin. Ability: steal up to 5 coins from any player within 5 spaces. Cooldown: 3 turns.', ability: 'steal', cooldown: 3 },
+  freddy: {
+    name: 'Freddy', emoji: '🐻', color: '#c48b14', img: 'images/chars/classic/freddy.png',
+    desc: "At Freddy's Tollbooths, can take Path A for free (ignores toll cost). Cooldown: 3 turns.", ability: 'tollpass', cooldown: 3
+  },
+  bonnie: {
+    name: 'Bonnie', emoji: '🎸', color: '#4169e1', img: 'images/chars/classic/bonnie.png',
+    desc: 'Jumps exactly 4 spaces instead of rolling the dice. Cooldown: 3 turns.', ability: 'jump', cooldown: 3
+  },
+  chica: {
+    name: 'Chica', emoji: '🐔', color: '#d4a017', img: 'images/chars/classic/chica.png',
+    desc: 'Places a Cupcake trap on any board space. Anyone who lands there loses 1 pizza to Chica. Disappears after 1 lap. Cooldown: 3 turns.', ability: 'boardCupcake', cooldown: 3
+  },
+  foxy: {
+    name: 'Foxy', emoji: '🦊', color: '#cc4400', img: 'images/chars/classic/foxy.png',
+    desc: 'Re-rolls the dice after the first result. Cooldown: 2 turns.', ability: 'reroll', cooldown: 2
+  },
+  mangle: {
+    name: 'Mangle', emoji: '🎀', color: '#e875b0', img: 'images/chars/toy/mangle.png',
+    desc: 'Shuffles all non-locked board spaces. Cooldown: 5 turns.', ability: 'shuffle', cooldown: 5
+  },
+  puppet: {
+    name: 'Puppet', emoji: '🎭', color: '#9a3ab0', img: 'images/chars/toy/puppet.png',
+    desc: 'Gifts: converts 10 coins → 1 pizza for any player within 5 spaces (including self). Cooldown: 5 turns.', ability: 'gifts', cooldown: 5
+  },
+  springtrap: {
+    name: 'Springtrap', emoji: '🪤', color: '#3a6a2a', img: 'images/chars/springlock/springtrap.png',
+    desc: 'Kill: sends a player within 5 spaces back to start (resets laps, keeps coins & pizzas). Cooldown: 5 turns.', ability: 'kill', cooldown: 5
+  },
+  bb: {
+    name: 'Balloon Boy', emoji: '🎈', color: '#4488cc', img: 'images/chars/toy/bb.png',
+    desc: 'Hi! Every time BB rolls the dice, a random opponent automatically loses 1 coin. Ability: steal up to 5 coins from any player within 5 spaces. Cooldown: 3 turns.', ability: 'steal', cooldown: 3
+  },
 };
 
 const PLAYER_COLORS = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#1abca8', '#e67e22'];
 
 // ─── Dice system ──────────────────────────────────────────
 const DICE_TYPES = {
-  d6:         { label: 'Standard Die',            emoji: '🎲',   roll: () => Math.floor(Math.random()*6)+1 },
-  d8:         { label: "Foxy's Die (d8)",          emoji: '🦊🎲', roll: () => Math.floor(Math.random()*8)+1 },
-  chef:       { label: "Chica's Chef Die",         emoji: '🍗🎲', roll: () => [2,2,3,3,4,5][Math.floor(Math.random()*6)] },
-  rocker:     { label: "Bonnie's Rocker Die",      emoji: '🎸🎲', roll: () => [1,1,3,4,6,7][Math.floor(Math.random()*6)] },
-  '2d6':      { label: 'Double Die (2d6)',         emoji: '🎲🎲', roll: () => Math.floor(Math.random()*6)+1 + Math.floor(Math.random()*6)+1 },
-  all1:       { label: 'All-Ones Die',             emoji: '1️⃣',   roll: () => 1 },
-  lucky7:     { label: 'Lucky Seven Die',          emoji: '7️⃣',   roll: () => { const r = Math.random(); return r < 0.34 ? 6 : r < 0.67 ? 7 : 0; } },
-  pick:       { label: 'Pick Your Steps',          emoji: '🎯',   roll: null, pick: true },
+  d6: { label: 'Standard Die', emoji: '🎲', roll: () => Math.floor(Math.random() * 6) + 1 },
+  d8: { label: "Foxy's Die (d8)", emoji: '🦊🎲', roll: () => Math.floor(Math.random() * 8) + 1 },
+  chef: { label: "Chica's Chef Die", emoji: '🍗🎲', roll: () => [2, 2, 3, 3, 4, 5][Math.floor(Math.random() * 6)] },
+  rocker: { label: "Bonnie's Rocker Die", emoji: '🎸🎲', roll: () => [1, 1, 3, 4, 6, 7][Math.floor(Math.random() * 6)] },
+  '2d6': { label: 'Double Die (2d6)', emoji: '🎲🎲', roll: () => Math.floor(Math.random() * 6) + 1 + Math.floor(Math.random() * 6) + 1 },
+  all1: { label: 'All-Ones Die', emoji: '1️⃣', roll: () => 1 },
+  lucky7: { label: 'Lucky Seven Die', emoji: '7️⃣', roll: () => { const r = Math.random(); return r < 0.34 ? 6 : r < 0.67 ? 7 : 0; } },
+  pick: { label: 'Pick Your Steps', emoji: '🎯', roll: null, pick: true },
   // Springtrap: faces 6-10 + Springlock (0 = go to start, no move)
-  springlock: { label: 'Springlock Die',           emoji: '🪤🎲', roll: () => [6,7,8,9,10,0][Math.floor(Math.random()*6)], springlock: true },
+  springlock: { label: 'Springlock Die', emoji: '🪤🎲', roll: () => [6, 7, 8, 9, 10, 0][Math.floor(Math.random() * 6)], springlock: true },
   // Puppet: faces 3-3-4-4-5-6; 6 = place a Music Box trap
-  musicbox:   { label: 'Music Box Die',            emoji: '🎭🎲', roll: () => [3,3,4,4,5,6][Math.floor(Math.random()*6)], musicbox: true },
+  musicbox: { label: 'Music Box Die', emoji: '🎭🎲', roll: () => [3, 3, 4, 4, 5, 6][Math.floor(Math.random() * 6)], musicbox: true },
   // Mangle: 2d5 (2-10)
-  '2d5':      { label: "Mangle's 2d5",             emoji: '🎀🎲', roll: () => Math.floor(Math.random()*5)+1 + Math.floor(Math.random()*5)+1 },
+  '2d5': { label: "Mangle's 2d5", emoji: '🎀🎲', roll: () => Math.floor(Math.random() * 5) + 1 + Math.floor(Math.random() * 5) + 1 },
   // BB: 1-2-3-1-2-3 + passive coin steal on every roll
-  balloon:    { label: "BB's Balloon Die",          emoji: '🎈🎲', roll: () => [1,2,3,1,2,3][Math.floor(Math.random()*6)], bbPassive: true },
+  balloon: { label: "BB's Balloon Die", emoji: '🎈🎲', roll: () => [1, 2, 3, 1, 2, 3][Math.floor(Math.random() * 6)], bbPassive: true },
 };
 
 const CHAR_DEFAULT_DICE = { freddy: 'd6', bonnie: 'd6', chica: 'd6', foxy: 'd6', mangle: 'd6', puppet: 'd6', springtrap: 'd6', bb: 'd6' };
 
 const SHOP_DICE = [
-  { id: 'd8',         price: 8,  maxUses: 4, label: "Foxy's Die (d8)",      emoji: '🦊🎲', desc: 'Rolls 1-8. Foxy only. · 4 uses.',                             onlyChar: 'foxy'       },
-  { id: 'chef',       price: 8,  maxUses: 4, label: "Chica's Chef Die",      emoji: '🍗🎲', desc: 'Rolls 2-2-3-3-4-5. Chica only. · 4 uses.',                   onlyChar: 'chica'      },
-  { id: 'rocker',     price: 8,  maxUses: 4, label: "Bonnie's Rocker Die",   emoji: '🎸🎲', desc: 'Rolls 1-1-3-4-6-6. Bonnie only. · 4 uses.',                  onlyChar: 'bonnie'     },
-  { id: '2d5',        price: 8,  maxUses: 4, label: "Mangle's 2d5",        emoji: '🎀🎲', desc: 'Rolls 2d5 (2-10). Mangle only. · 4 uses.',                    onlyChar: 'mangle'     },
-  { id: 'balloon',    price: 8,  maxUses: 4, label: "BB's Balloon Die",      emoji: '🎈🎲', desc: 'Rolls 1-2-3-1-2-3. Passive: steals 1 coin from a random opponent every roll! BB only. · 4 uses.', onlyChar: 'bb' },
-  { id: 'springlock', price: 8,  maxUses: 3, label: 'Springlock Die',        emoji: '🪤🎲', desc: 'Rolls 6-10 or Springlock (no move + back to start!). Springtrap only. · 3 uses.', onlyChar: 'springtrap' },
-  { id: 'musicbox',   price: 8,  maxUses: 3, label: 'Music Box Die',         emoji: '🎭🎲', desc: 'Rolls 3-3-4-4-5-6. On 6: places a Music Box trap! Puppet only. · 3 uses.',       onlyChar: 'puppet'     },
-  { id: '2d6',        price: 8,  maxUses: 3, label: 'Double Die (2d6)',       emoji: '🎲🎲', desc: 'Roll 2d6 and add results (2-12). · 3 uses.' },
-  { id: 'all1',       price: 3,  maxUses: 5, forced: 5, label: 'All-Ones Die', emoji: '1️⃣', desc: 'Always rolls 1. FORCED for 5 turns — cannot unequip!' },
-  { id: 'lucky7',     price: 12, maxUses: 4, label: 'Lucky Seven Die',        emoji: '7️⃣',   desc: 'Rolls 6 or 7... or 0. High risk, high reward. · 4 uses.' },
-  { id: 'pick',       price: 15, maxUses: 3, label: 'Pick Your Steps Die',    emoji: '🎯',   desc: 'Choose exactly how many spaces to move (1-6). · 3 uses.' },
+  { id: 'd8', price: 8, maxUses: 4, label: "Foxy's Die (d8)", emoji: '🦊🎲', desc: 'Rolls 1-8. Foxy only. · 4 uses.', onlyChar: 'foxy' },
+  { id: 'chef', price: 8, maxUses: 4, label: "Chica's Chef Die", emoji: '🍗🎲', desc: 'Rolls 2-2-3-3-4-5. Chica only. · 4 uses.', onlyChar: 'chica' },
+  { id: 'rocker', price: 8, maxUses: 4, label: "Bonnie's Rocker Die", emoji: '🎸🎲', desc: 'Rolls 1-1-3-4-6-6. Bonnie only. · 4 uses.', onlyChar: 'bonnie' },
+  { id: '2d5', price: 8, maxUses: 4, label: "Mangle's 2d5", emoji: '🎀🎲', desc: 'Rolls 2d5 (2-10). Mangle only. · 4 uses.', onlyChar: 'mangle' },
+  { id: 'balloon', price: 8, maxUses: 4, label: "BB's Balloon Die", emoji: '🎈🎲', desc: 'Rolls 1-2-3-1-2-3. Passive: steals 1 coin from a random opponent every roll! BB only. · 4 uses.', onlyChar: 'bb' },
+  { id: 'springlock', price: 8, maxUses: 3, label: 'Springlock Die', emoji: '🪤🎲', desc: 'Rolls 6-10 or Springlock (no move + back to start!). Springtrap only. · 3 uses.', onlyChar: 'springtrap' },
+  { id: 'musicbox', price: 8, maxUses: 3, label: 'Music Box Die', emoji: '🎭🎲', desc: 'Rolls 3-3-4-4-5-6. On 6: places a Music Box trap! Puppet only. · 3 uses.', onlyChar: 'puppet' },
+  { id: '2d6', price: 8, maxUses: 3, label: 'Double Die (2d6)', emoji: '🎲🎲', desc: 'Roll 2d6 and add results (2-12). · 3 uses.' },
+  { id: 'all1', price: 3, maxUses: 5, forced: 5, label: 'All-Ones Die', emoji: '1️⃣', desc: 'Always rolls 1. FORCED for 5 turns - cannot unequip!' },
+  { id: 'lucky7', price: 12, maxUses: 4, label: 'Lucky Seven Die', emoji: '7️⃣', desc: 'Rolls 6 or 7... or 0. High risk, high reward. · 4 uses.' },
+  { id: 'pick', price: 15, maxUses: 3, label: 'Pick Your Steps Die', emoji: '🎯', desc: 'Choose exactly how many spaces to move (1-6). · 3 uses.' },
 ];
 
 const TRAP_EFFECTS = [
-  { text: 'Lost 5 coins! 💸',          eff: (st, s)         => { st.coins[s] = Math.max(0, (st.coins[s]||0) - 5); } },
-  { text: 'Lost 1 pizza! 🍕',          eff: (st, s)         => { if ((st.pizzas[s]||0) > 0) st.pizzas[s]--; } },
-  { text: 'Swapped with last place! 🔄', eff: (st, s, room) => {
-    const pc = room.player_count || 2;
-    const last = allSlots(pc).filter(sl => room[`${sl}_name`])
-      .map(sl => ({ sl, score: (st.pizzas[sl]||0)*100 + (st.coins[sl]||0) }))
-      .sort((a,b) => a.score - b.score)[0]?.sl;
-    if (last && last !== s) {
-      [st.coins[s], st.coins[last]]   = [st.coins[last]||0, st.coins[s]||0];
-      [st.pizzas[s], st.pizzas[last]] = [st.pizzas[last]||0, st.pizzas[s]||0];
+  { text: 'Lost 5 coins! 💸', eff: (st, s) => { st.coins[s] = Math.max(0, (st.coins[s] || 0) - 5); } },
+  { text: 'Lost 1 pizza! 🍕', eff: (st, s) => { if ((st.pizzas[s] || 0) > 0) st.pizzas[s]--; } },
+  {
+    text: 'Swapped with last place! 🔄', eff: (st, s, room) => {
+      const pc = room.player_count || 2;
+      const last = allSlots(pc).filter(sl => room[`${sl}_name`])
+        .map(sl => ({ sl, score: (st.pizzas[sl] || 0) * 100 + (st.coins[sl] || 0) }))
+        .sort((a, b) => a.score - b.score)[0]?.sl;
+      if (last && last !== s) {
+        [st.coins[s], st.coins[last]] = [st.coins[last] || 0, st.coins[s] || 0];
+        [st.pizzas[s], st.pizzas[last]] = [st.pizzas[last] || 0, st.pizzas[s] || 0];
+      }
     }
-  }},
-  { text: 'Sent back to start! ⏮️',    eff: (st, s)         => { st.pos[s] = 0; } },
-  { text: 'Dice reset to default! 🎲', eff: (st, s, room, ns) => {
-    const char = room[`${s}_char`] || 'freddy';
-    if (!ns[s]) ns[s] = { mgWins: 0, badLucks: 0 };
-    ns[s].dice = CHAR_DEFAULT_DICE[char] || 'd6';
-  }},
+  },
+  { text: 'Sent back to start! ⏮️', eff: (st, s) => { st.pos[s] = 0; } },
+  {
+    text: 'Dice reset to default! 🎲', eff: (st, s, room, ns) => {
+      const char = room[`${s}_char`] || 'freddy';
+      if (!ns[s]) ns[s] = { mgWins: 0, badLucks: 0 };
+      ns[s].dice = CHAR_DEFAULT_DICE[char] || 'd6';
+    }
+  },
 ];
 
 const ITEM_CFG = [
-  { id: 'microphone',  emoji: '🎤', price: 10 },
-  { id: 'battery',     emoji: '🔋', price: 25 },
-  { id: 'helpy',       emoji: '🐰', price: 5  },
-  { id: 'swap',        emoji: '🔃', price: 3  },
-  { id: 'ballpit',     emoji: '🎊', price: 5  },
-  { id: 'm2',          emoji: '🤖', price: 7  },
-  { id: 'faz_mixer',   emoji: '🎰', price: 2  },
-  { id: 'glitchtrap',  emoji: '🐇', price: 15 },
-  { id: 'springlock',  emoji: '🔒', price: 8  },
+  { id: 'microphone', emoji: '🎤', price: 10 },
+  { id: 'battery', emoji: '🔋', price: 25 },
+  { id: 'helpy', emoji: '🐰', price: 5 },
+  { id: 'swap', emoji: '🔃', price: 3 },
+  { id: 'ballpit', emoji: '🎊', price: 5 },
+  { id: 'm2', emoji: '🤖', price: 7 },
+  { id: 'faz_mixer', emoji: '🎰', price: 2 },
+  { id: 'glitchtrap', emoji: '🐇', price: 15 },
+  { id: 'springlock', emoji: '🔒', price: 8 },
   { id: 'freddy_mask', emoji: '🎭', price: 22 },
 ];
 
 const MINIGAME_LIST = [
-  { id: 'helpyBoop',     name: 'Helpy Boop',       emoji: '👃', desc: 'Click Helpy\'s nose as many times as you can in 30 seconds!' },
-  { id: 'moneyLaundry',  name: 'Money Laundering',  emoji: '💰', desc: 'Drag coins to Rockstar Freddy! Most coins deposited in 30s wins.' },
-  { id: 'feedingFrenzy', name: 'Feeding Frenzy',    emoji: '🍕', desc: 'Make Chica\'s pizza as fast as possible! Wrong ingredient = -1 pizza.' },
-  { id: 'guitarFinder',  name: 'Guitar Finder',     emoji: '🎸', desc: 'Find Bonnie\'s guitar hidden in the grid as fast as possible!' },
-  { id: 'powerOut',      name: 'Power Out',         emoji: '🔦', desc: 'Close the door before Freddy attacks! Random timing.' },
-  { id: 'flashlight',    name: 'Flashlight',        emoji: '🔦', desc: 'Tap as fast as you can for 15 seconds! Watch out for Withered Foxy...' },
-  { id: 'pizzaDough',    name: 'Pizza Dough',       emoji: '🍕', desc: 'Draw the most perfect circle you can in 5 seconds!' },
+  { id: 'helpyBoop', name: 'Helpy Boop', emoji: '👃', desc: 'Click Helpy\'s nose as many times as you can in 30 seconds!' },
+  { id: 'moneyLaundry', name: 'Money Laundering', emoji: '💰', desc: 'Drag coins to Rockstar Freddy! Most coins deposited in 30s wins.' },
+  { id: 'feedingFrenzy', name: 'Feeding Frenzy', emoji: '🍕', desc: 'Make Chica\'s pizza as fast as possible! Wrong ingredient = -1 pizza.' },
+  { id: 'guitarFinder', name: 'Guitar Finder', emoji: '🎸', desc: 'Find Bonnie\'s guitar hidden in the grid as fast as possible!' },
+  { id: 'powerOut', name: 'Power Out', emoji: '🔦', desc: 'Close the door before Freddy attacks! Random timing.' },
+  { id: 'flashlight', name: 'Flashlight', emoji: '🔦', desc: 'Tap as fast as you can for 15 seconds! Watch out for Withered Foxy...' },
+  { id: 'pizzaDough', name: 'Pizza Dough', emoji: '🍕', desc: 'Draw the most perfect circle you can in 5 seconds!' },
 ];
 
 const QUESTION_EVENTS = [
-  { text: "Freddy's Birthday! 🎂",          desc: '+3 coins',            eff: p => { p.coins += 3; } },
-  { text: 'Toy Chica stole your coins! 😱', desc: '-3 coins',            eff: p => { p.coins = Math.max(0, p.coins - 3); } },
-  { text: 'Springtrap appeared! 💀',         desc: 'Go back 3 spaces',   eff: p => { p.pos = Math.max(0, p.pos - 3); } },
-  { text: 'Ballora dances for you! 💃',      desc: 'Go forward 3 spaces', eff: p => { p.pos = p.pos + 3; } },
-  { text: 'Phantom Freddy appeared! 👻',    desc: 'Lose 1 pizza',        eff: p => { if (p.pizzas > 0) p.pizzas--; } },
-  { text: 'Baby gave you a gift! 🎁',       desc: '+1 pizza',            eff: p => { p.pizzas++; } },
-  { text: 'Good night, everyone! 🌙',       desc: '+5 coins',            eff: p => { p.coins += 5; } },
-  { text: 'Nightmare Freddy invaded! 😨',   desc: '-5 coins',            eff: p => { p.coins = Math.max(0, p.coins - 5); } },
-  { text: 'Mangle fixed everything! 🔧',    desc: '+2 coins',            eff: p => { p.coins += 2; } },
+  { text: "Freddy's Birthday! 🎂", desc: '+3 coins', eff: p => { p.coins += 3; } },
+  { text: 'Toy Chica stole your coins! 😱', desc: '-3 coins', eff: p => { p.coins = Math.max(0, p.coins - 3); } },
+  { text: 'Springtrap appeared! 💀', desc: 'Go back 3 spaces', eff: p => { p.pos = Math.max(0, p.pos - 3); } },
+  { text: 'Ballora dances for you! 💃', desc: 'Go forward 3 spaces', eff: p => { p.pos = p.pos + 3; } },
+  { text: 'Phantom Freddy appeared! 👻', desc: 'Lose 1 pizza', eff: p => { if (p.pizzas > 0) p.pizzas--; } },
+  { text: 'Baby gave you a gift! 🎁', desc: '+1 pizza', eff: p => { p.pizzas++; } },
+  { text: 'Good night, everyone! 🌙', desc: '+5 coins', eff: p => { p.coins += 5; } },
+  { text: 'Nightmare Freddy invaded! 😨', desc: '-5 coins', eff: p => { p.coins = Math.max(0, p.coins - 5); } },
+  { text: 'Mangle fixed everything! 🔧', desc: '+2 coins', eff: p => { p.coins += 2; } },
   { text: 'Withered Bonnie scared you! 😰', desc: 'Lose half your coins', eff: p => { p.coins = Math.floor(p.coins / 2); } },
-  { text: 'Mangle shuffled the board! 🔀',  desc: 'All spaces reshuffled!',          eff: p => {}, boardShuffle: true },
-  { text: 'Found a free item! 🎁',          desc: 'Got a random item!',               eff: p => {}, giveItem: true },
-  { text: 'Faz-Blender activated! 🎰',      desc: 'All coins & pizzas scrambled!',    eff: p => {}, fazMix: true  },
+  { text: 'Mangle shuffled the board! 🔀', desc: 'All spaces reshuffled!', eff: p => { }, boardShuffle: true },
+  { text: 'Found a free item! 🎁', desc: 'Got a random item!', eff: p => { }, giveItem: true },
+  { text: 'Faz-Blender activated! 🎰', desc: 'All coins & pizzas scrambled!', eff: p => { }, fazMix: true },
 ];
 
 // ── Supabase ──────────────────────────────────────────────────────────────────
 const cfg = window.FNAF_CONFIG || {};
 if (!cfg.SUPABASE_URL || !cfg.SUPABASE_ANON_KEY) {
   document.querySelector('.container').innerHTML =
-    '<p style="color:#dd6d6d;font-family:monospace;padding:2rem">Missing config.js — Supabase not configured.</p>';
+    '<p style="color:#dd6d6d;font-family:monospace;padding:2rem">Missing config.js - Supabase not configured.</p>';
   throw new Error('FNAF_CONFIG not set');
 }
 const db = supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
@@ -206,34 +226,34 @@ sessionStorage.setItem('party_pid', playerId);
 // ── State ─────────────────────────────────────────────────────────────────────
 let roomId, playerSlot, roomData;
 let broadcastCh;
-let liveScores   = {};
-let mgDoneLocal          = {};   // tracks submitted slots via broadcast
-let mgReadyLocal         = new Set(); // tracks p5/p6 ready-for-minigame via broadcast
+let liveScores = {};
+let mgDoneLocal = {};   // tracks submitted slots via broadcast
+let mgReadyLocal = new Set(); // tracks p5/p6 ready-for-minigame via broadcast
 let podiumConfirmedLocal = new Set(); // tracks podium-confirmed slots via broadcast
-let activeMgId   = null;
-let mgWaitKey    = null;
-let isHopping    = false; // true during animateHops — blocks updateTokens interference
-let mgCleanup    = null;
-let mgPoller     = null;
-let pendingRoll  = null;
+let activeMgId = null;
+let mgWaitKey = null;
+let isHopping = false; // true during animateHops - blocks updateTokens interference
+let mgCleanup = null;
+let mgPoller = null;
+let pendingRoll = null;
 let lapCompletedLocal = false;     // local backup so lap-minigame survives Supabase race conditions
-let devScoreBonus    = 0;
-let eventLog    = [];              // local event history (broadcast to all clients)
+let devScoreBonus = 0;
+let eventLog = [];              // local event history (broadcast to all clients)
 let prevPlayerPos = {};            // track positions for movement animation
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const imgPath = rel => '../assets/' + rel;
 const charImg = char => imgPath(CHAR_CFG[char]?.img || 'images/default.png');
-const slotNum = slot  => +slot.replace('player', '');              // 'player2' → 2
+const slotNum = slot => +slot.replace('player', '');              // 'player2' → 2
 const mgScoreKey = slot => `mg_score_p${slotNum(slot)}`;
-const mgDoneKey  = slot => `mg_done_p${slotNum(slot)}`;
-const allSlots = n => ['player1','player2','player3','player4','player5','player6'].slice(0, n);
+const mgDoneKey = slot => `mg_done_p${slotNum(slot)}`;
+const allSlots = n => ['player1', 'player2', 'player3', 'player4', 'player5', 'player6'].slice(0, n);
 
 function pState(room) {
   return {
-    pos:       JSON.parse(room.player_pos      || '{}'),
-    coins:     JSON.parse(room.player_coins    || '{}'),
-    pizzas:    JSON.parse(room.player_pizzas   || '{}'),
+    pos: JSON.parse(room.player_pos || '{}'),
+    coins: JSON.parse(room.player_coins || '{}'),
+    pizzas: JSON.parse(room.player_pizzas || '{}'),
     cooldowns: JSON.parse(room.player_cooldowns || '{}'),
   };
 }
@@ -242,17 +262,17 @@ function parseBoard(room) {
     const raw = JSON.parse(room.board || '[]');
     if (Array.isArray(raw)) return { tiles: raw, laps: TOTAL_LAPS, boardSize: BOARD_SIZE, mapType: 'easy', toll: 5, tollMap: {}, skipMap: {}, freeMap: {}, nodes: null, boardAspect: '1:1' };
     return {
-      tiles:       Array.isArray(raw.tiles) ? raw.tiles : [],
-      laps:        raw.laps        || TOTAL_LAPS,
-      boardSize:   raw.boardSize   || BOARD_SIZE,
-      mapType:     raw.mapType     || 'easy',
-      toll:        raw.toll        ?? 5,
-      tollMap:     raw.tollMap     || {},
-      skipMap:     raw.skipMap     || {},
-      freeMap:     raw.freeMap     || {},
-      nodes:       Array.isArray(raw.nodes) ? raw.nodes : null,
+      tiles: Array.isArray(raw.tiles) ? raw.tiles : [],
+      laps: raw.laps || TOTAL_LAPS,
+      boardSize: raw.boardSize || BOARD_SIZE,
+      mapType: raw.mapType || 'easy',
+      toll: raw.toll ?? 5,
+      tollMap: raw.tollMap || {},
+      skipMap: raw.skipMap || {},
+      freeMap: raw.freeMap || {},
+      nodes: Array.isArray(raw.nodes) ? raw.nodes : null,
       boardAspect: raw.boardAspect || '1:1',
-      nextMap:            raw.nextMap            || {},
+      nextMap: raw.nextMap || {},
       endOfRoundMinigame: raw.endOfRoundMinigame || false,
     };
   } catch { return { tiles: [], laps: TOTAL_LAPS, boardSize: BOARD_SIZE, mapType: 'easy', toll: 5, tollMap: {}, skipMap: {}, freeMap: {}, nodes: null, boardAspect: '1:1' }; }
@@ -292,7 +312,7 @@ function emitEvent(msg) {
   broadcastCh?.send({ type: 'broadcast', event: 'game_event', payload: { msg } });
 }
 
-// ── Minigame poller — polls DB every 2s while minigame is active ──────────────
+// ── Minigame poller - polls DB every 2s while minigame is active ──────────────
 // Needed because Supabase real-time is unreliable for the allDone detection.
 function startMgPoller() {
   stopMgPoller();
@@ -309,7 +329,7 @@ function startMgPoller() {
       }
       const inv = JSON.parse(r.mg_players || '[]');
       if (inv.every(s => r[mgDoneKey(s)])) { stopMgPoller(); finishMinigame(r); }
-    } catch {}
+    } catch { }
   }, 2000);
 }
 function stopMgPoller() {
@@ -329,7 +349,7 @@ function checkMgAllReadyLocal() {
     db.from('party_rooms').update({
       turn_phase: 'minigame',
       mg_done_p1: false, mg_done_p2: false, mg_done_p3: false, mg_done_p4: false,
-    }).eq('id', roomId).eq('turn_phase', 'mg_waiting').then(() => {}, () => {});
+    }).eq('id', roomId).eq('turn_phase', 'mg_waiting').then(() => { }, () => { });
   }
 }
 
@@ -341,7 +361,7 @@ function checkMgAllDoneLocal() {
   if (involved.every(s => s in mgDoneLocal)) {
     stopMgPoller();
     (async () => {
-      try { const { data: r } = await db.from('party_rooms').select('*').eq('id', roomId).single(); if (r) finishMinigame(r); } catch {}
+      try { const { data: r } = await db.from('party_rooms').select('*').eq('id', roomId).single(); if (r) finishMinigame(r); } catch { }
     })();
   }
 }
@@ -352,14 +372,14 @@ function checkPodiumAllConfirmedLocal() {
   const involved = JSON.parse(roomData.mg_players || '[]');
   if (!involved.length) return;
   if (involved.every(s => podiumConfirmedLocal.has(s))) {
-    // Everyone confirmed — advance to roll
+    // Everyone confirmed - advance to roll
     let nextPlayer;
-    try { nextPlayer = JSON.parse(roomData.mg_config || '{}').nextPlayer; } catch {}
+    try { nextPlayer = JSON.parse(roomData.mg_config || '{}').nextPlayer; } catch { }
     nextPlayer = nextPlayer || nextSlot(roomData);
     db.from('party_rooms').update({
       turn_phase: 'roll', current_slot: nextPlayer, mg_id: null,
       mg_done_p1: false, mg_done_p2: false, mg_done_p3: false, mg_done_p4: false,
-    }).eq('id', roomId).eq('turn_phase', 'mg_podium').then(() => {}, () => {});
+    }).eq('id', roomId).eq('turn_phase', 'mg_podium').then(() => { }, () => { });
     // Also advance locally without waiting for subscription
     document.getElementById('mg-result-overlay')?.remove();
     roomData = { ...roomData, turn_phase: 'roll', current_slot: nextPlayer, mg_id: null };
@@ -370,11 +390,11 @@ function checkPodiumAllConfirmedLocal() {
     updateTokens(roomData);
   }
 }
-function playerPos(room, slot)  { return pState(room).pos[slot]       || 0; }
-function playerCoins(room, slot){ return pState(room).coins[slot]     || 0; }
-function playerPizzas(room, slot){ return pState(room).pizzas[slot]   || 0; }
-function playerLaps(room, slot)  { const { boardSize } = parseBoard(room); return Math.floor(playerPos(room, slot) / boardSize); }
-function boardPos(room, slot)    { const { boardSize } = parseBoard(room); return playerPos(room, slot) % boardSize; }
+function playerPos(room, slot) { return pState(room).pos[slot] || 0; }
+function playerCoins(room, slot) { return pState(room).coins[slot] || 0; }
+function playerPizzas(room, slot) { return pState(room).pizzas[slot] || 0; }
+function playerLaps(room, slot) { const { boardSize } = parseBoard(room); return Math.floor(playerPos(room, slot) / boardSize); }
+function boardPos(room, slot) { const { boardSize } = parseBoard(room); return playerPos(room, slot) % boardSize; }
 
 function myPlayer(room) {
   const s = pState(room);
@@ -383,17 +403,17 @@ function myPlayer(room) {
     name: room[`${playerSlot}_name`],
     char: room[`${playerSlot}_char`] || 'freddy',
     color: PLAYER_COLORS[slotNum(playerSlot) - 1],
-    pos:       s.pos[playerSlot]       || 0,
-    coins:     s.coins[playerSlot]     || 0,
-    pizzas:    s.pizzas[playerSlot]    || 0,
+    pos: s.pos[playerSlot] || 0,
+    coins: s.coins[playerSlot] || 0,
+    pizzas: s.pizzas[playerSlot] || 0,
     cooldowns: s.cooldowns[playerSlot] || 0,
   };
 }
 function isMyTurn(room) { return room.current_slot === playerSlot; }
 function nextSlot(room) {
-  const pc    = room.player_count || 2;
+  const pc = room.player_count || 2;
   const slots = allSlots(pc);
-  const idx   = slots.indexOf(room.current_slot);
+  const idx = slots.indexOf(room.current_slot);
   // Skip slots whose player has left (no name)
   for (let i = 1; i <= slots.length; i++) {
     const s = slots[(idx + i) % slots.length];
@@ -409,7 +429,7 @@ function moveBack(state, slot, steps) {
   state.pos[slot] = Math.max(0, (state.pos[slot] || 0) - steps);
 }
 
-// Graph-aware movement — follows nextMap connections, counts laps at node 0.
+// Graph-aware movement - follows nextMap connections, counts laps at node 0.
 function moveByGraph(state, slot, steps, boardSize, nextMap) {
   let node = (state.pos[slot] || 0) % boardSize;
   let laps = Math.floor((state.pos[slot] || 0) / boardSize);
@@ -422,12 +442,12 @@ function moveByGraph(state, slot, steps, boardSize, nextMap) {
 }
 
 // Jump directly to a board node index.
-// noLap = true: setback jump (freeMap going backward) — stays in same lap epoch, no coin conversion.
+// noLap = true: setback jump (freeMap going backward) - stays in same lap epoch, no coin conversion.
 function jumpToNode(state, slot, targetIdx, boardSize, noLap = false) {
-  const cur     = state.pos[slot] || 0;
+  const cur = state.pos[slot] || 0;
   const curNode = cur % boardSize;
   const lapBase = cur - curNode;
-  const newPos  = (noLap || targetIdx >= curNode)
+  const newPos = (noLap || targetIdx >= curNode)
     ? lapBase + targetIdx                  // no new lap: stay in current epoch
     : lapBase + boardSize + targetIdx;     // wraps forward: counts as lap
   const oldLap = Math.floor(cur / boardSize);
@@ -448,28 +468,30 @@ function generateBoard() { return createBoard('easy').tiles; } // backwards comp
 
 function createBoard(mapType = 'easy', laps = TOTAL_LAPS) {
   if (mapType === 'normal') {
-    return { tiles: shufflePool([
-      ...Array(5).fill('normal'), ...Array(4).fill('minigame'),
-      ...Array(4).fill('coin'),   ...Array(3).fill('pizza'),
-      ...Array(3).fill('badluck'),...Array(2).fill('trap'),
-      'challenge', 'question', 'jackpot',
-    ]), laps, boardSize: 24, mapType, toll: 5 };
+    return {
+      tiles: shufflePool([
+        ...Array(5).fill('normal'), ...Array(4).fill('minigame'),
+        ...Array(4).fill('coin'), ...Array(3).fill('pizza'),
+        ...Array(3).fill('badluck'), ...Array(2).fill('trap'),
+        'challenge', 'question', 'jackpot',
+      ]), laps, boardSize: 24, mapType, toll: 5
+    };
   }
   if (mapType === 'normal_map') {
     // 46-node custom board with split paths. Non-fixed tiles randomized each game.
-    const FIXED    = new Set(['tollbooth', 'freddy_zone', 'jackpot']);
+    const FIXED = new Set(['tollbooth', 'freddy_zone', 'jackpot']);
     const template = [
-      'normal','badluck','jackpot','pizza','normal','jackpot','badluck','coin','trap','question',
-      'tollbooth','normal','coin','freddy_zone','minigame','freddy_zone','normal','coin','normal',
-      'trap','normal','pizza','pizza','coin','normal','coin','minigame','minigame','trap',
-      'freddy_zone','coin','minigame','coin','jackpot','normal','badluck','badluck','challenge',
-      'question','minigame','minigame','badluck','pizza','normal','challenge','pizza',
+      'normal', 'badluck', 'jackpot', 'pizza', 'normal', 'jackpot', 'badluck', 'coin', 'trap', 'question',
+      'tollbooth', 'normal', 'coin', 'freddy_zone', 'minigame', 'freddy_zone', 'normal', 'coin', 'normal',
+      'trap', 'normal', 'pizza', 'pizza', 'coin', 'normal', 'coin', 'minigame', 'minigame', 'trap',
+      'freddy_zone', 'coin', 'minigame', 'coin', 'jackpot', 'normal', 'badluck', 'badluck', 'challenge',
+      'question', 'minigame', 'minigame', 'badluck', 'pizza', 'normal', 'challenge', 'pizza',
     ];
     // 38 randomizable slots (skip index 0 START + 7 fixed-type nodes)
     const pool = shufflePool([
-      ...Array(7).fill('normal'),   ...Array(7).fill('coin'),    ...Array(6).fill('pizza'),
+      ...Array(7).fill('normal'), ...Array(7).fill('coin'), ...Array(6).fill('pizza'),
       ...Array(6).fill('minigame'), ...Array(5).fill('badluck'), ...Array(3).fill('trap'),
-      ...Array(2).fill('challenge'),...Array(2).fill('question'),
+      ...Array(2).fill('challenge'), ...Array(2).fill('question'),
     ]);
     let pi = 0;
     const tiles = template.map((t, i) => {
@@ -481,16 +503,16 @@ function createBoard(mapType = 'easy', laps = TOTAL_LAPS) {
       tiles, laps, boardSize: 46, mapType: 'normal_map', toll: 5,
       skipMap: { 10: 35 }, freeMap: { 10: 11 }, nextMap: { 34: 0 }, boardAspect: '1:1',
       nodes: [
-        {x:22.5,y:13.5},{x:30.9,y:24.3},{x:40.7,y:12.9},{x:46.1,y:17.9},{x:50.8,y:27.2},
-        {x:56.5,y:23.4},{x:65.5,y:19.5},{x:70.6,y:28.0},{x:76.9,y:36.9},{x:75.0,y:45.4},
-        {x:68.0,y:57.3},{x:63.0,y:51.5},{x:58.8,y:55.0},{x:53.4,y:61.9},{x:49.2,y:54.7},
-        {x:43.0,y:61.4},{x:36.9,y:57.5},{x:39.4,y:53.8},{x:37.3,y:48.6},{x:32.3,y:49.1},
-        {x:29.2,y:56.9},{x:32.1,y:63.3},{x:36.2,y:68.3},{x:33.3,y:74.9},{x:27.1,y:74.4},
-        {x:25.2,y:68.0},{x:24.5,y:61.1},{x:14.6,y:60.6},{x:14.7,y:49.5},{x:20.3,y:44.5},
-        {x:11.6,y:33.4},{x:12.5,y:27.8},{x:18.0,y:25.7},{x:15.4,y:15.3},{x:18.7,y:8.4},
-        {x:65.7,y:63.9},{x:61.2,y:73.0},{x:68.0,y:79.1},{x:60.3,y:85.1},{x:47.2,y:82.7},
-        {x:47.6,y:71.1},{x:47.9,y:62.7},{x:54.8,y:42.7},{x:40.2,y:39.6},{x:29.0,y:35.4},
-        {x:22.3,y:23.9},
+        { x: 22.5, y: 13.5 }, { x: 30.9, y: 24.3 }, { x: 40.7, y: 12.9 }, { x: 46.1, y: 17.9 }, { x: 50.8, y: 27.2 },
+        { x: 56.5, y: 23.4 }, { x: 65.5, y: 19.5 }, { x: 70.6, y: 28.0 }, { x: 76.9, y: 36.9 }, { x: 75.0, y: 45.4 },
+        { x: 68.0, y: 57.3 }, { x: 63.0, y: 51.5 }, { x: 58.8, y: 55.0 }, { x: 53.4, y: 61.9 }, { x: 49.2, y: 54.7 },
+        { x: 43.0, y: 61.4 }, { x: 36.9, y: 57.5 }, { x: 39.4, y: 53.8 }, { x: 37.3, y: 48.6 }, { x: 32.3, y: 49.1 },
+        { x: 29.2, y: 56.9 }, { x: 32.1, y: 63.3 }, { x: 36.2, y: 68.3 }, { x: 33.3, y: 74.9 }, { x: 27.1, y: 74.4 },
+        { x: 25.2, y: 68.0 }, { x: 24.5, y: 61.1 }, { x: 14.6, y: 60.6 }, { x: 14.7, y: 49.5 }, { x: 20.3, y: 44.5 },
+        { x: 11.6, y: 33.4 }, { x: 12.5, y: 27.8 }, { x: 18.0, y: 25.7 }, { x: 15.4, y: 15.3 }, { x: 18.7, y: 8.4 },
+        { x: 65.7, y: 63.9 }, { x: 61.2, y: 73.0 }, { x: 68.0, y: 79.1 }, { x: 60.3, y: 85.1 }, { x: 47.2, y: 82.7 },
+        { x: 47.6, y: 71.1 }, { x: 47.9, y: 62.7 }, { x: 54.8, y: 42.7 }, { x: 40.2, y: 39.6 }, { x: 29.0, y: 35.4 },
+        { x: 22.3, y: 23.9 },
       ],
     };
   }
@@ -498,16 +520,16 @@ function createBoard(mapType = 'easy', laps = TOTAL_LAPS) {
     // 58-node Freddy map · 3 tollbooths · complex paths
     const FIXED = new Set(['tollbooth', 'freddy_zone', 'jackpot']);
     const template = [
-      'normal','tollbooth','normal','normal','normal','normal','normal','normal','normal','normal',
-      'tollbooth','jackpot','jackpot','jackpot','normal','normal','normal','normal','normal','normal',
-      'normal','normal','normal','normal','normal','normal','normal','normal','normal','normal',
-      'normal','normal','normal','normal','tollbooth','trap','challenge','freddy_zone','trap',
-      'badluck','badluck','freddy_zone','badluck','challenge','normal','normal','normal','normal','normal',
-      'normal','normal','normal','normal','normal','normal','normal','normal','normal',
+      'normal', 'tollbooth', 'normal', 'normal', 'normal', 'normal', 'normal', 'normal', 'normal', 'normal',
+      'tollbooth', 'jackpot', 'jackpot', 'jackpot', 'normal', 'normal', 'normal', 'normal', 'normal', 'normal',
+      'normal', 'normal', 'normal', 'normal', 'normal', 'normal', 'normal', 'normal', 'normal', 'normal',
+      'normal', 'normal', 'normal', 'normal', 'tollbooth', 'trap', 'challenge', 'freddy_zone', 'trap',
+      'badluck', 'badluck', 'freddy_zone', 'badluck', 'challenge', 'normal', 'normal', 'normal', 'normal', 'normal',
+      'normal', 'normal', 'normal', 'normal', 'normal', 'normal', 'normal', 'normal', 'normal',
     ];
     const pool = shufflePool([
-      'normal','normal','normal','coin','coin','coin',
-      'pizza','pizza','minigame','minigame','badluck','badluck','trap','challenge','question',
+      'normal', 'normal', 'normal', 'coin', 'coin', 'coin',
+      'pizza', 'pizza', 'minigame', 'minigame', 'badluck', 'badluck', 'trap', 'challenge', 'question',
     ]);
     let pi = 0;
     const tiles = template.map((t, i) => {
@@ -517,23 +539,23 @@ function createBoard(mapType = 'easy', laps = TOTAL_LAPS) {
     });
     return {
       tiles, laps, boardSize: 58, mapType: 'freddy', toll: 5,
-      skipMap: { 1: 2,  10: 11, 34: 44 },
+      skipMap: { 1: 2, 10: 11, 34: 44 },
       freeMap: { 1: 23, 10: 14, 34: 35 },
       nextMap: { 22: 0 },
       boardAspect: '1:1',
       nodes: [
-        {x:49.2,y:60.0},{x:48.9,y:51.4},{x:39.8,y:54.1},{x:28.4,y:57.2},{x:26.5,y:69.1},
-        {x:25.8,y:78.6},{x:30.5,y:92.8},{x:48.5,y:97.1},{x:48.0,y:77.9},{x:17.3,y:61.7},
-        {x:23.2,y:43.1},{x:11.7,y:42.5},{x:4.6,y:27.3},{x:14.8,y:21.4},{x:25.9,y:29.7},
-        {x:30.9,y:19.7},{x:38.2,y:18.9},{x:36.3,y:3.7},{x:45.8,y:2.5},{x:46.0,y:39.3},
-        {x:35.3,y:36.2},{x:31.1,y:48.2},{x:39.0,y:44.4},{x:57.5,y:55.6},{x:65.2,y:55.3},
-        {x:70.2,y:58.0},{x:73.8,y:64.1},{x:74.2,y:73.4},{x:74.4,y:83.7},{x:66.3,y:94.8},
-        {x:56.0,y:96.9},{x:55.6,y:77.4},{x:84.6,y:59.3},{x:79.6,y:54.0},{x:74.8,y:44.8},
-        {x:78.9,y:38.4},{x:87.4,y:41.9},{x:96.3,y:43.1},{x:97.5,y:36.7},{x:100.0,y:29.6},
-        {x:96.8,y:21.4},{x:87.2,y:18.2},{x:81.3,y:24.5},{x:77.0,y:30.3},{x:70.3,y:30.7},
-        {x:64.7,y:19.5},{x:59.5,y:12.2},{x:60.2,y:3.7},{x:52.4,y:3.4},{x:51.7,y:18.8},
-        {x:51.5,y:27.4},{x:52.5,y:39.9},{x:56.0,y:34.5},{x:62.5,y:32.7},{x:68.1,y:40.2},
-        {x:60.0,y:39.7},{x:66.8,y:46.6},{x:55.6,y:47.2},
+        { x: 49.2, y: 60.0 }, { x: 48.9, y: 51.4 }, { x: 39.8, y: 54.1 }, { x: 28.4, y: 57.2 }, { x: 26.5, y: 69.1 },
+        { x: 25.8, y: 78.6 }, { x: 30.5, y: 92.8 }, { x: 48.5, y: 97.1 }, { x: 48.0, y: 77.9 }, { x: 17.3, y: 61.7 },
+        { x: 23.2, y: 43.1 }, { x: 11.7, y: 42.5 }, { x: 4.6, y: 27.3 }, { x: 14.8, y: 21.4 }, { x: 25.9, y: 29.7 },
+        { x: 30.9, y: 19.7 }, { x: 38.2, y: 18.9 }, { x: 36.3, y: 3.7 }, { x: 45.8, y: 2.5 }, { x: 46.0, y: 39.3 },
+        { x: 35.3, y: 36.2 }, { x: 31.1, y: 48.2 }, { x: 39.0, y: 44.4 }, { x: 57.5, y: 55.6 }, { x: 65.2, y: 55.3 },
+        { x: 70.2, y: 58.0 }, { x: 73.8, y: 64.1 }, { x: 74.2, y: 73.4 }, { x: 74.4, y: 83.7 }, { x: 66.3, y: 94.8 },
+        { x: 56.0, y: 96.9 }, { x: 55.6, y: 77.4 }, { x: 84.6, y: 59.3 }, { x: 79.6, y: 54.0 }, { x: 74.8, y: 44.8 },
+        { x: 78.9, y: 38.4 }, { x: 87.4, y: 41.9 }, { x: 96.3, y: 43.1 }, { x: 97.5, y: 36.7 }, { x: 100.0, y: 29.6 },
+        { x: 96.8, y: 21.4 }, { x: 87.2, y: 18.2 }, { x: 81.3, y: 24.5 }, { x: 77.0, y: 30.3 }, { x: 70.3, y: 30.7 },
+        { x: 64.7, y: 19.5 }, { x: 59.5, y: 12.2 }, { x: 60.2, y: 3.7 }, { x: 52.4, y: 3.4 }, { x: 51.7, y: 18.8 },
+        { x: 51.5, y: 27.4 }, { x: 52.5, y: 39.9 }, { x: 56.0, y: 34.5 }, { x: 62.5, y: 32.7 }, { x: 68.1, y: 40.2 },
+        { x: 60.0, y: 39.7 }, { x: 66.8, y: 46.6 }, { x: 55.6, y: 47.2 },
       ],
     };
   }
@@ -541,15 +563,15 @@ function createBoard(mapType = 'easy', laps = TOTAL_LAPS) {
     // 26-node Bonnie silhouette map · single loop
     const FIXED = new Set(['jackpot']);
     const template = [
-      'jackpot','normal','normal','normal','jackpot','normal',
-      'normal','normal','jackpot','normal','normal','normal',
-      'jackpot','normal','normal','normal','jackpot','normal',
-      'normal','normal','jackpot','normal','normal','normal',
-      'jackpot','normal',
+      'jackpot', 'normal', 'normal', 'normal', 'jackpot', 'normal',
+      'normal', 'normal', 'jackpot', 'normal', 'normal', 'normal',
+      'jackpot', 'normal', 'normal', 'normal', 'jackpot', 'normal',
+      'normal', 'normal', 'jackpot', 'normal', 'normal', 'normal',
+      'jackpot', 'normal',
     ];
     const pool = shufflePool([
-      'normal','normal','normal','coin','coin','coin',
-      'pizza','pizza','minigame','minigame','badluck','badluck','trap','challenge','question',
+      'normal', 'normal', 'normal', 'coin', 'coin', 'coin',
+      'pizza', 'pizza', 'minigame', 'minigame', 'badluck', 'badluck', 'trap', 'challenge', 'question',
     ]);
     let pi = 0;
     const tiles = template.map(t => FIXED.has(t) ? t : (pool[pi++ % pool.length] || t));
@@ -558,13 +580,13 @@ function createBoard(mapType = 'easy', laps = TOTAL_LAPS) {
       skipMap: {}, freeMap: {}, nextMap: {},
       boardAspect: '1:1',
       nodes: [
-        {x:17.6,y:21.4},{x:30.1,y:21.4},{x:40.5,y:27.8},{x:44.5,y:38.4},
-        {x:44.1,y:48.5},{x:49.8,y:47.6},{x:57.8,y:48.2},{x:57.4,y:38},
-        {x:58.9,y:24.5},{x:59.6,y:10.6},{x:68.5,y:4},{x:70.7,y:12.7},
-        {x:71.4,y:24.9},{x:68.8,y:35.4},{x:63.6,y:50.7},{x:68.4,y:64.3},
-        {x:69.7,y:79.5},{x:60.8,y:96.7},{x:48.1,y:97.4},{x:36.4,y:90.8},
-        {x:31.4,y:79.6},{x:32.3,y:68.3},{x:37.2,y:52.9},{x:33.9,y:41.9},
-        {x:31.3,y:32.4},{x:23,y:29.7},
+        { x: 17.6, y: 21.4 }, { x: 30.1, y: 21.4 }, { x: 40.5, y: 27.8 }, { x: 44.5, y: 38.4 },
+        { x: 44.1, y: 48.5 }, { x: 49.8, y: 47.6 }, { x: 57.8, y: 48.2 }, { x: 57.4, y: 38 },
+        { x: 58.9, y: 24.5 }, { x: 59.6, y: 10.6 }, { x: 68.5, y: 4 }, { x: 70.7, y: 12.7 },
+        { x: 71.4, y: 24.9 }, { x: 68.8, y: 35.4 }, { x: 63.6, y: 50.7 }, { x: 68.4, y: 64.3 },
+        { x: 69.7, y: 79.5 }, { x: 60.8, y: 96.7 }, { x: 48.1, y: 97.4 }, { x: 36.4, y: 90.8 },
+        { x: 31.4, y: 79.6 }, { x: 32.3, y: 68.3 }, { x: 37.2, y: 52.9 }, { x: 33.9, y: 41.9 },
+        { x: 31.3, y: 32.4 }, { x: 23, y: 29.7 },
       ],
     };
   }
@@ -590,12 +612,12 @@ function createBoard(mapType = 'easy', laps = TOTAL_LAPS) {
       nextMap: { 15: 27, 23: 0, 26: 12, 27: 16 },
       boardAspect: '1:1',
       nodes: [
-        {x:44.9,y:56.6},{x:35.7,y:70.7},{x:61.2,y:70.6},{x:49.8,y:57},{x:34.9,y:78.9},
-        {x:47.6,y:94},{x:61.4,y:80.1},{x:24,y:80.4},{x:14.1,y:57.2},{x:24.4,y:28.3},
-        {x:36.2,y:21.6},{x:47.1,y:25.1},{x:58.5,y:21.2},{x:68.3,y:26.9},{x:79.9,y:53.1},
-        {x:69.2,y:81.2},{x:35.9,y:59.4},{x:29.2,y:50.9},{x:38.2,y:46.3},{x:44.5,y:52.2},
-        {x:51.5,y:52.7},{x:57.4,y:46.9},{x:66.2,y:53},{x:58.9,y:58.8},{x:29,y:8.6},
-        {x:46.4,y:21.7},{x:61.7,y:9},{x:47.8,y:87.9},
+        { x: 44.9, y: 56.6 }, { x: 35.7, y: 70.7 }, { x: 61.2, y: 70.6 }, { x: 49.8, y: 57 }, { x: 34.9, y: 78.9 },
+        { x: 47.6, y: 94 }, { x: 61.4, y: 80.1 }, { x: 24, y: 80.4 }, { x: 14.1, y: 57.2 }, { x: 24.4, y: 28.3 },
+        { x: 36.2, y: 21.6 }, { x: 47.1, y: 25.1 }, { x: 58.5, y: 21.2 }, { x: 68.3, y: 26.9 }, { x: 79.9, y: 53.1 },
+        { x: 69.2, y: 81.2 }, { x: 35.9, y: 59.4 }, { x: 29.2, y: 50.9 }, { x: 38.2, y: 46.3 }, { x: 44.5, y: 52.2 },
+        { x: 51.5, y: 52.7 }, { x: 57.4, y: 46.9 }, { x: 66.2, y: 53 }, { x: 58.9, y: 58.8 }, { x: 29, y: 8.6 },
+        { x: 46.4, y: 21.7 }, { x: 61.7, y: 9 }, { x: 47.8, y: 87.9 },
       ],
     };
   }
@@ -613,16 +635,16 @@ function createBoard(mapType = 'easy', laps = TOTAL_LAPS) {
       nextMap: {}, skipMap: {}, freeMap: {},
       boardAspect: '1:1',
       nodes: [
-        {x:40.9,y:35.9},{x:48.6,y:42.2},{x:40.9,y:48.2},{x:33.3,y:39.6},{x:27.1,y:35.6},
-        {x:27.5,y:46.9},{x:20.4,y:48.5},{x:25.1,y:52.1},{x:11.7,y:55.5},{x:37.8,y:60.7},
-        {x:62.8,y:55.3},{x:50.1,y:47.3},{x:37,y:54.8},{x:49.7,y:53.5},{x:50.4,y:63.3},
-        {x:84.6,y:56.6},{x:76.6,y:51.6},{x:79.2,y:47.6},{x:71.4,y:46.2},{x:71,y:33.7},
-        {x:62.5,y:24.3},{x:65.2,y:18.9},{x:77.6,y:4.9},{x:90.2,y:4.1},{x:87.3,y:17.5},
-        {x:74.6,y:29},{x:67.5,y:26.6},{x:55,y:20.7},{x:47.9,y:22.1},{x:43.4,y:15},
-        {x:49.6,y:19.2},{x:56.2,y:14},{x:37.2,y:22.5},{x:33.7,y:27.1},{x:34.3,y:20.8},
-        {x:18.1,y:5.1},{x:9.5,y:5},{x:10.4,y:16.7},{x:25.6,y:30.1},{x:34.6,y:62.1},
-        {x:36,y:88.5},{x:50.1,y:98.7},{x:64.3,y:89.9},{x:64,y:60.9},{x:56.9,y:36.4},
-        {x:63.3,y:42.6},{x:56.1,y:47.7},{x:51.7,y:41.7},
+        { x: 40.9, y: 35.9 }, { x: 48.6, y: 42.2 }, { x: 40.9, y: 48.2 }, { x: 33.3, y: 39.6 }, { x: 27.1, y: 35.6 },
+        { x: 27.5, y: 46.9 }, { x: 20.4, y: 48.5 }, { x: 25.1, y: 52.1 }, { x: 11.7, y: 55.5 }, { x: 37.8, y: 60.7 },
+        { x: 62.8, y: 55.3 }, { x: 50.1, y: 47.3 }, { x: 37, y: 54.8 }, { x: 49.7, y: 53.5 }, { x: 50.4, y: 63.3 },
+        { x: 84.6, y: 56.6 }, { x: 76.6, y: 51.6 }, { x: 79.2, y: 47.6 }, { x: 71.4, y: 46.2 }, { x: 71, y: 33.7 },
+        { x: 62.5, y: 24.3 }, { x: 65.2, y: 18.9 }, { x: 77.6, y: 4.9 }, { x: 90.2, y: 4.1 }, { x: 87.3, y: 17.5 },
+        { x: 74.6, y: 29 }, { x: 67.5, y: 26.6 }, { x: 55, y: 20.7 }, { x: 47.9, y: 22.1 }, { x: 43.4, y: 15 },
+        { x: 49.6, y: 19.2 }, { x: 56.2, y: 14 }, { x: 37.2, y: 22.5 }, { x: 33.7, y: 27.1 }, { x: 34.3, y: 20.8 },
+        { x: 18.1, y: 5.1 }, { x: 9.5, y: 5 }, { x: 10.4, y: 16.7 }, { x: 25.6, y: 30.1 }, { x: 34.6, y: 62.1 },
+        { x: 36, y: 88.5 }, { x: 50.1, y: 98.7 }, { x: 64.3, y: 89.9 }, { x: 64, y: 60.9 }, { x: 56.9, y: 36.4 },
+        { x: 63.3, y: 42.6 }, { x: 56.1, y: 47.7 }, { x: 51.7, y: 41.7 },
       ],
     };
   }
@@ -637,41 +659,43 @@ function createBoard(mapType = 'easy', laps = TOTAL_LAPS) {
     ];
     return {
       tiles, laps, boardSize: 39, mapType: 'jackpot', toll: 5,
-      skipMap: { 29:30, 30:31, 31:32, 32:33, 33:34, 34:35, 35:36, 36:37, 37:38 },
-      freeMap: { 29:1,  30:1,  31:1,  32:1,  33:1,  34:1,  35:1,  36:1,  37:1  },
+      skipMap: { 29: 30, 30: 31, 31: 32, 32: 33, 33: 34, 34: 35, 35: 36, 36: 37, 37: 38 },
+      freeMap: { 29: 1, 30: 1, 31: 1, 32: 1, 33: 1, 34: 1, 35: 1, 36: 1, 37: 1 },
       boardAspect: '1:1',
       endOfRoundMinigame: true,
       nodes: [
-        {x:49.2,y:67.9},{x:47.9,y:89.2},{x:66.7,y:87.2},{x:49.0,y:99.5},{x:30.5,y:86.4},
-        {x:32.8,y:52.1},{x:38.3,y:48.8},{x:32.1,y:33.4},{x:34.7,y:18.8},{x:27.5,y:16.7},
-        {x:26.7,y:8.4},{x:36.0,y:8.2},{x:39.3,y:14.2},{x:44.7,y:1.5},{x:54.7,y:1.9},
-        {x:62.5,y:13.3},{x:66.4,y:7.2},{x:72.3,y:8.2},{x:70.7,y:16.4},{x:64.7,y:19.9},
-        {x:68.9,y:34.1},{x:64.3,y:47.2},{x:56.1,y:50.4},{x:51.2,y:36.6},{x:47.7,y:31.5},
-        {x:54.4,y:31.0},{x:44.6,y:50.4},{x:66.6,y:52.4},{x:67.6,y:70.3},{x:60.8,y:65.9},
-        {x:53.4,y:64.3},{x:49.7,y:58.6},{x:45.6,y:63.8},{x:39.2,y:65.2},{x:43.3,y:69.7},
-        {x:42.0,y:76.8},{x:49.1,y:73.2},{x:56.8,y:77.4},{x:55.0,y:70.3},
+        { x: 49.2, y: 67.9 }, { x: 47.9, y: 89.2 }, { x: 66.7, y: 87.2 }, { x: 49.0, y: 99.5 }, { x: 30.5, y: 86.4 },
+        { x: 32.8, y: 52.1 }, { x: 38.3, y: 48.8 }, { x: 32.1, y: 33.4 }, { x: 34.7, y: 18.8 }, { x: 27.5, y: 16.7 },
+        { x: 26.7, y: 8.4 }, { x: 36.0, y: 8.2 }, { x: 39.3, y: 14.2 }, { x: 44.7, y: 1.5 }, { x: 54.7, y: 1.9 },
+        { x: 62.5, y: 13.3 }, { x: 66.4, y: 7.2 }, { x: 72.3, y: 8.2 }, { x: 70.7, y: 16.4 }, { x: 64.7, y: 19.9 },
+        { x: 68.9, y: 34.1 }, { x: 64.3, y: 47.2 }, { x: 56.1, y: 50.4 }, { x: 51.2, y: 36.6 }, { x: 47.7, y: 31.5 },
+        { x: 54.4, y: 31.0 }, { x: 44.6, y: 50.4 }, { x: 66.6, y: 52.4 }, { x: 67.6, y: 70.3 }, { x: 60.8, y: 65.9 },
+        { x: 53.4, y: 64.3 }, { x: 49.7, y: 58.6 }, { x: 45.6, y: 63.8 }, { x: 39.2, y: 65.2 }, { x: 43.3, y: 69.7 },
+        { x: 42.0, y: 76.8 }, { x: 49.1, y: 73.2 }, { x: 56.8, y: 77.4 }, { x: 55.0, y: 70.3 },
       ],
     };
   }
 
   // easy
-  return { tiles: shufflePool([
-    ...Array(5).fill('normal'), ...Array(3).fill('minigame'),
-    ...Array(3).fill('coin'),   ...Array(2).fill('pizza'),
-    ...Array(2).fill('badluck'),...Array(2).fill('trap'),
-    'challenge', 'question', 'jackpot',
-  ]), laps, boardSize: 20, mapType, toll: 5 };
+  return {
+    tiles: shufflePool([
+      ...Array(5).fill('normal'), ...Array(3).fill('minigame'),
+      ...Array(3).fill('coin'), ...Array(2).fill('pizza'),
+      ...Array(2).fill('badluck'), ...Array(2).fill('trap'),
+      'challenge', 'question', 'jackpot',
+    ]), laps, boardSize: 20, mapType, toll: 5
+  };
 }
 function genCode() { return Math.random().toString(36).slice(2, 8).toUpperCase(); }
 
 // ── Screens ───────────────────────────────────────────────────────────────────
 function showScreen(name) {
-  ['lobby','waiting','board','minigame','result'].forEach(s => {
+  ['lobby', 'waiting', 'board', 'minigame', 'result'].forEach(s => {
     const el = document.getElementById(`screen-${s}`);
     if (el) el.style.display = (s === name) ? '' : 'none';
   });
-  const inGame    = ['board','minigame','result'].includes(name);
-  const inGameHUD = ['board','minigame'].includes(name);
+  const inGame = ['board', 'minigame', 'result'].includes(name);
+  const inGameHUD = ['board', 'minigame'].includes(name);
   const shop = document.getElementById('dice-shop-panel');
   if (shop) shop.style.display = inGameHUD ? '' : 'none';
   const actionPanel = document.getElementById('dice-action-panel');
@@ -694,8 +718,8 @@ function initLobby() {
   document.getElementById('create-room-btn').addEventListener('click', showPartyCreatePanel);
   document.getElementById('confirm-create-btn').addEventListener('click', confirmCreatePartyRoom);
   document.getElementById('cancel-create-btn').addEventListener('click', cancelPartyCreateRoom);
-  document.getElementById('join-room-btn').addEventListener('click',   joinRoom);
-  document.getElementById('copy-code-btn').addEventListener('click',   copyCode);
+  document.getElementById('join-room-btn').addEventListener('click', joinRoom);
+  document.getElementById('copy-code-btn').addEventListener('click', copyCode);
   document.getElementById('refresh-lobby-btn').addEventListener('click', loadPublicPartyLobby);
   document.getElementById('start-early-btn').addEventListener('click', startEarlyParty);
 
@@ -710,7 +734,7 @@ function initLobby() {
   // Render rules list
   const rulesList = document.getElementById('rules-list');
   if (rulesList) {
-    const RULE_EMOJIS = ['🎲','🔄','🏆','🪙','🎮','🐻','👥','🎲','1️⃣','🦊🐻🐔🎸🪤🎭🎀','💰'];
+    const RULE_EMOJIS = ['🎲', '🔄', '🏆', '🪙', '🎮', '🐻', '👥', '🎲', '1️⃣', '🦊🐻🐔🎸🪤🎭🎀', '💰'];
     rulesList.innerHTML = Array.from({ length: 11 }, (_, i) =>
       `<li><span class="e">${RULE_EMOJIS[i]}</span> ${T('rules.' + i)}</li>`
     ).join('');
@@ -745,24 +769,24 @@ async function confirmCreatePartyRoom() {
   const name = document.getElementById('lobby-name').value.trim();
   if (!name) { lobbyError(T('error.enterName')); return; }
 
-  const code      = document.getElementById('create-room-code').textContent;
-  const roomName  = document.getElementById('create-room-name').value.trim() || `${name}'s Room`;
+  const code = document.getElementById('create-room-code').textContent;
+  const roomName = document.getElementById('create-room-name').value.trim() || `${name}'s Room`;
   const isPrivate = document.querySelector('input[name="party-privacy"]:checked')?.value === 'private';
-  const pc       = +document.querySelector('input[name="party-count"]:checked').value;
+  const pc = +document.querySelector('input[name="party-count"]:checked').value;
   const totalLaps = +document.querySelector('input[name="party-laps"]:checked').value;
-  const mapType  = document.querySelector('input[name="party-map"]:checked').value;
-  const board    = createBoard(mapType, totalLaps);
+  const mapType = document.querySelector('input[name="party-map"]:checked').value;
+  const board = createBoard(mapType, totalLaps);
 
   const { data, error } = await db.from('party_rooms').insert({
     code, player_count: pc, state: 'waiting',
     player1_id: playerId, player1_name: name, player1_char: null,
     room_name: roomName, is_private: isPrivate,
     board: JSON.stringify(board),
-    player_pos:       JSON.stringify({ player1: 0 }),
-    player_coins:     JSON.stringify({ player1: 0 }),
-    player_pizzas:    JSON.stringify({ player1: 0 }),
+    player_pos: JSON.stringify({ player1: 0 }),
+    player_coins: JSON.stringify({ player1: 0 }),
+    player_pizzas: JSON.stringify({ player1: 0 }),
     player_cooldowns: JSON.stringify({ player1: 0 }),
-    player_stats:     JSON.stringify({}),
+    player_stats: JSON.stringify({}),
     current_slot: 'player1', turn_phase: 'roll',
   }).select().single();
 
@@ -804,7 +828,7 @@ function renderPublicPartyLobby(rooms) {
   if (!listEl) return;
   if (!rooms.length) { listEl.innerHTML = `<div class="lobby-empty">${T('lobby.noRooms')}</div>`; return; }
 
-  const escHtml = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const escHtml = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   listEl.innerHTML = '';
   let anyShown = false;
   rooms.forEach(r => {
@@ -839,7 +863,7 @@ function joinFromPartyLobby(code) {
 function updatePartyStartEarlyBtn(room) {
   const btn = document.getElementById('start-early-btn');
   if (!btn) return;
-  const pc     = room.player_count || 2;
+  const pc = room.player_count || 2;
   const joined = allSlots(pc).filter(s => room[`${s}_name`]).length;
   if (playerSlot === 'player1' && joined >= 2 && joined < pc) {
     btn.style.display = '';
@@ -852,7 +876,7 @@ function updatePartyStartEarlyBtn(room) {
 
 async function startEarlyParty() {
   if (playerSlot !== 'player1') return;
-  const pc     = roomData.player_count || 2;
+  const pc = roomData.player_count || 2;
   const joined = allSlots(pc).filter(s => roomData[`${s}_name`]).length;
   if (joined < 2) return;
   const btn = document.getElementById('start-early-btn');
@@ -874,7 +898,7 @@ async function joinRoom() {
 
   const pc = room.player_count || 2;
   let slot;
-  if      (!room.player2_id)            slot = 'player2';
+  if (!room.player2_id) slot = 'player2';
   else if (pc >= 3 && !room.player3_id) slot = 'player3';
   else if (pc >= 4 && !room.player4_id) slot = 'player4';
   else if (pc >= 5 && !room.player5_id) slot = 'player5';
@@ -882,18 +906,18 @@ async function joinRoom() {
   else { lobbyError(T('error.roomFull')); return; }
 
   const st = pState(room);
-  st.pos[slot]       = 0;
-  st.coins[slot]     = 0;
-  st.pizzas[slot]    = 0;
+  st.pos[slot] = 0;
+  st.coins[slot] = 0;
+  st.pizzas[slot] = 0;
   st.cooldowns[slot] = 0;
 
   const { data, error: err2 } = await db.from('party_rooms').update({
-    [`${slot}_id`]:   playerId,
+    [`${slot}_id`]: playerId,
     [`${slot}_name`]: name,
     [`${slot}_char`]: null,
-    player_pos:       JSON.stringify(st.pos),
-    player_coins:     JSON.stringify(st.coins),
-    player_pizzas:    JSON.stringify(st.pizzas),
+    player_pos: JSON.stringify(st.pos),
+    player_coins: JSON.stringify(st.coins),
+    player_pizzas: JSON.stringify(st.pizzas),
     player_cooldowns: JSON.stringify(st.cooldowns),
   }).eq('id', room.id).select().single();
 
@@ -913,7 +937,7 @@ function showWaiting(room) {
 }
 
 function updateWaitingScreen(room) {
-  const pc     = room.player_count || 2;
+  const pc = room.player_count || 2;
   const joined = allSlots(pc).filter(s => room[`${s}_name`]).length;
 
   // Player list
@@ -923,7 +947,7 @@ function updateWaitingScreen(room) {
     allSlots(pc).forEach((s, i) => {
       const name = room[`${s}_name`];
       const char = room[`${s}_char`];
-      const row  = document.createElement('div');
+      const row = document.createElement('div');
       row.className = 'waiting-player-row';
       if (name) {
         const c = CHAR_CFG[char];
@@ -941,16 +965,16 @@ function updateWaitingScreen(room) {
   }
 
   // Title
-  const active    = allSlots(pc).filter(s => room[`${s}_name`]);
+  const active = allSlots(pc).filter(s => room[`${s}_name`]);
   const allChosen = active.every(s => room[`${s}_char`]);
-  const stats     = JSON.parse(room.player_stats || '{}');
+  const stats = JSON.parse(room.player_stats || '{}');
   const allConfirmed = allChosen && active.every(s => stats[`confirmed_${s}`]);
   const title = document.getElementById('waiting-title');
   if (title) {
-    if (joined < pc)        title.textContent = T('waiting.titleCount', { joined, pc });
-    else if (!allChosen)    title.textContent = T('waiting.titleChoose');
+    if (joined < pc) title.textContent = T('waiting.titleCount', { joined, pc });
+    else if (!allChosen) title.textContent = T('waiting.titleChoose');
     else if (!allConfirmed) title.textContent = T('waiting.titleConfirm');
-    else                    title.textContent = T('waiting.titleReady');
+    else title.textContent = T('waiting.titleReady');
   }
 
   // Char picker (show once all players have joined)
@@ -980,21 +1004,21 @@ function updateWaitingScreen(room) {
 }
 
 function renderWaitingCharPicker(room) {
-  const pc      = room.player_count || 2;
-  const myChar  = room[`${playerSlot}_char`];
+  const pc = room.player_count || 2;
+  const myChar = room[`${playerSlot}_char`];
   const takenBy = {};
   allSlots(pc).forEach(s => {
     if (s !== playerSlot && room[`${s}_char`]) takenBy[room[`${s}_char`]] = room[`${s}_name`];
   });
 
   const picker = document.getElementById('waiting-char-picker');
-  const desc   = document.getElementById('waiting-char-desc');
+  const desc = document.getElementById('waiting-char-desc');
   if (!picker) return;
 
   const charEntries = Object.entries(CHAR_CFG);
-  const ROW1_KEYS = ['freddy','bonnie','chica','foxy'];
+  const ROW1_KEYS = ['freddy', 'bonnie', 'chica', 'foxy'];
   const renderCharOpt = ([k, c]) => {
-    const taken    = takenBy[k];
+    const taken = takenBy[k];
     const selected = myChar === k;
     return `<label class="char-pick-opt${selected ? ' selected' : ''}" data-k="${k}"
               style="opacity:${taken ? '0.3' : '1'};pointer-events:${taken ? 'none' : 'auto'}">
@@ -1005,7 +1029,7 @@ function renderWaitingCharPicker(room) {
       <span class="char-name">${T('char.' + k + '.name')}${taken ? `<br><small style="font-size:.6rem">${taken}</small>` : ''}</span>
     </label>`;
   };
-  const row1 = charEntries.filter(([k]) =>  ROW1_KEYS.includes(k));
+  const row1 = charEntries.filter(([k]) => ROW1_KEYS.includes(k));
   const row2 = charEntries.filter(([k]) => !ROW1_KEYS.includes(k));
   picker.innerHTML =
     row1.map(renderCharOpt).join('') +
@@ -1019,7 +1043,7 @@ function renderWaitingCharPicker(room) {
   if (desc) desc.textContent = myChar ? T('char.' + myChar + '.desc') : T('waiting.clickSelect');
 
   // Confirm button
-  const stats    = JSON.parse(room.player_stats || '{}');
+  const stats = JSON.parse(room.player_stats || '{}');
   const confirmed = stats[`confirmed_${playerSlot}`];
   let confirmWrap = document.getElementById('char-confirm-wrap');
   if (!confirmWrap) {
@@ -1059,12 +1083,12 @@ async function confirmChar() {
 }
 
 async function checkAllCharsReady(room) {
-  const pc     = room.player_count || 2;
+  const pc = room.player_count || 2;
   const active = allSlots(pc).filter(s => room[`${s}_name`]);
   if (active.length < pc) return;
   const allChosen = active.every(s => room[`${s}_char`]);
   if (!allChosen) return;
-  const chars  = active.map(s => room[`${s}_char`]);
+  const chars = active.map(s => room[`${s}_char`]);
   const unique = new Set(chars).size === chars.length;
   if (!unique) return;
   // Require all players to confirm their character
@@ -1101,16 +1125,16 @@ function refreshPlayerSlot(room) {
 
 function copyCode() {
   const code = document.getElementById('waiting-code').textContent;
-  const btn  = document.getElementById('copy-code-btn');
+  const btn = document.getElementById('copy-code-btn');
   if (navigator.clipboard) {
-    navigator.clipboard.writeText(code).catch(() => {});
+    navigator.clipboard.writeText(code).catch(() => { });
   } else {
     try {
       const el = document.createElement('textarea');
       el.value = code; el.style.position = 'fixed'; el.style.opacity = '0';
       document.body.appendChild(el); el.select(); document.execCommand('copy');
       document.body.removeChild(el);
-    } catch (_) {}
+    } catch (_) { }
   }
   btn.textContent = T('waiting.copied');
   setTimeout(() => { btn.textContent = T('waiting.copyCode'); }, 2000);
@@ -1132,7 +1156,7 @@ function subscribeRoom() {
     })
     .on('broadcast', { event: 'mg_done' }, ({ payload }) => {
       mgDoneLocal[payload.slot] = payload.score;
-      liveScores[payload.slot]  = payload.score;
+      liveScores[payload.slot] = payload.score;
       updateLiveBar();
       checkMgAllDoneLocal();
     })
@@ -1145,7 +1169,7 @@ function subscribeRoom() {
       checkPodiumAllConfirmedLocal();
     })
     .on('broadcast', { event: 'jumpscare' }, ({ payload }) => {
-      if (payload.sender !== playerId) triggerJumpscare(payload.char, () => {});
+      if (payload.sender !== playerId) triggerJumpscare(payload.char, () => { });
     })
     .on('broadcast', { event: 'game_event' }, ({ payload }) => {
       addEvent(payload.msg);
@@ -1155,7 +1179,7 @@ function subscribeRoom() {
 
 async function handleRoomUpdate(room) {
   const prev = roomData;
-  roomData   = room;
+  roomData = room;
 
   if (room.state === 'waiting') {
     if (prev?.state === 'finished') {
@@ -1177,16 +1201,16 @@ async function handleRoomUpdate(room) {
     if (room.turn_phase === 'mg_waiting') {
       const mgKey = room.mg_id + room.mg_config;
       if (mgWaitKey !== mgKey) {
-        mgWaitKey  = mgKey;
+        mgWaitKey = mgKey;
         activeMgId = null; // must be null so startMinigameScreen fires when phase → 'minigame'
         liveScores = {};
       }
       const involved = JSON.parse(room.mg_players || '[]');
-      const allReady  = involved.every(s =>
+      const allReady = involved.every(s =>
         slotNum(s) <= 4 ? room[mgDoneKey(s)] : mgReadyLocal.has(s)
       );
       if (allReady && involved[0] === playerSlot) {
-        // All players ready — lowest slot kicks off the actual game
+        // All players ready - lowest slot kicks off the actual game
         await db.from('party_rooms').update({
           turn_phase: 'minigame',
           mg_done_p1: false, mg_done_p2: false, mg_done_p3: false, mg_done_p4: false,
@@ -1202,7 +1226,7 @@ async function handleRoomUpdate(room) {
         startMinigameScreen(room); // activeMgId was null (reset in mg_waiting) → always fires
       } else {
         const involved = JSON.parse(room.mg_players || '[]');
-        const allDone  = involved.every(s => room[mgDoneKey(s)]);
+        const allDone = involved.every(s => room[mgDoneKey(s)]);
         if (allDone) { stopMgPoller(); finishMinigame(room); }
       }
     } else if (room.turn_phase === 'tollbooth') {
@@ -1213,7 +1237,7 @@ async function handleRoomUpdate(room) {
       if (isMyTurn(room)) {
         showTollboothUI(room);
       } else {
-        const curName  = room[`${room.current_slot}_name`] || '?';
+        const curName = room[`${room.current_slot}_name`] || '?';
         const curColor = PLAYER_COLORS[slotNum(room.current_slot) - 1];
         const el = document.getElementById('current-player-action');
         if (el) el.innerHTML = `<div class="action-card"><div class="action-waiting"><strong style="color:${curColor}">${T('action.atTollbooth', { name: curName })}</strong></div></div>`;
@@ -1230,7 +1254,7 @@ async function handleRoomUpdate(room) {
       );
       if (allConfirmed) {
         let nextPlayer;
-        try { nextPlayer = JSON.parse(room.mg_config || '{}').nextPlayer; } catch {}
+        try { nextPlayer = JSON.parse(room.mg_config || '{}').nextPlayer; } catch { }
         nextPlayer = nextPlayer || nextSlot(room);
         await db.from('party_rooms').update({
           turn_phase: 'roll', current_slot: nextPlayer, mg_id: null,
@@ -1256,7 +1280,7 @@ async function handleRoomUpdate(room) {
       if (playerSlot === active[0]) {
         await applyEndAwards(room);
       }
-      // Await DB propagation — don't show result yet
+      // Await DB propagation - don't show result yet
       return;
     }
     const voters = room.mg_id || '';
@@ -1273,7 +1297,7 @@ function startGame(room) {
   try {
     const firstEvent = JSON.parse(room.mg_config || '{}').firstEvent;
     if (firstEvent) addEvent(firstEvent);
-  } catch {}
+  } catch { }
   showScreen('board');
   renderBoard(room);
   renderStatusBar(room);
@@ -1293,23 +1317,23 @@ function renderBoard(room) {
     renderFreddyFaceBoard(el, tiles, laps, toll);
   } else {
     const grid = getBoardGrid(mapType);
-    const maxCol = Math.max(...grid.map(([,c]) => c));
+    const maxCol = Math.max(...grid.map(([, c]) => c));
     const maxRow = Math.max(...grid.map(([r]) => r));
     el.style.gridTemplateColumns = `repeat(${maxCol}, 1fr)`;
-    el.style.gridTemplateRows    = `repeat(${maxRow}, 1fr)`;
-    el.style.aspectRatio  = `${maxCol} / ${maxRow}`;
-    el.style.position     = '';
+    el.style.gridTemplateRows = `repeat(${maxRow}, 1fr)`;
+    el.style.aspectRatio = `${maxCol} / ${maxRow}`;
+    el.style.position = '';
     el.style.paddingBottom = '';
-    el.style.height       = '';
+    el.style.height = '';
 
     grid.forEach(([row, col], idx) => {
       const type = tiles[idx] || 'normal';
-      const cfg  = SPACE_CFG[type] || SPACE_CFG.normal;
+      const cfg = SPACE_CFG[type] || SPACE_CFG.normal;
       const jackLabel = type === 'jackpot' ? `<span class="space-jack-val">${getJackpotValue(room)}</span>` : '';
-      const sp   = document.createElement('div');
+      const sp = document.createElement('div');
       sp.className = `board-space ${cfg.cls}${idx === 0 ? ' space-start' : ''}`;
       sp.dataset.node = String(idx);
-      sp.style.gridRow    = row;
+      sp.style.gridRow = row;
       sp.style.gridColumn = col;
       sp.innerHTML = `
         <span class="space-num">${idx === 0 ? '🏁' : idx}</span>
@@ -1322,7 +1346,7 @@ function renderBoard(room) {
     const center = document.createElement('div');
     center.className = 'board-center';
     center.style.gridColumn = `2 / ${maxCol}`;
-    center.style.gridRow    = `2 / ${maxRow}`;
+    center.style.gridRow = `2 / ${maxRow}`;
     center.innerHTML = `
       <div class="board-center-logo">${mapIcon}</div>
       <div class="board-center-text">${T('board.center').replace('\n', '<br>')}</div>
@@ -1335,67 +1359,67 @@ function renderBoard(room) {
 
 function renderFreddyFaceBoard(el, tiles, laps, toll) {
   el.style.gridTemplateColumns = 'none';
-  el.style.gridTemplateRows    = 'none';
-  el.style.position    = 'relative';
-  el.style.width       = 'min(480px, 100%)';
+  el.style.gridTemplateRows = 'none';
+  el.style.position = 'relative';
+  el.style.width = 'min(480px, 100%)';
   el.style.paddingBottom = 'min(480px, 100%)';
-  el.style.height      = '0';
+  el.style.height = '0';
 
   // SVG face layer
-  const NS  = 'http://www.w3.org/2000/svg';
+  const NS = 'http://www.w3.org/2000/svg';
   const svg = document.createElementNS(NS, 'svg');
   svg.setAttribute('viewBox', '0 0 100 100');
   svg.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;';
 
   function svgEl(tag, attrs) {
     const e = document.createElementNS(NS, tag);
-    Object.entries(attrs).forEach(([k,v]) => e.setAttribute(k, v));
+    Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v));
     return e;
   }
 
   // ── Face shape ────────────────────────────────────────
   // Main head oval (matches face proportions from Freddy image)
-  svg.appendChild(svgEl('ellipse', { cx:'50', cy:'58', rx:'41', ry:'38', fill:'#1a0900', stroke:'#7a4200', 'stroke-width':'0.8', opacity:'0.65' }));
+  svg.appendChild(svgEl('ellipse', { cx: '50', cy: '58', rx: '41', ry: '38', fill: '#1a0900', stroke: '#7a4200', 'stroke-width': '0.8', opacity: '0.65' }));
   // Hat brim (wide flat band at y≈17-21)
-  svg.appendChild(svgEl('rect', { x:'28', y:'18', width:'44', height:'4', rx:'2', fill:'#0d0600', stroke:'#7a4200', 'stroke-width':'0.6', opacity:'0.65' }));
+  svg.appendChild(svgEl('rect', { x: '28', y: '18', width: '44', height: '4', rx: '2', fill: '#0d0600', stroke: '#7a4200', 'stroke-width': '0.6', opacity: '0.65' }));
   // Hat body (tall rectangle above brim)
-  svg.appendChild(svgEl('rect', { x:'35', y:'2', width:'30', height:'17', rx:'2', fill:'#0d0600', stroke:'#7a4200', 'stroke-width':'0.6', opacity:'0.65' }));
+  svg.appendChild(svgEl('rect', { x: '35', y: '2', width: '30', height: '17', rx: '2', fill: '#0d0600', stroke: '#7a4200', 'stroke-width': '0.6', opacity: '0.65' }));
   // Right ear (circle at ~90%, 44%)
-  svg.appendChild(svgEl('circle', { cx:'92', cy:'44', r:'7', fill:'#200e00', stroke:'#7a4200', 'stroke-width':'0.6', opacity:'0.6' }));
+  svg.appendChild(svgEl('circle', { cx: '92', cy: '44', r: '7', fill: '#200e00', stroke: '#7a4200', 'stroke-width': '0.6', opacity: '0.6' }));
   // Left ear (circle at ~8%, 44%)
-  svg.appendChild(svgEl('circle', { cx:'8', cy:'44', r:'7', fill:'#200e00', stroke:'#7a4200', 'stroke-width':'0.6', opacity:'0.6' }));
+  svg.appendChild(svgEl('circle', { cx: '8', cy: '44', r: '7', fill: '#200e00', stroke: '#7a4200', 'stroke-width': '0.6', opacity: '0.6' }));
   // Right eye socket (danger zone, around nodes 6-8, center ≈ 75,55)
-  svg.appendChild(svgEl('ellipse', { cx:'74', cy:'54', rx:'8', ry:'10', fill:'#1e0505', stroke:'#882222', 'stroke-width':'0.7', opacity:'0.8' }));
+  svg.appendChild(svgEl('ellipse', { cx: '74', cy: '54', rx: '8', ry: '10', fill: '#1e0505', stroke: '#882222', 'stroke-width': '0.7', opacity: '0.8' }));
   // Left eye socket (danger zone, around nodes 13-15, center ≈ 26,55)
-  svg.appendChild(svgEl('ellipse', { cx:'26', cy:'54', rx:'8', ry:'10', fill:'#1e0505', stroke:'#882222', 'stroke-width':'0.7', opacity:'0.8' }));
+  svg.appendChild(svgEl('ellipse', { cx: '26', cy: '54', rx: '8', ry: '10', fill: '#1e0505', stroke: '#882222', 'stroke-width': '0.7', opacity: '0.8' }));
   // Nose (small oval at center)
-  svg.appendChild(svgEl('ellipse', { cx:'50', cy:'68', rx:'5', ry:'4', fill:'#150800', stroke:'#7a4200', 'stroke-width':'0.5', opacity:'0.5' }));
+  svg.appendChild(svgEl('ellipse', { cx: '50', cy: '68', rx: '5', ry: '4', fill: '#150800', stroke: '#7a4200', 'stroke-width': '0.5', opacity: '0.5' }));
   // Mouth (wide arc near bottom)
-  svg.appendChild(svgEl('path', { d:'M 35 76 Q 50 87 65 76', fill:'none', stroke:'#7a4200', 'stroke-width':'0.7', opacity:'0.55' }));
+  svg.appendChild(svgEl('path', { d: 'M 35 76 Q 50 87 65 76', fill: 'none', stroke: '#7a4200', 'stroke-width': '0.7', opacity: '0.55' }));
   // Eyebrows (arcs above eye sockets)
-  svg.appendChild(svgEl('path', { d:'M 65 35 Q 74 30 82 33', fill:'none', stroke:'#442200', 'stroke-width':'1.2', opacity:'0.6' }));
-  svg.appendChild(svgEl('path', { d:'M 35 35 Q 26 30 18 33', fill:'none', stroke:'#442200', 'stroke-width':'1.2', opacity:'0.6' }));
+  svg.appendChild(svgEl('path', { d: 'M 65 35 Q 74 30 82 33', fill: 'none', stroke: '#442200', 'stroke-width': '1.2', opacity: '0.6' }));
+  svg.appendChild(svgEl('path', { d: 'M 35 35 Q 26 30 18 33', fill: 'none', stroke: '#442200', 'stroke-width': '1.2', opacity: '0.6' }));
 
   // ── Path connection lines ──────────────────────────────
   function line(a, b, col = '#7a4200', op = 0.45) {
     const n1 = FREDDY_HEAD_NODES[a], n2 = FREDDY_HEAD_NODES[b];
-    svg.appendChild(svgEl('line', { x1: n1.x, y1: n1.y, x2: n2.x, y2: n2.y, stroke: col, 'stroke-width':'0.9', opacity: op }));
+    svg.appendChild(svgEl('line', { x1: n1.x, y1: n1.y, x2: n2.x, y2: n2.y, stroke: col, 'stroke-width': '0.9', opacity: op }));
   }
   // Main outer path (clockwise, skipping danger zones)
-  [0,1,2,3,4,5,9,10,11,12,16,17,18,19].reduce((a,b) => { line(a,b); return b; });
+  [0, 1, 2, 3, 4, 5, 9, 10, 11, 12, 16, 17, 18, 19].reduce((a, b) => { line(a, b); return b; });
   line(19, 0); // close loop
   // Danger zone right eye (red dashed-style, thinner)
-  [5,6,7,8,9].reduce((a,b) => { line(a,b,'#cc2222',0.55); return b; });
+  [5, 6, 7, 8, 9].reduce((a, b) => { line(a, b, '#cc2222', 0.55); return b; });
   // Danger zone left eye
-  [12,13,14,15,16].reduce((a,b) => { line(a,b,'#cc2222',0.55); return b; });
+  [12, 13, 14, 15, 16].reduce((a, b) => { line(a, b, '#cc2222', 0.55); return b; });
 
   el.appendChild(svg);
 
   // Space nodes with absolute positioning
-  FREDDY_HEAD_NODES.forEach(({x, y}, idx) => {
+  FREDDY_HEAD_NODES.forEach(({ x, y }, idx) => {
     const type = tiles[idx] || 'normal';
-    const cfg  = SPACE_CFG[type] || SPACE_CFG.normal;
-    const jackLabel = type === 'jackpot' ? `<span class="space-jack-val">${getJackpotValue({board: JSON.stringify({tiles, laps, boardSize: 20, mapType: 'freddy', toll})})}</span>` : '';
+    const cfg = SPACE_CFG[type] || SPACE_CFG.normal;
+    const jackLabel = type === 'jackpot' ? `<span class="space-jack-val">${getJackpotValue({ board: JSON.stringify({ tiles, laps, boardSize: 20, mapType: 'freddy', toll }) })}</span>` : '';
     const sp = document.createElement('div');
     sp.className = `board-space board-node ${cfg.cls}${idx === 0 ? ' space-start' : ''}`;
     sp.dataset.node = String(idx);
@@ -1417,17 +1441,17 @@ function renderFreddyFaceBoard(el, tiles, laps, toll) {
 
 function renderCustomBoard(el, tiles, laps, toll, nodes, skipMap, freeMap, boardAspect) {
   el.style.gridTemplateColumns = 'none';
-  el.style.gridTemplateRows    = 'none';
-  el.style.position            = 'relative';
+  el.style.gridTemplateRows = 'none';
+  el.style.position = 'relative';
 
   const [aw, ah] = (boardAspect || '1:1').split(':').map(Number);
   const maxPx = nodes.length > 45 ? 960 : nodes.length > 35 ? 840 : nodes.length > 25 ? 640 : 480;
-  const base   = `min(${maxPx}px, 100%)`;
-  el.style.width         = base;
+  const base = `min(${maxPx}px, 100%)`;
+  el.style.width = base;
   el.style.paddingBottom = ah === aw ? base : `calc(${base} * ${ah / aw})`;
-  el.style.height        = '0';
+  el.style.height = '0';
 
-  const NS  = 'http://www.w3.org/2000/svg';
+  const NS = 'http://www.w3.org/2000/svg';
   const svg = document.createElementNS(NS, 'svg');
   svg.setAttribute('viewBox', '0 0 100 100');
   svg.setAttribute('preserveAspectRatio', 'none');
@@ -1457,9 +1481,9 @@ function renderCustomBoard(el, tiles, laps, toll, nodes, skipMap, freeMap, board
   // Tollbooth split-path arrows
   tiles.forEach((type, i) => {
     if (type !== 'tollbooth') return;
-    const n    = nodes[i];
+    const n = nodes[i];
     if (!n) return;
-    const payIdx  = skipMap?.[i];
+    const payIdx = skipMap?.[i];
     const freeIdx = freeMap?.[i];
     if (payIdx !== undefined && nodes[payIdx]) {
       const d = nodes[payIdx];
@@ -1467,7 +1491,7 @@ function renderCustomBoard(el, tiles, laps, toll, nodes, skipMap, freeMap, board
     }
     if (freeIdx !== undefined && nodes[freeIdx]) {
       const d = nodes[freeIdx];
-      svg.appendChild(svgEl('line', { x1: nx(n.x), y1: ny(n.y), x2: nx(d.x), y2: ny(d.y), stroke: '#cc3322', 'stroke-width': '1.3', 'stroke-dasharray': '3,2', opacity: '0.7'  }));
+      svg.appendChild(svgEl('line', { x1: nx(n.x), y1: ny(n.y), x2: nx(d.x), y2: ny(d.y), stroke: '#cc3322', 'stroke-width': '1.3', 'stroke-dasharray': '3,2', opacity: '0.7' }));
     }
   });
 
@@ -1478,7 +1502,7 @@ function renderCustomBoard(el, tiles, laps, toll, nodes, skipMap, freeMap, board
   // Space nodes
   nodes.forEach(({ x, y }, idx) => {
     const type = tiles[idx] || 'normal';
-    const cfg  = SPACE_CFG[type] || SPACE_CFG.normal;
+    const cfg = SPACE_CFG[type] || SPACE_CFG.normal;
     const jackLabel = type === 'jackpot' ? `<span class="space-jack-val">${getJackpotValue({ board: JSON.stringify({ tiles, laps, boardSize: nodes.length, mapType: 'custom', toll }) })}</span>` : '';
     const sp = document.createElement('div');
     sp.className = `board-space board-node ${cfg.cls}${idx === 0 ? ' space-start' : ''}`;
@@ -1498,7 +1522,7 @@ function renderCustomBoard(el, tiles, laps, toll, nodes, skipMap, freeMap, board
   el.appendChild(lbl);
 }
 
-// Spread offsets (px) per token count — scaled by JS for node vs grid boards
+// Spread offsets (px) per token count - scaled by JS for node vs grid boards
 const TOKEN_OFFSET_PATTERNS = [
   [[0, 0]],
   [[-1, 0], [1, 0]],
@@ -1511,7 +1535,7 @@ const TOKEN_OFFSET_PATTERNS = [
 function updateTokens(room) {
   if (isHopping) return;
   const { boardSize, nodes } = parseBoard(room);
-  // Node boards use compact 16px tokens; grid boards use 24px — scale offsets accordingly
+  // Node boards use compact 16px tokens; grid boards use 24px - scale offsets accordingly
   const spread = nodes && nodes.length > 0 ? 10 : 14;
 
   for (let i = 0; i < boardSize; i++) {
@@ -1533,14 +1557,14 @@ function updateTokens(room) {
   Object.entries(byPos).forEach(([posStr, players]) => {
     const el = document.getElementById(`tok-${posStr}`);
     if (!el) return;
-    const count   = players.length;
+    const count = players.length;
     const pattern = TOKEN_OFFSET_PATTERNS[Math.min(count, 6) - 1];
 
     players.forEach(({ slot, slotIdx }, tokIdx) => {
-      const char  = room[`${slot}_char`] || 'freddy';
+      const char = room[`${slot}_char`] || 'freddy';
       const moved = prevPlayerPos[slot] !== undefined && prevPlayerPos[slot] !== (newPos[slot] || 0);
-      const tok   = document.createElement('div');
-      tok.className         = `player-token${moved ? ' token-moved' : ''}`;
+      const tok = document.createElement('div');
+      tok.className = `player-token${moved ? ' token-moved' : ''}`;
       tok.style.borderColor = PLAYER_COLORS[slotIdx];
       tok.title = room[`${slot}_name`];
       if (count > 1) {
@@ -1614,8 +1638,8 @@ async function animateHops(slot, char, fromNode, steps, boardSize, tiles, nextMa
     node = nxt;
     if (i < steps - 1 && tiles[node] === 'tollbooth') break;
   }
-  // Leave final ghost at landing cell — updateTokens clears it when isHopping goes false
-  // NOTE: caller owns isHopping — must set false AFTER its DB write
+  // Leave final ghost at landing cell - updateTokens clears it when isHopping goes false
+  // NOTE: caller owns isHopping - must set false AFTER its DB write
 }
 
 function renderStatusBar(room) {
@@ -1637,14 +1661,14 @@ function renderPlayerSlots(room) {
         <div class="ps-empty-label">${T('slot.waiting')}</div>
       </div>`;
     }
-    const char    = room[`${slot}_char`] || 'freddy';
-    const c       = CHAR_CFG[char] || {};
-    const isCur   = room.current_slot === slot && room.turn_phase !== 'minigame';
-    const laps    = playerLaps(room, slot);
-    const coins   = playerCoins(room, slot);
-    const pizzas  = playerPizzas(room, slot);
-    const cd      = pState(room).cooldowns[slot] || 0;
-    const color   = PLAYER_COLORS[i];
+    const char = room[`${slot}_char`] || 'freddy';
+    const c = CHAR_CFG[char] || {};
+    const isCur = room.current_slot === slot && room.turn_phase !== 'minigame';
+    const laps = playerLaps(room, slot);
+    const coins = playerCoins(room, slot);
+    const pizzas = playerPizzas(room, slot);
+    const cd = pState(room).cooldowns[slot] || 0;
+    const color = PLAYER_COLORS[i];
     const lapDisp = `${Math.min(laps + 1, boardLaps)}/${boardLaps}`;
     return `<div class="player-slot ps-occupied${isCur ? ' ps-current' : ''}">
       <div class="ps-header">
@@ -1667,10 +1691,10 @@ function renderActionUI(room) {
   if (!el) return;
 
   if (!isMyTurn(room)) {
-    const curName  = room[`${room.current_slot}_name`] || '?';
+    const curName = room[`${room.current_slot}_name`] || '?';
     const curColor = PLAYER_COLORS[slotNum(room.current_slot) - 1];
     const extra = room.turn_phase === 'rolled'
-      ? ` — rolled <strong>🎲 ${room.dice_result}</strong>` : '';
+      ? ` - rolled <strong>🎲 ${room.dice_result}</strong>` : '';
     el.innerHTML = `<div class="action-card">
       <div class="action-waiting"><strong style="color:${curColor}">${room.turn_phase === 'rolled' ? T('action.otherRolled', { name: curName, n: room.dice_result }) : T('action.otherTurn', { name: curName })}</strong></div>
     </div>`;
@@ -1678,16 +1702,16 @@ function renderActionUI(room) {
     return;
   }
 
-  const me  = myPlayer(room);
-  const c   = CHAR_CFG[me.char];
+  const me = myPlayer(room);
+  const c = CHAR_CFG[me.char];
   const pos = boardPos(room, me.slot);
   const { laps: boardLaps, boardSize } = parseBoard(room);
 
   if (room.turn_phase === 'roll') {
-    const diceId  = getPlayerDice(room, playerSlot);
+    const diceId = getPlayerDice(room, playerSlot);
     const diceObj = DICE_TYPES[diceId] || DICE_TYPES.d6;
-    const dblTag  = isDoublePhase(room) ? ' <span style="color:#f9c;font-size:.7rem">2×</span>' : '';
-    const psn     = pStats(room)[playerSlot] || {};
+    const dblTag = isDoublePhase(room) ? ' <span style="color:#f9c;font-size:.7rem">2×</span>' : '';
+    const psn = pStats(room)[playerSlot] || {};
     const forcedTag = (psn.forcedDice && (psn.forcedTurns || 0) > 0)
       ? `<div style="font-size:.65rem;color:#f66;margin:1px 0">${T('action.forcedTag', { n: psn.forcedTurns })}</div>` : '';
     el.innerHTML = `<div class="action-card">
@@ -1701,9 +1725,9 @@ function renderActionUI(room) {
     </div>`;
 
   } else if (room.turn_phase === 'rolled') {
-    const lastDice    = pStats(room)[playerSlot]?.lastDiceId || getPlayerDice(room, playerSlot);
+    const lastDice = pStats(room)[playerSlot]?.lastDiceId || getPlayerDice(room, playerSlot);
     const isSpringlock = lastDice === 'springlock' && room.dice_result === 0;
-    const diceDisplay  = isSpringlock ? T('action.springlockRolled') : `🎲 ${room.dice_result}`;
+    const diceDisplay = isSpringlock ? T('action.springlockRolled') : `🎲 ${room.dice_result}`;
     el.innerHTML = `<div class="action-card">
       <div class="action-player-name" style="color:${me.color}">${me.name}</div>
       <div class="action-dice">${diceDisplay}</div>
@@ -1713,7 +1737,7 @@ function renderActionUI(room) {
   } else if (room.turn_phase === 'moved') {
     const { tiles: bt } = parseBoard(room);
     const spType = bt[pos] || 'normal';
-    const cfg    = SPACE_CFG[spType] || SPACE_CFG.normal;
+    const cfg = SPACE_CFG[spType] || SPACE_CFG.normal;
     const jackInfo = spType === 'jackpot' ? ` (${getJackpotValue(room)}${COIN_IMG})` : '';
     el.innerHTML = `<div class="action-card">
       <div class="action-player-name" style="color:${me.color}">${me.name}</div>
@@ -1727,9 +1751,9 @@ function renderActionUI(room) {
 // ── Roll dice ─────────────────────────────────────────────────────────────────
 async function doRoll() {
   const diceId = getPlayerDice(roomData, playerSlot);
-  const dice   = DICE_TYPES[diceId] || DICE_TYPES.d6;
-  const roll   = dice.roll();
-  const ns     = pStats(roomData);
+  const dice = DICE_TYPES[diceId] || DICE_TYPES.d6;
+  const roll = dice.roll();
+  const ns = pStats(roomData);
   if (!ns[playerSlot]) ns[playerSlot] = { mgWins: 0, badLucks: 0 };
 
   const shopD = SHOP_DICE.find(d => d.id === diceId);
@@ -1758,17 +1782,17 @@ async function doRoll() {
   const rollLabel = (diceId === 'springlock' && roll === 0) ? '🪤 SPRINGLOCK!' : String(roll);
   emitEvent(`🎲 ${roomData[`${playerSlot}_name`]} rolled ${rollLabel} (${dice.label})`);
 
-  // BB passive: "Hi!" — only triggers when using the Balloon Die
+  // BB passive: "Hi!" - only triggers when using the Balloon Die
   // Randomly either steals 1 coin OR pushes the target back 1 space
   const bbExtra = {};
   if (dice.bbPassive && (roomData[`${playerSlot}_char`] || 'freddy') === 'bb') {
-    const pc  = roomData.player_count || 2;
+    const pc = roomData.player_count || 2;
     const opp = allSlots(pc).filter(s => s !== playerSlot && roomData[`${s}_name`]);
     if (opp.length) {
       const target = opp[Math.floor(Math.random() * opp.length)];
-      const st     = pState(roomData);
+      const st = pState(roomData);
       if (Math.random() < 0.5) {
-        st.coins[target]     = Math.max(0, (st.coins[target] || 0) - 1);
+        st.coins[target] = Math.max(0, (st.coins[target] || 0) - 1);
         st.coins[playerSlot] = (st.coins[playerSlot] || 0) + 1;
         bbExtra.player_coins = JSON.stringify(st.coins);
         emitEvent(`🎈 Hi! BB annoyed ${roomData[`${target}_name`]}! -1🪙`);
@@ -1792,7 +1816,7 @@ function showPickDiceUI() {
   el.innerHTML = `<div class="action-card">
     <div class="action-player-name" style="color:${me.color}">${T('action.pickPrompt')}</div>
     <div class="pick-dice-grid">
-      ${[1,2,3,4,5,6].map(n => `<button class="mp-btn pick-num-btn" data-n="${n}">${n}</button>`).join('')}
+      ${[1, 2, 3, 4, 5, 6].map(n => `<button class="mp-btn pick-num-btn" data-n="${n}">${n}</button>`).join('')}
     </div>
   </div>`;
   el.querySelectorAll('.pick-num-btn').forEach(btn => {
@@ -1818,7 +1842,7 @@ function showPickDiceUI() {
   });
 }
 
-// Step-by-step movement — stops early if a tollbooth is hit mid-roll.
+// Step-by-step movement - stops early if a tollbooth is hit mid-roll.
 function moveStepByStep(state, slot, steps, boardSize, tiles, nextMap) {
   let node = (state.pos[slot] || 0) % boardSize;
   let laps = Math.floor((state.pos[slot] || 0) / boardSize);
@@ -1842,7 +1866,7 @@ async function applyMove() {
   const room = roomData;
   const roll = pendingRoll ?? room.dice_result;
   pendingRoll = null;
-  const st   = pState(room);
+  const st = pState(room);
   const { laps, boardSize, tiles, nextMap, endOfRoundMinigame } = parseBoard(room);
   if ((st.cooldowns[playerSlot] || 0) > 0) st.cooldowns[playerSlot]--;
 
@@ -1895,11 +1919,11 @@ async function applyMove() {
 
     const finished = Math.floor(st.pos[playerSlot] / boardSize) >= laps;
     await db.from('party_rooms').update({
-      player_pos:       JSON.stringify(st.pos),
-      player_coins:     JSON.stringify(st.coins),
-      player_pizzas:    JSON.stringify(st.pizzas),
+      player_pos: JSON.stringify(st.pos),
+      player_coins: JSON.stringify(st.coins),
+      player_pizzas: JSON.stringify(st.pizzas),
       player_cooldowns: JSON.stringify(st.cooldowns),
-      player_stats:     JSON.stringify(ns),
+      player_stats: JSON.stringify(ns),
       turn_phase: finished ? undefined : 'moved',
       ...(finished ? { state: 'finished' } : {}),
     }).eq('id', roomId);
@@ -1910,10 +1934,10 @@ async function applyMove() {
 
 async function doFoxyReroll() {
   const diceId = getPlayerDice(roomData, playerSlot);
-  const dice   = DICE_TYPES[diceId] || DICE_TYPES.d6;
-  const roll   = dice.roll ? dice.roll() : Math.floor(Math.random()*6)+1;
+  const dice = DICE_TYPES[diceId] || DICE_TYPES.d6;
+  const roll = dice.roll ? dice.roll() : Math.floor(Math.random() * 6) + 1;
   pendingRoll = roll;
-  const st   = pState(roomData);
+  const st = pState(roomData);
   st.cooldowns[playerSlot] = CHAR_CFG['foxy'].cooldown;
   // Update UI immediately so the new number shows before DB subscription fires
   const actionEl = document.getElementById('current-player-action');
@@ -1973,7 +1997,7 @@ async function passOrMinigame(room, extraUpdates = {}) {
   if (ns[playerSlot]?.lapCompleted) {
     // Clear Freddy Mask on lap completion
     if (ns[playerSlot]?.maskActive) ns[playerSlot].maskActive = false;
-    // DON'T clear microphoneActive here — finishMinigame will clear it after applying the reward
+    // DON'T clear microphoneActive here - finishMinigame will clear it after applying the reward
     if (ns[playerSlot]) ns[playerSlot].lapCompleted = false;
     const allPlayers = allSlots(room.player_count || 2).filter(s => room[`${s}_name`]);
     await db.from('party_rooms').update({
@@ -1985,7 +2009,7 @@ async function passOrMinigame(room, extraUpdates = {}) {
     ns[playerSlot].extraTurn = false;
     // Clear microphone: turn ends without entering a minigame
     if (ns[playerSlot]?.microphoneActive) ns[playerSlot].microphoneActive = false;
-    emitEvent(`🔋 ${room[`${playerSlot}_name`]} activated the Battery — extra turn!`);
+    emitEvent(`🔋 ${room[`${playerSlot}_name`]} activated the Battery - extra turn!`);
     await db.from('party_rooms').update({
       turn_phase: 'roll', current_slot: playerSlot,
       ...extraUpdates,
@@ -2030,11 +2054,11 @@ async function handleSpace() {
     if (!guard || guard.turn_phase !== 'moved' || guard.current_slot !== playerSlot) return;
   } catch { return; }
 
-  const room  = roomData;
+  const room = roomData;
   const { tiles, laps, boardSize: bs } = parseBoard(room);
-  const pos   = boardPos(room, playerSlot);
-  const type  = tiles[pos] || 'normal';
-  const pc    = room.player_count || 2;
+  const pos = boardPos(room, playerSlot);
+  const type = tiles[pos] || 'normal';
+  const pc = room.player_count || 2;
   const others = allSlots(pc).filter(s =>
     s !== playerSlot && room[`${s}_name`] && boardPos(room, s) === pos);
 
@@ -2056,10 +2080,10 @@ async function handleSpace() {
     const mb = ns._musicBoxes[mbIdx];
     ns._musicBoxes.splice(mbIdx, 1);
     if (masked) {
-      emitEvent(`🎵 ${room[`${playerSlot}_name`]} triggered Puppet's Music Box — 🎭 Mask blocked it!`);
+      emitEvent(`🎵 ${room[`${playerSlot}_name`]} triggered Puppet's Music Box - 🎭 Mask blocked it!`);
       showToast('🎭 Mask blocked Music Box!');
     } else {
-      st.coins[playerSlot]   = (st.coins[playerSlot]   || 0) - 5; // can go negative
+      st.coins[playerSlot] = (st.coins[playerSlot] || 0) - 5; // can go negative
       st.coins[mb.ownerSlot] = (st.coins[mb.ownerSlot] || 0) + 5;
       emitEvent(`🎵 ${room[`${playerSlot}_name`]} triggered Puppet's Music Box! -5🪙 → ${room[`${mb.ownerSlot}_name`]}`);
       showToast(T('toast.musicBoxTrap'));
@@ -2072,11 +2096,11 @@ async function handleSpace() {
     const cup = ns._cupcakes_[cupIdx];
     ns._cupcakes_.splice(cupIdx, 1);
     if (masked) {
-      emitEvent(`🧁 ${room[`${playerSlot}_name`]} landed on Chica's Cupcake — 🎭 Mask blocked it!`);
+      emitEvent(`🧁 ${room[`${playerSlot}_name`]} landed on Chica's Cupcake - 🎭 Mask blocked it!`);
       showToast('🎭 Mask blocked Cupcake!');
     } else {
-      st.pizzas[playerSlot]      = (st.pizzas[playerSlot]      || 0) - 1; // can go negative
-      st.pizzas[cup.ownerSlot]   = (st.pizzas[cup.ownerSlot]   || 0) + 1;
+      st.pizzas[playerSlot] = (st.pizzas[playerSlot] || 0) - 1; // can go negative
+      st.pizzas[cup.ownerSlot] = (st.pizzas[cup.ownerSlot] || 0) + 1;
       emitEvent(`🧁 ${room[`${playerSlot}_name`]} ate Chica's Cupcake! -1🍕 → ${room[`${cup.ownerSlot}_name`]}`);
       showToast('🧁 Cupcake! -1🍕');
     }
@@ -2088,10 +2112,10 @@ async function handleSpace() {
     const sl = ns._springlocks_[slIdx];
     ns._springlocks_.splice(slIdx, 1);
     if (masked) {
-      emitEvent(`🔒 ${room[`${playerSlot}_name`]} triggered a Springlock — 🎭 Mask blocked it!`);
+      emitEvent(`🔒 ${room[`${playerSlot}_name`]} triggered a Springlock - 🎭 Mask blocked it!`);
       showToast('🎭 Mask blocked Springlock!');
     } else {
-      st.coins[playerSlot]   = (st.coins[playerSlot]   || 0) - 5; // can go negative
+      st.coins[playerSlot] = (st.coins[playerSlot] || 0) - 5; // can go negative
       st.coins[sl.ownerSlot] = (st.coins[sl.ownerSlot] || 0) + 5;
       emitEvent(`🔒 ${room[`${playerSlot}_name`]} triggered ${room[`${sl.ownerSlot}_name`]}'s Springlock! -5🪙 → ${room[`${sl.ownerSlot}_name`]}`);
       showToast('🔒 Springlock! -5🪙');
@@ -2118,7 +2142,7 @@ async function handleSpace() {
   }
   if (type === 'badluck') {
     if (masked) {
-      emitEvent(`💀 ${room[`${playerSlot}_name`]} hit Bad Luck — 🎭 Mask blocked it!`);
+      emitEvent(`💀 ${room[`${playerSlot}_name`]} hit Bad Luck - 🎭 Mask blocked it!`);
       showToast('🎭 Mask blocked Bad Luck!');
       await resolveSpace(room, { player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns) }, others);
       return;
@@ -2129,7 +2153,7 @@ async function handleSpace() {
     ns[playerSlot].badLucks = (ns[playerSlot].badLucks || 0) + 1;
     const micTag = ns[playerSlot]?.microphoneActive ? ' 🎤×4' : '';
     emitEvent(`💀 ${room[`${playerSlot}_name`]} hit bad luck! ${loss} coins${micTag}`);
-    showToast(`${loss} coins 💀${mul>1?' ×2':''}${micTag}`);
+    showToast(`${loss} coins 💀${mul > 1 ? ' ×2' : ''}${micTag}`);
     await resolveSpace(room, { player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns) }, others);
     return;
   }
@@ -2145,7 +2169,7 @@ async function handleSpace() {
     if (mbIdx !== -1) await db.from('party_rooms').update({ player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns) }).eq('id', roomId);
     const el = document.getElementById('current-player-action');
     if (el) el.innerHTML = `<div class="action-card">
-      <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot)-1]}">${T('pizza.shopTitle')}</div>
+      <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot) - 1]}">${T('pizza.shopTitle')}</div>
       <div class="action-space">${T('pizza.buyPrompt', { coins })}</div>
       <div class="action-btns">
         <button class="mp-btn primary" id="pizza-buy-btn">${T('pizza.buyBtn')}</button>
@@ -2166,7 +2190,7 @@ async function handleSpace() {
   }
   if (type === 'freddy_zone') {
     if (masked) {
-      emitEvent(`😱 ${room[`${playerSlot}_name`]} entered the Freddy Zone — 🎭 Mask blocked it!`);
+      emitEvent(`😱 ${room[`${playerSlot}_name`]} entered the Freddy Zone - 🎭 Mask blocked it!`);
       showToast('🎭 Mask blocked Freddy Zone!');
       await resolveSpace(room, { player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns) }, others);
       return;
@@ -2182,7 +2206,7 @@ async function handleSpace() {
   }
   if (type === 'trap') {
     if (masked) {
-      emitEvent(`🪤 ${room[`${playerSlot}_name`]} hit a Trap — 🎭 Mask blocked it!`);
+      emitEvent(`🪤 ${room[`${playerSlot}_name`]} hit a Trap - 🎭 Mask blocked it!`);
       showToast('🎭 Mask blocked Trap!');
       await resolveSpace(room, { player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns) }, others);
       return;
@@ -2231,15 +2255,15 @@ async function handleSpace() {
 
 async function triggerQuestion() {
   const evIdx = Math.floor(Math.random() * QUESTION_EVENTS.length);
-  const ev  = QUESTION_EVENTS[evIdx];
-  const st  = pState(roomData);
-  const ns  = pStats(roomData);
+  const ev = QUESTION_EVENTS[evIdx];
+  const st = pState(roomData);
+  const ns = pStats(roomData);
 
-  const tempPlayer = { coins: st.coins[playerSlot]||0, pizzas: st.pizzas[playerSlot]||0, pos: st.pos[playerSlot]||0 };
+  const tempPlayer = { coins: st.coins[playerSlot] || 0, pizzas: st.pizzas[playerSlot] || 0, pos: st.pos[playerSlot] || 0 };
   ev.eff(tempPlayer);
-  st.coins[playerSlot]  = Math.max(0, tempPlayer.coins);
+  st.coins[playerSlot] = Math.max(0, tempPlayer.coins);
   st.pizzas[playerSlot] = Math.max(0, tempPlayer.pizzas);
-  st.pos[playerSlot]    = Math.max(0, tempPlayer.pos);
+  st.pos[playerSlot] = Math.max(0, tempPlayer.pos);
 
   const extra = ev.boardShuffle ? { board: JSON.stringify(createBoard(parseBoard(roomData).mapType, parseBoard(roomData).laps)) } : {};
 
@@ -2267,10 +2291,10 @@ async function triggerQuestion() {
   }
 
   await passOrMinigame(roomData, {
-    player_pos:    JSON.stringify(st.pos),
-    player_coins:  JSON.stringify(st.coins),
+    player_pos: JSON.stringify(st.pos),
+    player_coins: JSON.stringify(st.coins),
     player_pizzas: JSON.stringify(st.pizzas),
-    player_stats:  JSON.stringify(ns),
+    player_stats: JSON.stringify(ns),
     ...extra,
   });
 }
@@ -2280,17 +2304,17 @@ async function buyPizza() {
   const room = roomData;
   const { laps, tiles, boardSize, mapType, toll, skipMap, freeMap, nodes, boardAspect, nextMap } = parseBoard(room);
   const pos = boardPos(room, playerSlot);
-  const st  = pState(room);
-  const ns  = pStats(room);
+  const st = pState(room);
+  const ns = pStats(room);
   const mul = isDoublePhase(room) ? 2 : 1;
 
-  st.coins[playerSlot]  = Math.max(0, (st.coins[playerSlot] || 0) - 10);
+  st.coins[playerSlot] = Math.max(0, (st.coins[playerSlot] || 0) - 10);
   st.pizzas[playerSlot] = (st.pizzas[playerSlot] || 0) + mul;
 
   const newTiles = [...tiles];
   newTiles[pos] = 'normal';
-  const free = newTiles.map((t,i) => i).filter(i => newTiles[i] === 'normal' && i !== 0);
-  if (free.length) newTiles[free[Math.floor(Math.random()*free.length)]] = 'pizza';
+  const free = newTiles.map((t, i) => i).filter(i => newTiles[i] === 'normal' && i !== 0);
+  if (free.length) newTiles[free[Math.floor(Math.random() * free.length)]] = 'pizza';
   const newBoard = { tiles: newTiles, laps, boardSize, mapType, toll, skipMap, freeMap };
   if (nodes) newBoard.nodes = nodes;
   if (boardAspect) newBoard.boardAspect = boardAspect;
@@ -2364,20 +2388,20 @@ function useAbility() {
   const ability = copiedAb?.ability || CHAR_CFG[me.char]?.ability;
   switch (ability) {
     case 'cupcake':
-    case 'steal':        showCupcakeTarget();    break;
-    case 'boardCupcake': showBoardCupcakeUI();   break;
-    case 'jump':         doJump();               break;
-    case 'reroll':       doReroll();             break;
-    case 'kill':         showKillTarget();        break;
-    case 'gifts':        showGiftsTarget();       break;
-    case 'shuffle':      doShuffle();             break;
+    case 'steal': showCupcakeTarget(); break;
+    case 'boardCupcake': showBoardCupcakeUI(); break;
+    case 'jump': doJump(); break;
+    case 'reroll': doReroll(); break;
+    case 'kill': showKillTarget(); break;
+    case 'gifts': showGiftsTarget(); break;
+    case 'shuffle': doShuffle(); break;
   }
   if (copiedAb) {
     // consume M2 copied ability after use
     const ns = pStats(roomData);
     if (!ns[playerSlot]) ns[playerSlot] = { mgWins: 0, badLucks: 0 };
     delete ns[playerSlot].copiedAbility;
-    db.from('party_rooms').update({ player_stats: JSON.stringify(ns) }).eq('id', roomId).then(() => {}, () => {});
+    db.from('party_rooms').update({ player_stats: JSON.stringify(ns) }).eq('id', roomId).then(() => { }, () => { });
   }
 }
 
@@ -2385,7 +2409,7 @@ function useAbility() {
 async function doShuffle() {
   const board = parseBoard(roomData);
   const locked = new Set(['start', 'tollbooth', 'freddy_zone', 'jackpot']);
-  const tiles  = [...board.tiles];
+  const tiles = [...board.tiles];
 
   // Collect shuffleable indices and their values
   const freeIdx = tiles.map((t, i) => i).filter(i => !locked.has(tiles[i]));
@@ -2402,7 +2426,7 @@ async function doShuffle() {
   st.cooldowns[playerSlot] = CHAR_CFG['mangle'].cooldown;
 
   await db.from('party_rooms').update({
-    board:            JSON.stringify(newBoard),
+    board: JSON.stringify(newBoard),
     player_cooldowns: JSON.stringify(st.cooldowns),
   }).eq('id', roomId);
 
@@ -2414,19 +2438,19 @@ async function doShuffle() {
 // ── Microphone item: pick target ──────────────────────────────────────────────
 function showMicrophoneTarget(targets) {
   const room = roomData;
-  const el   = document.getElementById('current-player-action');
+  const el = document.getElementById('current-player-action');
   if (!el) return;
   el.innerHTML = `<div class="action-card">
-    <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot)-1]}">🎤 ${T('item.microphone.name')}</div>
+    <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot) - 1]}">🎤 ${T('item.microphone.name')}</div>
     <p style="font-size:.7rem;color:var(--text-muted);margin:2px 0">${T('item.microphone.pickDesc')}</p>
     <div class="ability-targets">
       ${targets.map(s => {
-        const char = room[`${s}_char`] || 'freddy';
-        return `<button class="mp-btn" onclick="applyMicrophone('${s}')">
+    const char = room[`${s}_char`] || 'freddy';
+    return `<button class="mp-btn" onclick="applyMicrophone('${s}')">
           <img src="${charImg(char)}" style="width:20px;height:20px;border-radius:50%;object-fit:contain;vertical-align:middle" onerror="this.style.display='none'"/>
           ${room[`${s}_name`]}${s === playerSlot ? ' (você)' : ''}
         </button>`;
-      }).join('')}
+  }).join('')}
     </div>
     <button class="mp-btn small" onclick="renderActionUI(roomData)" style="margin-top:4px">${T('ability.kill.cancel')}</button>
   </div>`;
@@ -2461,7 +2485,7 @@ function enterSpringlockPlacement() {
 
   const el = document.getElementById('current-player-action');
   if (el) el.innerHTML = `<div class="action-card">
-    <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot)-1]}">🔒 ${T('item.springlock.name')}</div>
+    <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot) - 1]}">🔒 ${T('item.springlock.name')}</div>
     <p style="font-size:.7rem;color:var(--text-muted);margin:2px 0">${T('item.springlock.pickDesc')}</p>
     <button class="mp-btn small" onclick="cancelSpringlockPlacement()">${T('ability.kill.cancel')}</button>
   </div>`;
@@ -2527,7 +2551,7 @@ function showBoardCupcakeUI() {
 
   const el = document.getElementById('current-player-action');
   if (el) el.innerHTML = `<div class="action-card">
-    <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot)-1]}">🧁 ${T('ability.boardCupcake.title')}</div>
+    <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot) - 1]}">🧁 ${T('ability.boardCupcake.title')}</div>
     <p style="font-size:.7rem;color:var(--text-muted);margin:2px 0">${T('ability.boardCupcake.pickDesc')}</p>
     <button class="mp-btn small" onclick="cancelBoardCupcakePlacement()">${T('ability.kill.cancel')}</button>
   </div>`;
@@ -2590,23 +2614,23 @@ async function placeBoardCupcake(spaceIdx) {
 // ── Springtrap: Kill ability ──────────────────────────────────────────────────
 function showKillTarget() {
   const room = roomData;
-  const pc   = room.player_count || 2;
+  const pc = room.player_count || 2;
   const targets = allSlots(pc).filter(s =>
     s !== playerSlot && room[`${s}_name`] && inRange5(room, playerSlot, s));
   if (!targets.length) { showToast(T('error.noRange')); return; }
 
   const el = document.getElementById('current-player-action');
   el.innerHTML = `<div class="action-card">
-    <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot)-1]}">${T('ability.kill.title')}</div>
+    <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot) - 1]}">${T('ability.kill.title')}</div>
     <p style="font-size:.7rem;color:var(--text-muted);margin:2px 0">${T('ability.kill.desc')}</p>
     <div class="ability-targets">
       ${targets.map(s => {
-        const char = room[`${s}_char`] || 'freddy';
-        return `<button class="mp-btn" onclick="executeKill('${s}')">
+    const char = room[`${s}_char`] || 'freddy';
+    return `<button class="mp-btn" onclick="executeKill('${s}')">
           <img src="${charImg(char)}" style="width:20px;height:20px;border-radius:50%;object-fit:contain;vertical-align:middle" onerror="this.style.display='none'"/>
           ${room[`${s}_name`]}
         </button>`;
-      }).join('')}
+  }).join('')}
     </div>
     <button class="mp-btn small" onclick="renderActionUI(roomData)" style="margin-top:4px">${T('ability.kill.cancel')}</button>
   </div>`;
@@ -2614,10 +2638,10 @@ function showKillTarget() {
 
 async function executeKill(targetSlot) {
   const st = pState(roomData);
-  st.pos[targetSlot] = 0; // reset to start (lap 0, node 0) — coins/pizzas stay
+  st.pos[targetSlot] = 0; // reset to start (lap 0, node 0) - coins/pizzas stay
   st.cooldowns[playerSlot] = CHAR_CFG['springtrap'].cooldown;
   await db.from('party_rooms').update({
-    player_pos:       JSON.stringify(st.pos),
+    player_pos: JSON.stringify(st.pos),
     player_cooldowns: JSON.stringify(st.cooldowns),
   }).eq('id', roomId);
   emitEvent(`🪤 ${roomData[`${playerSlot}_name`]} killed ${roomData[`${targetSlot}_name`]}! Back to start!`);
@@ -2628,7 +2652,7 @@ async function executeKill(targetSlot) {
 // ── Puppet: Gifts ability ─────────────────────────────────────────────────────
 function showGiftsTarget() {
   const room = roomData;
-  const pc   = room.player_count || 2;
+  const pc = room.player_count || 2;
   const targets = allSlots(pc).filter(s => {
     if (!room[`${s}_name`]) return false;
     return s === playerSlot || inRange5(room, playerSlot, s);
@@ -2637,18 +2661,18 @@ function showGiftsTarget() {
 
   const el = document.getElementById('current-player-action');
   el.innerHTML = `<div class="action-card">
-    <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot)-1]}">${T('ability.gifts.title')}</div>
+    <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot) - 1]}">${T('ability.gifts.title')}</div>
     <p style="font-size:.7rem;color:var(--text-muted);margin:2px 0">${T('ability.gifts.desc')}</p>
     <div class="ability-targets">
       ${targets.map(s => {
-        const char    = room[`${s}_char`] || 'freddy';
-        const coins   = playerCoins(room, s);
-        const canGift = coins >= 10;
-        return `<button class="mp-btn" onclick="executeGifts('${s}')" ${canGift ? '' : 'disabled'} title="${canGift ? '' : `Needs 10${COIN_IMG}`}">
+    const char = room[`${s}_char`] || 'freddy';
+    const coins = playerCoins(room, s);
+    const canGift = coins >= 10;
+    return `<button class="mp-btn" onclick="executeGifts('${s}')" ${canGift ? '' : 'disabled'} title="${canGift ? '' : `Needs 10${COIN_IMG}`}">
           <img src="${charImg(char)}" style="width:20px;height:20px;border-radius:50%;object-fit:contain;vertical-align:middle" onerror="this.style.display='none'"/>
           ${room[`${s}_name`]} (${coins}${COIN_IMG})
         </button>`;
-      }).join('')}
+  }).join('')}
     </div>
     <button class="mp-btn small" onclick="renderActionUI(roomData)" style="margin-top:4px">${T('ability.gifts.cancel')}</button>
   </div>`;
@@ -2657,12 +2681,12 @@ function showGiftsTarget() {
 async function executeGifts(targetSlot) {
   const st = pState(roomData);
   if ((st.coins[targetSlot] || 0) < 10) { showToast(T('error.notEnoughCoins')); return; }
-  st.coins[targetSlot]  = (st.coins[targetSlot]  || 0) - 10;
+  st.coins[targetSlot] = (st.coins[targetSlot] || 0) - 10;
   st.pizzas[targetSlot] = (st.pizzas[targetSlot] || 0) + 1;
   st.cooldowns[playerSlot] = CHAR_CFG['puppet'].cooldown;
   await db.from('party_rooms').update({
-    player_coins:     JSON.stringify(st.coins),
-    player_pizzas:    JSON.stringify(st.pizzas),
+    player_coins: JSON.stringify(st.coins),
+    player_pizzas: JSON.stringify(st.pizzas),
     player_cooldowns: JSON.stringify(st.cooldowns),
   }).eq('id', roomId);
   const target = roomData[`${targetSlot}_name`];
@@ -2672,8 +2696,8 @@ async function executeGifts(targetSlot) {
 }
 
 function showCupcakeTarget() {
-  const room    = roomData;
-  const pc      = room.player_count || 2;
+  const room = roomData;
+  const pc = room.player_count || 2;
   const targets = allSlots(pc).filter(s =>
     s !== playerSlot && room[`${s}_name`] && inRange5(room, playerSlot, s));
   if (!targets.length) { showToast(T('error.noRangeShort')); return; }
@@ -2681,28 +2705,28 @@ function showCupcakeTarget() {
   const abilKey = (CHAR_CFG[room[`${playerSlot}_char`] || 'freddy']?.ability === 'steal') ? 'steal' : 'cupcake';
   const el = document.getElementById('current-player-action');
   el.innerHTML = `<div class="action-card">
-    <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot)-1]}">${T('ability.' + abilKey + '.title')}</div>
+    <div class="action-player-name" style="color:${PLAYER_COLORS[slotNum(playerSlot) - 1]}">${T('ability.' + abilKey + '.title')}</div>
     <div class="ability-targets">
       ${targets.map(s => {
-        const char = room[`${s}_char`] || 'freddy';
-        return `<button class="mp-btn" onclick="executeCupcake('${s}')">
+    const char = room[`${s}_char`] || 'freddy';
+    return `<button class="mp-btn" onclick="executeCupcake('${s}')">
           <img src="${charImg(char)}" style="width:20px;height:20px;border-radius:50%;object-fit:contain;vertical-align:middle" onerror="this.style.display='none'"/>
           ${room[`${s}_name`]}
         </button>`;
-      }).join('')}
+  }).join('')}
     </div>
     <button class="mp-btn small" onclick="renderActionUI(roomData)" style="margin-top:4px">${T('ability.' + abilKey + '.cancel')}</button>
   </div>`;
 }
 
 async function executeCupcake(targetSlot) {
-  const st     = pState(roomData);
+  const st = pState(roomData);
   const stolen = Math.min(5, st.coins[targetSlot] || 0);
-  st.coins[targetSlot]  = Math.max(0, (st.coins[targetSlot] || 0) - stolen);
-  st.coins[playerSlot]  = (st.coins[playerSlot] || 0) + stolen;
+  st.coins[targetSlot] = Math.max(0, (st.coins[targetSlot] || 0) - stolen);
+  st.coins[playerSlot] = (st.coins[playerSlot] || 0) + stolen;
   st.cooldowns[playerSlot] = CHAR_CFG[roomData[`${playerSlot}_char`]].cooldown;
   await db.from('party_rooms').update({
-    player_coins:     JSON.stringify(st.coins),
+    player_coins: JSON.stringify(st.coins),
     player_cooldowns: JSON.stringify(st.cooldowns),
   }).eq('id', roomId);
   showToast(T('toast.stolen', { name: roomData[`${playerSlot}_name`], n: stolen }));
@@ -2711,8 +2735,8 @@ async function executeCupcake(targetSlot) {
 
 async function doJump() {
   const steps = 4;
-  const room  = roomData;
-  const st    = pState(room);
+  const room = roomData;
+  const st = pState(room);
   const { laps, boardSize, tiles, nextMap } = parseBoard(room);
   const fromNodeIdx = (st.pos[playerSlot] || 0) % boardSize;
   st.cooldowns[playerSlot] = CHAR_CFG[room[`${playerSlot}_char`]].cooldown;
@@ -2722,9 +2746,9 @@ async function doJump() {
     await animateHops(playerSlot, room[`${playerSlot}_char`] || 'freddy', fromNodeIdx, steps, boardSize, tiles, nextMap || {});
     const finished = Math.floor(st.pos[playerSlot] / boardSize) >= laps;
     await db.from('party_rooms').update({
-      player_pos:       JSON.stringify(st.pos),
-      player_coins:     JSON.stringify(st.coins),
-      player_pizzas:    JSON.stringify(st.pizzas),
+      player_pos: JSON.stringify(st.pos),
+      player_coins: JSON.stringify(st.coins),
+      player_pizzas: JSON.stringify(st.pizzas),
       player_cooldowns: JSON.stringify(st.cooldowns),
       turn_phase: 'moved', dice_result: steps,
       ...(finished ? { state: 'finished' } : {}),
@@ -2763,18 +2787,18 @@ function micMultiplied(ns, slot, delta) {
 }
 
 function showDiceShop(room) {
-  const coins    = playerCoins(room, playerSlot);
-  const myChar   = room[`${playerSlot}_char`] || 'freddy';
+  const coins = playerCoins(room, playerSlot);
+  const myChar = room[`${playerSlot}_char`] || 'freddy';
   const equipped = getPlayerDice(room, playerSlot);
-  const owned    = getOwnedDice(room, playerSlot);
-  const btnsEl   = document.getElementById('dice-action-btns');
-  const panel    = document.getElementById('dice-shop-content') || document.getElementById('dice-shop-panel');
+  const owned = getOwnedDice(room, playerSlot);
+  const btnsEl = document.getElementById('dice-action-btns');
+  const panel = document.getElementById('dice-shop-content') || document.getElementById('dice-shop-panel');
   if (!panel) return;
 
   const psn = pStats(room)[playerSlot] || {};
-  const forcedDie   = psn.forcedDice;
+  const forcedDie = psn.forcedDice;
   const forcedTurns = psn.forcedTurns || 0;
-  const isForced    = !!(forcedDie && forcedTurns > 0);
+  const isForced = !!(forcedDie && forcedTurns > 0);
 
   const allDice = [
     { id: 'd6', label: T('dname.d6'), emoji: '🎲', desc: T('ddesc.d6'), price: 0 },
@@ -2783,14 +2807,14 @@ function showDiceShop(room) {
 
   const cards = allDice.map(d => {
     const isEquipped = equipped === d.id;
-    const isOwned    = owned.includes(d.id);
-    const canBuy     = !isOwned && d.price > 0 && coins >= d.price;
-    const shopD      = SHOP_DICE.find(x => x.id === d.id);
-    const usesLeft   = isOwned && shopD?.maxUses
+    const isOwned = owned.includes(d.id);
+    const canBuy = !isOwned && d.price > 0 && coins >= d.price;
+    const shopD = SHOP_DICE.find(x => x.id === d.id);
+    const usesLeft = isOwned && shopD?.maxUses
       ? (psn.diceUses?.[d.id] ?? shopD.maxUses)
       : null;
     const isThisForced = isForced && d.id === forcedDie;
-    const otherForced  = isForced && d.id !== forcedDie;
+    const otherForced = isForced && d.id !== forcedDie;
 
     const cls = isEquipped ? 'dic-equipped' : (!isOwned ? 'dic-locked' : '');
 
@@ -2830,7 +2854,7 @@ function showDiceShop(room) {
   if (myTurn) {
     if (room.turn_phase === 'roll') {
       const me = myPlayer(room);
-      const c  = CHAR_CFG[me.char] || {};
+      const c = CHAR_CFG[me.char] || {};
       const copiedAb = pStats(room)[playerSlot]?.copiedAbility;
       const effectiveAbility = copiedAb?.ability || c.ability;
       const canAbility = effectiveAbility && effectiveAbility !== 'reroll' && effectiveAbility !== 'tollpass'
@@ -2842,9 +2866,9 @@ function showDiceShop(room) {
 
     } else if (room.turn_phase === 'rolled') {
       const me = myPlayer(room);
-      const c  = CHAR_CFG[me.char] || {};
-      const canReroll   = c.ability === 'reroll' && (pState(room).cooldowns[playerSlot] || 0) === 0;
-      const lastDice    = pStats(room)[playerSlot]?.lastDiceId || getPlayerDice(room, playerSlot);
+      const c = CHAR_CFG[me.char] || {};
+      const canReroll = c.ability === 'reroll' && (pState(room).cooldowns[playerSlot] || 0) === 0;
+      const lastDice = pStats(room)[playerSlot]?.lastDiceId || getPlayerDice(room, playerSlot);
       const isSpringlock = lastDice === 'springlock' && room.dice_result === 0;
       actionHTML = `
         <button class="mp-btn primary dp-action-btn" id="dp-apply-btn">${isSpringlock ? T('action.backToStart') : T('action.continue')}</button>
@@ -2855,19 +2879,19 @@ function showDiceShop(room) {
 
     } else if (room.turn_phase === 'tollbooth') {
       const { toll, tollMap, skipMap, freeMap, boardSize, tiles } = parseBoard(room);
-      const pos         = boardPos(room, playerSlot);
+      const pos = boardPos(room, playerSlot);
       const currentToll = tollMap[pos] !== undefined ? tollMap[pos] : toll;
-      const canAfford   = coins >= currentToll;
-      const myChar      = room[`${playerSlot}_char`] || 'freddy';
-      const cd          = pState(room).cooldowns[playerSlot] || 0;
-      const canPass     = myChar === 'freddy' && cd === 0;
-      const nextToll    = Math.min(toll + 25, currentToll + 5);
-      const skipIdx     = skipMap[pos] !== undefined ? skipMap[pos] : (pos + TOLL_SKIP) % boardSize;
-      const freeIdx     = freeMap[pos] !== undefined ? freeMap[pos] : null;
-      const skipCfg     = SPACE_CFG[tiles[skipIdx]] || SPACE_CFG.normal;
-      const freeCfg     = freeIdx !== null ? (SPACE_CFG[tiles[freeIdx]] || SPACE_CFG.normal) : null;
-      const skipLabel   = `${T('toll.spaceLabel', { n: skipIdx })} ${skipCfg.emoji || ''}`;
-      const freeLabel   = freeIdx !== null ? `${T('toll.spaceLabel', { n: freeIdx })} ${freeCfg.emoji || ''}` : T('toll.dangerZone');
+      const canAfford = coins >= currentToll;
+      const myChar = room[`${playerSlot}_char`] || 'freddy';
+      const cd = pState(room).cooldowns[playerSlot] || 0;
+      const canPass = myChar === 'freddy' && cd === 0;
+      const nextToll = Math.min(toll + 25, currentToll + 5);
+      const skipIdx = skipMap[pos] !== undefined ? skipMap[pos] : (pos + TOLL_SKIP) % boardSize;
+      const freeIdx = freeMap[pos] !== undefined ? freeMap[pos] : null;
+      const skipCfg = SPACE_CFG[tiles[skipIdx]] || SPACE_CFG.normal;
+      const freeCfg = freeIdx !== null ? (SPACE_CFG[tiles[freeIdx]] || SPACE_CFG.normal) : null;
+      const skipLabel = `${T('toll.spaceLabel', { n: skipIdx })} ${skipCfg.emoji || ''}`;
+      const freeLabel = freeIdx !== null ? `${T('toll.spaceLabel', { n: freeIdx })} ${freeCfg.emoji || ''}` : T('toll.dangerZone');
       actionHTML = `
         <div class="dp-toll-title">${T('toll.title')}</div>
         ${canPass ? `<button class="mp-btn accent dp-action-btn" id="dp-freddy-pass">${T('toll.freePass', { dest: skipLabel })}</button>` : ''}
@@ -2879,30 +2903,30 @@ function showDiceShop(room) {
 
   // ── Items section ─────────────────────────────────────
   const ownedItems = getOwnedItems(room, playerSlot);
-  const myTurnForItems = isMyTurn(room) && ['roll','rolled','moved','tollbooth'].includes(room.turn_phase);
+  const myTurnForItems = isMyTurn(room) && ['roll', 'rolled', 'moved', 'tollbooth'].includes(room.turn_phase);
   const ns_items = pStats(room);
 
   const itemShopCards = ITEM_CFG.map(it => {
     const count = ownedItems.filter(id => id === it.id).length;
     const canBuy = coins >= it.price;
-    const isBattery        = it.id === 'battery';
-    const isFazMixer       = it.id === 'faz_mixer';
-    const isMask           = it.id === 'freddy_mask';
-    const batteryUsed      = isBattery  && !!(ns_items[playerSlot]?.batteryUsed);
-    const fazMixerBought   = isFazMixer ? (ns_items[playerSlot]?.fazMixerBought || 0) : 0;
-    const maskUsed         = isMask     && !!(ns_items[playerSlot]?.maskUsed);
+    const isBattery = it.id === 'battery';
+    const isFazMixer = it.id === 'faz_mixer';
+    const isMask = it.id === 'freddy_mask';
+    const batteryUsed = isBattery && !!(ns_items[playerSlot]?.batteryUsed);
+    const fazMixerBought = isFazMixer ? (ns_items[playerSlot]?.fazMixerBought || 0) : 0;
+    const maskUsed = isMask && !!(ns_items[playerSlot]?.maskUsed);
     const activeEffects = [];
-    if (it.id === 'battery'     && ns_items[playerSlot]?.extraTurn)      activeEffects.push('⚡');
-    if (it.id === 'helpy'       && ns_items[playerSlot]?.helpyActive)     activeEffects.push('✨');
-    if (it.id === 'm2'          && ns_items[playerSlot]?.copiedAbility)   activeEffects.push('🔮');
-    if (it.id === 'freddy_mask' && ns_items[playerSlot]?.maskActive)      activeEffects.push('🛡️');
-    if (it.id === 'faz_mixer')  activeEffects.push(`${fazMixerBought}/3`);
+    if (it.id === 'battery' && ns_items[playerSlot]?.extraTurn) activeEffects.push('⚡');
+    if (it.id === 'helpy' && ns_items[playerSlot]?.helpyActive) activeEffects.push('✨');
+    if (it.id === 'm2' && ns_items[playerSlot]?.copiedAbility) activeEffects.push('🔮');
+    if (it.id === 'freddy_mask' && ns_items[playerSlot]?.maskActive) activeEffects.push('🛡️');
+    if (it.id === 'faz_mixer') activeEffects.push(`${fazMixerBought}/3`);
 
     const onceLocked = (isBattery && (batteryUsed || count > 0))
-                    || (isFazMixer && fazMixerBought >= 3)
-                    || (isMask && (maskUsed || count > 0));
-    const canBuyItem  = canBuy && !onceLocked;
-    const isUsed      = (isBattery && batteryUsed) || (isMask && maskUsed);
+      || (isFazMixer && fazMixerBought >= 3)
+      || (isMask && (maskUsed || count > 0));
+    const canBuyItem = canBuy && !onceLocked;
+    const isUsed = (isBattery && batteryUsed) || (isMask && maskUsed);
     const useBtn = count > 0 && myTurnForItems && !isUsed
       ? `<button class="mp-btn small itm-use-btn" data-id="${it.id}">${T('item.use')}</button>` : '';
     const countTag = count > 0 ? `<span class="itm-count">${count > 1 ? '×' + count : '●'}</span>` : '';
@@ -2985,7 +3009,7 @@ async function buyDice(diceId, price) {
     ns[playerSlot].diceUses[diceId] = shopD.maxUses;
   }
   if (shopD?.forced) {
-    ns[playerSlot].forcedDice  = diceId;
+    ns[playerSlot].forcedDice = diceId;
     ns[playerSlot].forcedTurns = shopD.forced;
   }
   const st = pState(roomData);
@@ -3058,16 +3082,16 @@ async function useItem(itemId) {
     case 'battery': {
       if (ns[playerSlot].batteryUsed) { showToast(T('item.battery.used')); return; }
       ns[playerSlot].batteryUsed = true;
-      ns[playerSlot].extraTurn   = true;
+      ns[playerSlot].extraTurn = true;
       await db.from('party_rooms').update({ player_stats: JSON.stringify(ns) }).eq('id', roomId);
-      emitEvent(`🔋 ${roomData[`${playerSlot}_name`]} activated the Battery — extra turn coming!`);
+      emitEvent(`🔋 ${roomData[`${playerSlot}_name`]} activated the Battery - extra turn coming!`);
       showToast(`🔋 ${T('item.battery.name')} activated!`);
       break;
     }
     case 'helpy': {
       ns[playerSlot].helpyActive = true;
       await db.from('party_rooms').update({ player_stats: JSON.stringify(ns) }).eq('id', roomId);
-      emitEvent(`🐰 ${roomData[`${playerSlot}_name`]} used Helpy — next minigame score ×2!`);
+      emitEvent(`🐰 ${roomData[`${playerSlot}_name`]} used Helpy - next minigame score ×2!`);
       showToast(`🐰 ${T('item.helpy.name')} activated!`);
       break;
     }
@@ -3075,11 +3099,11 @@ async function useItem(itemId) {
       if (!others.length) { showToast(T('error.noRange')); return; }
       const target = others[Math.floor(Math.random() * others.length)];
       const posA = st.pos[playerSlot] || 0;
-      const posB = st.pos[target]     || 0;
+      const posB = st.pos[target] || 0;
       st.pos[playerSlot] = posB;
-      st.pos[target]     = posA;
+      st.pos[target] = posA;
       await db.from('party_rooms').update({
-        player_pos:   JSON.stringify(st.pos),
+        player_pos: JSON.stringify(st.pos),
         player_stats: JSON.stringify(ns),
       }).eq('id', roomId);
       emitEvent(`🔃 ${roomData[`${playerSlot}_name`]} swapped positions with ${roomData[`${target}_name`]}!`);
@@ -3092,21 +3116,21 @@ async function useItem(itemId) {
       const randomNode = Math.floor(Math.random() * boardSize);
       st.pos[playerSlot] = currentLap * boardSize + randomNode;
       await db.from('party_rooms').update({
-        player_pos:   JSON.stringify(st.pos),
+        player_pos: JSON.stringify(st.pos),
         player_stats: JSON.stringify(ns),
       }).eq('id', roomId);
-      emitEvent(`🎊 ${roomData[`${playerSlot}_name`]} used Ball Pit — teleported to space ${randomNode}!`);
+      emitEvent(`🎊 ${roomData[`${playerSlot}_name`]} used Ball Pit - teleported to space ${randomNode}!`);
       showToast(`🎊 Teleported to space ${randomNode}!`);
       break;
     }
     case 'm2': {
       if (!others.length) { showToast(T('error.noRange')); return; }
       const target = others[Math.floor(Math.random() * others.length)];
-      const targetChar    = roomData[`${target}_char`] || 'freddy';
+      const targetChar = roomData[`${target}_char`] || 'freddy';
       const targetAbility = CHAR_CFG[targetChar]?.ability;
       if (!targetAbility || targetAbility === 'tollpass') {
         await db.from('party_rooms').update({ player_stats: JSON.stringify(ns) }).eq('id', roomId);
-        emitEvent(`🤖 ${roomData[`${playerSlot}_name`]} copied ${roomData[`${target}_name`]}'s style — nothing useful!`);
+        emitEvent(`🤖 ${roomData[`${playerSlot}_name`]} copied ${roomData[`${target}_name`]}'s style - nothing useful!`);
         showToast(`🤖 Nothing to copy from ${roomData[`${target}_name`]}!`);
         break;
       }
@@ -3127,11 +3151,11 @@ async function useItem(itemId) {
       let pi = 0;
       active.forEach(s => { st.coins[s] = pool[pi++]; st.pizzas[s] = pool[pi++]; });
       await db.from('party_rooms').update({
-        player_coins:  JSON.stringify(st.coins),
+        player_coins: JSON.stringify(st.coins),
         player_pizzas: JSON.stringify(st.pizzas),
-        player_stats:  JSON.stringify(ns),
+        player_stats: JSON.stringify(ns),
       }).eq('id', roomId);
-      emitEvent(`🎰 ${roomData[`${playerSlot}_name`]} used Faz-Blender — everyone's coins & pizzas scrambled!`);
+      emitEvent(`🎰 ${roomData[`${playerSlot}_name`]} used Faz-Blender - everyone's coins & pizzas scrambled!`);
       showToast('🎰 Faz-Blender! Everything scrambled!');
       break;
     }
@@ -3146,10 +3170,10 @@ async function useItem(itemId) {
       shuffled[0] = 'normal';
       const newBoard = { ...board, tiles: shuffled };
       await db.from('party_rooms').update({
-        board:        JSON.stringify(newBoard),
+        board: JSON.stringify(newBoard),
         player_stats: JSON.stringify(ns),
       }).eq('id', roomId);
-      emitEvent(`🐇 ${roomData[`${playerSlot}_name`]} used Glitchtrap — the board has been corrupted!`);
+      emitEvent(`🐇 ${roomData[`${playerSlot}_name`]} used Glitchtrap - the board has been corrupted!`);
       showToast('🐇 Board shuffled!');
       break;
     }
@@ -3159,10 +3183,10 @@ async function useItem(itemId) {
     }
     case 'freddy_mask': {
       if (ns[playerSlot]?.maskUsed) { showToast(T('item.battery.used')); return; }
-      ns[playerSlot].maskUsed   = true;
+      ns[playerSlot].maskUsed = true;
       ns[playerSlot].maskActive = true;
       await db.from('party_rooms').update({ player_stats: JSON.stringify(ns) }).eq('id', roomId);
-      emitEvent(`🎭 ${roomData[`${playerSlot}_name`]} put on the Freddy Mask — immune to negative effects for 1 lap!`);
+      emitEvent(`🎭 ${roomData[`${playerSlot}_name`]} put on the Freddy Mask - immune to negative effects for 1 lap!`);
       showToast('🎭 Freddy Mask active! Immune for 1 lap!');
       break;
     }
@@ -3173,14 +3197,14 @@ async function useItem(itemId) {
 // ── Tollbooth (hard mode) ─────────────────────────────────────────────────────
 function showTollboothUI(room) {
   const { boardSize, tiles, skipMap, freeMap } = parseBoard(room);
-  const pos     = boardPos(room, playerSlot);
-  const el      = document.getElementById('current-player-action');
+  const pos = boardPos(room, playerSlot);
+  const el = document.getElementById('current-player-action');
   if (!el) return;
 
-  const skipIdx  = skipMap[pos] !== undefined ? skipMap[pos] : (pos + TOLL_SKIP) % boardSize;
-  const freeIdx  = freeMap[pos] !== undefined ? freeMap[pos] : null;
-  const skipCfg  = SPACE_CFG[tiles[skipIdx]] || SPACE_CFG.normal;
-  const freeCfg  = freeIdx !== null ? (SPACE_CFG[tiles[freeIdx]] || SPACE_CFG.normal) : null;
+  const skipIdx = skipMap[pos] !== undefined ? skipMap[pos] : (pos + TOLL_SKIP) % boardSize;
+  const freeIdx = freeMap[pos] !== undefined ? freeMap[pos] : null;
+  const skipCfg = SPACE_CFG[tiles[skipIdx]] || SPACE_CFG.normal;
+  const freeCfg = freeIdx !== null ? (SPACE_CFG[tiles[freeIdx]] || SPACE_CFG.normal) : null;
   const skipDesc = `${T('toll.spaceLabel', { n: skipIdx })} ${skipCfg.emoji || ''}`;
   const freeDesc = freeIdx !== null ? `${T('toll.spaceLabel', { n: freeIdx })} ${freeCfg.emoji || ''}` : T('toll.dangerZone');
   const pendingSteps = pStats(room)[playerSlot]?.pendingSteps || 0;
@@ -3200,8 +3224,8 @@ async function resolveTollChoice(destIdx, orSkipFwd, labelA, labelB, noLap = fal
   const room = roomData;
   const board = parseBoard(room);
   const { tiles, laps, boardSize, mapType, toll, tollMap, skipMap, freeMap, nodes, boardAspect, nextMap } = board;
-  const st  = pState(room);
-  const ns  = pStats(room);
+  const st = pState(room);
+  const ns = pStats(room);
   const pos = boardPos(room, playerSlot);
   if (coinDeduct > 0) st.coins[playerSlot] = Math.max(0, (st.coins[playerSlot] || 0) - coinDeduct);
 
@@ -3243,19 +3267,19 @@ async function resolveTollChoice(destIdx, orSkipFwd, labelA, labelB, noLap = fal
     newTollMap[pos] = Math.min(toll + 25, nodeToll + 5);
   }
   const newBoard = { tiles, laps, boardSize, mapType, toll, tollMap: newTollMap, skipMap, freeMap };
-  if (nodes)   newBoard.nodes = nodes;
+  if (nodes) newBoard.nodes = nodes;
   if (boardAspect) newBoard.boardAspect = boardAspect;
   if (nextMap && Object.keys(nextMap).length) newBoard.nextMap = nextMap;
   if (board.endOfRoundMinigame) newBoard.endOfRoundMinigame = true;
 
   await db.from('party_rooms').update({
-    player_pos:    JSON.stringify(st.pos),
-    player_coins:  JSON.stringify(st.coins),
+    player_pos: JSON.stringify(st.pos),
+    player_coins: JSON.stringify(st.coins),
     player_pizzas: JSON.stringify(st.pizzas),
-    player_stats:  JSON.stringify(ns),
-    board:         JSON.stringify(newBoard),
-    turn_phase:    finished ? undefined : finalPhase,
-    current_slot:  finished ? undefined : finalSlot,
+    player_stats: JSON.stringify(ns),
+    board: JSON.stringify(newBoard),
+    turn_phase: finished ? undefined : finalPhase,
+    current_slot: finished ? undefined : finalSlot,
     ...(finished ? { state: 'finished' } : {}),
   }).eq('id', roomId);
 
@@ -3264,19 +3288,19 @@ async function resolveTollChoice(destIdx, orSkipFwd, labelA, labelB, noLap = fal
 }
 
 async function payToll() {
-  const room  = roomData;
+  const room = roomData;
   const { toll, tollMap, skipMap } = parseBoard(room);
-  const pos   = boardPos(room, playerSlot);
+  const pos = boardPos(room, playerSlot);
   const currentToll = tollMap[pos] !== undefined ? tollMap[pos] : toll;
   const skipIdx = skipMap[pos] !== undefined ? skipMap[pos] : null;
-  const dest    = skipIdx !== null ? `Space ${skipIdx}` : `+${TOLL_SKIP} spaces`;
-  await resolveTollChoice(skipIdx, skipIdx === null, `paid ${currentToll}🪙 — Path A → ${dest}`, `Paid ${currentToll}🪙 — Path A! 🐻`, false, currentToll);
+  const dest = skipIdx !== null ? `Space ${skipIdx}` : `+${TOLL_SKIP} spaces`;
+  await resolveTollChoice(skipIdx, skipIdx === null, `paid ${currentToll}🪙 - Path A → ${dest}`, `Paid ${currentToll}🪙 - Path A! 🐻`, false, currentToll);
 }
 
 async function passTollFree() {
-  const room  = roomData;
+  const room = roomData;
   const { freeMap } = parseBoard(room);
-  const pos   = boardPos(room, playerSlot);
+  const pos = boardPos(room, playerSlot);
   const freeIdx = freeMap[pos];
 
   if (freeIdx !== undefined) {
@@ -3290,21 +3314,21 @@ async function passTollFree() {
 
 // Freddy's ability: take Path A for free (no coin cost), sets cooldown
 async function freddyTollPass() {
-  const room  = roomData;
+  const room = roomData;
   const { skipMap } = parseBoard(room);
-  const pos   = boardPos(room, playerSlot);
-  const st    = pState(room);
+  const pos = boardPos(room, playerSlot);
+  const st = pState(room);
   const skipIdx = skipMap[pos] !== undefined ? skipMap[pos] : null;
   st.cooldowns[playerSlot] = CHAR_CFG['freddy'].cooldown;
-  await resolveTollChoice(skipIdx, skipIdx === null, `used Freddy's Pass — Path A for free! 🐻`, `Freddy's Pass! Path A for free 🐻`);
+  await resolveTollChoice(skipIdx, skipIdx === null, `used Freddy's Pass - Path A for free! 🐻`, `Freddy's Pass! Path A for free 🐻`);
   await db.from('party_rooms').update({ player_cooldowns: JSON.stringify(st.cooldowns) }).eq('id', roomId);
 }
 
 // ── Minigame trigger ──────────────────────────────────────────────────────────
 async function triggerMinigame(involvedSlots, extraCfg = {}) {
   const lastMgId = roomData?.mg_id;
-  const mgPool   = MINIGAME_LIST.filter(m => m.id !== lastMgId);
-  const cfg      = (mgPool.length > 0 ? mgPool : MINIGAME_LIST)[Math.floor(Math.random() * (mgPool.length || MINIGAME_LIST.length))];
+  const mgPool = MINIGAME_LIST.filter(m => m.id !== lastMgId);
+  const cfg = (mgPool.length > 0 ? mgPool : MINIGAME_LIST)[Math.floor(Math.random() * (mgPool.length || MINIGAME_LIST.length))];
   let reward = extraCfg.challengeReward !== undefined ? extraCfg.challengeReward : Math.floor(Math.random() * 3) + 1;
 
   // Double multiplier: last-lap double phase OR triggering player has 2d6 equipped
@@ -3317,7 +3341,7 @@ async function triggerMinigame(involvedSlots, extraCfg = {}) {
 
   // Deterministic seeds for fairness
   if (cfg.id === 'feedingFrenzy') {
-    const FF_INGREDIENTS = ['🍅','🧀','🥓','🫑','🧅','🍄','🫒','🌶️','🥚','🍗'];
+    const FF_INGREDIENTS = ['🍅', '🧀', '🥓', '🫑', '🧅', '🍄', '🫒', '🌶️', '🥚', '🍗'];
     const rng = seededRand(config.seed);
     const shuffled = [...FF_INGREDIENTS].sort(() => rng() - .5);
     config.recipe = shuffled.slice(0, 3);
@@ -3352,7 +3376,7 @@ function seededRand(seed) {
 // ── Minigame wait screen (all-ready gate) ────────────────────────────────────
 function showMgWaitScreen(room) {
   const involved = JSON.parse(room.mg_players || '[]');
-  const cfg      = MINIGAME_LIST.find(m => m.id === room.mg_id);
+  const cfg = MINIGAME_LIST.find(m => m.id === room.mg_id);
   if (!cfg) return;
 
   const isP56 = slotNum(playerSlot) > 4;
@@ -3367,15 +3391,15 @@ function showMgWaitScreen(room) {
     <p class="mg-desc">${T('mg.' + cfg.id + '.desc')}</p>
     <div class="mg-players" id="mg-ready-list">
       ${involved.map(s => {
-        const char  = room[`${s}_char`] || 'freddy';
-        const color = PLAYER_COLORS[slotNum(s) - 1];
-        const ready = slotNum(s) <= 4 ? room[mgDoneKey(s)] : mgReadyLocal.has(s);
-        return `<span class="mg-player-tag" id="ready-tag-${s}"
+    const char = room[`${s}_char`] || 'freddy';
+    const color = PLAYER_COLORS[slotNum(s) - 1];
+    const ready = slotNum(s) <= 4 ? room[mgDoneKey(s)] : mgReadyLocal.has(s);
+    return `<span class="mg-player-tag" id="ready-tag-${s}"
             style="border-color:${color};background:${ready ? color + '40' : color + '15'}">
           <img src="${charImg(char)}" style="width:16px;height:16px;border-radius:50%;object-fit:contain;vertical-align:middle;margin-right:4px" onerror="this.style.display='none'"/>
           ${room[`${s}_name`]} ${ready ? '✅' : '⏳'}
         </span>`;
-      }).join('')}
+  }).join('')}
     </div>
     <div class="mg-reward">${T('mg.reward', { n: room.mg_reward })}</div>
     ${!alreadyReady && involved.includes(playerSlot)
@@ -3404,17 +3428,17 @@ async function readyForMinigame() {
 function startMinigameScreen(room) {
   if (mgCleanup) { mgCleanup(); mgCleanup = null; }
   stopMgPoller();
-  mgDoneLocal          = {};
-  mgReadyLocal         = new Set();
+  mgDoneLocal = {};
+  mgReadyLocal = new Set();
   podiumConfirmedLocal = new Set();
-  const mg       = { id: room.mg_id, config: JSON.parse(room.mg_config || '{}'), reward: room.mg_reward };
+  const mg = { id: room.mg_id, config: JSON.parse(room.mg_config || '{}'), reward: room.mg_reward };
   const involved = JSON.parse(room.mg_players || '[]');
-  const cfg      = MINIGAME_LIST.find(m => m.id === mg.id);
+  const cfg = MINIGAME_LIST.find(m => m.id === mg.id);
   if (!cfg) return;
 
   showScreen('minigame');
   buildLiveBar(room, involved);
-  // Poller runs for everyone — participants detect allDone, spectators detect mg_podium
+  // Poller runs for everyone - participants detect allDone, spectators detect mg_podium
   startMgPoller();
 
   // Spectator view
@@ -3428,13 +3452,13 @@ function startMinigameScreen(room) {
   }
 
   const runners = {
-    helpyBoop:     () => playHelpyBoop(room, mg),
-    moneyLaundry:  () => playMoneyLaundry(room, mg),
+    helpyBoop: () => playHelpyBoop(room, mg),
+    moneyLaundry: () => playMoneyLaundry(room, mg),
     feedingFrenzy: () => playFeedingFrenzy(room, mg),
-    guitarFinder:  () => playGuitarFinder(room, mg),
-    powerOut:      () => playPowerOut(room, mg),
-    flashlight:    () => playFlashlight(room, mg),
-    pizzaDough:    () => playPizzaDough(room, mg),
+    guitarFinder: () => playGuitarFinder(room, mg),
+    powerOut: () => playPowerOut(room, mg),
+    flashlight: () => playFlashlight(room, mg),
+    pizzaDough: () => playPizzaDough(room, mg),
   };
   runners[mg.id]?.();
 }
@@ -3444,7 +3468,7 @@ function buildLiveBar(room, involved) {
   const bar = document.getElementById('mg-live-bar');
   bar.style.display = 'flex';
   bar.innerHTML = involved.map(s => {
-    const char  = room[`${s}_char`] || 'freddy';
+    const char = room[`${s}_char`] || 'freddy';
     const color = PLAYER_COLORS[slotNum(s) - 1];
     return `<div class="mg-live-row${s === playerSlot ? ' me' : ''}" id="live-${s}" style="border-color:${color}">
       <img class="mg-live-avatar" src="${charImg(char)}" onerror="this.style.display='none'"/>
@@ -3465,9 +3489,9 @@ async function submitScore(rawScore) {
   const score = rawScore + devScoreBonus;
   devScoreBonus = 0;
   mgDoneLocal[playerSlot] = score;
-  liveScores[playerSlot]  = score;
+  liveScores[playerSlot] = score;
   updateLiveBar();
-  broadcastCh?.send({ type: 'broadcast', event: 'mg_done',  payload: { slot: playerSlot, score } });
+  broadcastCh?.send({ type: 'broadcast', event: 'mg_done', payload: { slot: playerSlot, score } });
   broadcastCh?.send({ type: 'broadcast', event: 'mg_score', payload: { slot: playerSlot, score } });
 
   // Write to DB
@@ -3479,7 +3503,7 @@ async function submitScore(rawScore) {
   }
 
   let r0 = null;
-  try { const res = await db.from('party_rooms').select('*').eq('id', roomId).single(); r0 = res.data; } catch {}
+  try { const res = await db.from('party_rooms').select('*').eq('id', roomId).single(); r0 = res.data; } catch { }
   if (!r0) return;
   const inv0 = JSON.parse(r0.mg_players || '[]');
 
@@ -3494,7 +3518,7 @@ async function submitScore(rawScore) {
   const forceTry = async () => {
     if (!roomId) return;
     let r = null;
-    try { r = (await db.from('party_rooms').select('*').eq('id', roomId).single()).data; } catch {}
+    try { r = (await db.from('party_rooms').select('*').eq('id', roomId).single()).data; } catch { }
     if (!r) return;
     if (r.turn_phase === 'mg_podium') { stopMgPoller(); handleRoomUpdate(r); return; }
     if (r.turn_phase !== 'minigame') return;
@@ -3510,136 +3534,136 @@ async function submitScore(rawScore) {
 
 async function finishMinigame(room) {
   try {
-  const involved = JSON.parse(room.mg_players || '[]');
-  if (!involved.length) return;
-  const ranked   = involved
-    .map(s => ({ slot: s, score: mgDoneLocal[s] ?? room[mgScoreKey(s)] ?? 0 }))
-    .sort((a, b) => b.score - a.score);
+    const involved = JSON.parse(room.mg_players || '[]');
+    if (!involved.length) return;
+    const ranked = involved
+      .map(s => ({ slot: s, score: mgDoneLocal[s] ?? room[mgScoreKey(s)] ?? 0 }))
+      .sort((a, b) => b.score - a.score);
 
-  const st       = pState(room);
-  const ns       = pStats(room);
+    const st = pState(room);
+    const ns = pStats(room);
 
-  // Helpy: double score of affected player in this minigame
-  let helpyApplied = false;
-  ranked.forEach(r => {
-    if (ns[r.slot]?.helpyActive) {
-      r.score = r.score * 2;
-      ns[r.slot].helpyActive = false;
-      helpyApplied = true;
-    }
-  });
-  if (helpyApplied) ranked.sort((a, b) => b.score - a.score);
-
-  const winner   = ranked[0].slot;
-  const loser    = ranked[ranked.length - 1].slot;
-  const topScore = ranked[0].score;
-  const isTie    = ranked.length > 1 && ranked.every(r => r.score === topScore);
-
-  let mgConfig = {};
-  try { mgConfig = JSON.parse(room.mg_config || '{}'); } catch {}
-  const isChallenge = !!mgConfig.isChallenge;
-  const rewardMul   = mgConfig.rewardMul || 1;
-  const reward      = room.mg_reward || 0;
-  let challengeCoinsChange = {};
-  const actualCoinsChange  = {}; // tracks real coin deltas for podium display
-
-  if (isChallenge) {
-    const challenger      = mgConfig.challenger;
-    const challengeReward = (mgConfig.challengeReward || 5) * rewardMul;
-    const isPizzaReward   = !!mgConfig.isPizzaReward;
-    const challengerWon   = ranked[0].slot === challenger;
-    const others          = involved.filter(s => s !== challenger);
-
-    if (!isTie) {
-      if (challengerWon) {
-        if (isPizzaReward) {
-          st.pizzas[challenger] = (st.pizzas[challenger] || 0) + 1;
-        } else {
-          const actualReward = micMultiplied(ns, challenger, challengeReward);
-          st.coins[challenger] = (st.coins[challenger] || 0) + actualReward;
-          challengeCoinsChange[challenger] = actualReward;
-        }
-        if (!ns[challenger]) ns[challenger] = { mgWins: 0, badLucks: 0 };
-        ns[challenger].mgWins = (ns[challenger].mgWins || 0) + 1;
-        if (!isPizzaReward) challengeCoinsChange[challenger] = micMultiplied(ns, challenger, challengeReward);
-        emitEvent(`⚔️ ${room[`${challenger}_name`]} won the Challenge! ${isPizzaReward ? '+🍕' : '+' + challengeCoinsChange[challenger] + '🪙'}`);
-      } else {
-        // Challenger loses: deduct from challenger, split among others
-        const actualLoss = micMultiplied(ns, challenger, -challengeReward);
-        st.coins[challenger] = Math.max(0, (st.coins[challenger] || 0) + actualLoss);
-        challengeCoinsChange[challenger] = actualLoss;
-        const split = Math.ceil(challengeReward / Math.max(1, others.length));
-        others.forEach(s => {
-          const actualSplit = micMultiplied(ns, s, split);
-          st.coins[s] = (st.coins[s] || 0) + actualSplit;
-          challengeCoinsChange[s] = actualSplit;
-        });
-        if (!ns[winner]) ns[winner] = { mgWins: 0, badLucks: 0 };
-        ns[winner].mgWins = (ns[winner].mgWins || 0) + 1;
-        emitEvent(`⚔️ ${room[`${challenger}_name`]} lost the Challenge! Coins split among others`);
+    // Helpy: double score of affected player in this minigame
+    let helpyApplied = false;
+    ranked.forEach(r => {
+      if (ns[r.slot]?.helpyActive) {
+        r.score = r.score * 2;
+        ns[r.slot].helpyActive = false;
+        helpyApplied = true;
       }
-    }
-  } else {
-    const mulTag = rewardMul > 1 ? ` (${rewardMul}×!)` : '';
-    if (isTie) {
-      const perPlayer = reward > 0 ? Math.max(1, Math.ceil(reward / ranked.length)) : 0;
-      if (perPlayer > 0) {
-        ranked.forEach(r => {
-          const actual = micMultiplied(ns, r.slot, perPlayer);
-          st.coins[r.slot] = (st.coins[r.slot] || 0) + actual;
-          actualCoinsChange[r.slot] = actual;
-        });
-        emitEvent(`🎮 Minigame tied! Each player gets ${perPlayer}🪙`);
-      } else {
-        emitEvent(`🎮 Minigame tied!`);
+    });
+    if (helpyApplied) ranked.sort((a, b) => b.score - a.score);
+
+    const winner = ranked[0].slot;
+    const loser = ranked[ranked.length - 1].slot;
+    const topScore = ranked[0].score;
+    const isTie = ranked.length > 1 && ranked.every(r => r.score === topScore);
+
+    let mgConfig = {};
+    try { mgConfig = JSON.parse(room.mg_config || '{}'); } catch { }
+    const isChallenge = !!mgConfig.isChallenge;
+    const rewardMul = mgConfig.rewardMul || 1;
+    const reward = room.mg_reward || 0;
+    let challengeCoinsChange = {};
+    const actualCoinsChange = {}; // tracks real coin deltas for podium display
+
+    if (isChallenge) {
+      const challenger = mgConfig.challenger;
+      const challengeReward = (mgConfig.challengeReward || 5) * rewardMul;
+      const isPizzaReward = !!mgConfig.isPizzaReward;
+      const challengerWon = ranked[0].slot === challenger;
+      const others = involved.filter(s => s !== challenger);
+
+      if (!isTie) {
+        if (challengerWon) {
+          if (isPizzaReward) {
+            st.pizzas[challenger] = (st.pizzas[challenger] || 0) + 1;
+          } else {
+            const actualReward = micMultiplied(ns, challenger, challengeReward);
+            st.coins[challenger] = (st.coins[challenger] || 0) + actualReward;
+            challengeCoinsChange[challenger] = actualReward;
+          }
+          if (!ns[challenger]) ns[challenger] = { mgWins: 0, badLucks: 0 };
+          ns[challenger].mgWins = (ns[challenger].mgWins || 0) + 1;
+          if (!isPizzaReward) challengeCoinsChange[challenger] = micMultiplied(ns, challenger, challengeReward);
+          emitEvent(`⚔️ ${room[`${challenger}_name`]} won the Challenge! ${isPizzaReward ? '+🍕' : '+' + challengeCoinsChange[challenger] + '🪙'}`);
+        } else {
+          // Challenger loses: deduct from challenger, split among others
+          const actualLoss = micMultiplied(ns, challenger, -challengeReward);
+          st.coins[challenger] = Math.max(0, (st.coins[challenger] || 0) + actualLoss);
+          challengeCoinsChange[challenger] = actualLoss;
+          const split = Math.ceil(challengeReward / Math.max(1, others.length));
+          others.forEach(s => {
+            const actualSplit = micMultiplied(ns, s, split);
+            st.coins[s] = (st.coins[s] || 0) + actualSplit;
+            challengeCoinsChange[s] = actualSplit;
+          });
+          if (!ns[winner]) ns[winner] = { mgWins: 0, badLucks: 0 };
+          ns[winner].mgWins = (ns[winner].mgWins || 0) + 1;
+          emitEvent(`⚔️ ${room[`${challenger}_name`]} lost the Challenge! Coins split among others`);
+        }
       }
     } else {
-      const actualReward = micMultiplied(ns, winner, reward);
-      st.coins[winner] = (st.coins[winner] || 0) + actualReward;
-      actualCoinsChange[winner] = actualReward;
-      if (!ns[winner]) ns[winner] = { mgWins: 0, badLucks: 0 };
-      ns[winner].mgWins = (ns[winner].mgWins || 0) + 1;
-      const micTag = ns[winner]?.microphoneActive ? ' 🎤×2' : '';
-      emitEvent(`🎮 ${room[`${winner}_name`]} won the minigame! +${actualReward}🪙${mulTag}${micTag}`);
+      const mulTag = rewardMul > 1 ? ` (${rewardMul}×!)` : '';
+      if (isTie) {
+        const perPlayer = reward > 0 ? Math.max(1, Math.ceil(reward / ranked.length)) : 0;
+        if (perPlayer > 0) {
+          ranked.forEach(r => {
+            const actual = micMultiplied(ns, r.slot, perPlayer);
+            st.coins[r.slot] = (st.coins[r.slot] || 0) + actual;
+            actualCoinsChange[r.slot] = actual;
+          });
+          emitEvent(`🎮 Minigame tied! Each player gets ${perPlayer}🪙`);
+        } else {
+          emitEvent(`🎮 Minigame tied!`);
+        }
+      } else {
+        const actualReward = micMultiplied(ns, winner, reward);
+        st.coins[winner] = (st.coins[winner] || 0) + actualReward;
+        actualCoinsChange[winner] = actualReward;
+        if (!ns[winner]) ns[winner] = { mgWins: 0, badLucks: 0 };
+        ns[winner].mgWins = (ns[winner].mgWins || 0) + 1;
+        const micTag = ns[winner]?.microphoneActive ? ' 🎤×2' : '';
+        emitEvent(`🎮 ${room[`${winner}_name`]} won the minigame! +${actualReward}🪙${mulTag}${micTag}`);
+      }
     }
-  }
 
-  // Clear microphone effect for all involved players now that rewards are computed
-  involved.forEach(s => { if (ns[s]?.microphoneActive) ns[s].microphoneActive = false; });
+    // Clear microphone effect for all involved players now that rewards are computed
+    involved.forEach(s => { if (ns[s]?.microphoneActive) ns[s].microphoneActive = false; });
 
-  const podiumRows = ranked.map(r => ({
-    slot: r.slot, name: room[`${r.slot}_name`], char: room[`${r.slot}_char`] || 'freddy', score: r.score,
-    coinsChange: isChallenge ? (challengeCoinsChange[r.slot] || 0) : (actualCoinsChange[r.slot] || 0),
-  }));
-  const nextPlayer = nextSlot(room);
-  const mgCfg = MINIGAME_LIST.find(m => m.id === room.mg_id);
+    const podiumRows = ranked.map(r => ({
+      slot: r.slot, name: room[`${r.slot}_name`], char: room[`${r.slot}_char`] || 'freddy', score: r.score,
+      coinsChange: isChallenge ? (challengeCoinsChange[r.slot] || 0) : (actualCoinsChange[r.slot] || 0),
+    }));
+    const nextPlayer = nextSlot(room);
+    const mgCfg = MINIGAME_LIST.find(m => m.id === room.mg_id);
 
-  const podiumCfg = {
-    podium: podiumRows, nextPlayer, mgId: room.mg_id, isTie, rewardMul,
-    mgName: mgCfg ? `${mgCfg.emoji} ${mgCfg.name}${rewardMul > 1 ? ` ${rewardMul}×` : ''}` : (isChallenge ? '⚔️ Challenge' : 'Minigame'),
-  };
-  const { data: updated } = await db.from('party_rooms').update({
-    turn_phase: 'mg_podium',
-    mg_config: JSON.stringify(podiumCfg),
-    player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas),
-    player_stats: JSON.stringify(ns),
-    mg_done_p1: false, mg_done_p2: false, mg_done_p3: false, mg_done_p4: false,
-  }).eq('id', roomId).eq('turn_phase', 'minigame').select('id');
+    const podiumCfg = {
+      podium: podiumRows, nextPlayer, mgId: room.mg_id, isTie, rewardMul,
+      mgName: mgCfg ? `${mgCfg.emoji} ${mgCfg.name}${rewardMul > 1 ? ` ${rewardMul}×` : ''}` : (isChallenge ? '⚔️ Challenge' : 'Minigame'),
+    };
+    const { data: updated } = await db.from('party_rooms').update({
+      turn_phase: 'mg_podium',
+      mg_config: JSON.stringify(podiumCfg),
+      player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas),
+      player_stats: JSON.stringify(ns),
+      mg_done_p1: false, mg_done_p2: false, mg_done_p3: false, mg_done_p4: false,
+    }).eq('id', roomId).eq('turn_phase', 'minigame').select('id');
 
-  // Build the podium room for local display (works whether or not we won the DB race)
-  const podiumRoom = {
-    ...room, turn_phase: 'mg_podium', mg_config: JSON.stringify(podiumCfg),
-    player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas),
-    player_stats: JSON.stringify(ns),
-    mg_done_p1: false, mg_done_p2: false, mg_done_p3: false, mg_done_p4: false,
-  };
-  roomData = podiumRoom;
-  showScreen('board');
-  renderBoard(podiumRoom);
-  renderStatusBar(podiumRoom);
-  updateTokens(podiumRoom);
-  showMgPodium(podiumRoom);
-  showDiceShop(podiumRoom);
+    // Build the podium room for local display (works whether or not we won the DB race)
+    const podiumRoom = {
+      ...room, turn_phase: 'mg_podium', mg_config: JSON.stringify(podiumCfg),
+      player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas),
+      player_stats: JSON.stringify(ns),
+      mg_done_p1: false, mg_done_p2: false, mg_done_p3: false, mg_done_p4: false,
+    };
+    roomData = podiumRoom;
+    showScreen('board');
+    renderBoard(podiumRoom);
+    renderStatusBar(podiumRoom);
+    updateTokens(podiumRoom);
+    showMgPodium(podiumRoom);
+    showDiceShop(podiumRoom);
   } catch (e) { console.error('[finishMinigame]', e); }
 }
 
@@ -3649,9 +3673,9 @@ function showMgPodium(room) {
   try {
     const cfg = JSON.parse(room.mg_config || '{}');
     podiumRows = cfg.podium || [];
-    mgName     = cfg.mgName || 'Minigame';
-    isTie      = !!cfg.isTie;
-  } catch {}
+    mgName = cfg.mgName || 'Minigame';
+    isTie = !!cfg.isTie;
+  } catch { }
 
   const alreadyConfirmed = room[mgDoneKey(playerSlot)];
   const isInvolved = involved.includes(playerSlot);
@@ -3659,13 +3683,13 @@ function showMgPodium(room) {
 
   document.getElementById('mg-result-overlay')?.remove();
 
-  const medals = ['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣'];
+  const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣'];
 
   const podiumHTML = podiumRows.map((p, i) => {
-    const color  = PLAYER_COLORS[slotNum(p.slot) - 1];
-    const isMe   = p.slot === playerSlot;
+    const color = PLAYER_COLORS[slotNum(p.slot) - 1];
+    const isMe = p.slot === playerSlot;
     const change = p.coinsChange > 0 ? `<span style="color:#2ecc71">+${p.coinsChange}${COIN_IMG}</span>`
-                 : p.coinsChange < 0 ? `<span style="color:#e74c3c">${p.coinsChange}${COIN_IMG}</span>` : '';
+      : p.coinsChange < 0 ? `<span style="color:#e74c3c">${p.coinsChange}${COIN_IMG}</span>` : '';
     return `<div class="pdm-row${isMe ? ' pdm-me' : ''}" style="border-color:${isMe ? color : 'transparent'}">
       <span class="pdm-medal">${isTie ? '🤝' : medals[i]}</span>
       <img class="pdm-avatar" src="${charImg(p.char)}" style="border-color:${color}" onerror="this.style.display='none'"/>
@@ -3679,8 +3703,8 @@ function showMgPodium(room) {
   const tieCoins = podiumRows[0]?.coinsChange || 0;
   const verdict = isTie ? (tieCoins > 0 ? T('podium.tie', { n: tieCoins }) : T('podium.tieSplit'))
     : myRank === 0 ? T('podium.youWon')
-    : myRank === podiumRows.length - 1 ? T('podium.youLost')
-    : T('podium.youRank', { n: myRank + 1 });
+      : myRank === podiumRows.length - 1 ? T('podium.youLost')
+        : T('podium.youRank', { n: myRank + 1 });
 
   const overlay = document.createElement('div');
   overlay.id = 'mg-result-overlay';
@@ -3688,11 +3712,11 @@ function showMgPodium(room) {
   overlay.innerHTML = `
     <div class="mg-result-card">
       <div class="mg-result-title">${mgName}</div>
-      ${isInvolved ? `<div class="mg-result-verdict ${myRank === 0 && !isTie ? 'mg-result-win' : myRank === podiumRows.length-1 && !isTie ? 'mg-result-lose' : ''}">${verdict}</div>` : ''}
+      ${isInvolved ? `<div class="mg-result-verdict ${myRank === 0 && !isTie ? 'mg-result-win' : myRank === podiumRows.length - 1 && !isTie ? 'mg-result-lose' : ''}">${verdict}</div>` : ''}
       <div class="pdm-list">${podiumHTML}</div>
       ${!alreadyConfirmed && isInvolved
-        ? `<button class="mp-btn primary" id="mg-result-confirm" style="margin-top:6px;width:100%">${T('podium.continue')}</button>`
-        : `<p class="mg-result-waiting">${T('podium.waitingOthers')}</p>`}
+      ? `<button class="mp-btn primary" id="mg-result-confirm" style="margin-top:6px;width:100%">${T('podium.continue')}</button>`
+      : `<p class="mg-result-waiting">${T('podium.waitingOthers')}</p>`}
     </div>`;
 
   document.body.appendChild(overlay);
@@ -3703,7 +3727,7 @@ function showMgPodium(room) {
     podiumConfirmedLocal.add(playerSlot);
     broadcastCh?.send({ type: 'broadcast', event: 'podium_confirm', payload: { slot: playerSlot } });
     // Also write to DB (best-effort)
-    db.from('party_rooms').update({ [mgDoneKey(playerSlot)]: true }).eq('id', roomId).then(() => {}, () => {});
+    db.from('party_rooms').update({ [mgDoneKey(playerSlot)]: true }).eq('id', roomId).then(() => { }, () => { });
     overlay.remove();
     checkPodiumAllConfirmedLocal();
   }, { once: true });
@@ -3740,7 +3764,7 @@ function playHelpyBoop(room, mg) {
     </div>
   </div>`;
 
-  const area    = document.getElementById('hb-area');
+  const area = document.getElementById('hb-area');
   const scoreEl = document.getElementById('hb-score');
   const timerEl = document.getElementById('hb-timer');
 
@@ -3750,10 +3774,10 @@ function playHelpyBoop(room, mg) {
     if (old) old.remove();
     const h = document.createElement('div');
     h.className = 'helpy-face';
-    const maxX = Math.max(10, area.clientWidth  - 72);
+    const maxX = Math.max(10, area.clientWidth - 72);
     const maxY = Math.max(10, area.clientHeight - 72);
     h.style.left = Math.random() * maxX + 'px';
-    h.style.top  = Math.random() * maxY + 'px';
+    h.style.top = Math.random() * maxY + 'px';
     const img = document.createElement('img');
     img.src = helpyImgSrc; img.draggable = false;
     img.onerror = () => { h.textContent = '😊'; h.style.fontSize = '2.5rem'; h.style.background = '#ffcc44'; };
@@ -3762,7 +3786,7 @@ function playHelpyBoop(room, mg) {
       if (done) return;
       score++;
       scoreEl.textContent = `👃 ${score}`;
-      try { const a = new Audio('../assets/sounds/honk.mp3'); a.volume = 0.6; a.play(); } catch(e) {}
+      try { const a = new Audio('../assets/sounds/honk.mp3'); a.volume = 0.6; a.play(); } catch (e) { }
       liveScores[playerSlot] = score; updateLiveBar();
       broadcastCh?.send({ type: 'broadcast', event: 'mg_score', payload: { slot: playerSlot, score } });
       h.classList.add('clicked');
@@ -3791,9 +3815,9 @@ function playMoneyLaundry(room, mg) {
     if (done) return; done = true;
     clearInterval(ct);
     document.removeEventListener('mousemove', onMove);
-    document.removeEventListener('mouseup',   onUp);
+    document.removeEventListener('mouseup', onUp);
     document.removeEventListener('touchmove', onMove);
-    document.removeEventListener('touchend',  onUp);
+    document.removeEventListener('touchend', onUp);
     const el = document.getElementById('mg-content');
     if (el) el.innerHTML = `<div class="mg-done-msg">${T('mg.waitingResults')}</div>`;
     submitScore(deposited);
@@ -3816,14 +3840,14 @@ function playMoneyLaundry(room, mg) {
     <p style="font-size:.75rem;color:var(--text-muted);text-align:center;margin:0">${T('mg.money.prompt')}</p>
   </div>`;
 
-  const scene   = document.getElementById('ml-scene');
-  const freddy  = document.getElementById('ml-freddy');
-  const depEl   = document.getElementById('ml-dep');
+  const scene = document.getElementById('ml-scene');
+  const freddy = document.getElementById('ml-freddy');
+  const depEl = document.getElementById('ml-dep');
   const timerEl = document.getElementById('ml-timer');
 
   function isOverFreddy(x, y) {
     const r = freddy.getBoundingClientRect();
-    return Math.hypot(x - (r.left + r.width/2), y - (r.top + r.height/2)) < 55;
+    return Math.hypot(x - (r.left + r.width / 2), y - (r.top + r.height / 2)) < 55;
   }
 
   function spawnCoin() {
@@ -3831,11 +3855,11 @@ function playMoneyLaundry(room, mg) {
     const coin = document.createElement('div');
     coin.className = 'ml-coin';
     const w = scene.clientWidth || 300, h = scene.clientHeight || 260;
-    const cx0 = w/2, cy0 = h/2;
+    const cx0 = w / 2, cy0 = h / 2;
     let cx, cy, t = 0;
-    do { cx = Math.random() * Math.max(w-40,40); cy = Math.random() * Math.max(h-40,40); t++; }
-    while (t < 30 && Math.abs(cx-cx0) < 60 && Math.abs(cy-cy0) < 60);
-    coin.style.left = cx+'px'; coin.style.top = cy+'px'; coin.innerHTML = `<img src="../assets/images/fazcoin.png" style="width:28px;height:28px;object-fit:contain;pointer-events:none;">`;
+    do { cx = Math.random() * Math.max(w - 40, 40); cy = Math.random() * Math.max(h - 40, 40); t++; }
+    while (t < 30 && Math.abs(cx - cx0) < 60 && Math.abs(cy - cy0) < 60);
+    coin.style.left = cx + 'px'; coin.style.top = cy + 'px'; coin.innerHTML = `<img src="../assets/images/fazcoin.png" style="width:28px;height:28px;object-fit:contain;pointer-events:none;">`;
     coin.addEventListener('mousedown', startDrag);
     coin.addEventListener('touchstart', startDrag, { passive: false });
     scene.appendChild(coin);
@@ -3853,8 +3877,8 @@ function playMoneyLaundry(room, mg) {
     if (!dragCoin) return; e.preventDefault();
     const client = e.touches ? e.touches[0] : e;
     const sr = scene.getBoundingClientRect();
-    dragCoin.style.left = (client.clientX - sr.left - dragOX)+'px';
-    dragCoin.style.top  = (client.clientY - sr.top  - dragOY)+'px';
+    dragCoin.style.left = (client.clientX - sr.left - dragOX) + 'px';
+    dragCoin.style.top = (client.clientY - sr.top - dragOY) + 'px';
   };
   const onUp = (e) => {
     if (!dragCoin) return;
@@ -3862,7 +3886,7 @@ function playMoneyLaundry(room, mg) {
     dragCoin.classList.remove('dragging');
     if (isOverFreddy(client.clientX, client.clientY)) {
       deposited++; depEl.textContent = `🏦 ${deposited}`;
-      try { const a = new Audio('../assets/sounds/money.mp3'); a.volume = 0.6; a.play(); } catch(e) {}
+      try { const a = new Audio('../assets/sounds/money.mp3'); a.volume = 0.6; a.play(); } catch (e) { }
       liveScores[playerSlot] = deposited; updateLiveBar();
       broadcastCh?.send({ type: 'broadcast', event: 'mg_score', payload: { slot: playerSlot, score: deposited } });
       dragCoin.classList.add('deposited');
@@ -3872,9 +3896,9 @@ function playMoneyLaundry(room, mg) {
   };
 
   document.addEventListener('mousemove', onMove);
-  document.addEventListener('mouseup',   onUp);
+  document.addEventListener('mouseup', onUp);
   document.addEventListener('touchmove', onMove, { passive: false });
-  document.addEventListener('touchend',  onUp);
+  document.addEventListener('touchend', onUp);
 
   for (let i = 0; i < 6; i++) setTimeout(spawnCoin, i * 150);
 
@@ -3886,11 +3910,11 @@ function playMoneyLaundry(room, mg) {
 }
 
 // ── Feeding Frenzy ────────────────────────────────────────────────────────────
-const FF_INGREDIENTS = ['🍅','🧀','🥓','🫑','🧅','🍄','🫒','🌶️','🥚','🍗'];
+const FF_INGREDIENTS = ['🍅', '🧀', '🥓', '🫑', '🧅', '🍄', '🫒', '🌶️', '🥚', '🍗'];
 
 function playFeedingFrenzy(room, mg) {
-  const recipe = mg.config.recipe || [...FF_INGREDIENTS].sort(() => Math.random()-.5).slice(0,3);
-  const chSrc  = '../assets/images/chars/classic/chica.png';
+  const recipe = mg.config.recipe || [...FF_INGREDIENTS].sort(() => Math.random() - .5).slice(0, 3);
+  const chSrc = '../assets/images/chars/classic/chica.png';
   let step = 0, done = false, ct = null;
   const start = Date.now();
 
@@ -3905,23 +3929,23 @@ function playFeedingFrenzy(room, mg) {
 
   function render() {
     if (done) return;
-    const shuffled = [...FF_INGREDIENTS].sort(() => Math.random()-.5);
+    const shuffled = [...FF_INGREDIENTS].sort(() => Math.random() - .5);
     document.getElementById('mg-content').innerHTML = `<div class="mg-play feeding-frenzy">
       <div class="mg-hud">
         <img class="ff-chica-img" src="${chSrc}" onerror="this.style.display='none'"/>
         <span>${T('mg.feedingFrenzy.name')}</span>
-        <span>${step+1}/${recipe.length}</span>
+        <span>${step + 1}/${recipe.length}</span>
         <span id="ff-timer">⏱ 60s</span>
       </div>
       <div class="ff-recipe">
         <div class="ff-label">${T('mg.feeding.recipe')}</div>
         <div class="ff-recipe-items">
-          ${recipe.map((ing,i)=>`<span class="ff-recipe-ing ${i<step?'done':i===step?'current':''}">${i<step?'✅':ing}</span>`).join('')}
+          ${recipe.map((ing, i) => `<span class="ff-recipe-ing ${i < step ? 'done' : i === step ? 'current' : ''}">${i < step ? '✅' : ing}</span>`).join('')}
         </div>
       </div>
       <div class="ff-instruction">${T('mg.feeding.click')} <span class="ff-target">${recipe[step]}</span></div>
       <div class="ff-ingredients" id="ff-grid">
-        ${shuffled.map(ing=>`<button class="mp-btn ff-ing-btn" data-ing="${ing}">${ing}</button>`).join('')}
+        ${shuffled.map(ing => `<button class="mp-btn ff-ing-btn" data-ing="${ing}">${ing}</button>`).join('')}
       </div>
     </div>`;
 
@@ -3932,8 +3956,8 @@ function playFeedingFrenzy(room, mg) {
       if (ing === recipe[step]) {
         step++;
         if (step >= recipe.length) {
-          const elapsed = ((Date.now()-start)/1000).toFixed(1);
-          end(Math.round(1000/parseFloat(elapsed)));
+          const elapsed = ((Date.now() - start) / 1000).toFixed(1);
+          end(Math.round(1000 / parseFloat(elapsed)));
         } else render();
       } else {
         end(0);
@@ -3941,7 +3965,7 @@ function playFeedingFrenzy(room, mg) {
     });
 
     if (ct) clearInterval(ct);
-    let tLeft = 60 - Math.floor((Date.now()-start)/1000);
+    let tLeft = 60 - Math.floor((Date.now() - start) / 1000);
     ct = setInterval(() => {
       tLeft--;
       const te = document.getElementById('ff-timer'); if (te) te.textContent = `⏱ ${tLeft}s`;
@@ -3953,10 +3977,10 @@ function playFeedingFrenzy(room, mg) {
 }
 
 // ── Guitar Finder ─────────────────────────────────────────────────────────────
-const GF_ITEMS = ['🎹','🥁','🎺','🎻','🎤','🔊','💡','🎭','🎪','🎨','🪗','🎵','🎼','🎙️','🔔','📯'];
+const GF_ITEMS = ['🎹', '🥁', '🎺', '🎻', '🎤', '🔊', '💡', '🎭', '🎪', '🎨', '🪗', '🎵', '🎼', '🎙️', '🔔', '📯'];
 
 function playGuitarFinder(room, mg) {
-  const gPos  = mg.config.guitarPos ?? Math.floor(Math.random() * 16);
+  const gPos = mg.config.guitarPos ?? Math.floor(Math.random() * 16);
   const items = Array.from({ length: 16 }, (_, i) =>
     i === gPos ? '🎸' : GF_ITEMS[Math.floor(Math.random() * GF_ITEMS.length)]);
   const start = Date.now();
@@ -3980,7 +4004,7 @@ function playGuitarFinder(room, mg) {
     </div>
     <div class="gf-instruction">${T('mg.guitar.inst')}</div>
     <div class="gf-grid" id="gf-grid">
-      ${items.map((item,i) => `<button class="mp-btn gf-item" data-idx="${i}">${item}</button>`).join('')}
+      ${items.map((item, i) => `<button class="mp-btn gf-item" data-idx="${i}">${item}</button>`).join('')}
     </div>
   </div>`;
 
@@ -3989,7 +4013,7 @@ function playGuitarFinder(room, mg) {
     const btn = e.target.closest('.gf-item'); if (!btn) return;
     const idx = +btn.dataset.idx;
     if (idx === gPos) {
-      end(Math.round(10000/((Date.now()-start)/1000)));
+      end(Math.round(10000 / ((Date.now() - start) / 1000)));
     } else { btn.style.background = '#8b2020'; btn.disabled = true; }
   });
 
@@ -4002,7 +4026,7 @@ function playGuitarFinder(room, mg) {
 
 // ── Power Out ─────────────────────────────────────────────────────────────────
 function playPowerOut(room, mg) {
-  const attackDelay  = mg.config.attackDelay ?? (Math.floor(Math.random() * 4000) + 500);
+  const attackDelay = mg.config.attackDelay ?? (Math.floor(Math.random() * 4000) + 500);
   const REACT_WINDOW = 3000;
   let done = false, freddyTime = 0;
   let reactPoll = null, dotTimer = null, attackTimer = null;
@@ -4038,7 +4062,7 @@ function playPowerOut(room, mg) {
 
   let dots = 0;
   dotTimer = setInterval(() => {
-    dots = (dots+1) % 4;
+    dots = (dots + 1) % 4;
     const s = document.getElementById('po-status');
     if (s) s.textContent = '🌑 ' + T('mg.power.waiting') + '.'.repeat(dots);
   }, 500);
@@ -4047,18 +4071,18 @@ function playPowerOut(room, mg) {
     if (done) return;
     clearInterval(dotTimer);
     const scene = document.getElementById('po-scene');
-    const door  = document.getElementById('po-door');
+    const door = document.getElementById('po-door');
     const status = document.getElementById('po-status');
-    const inst   = document.getElementById('po-inst');
+    const inst = document.getElementById('po-inst');
     const barWrap = document.getElementById('po-bar-wrap');
-    const bar     = document.getElementById('po-bar');
+    const bar = document.getElementById('po-bar');
     if (!scene) { end(0); return; }
 
     freddyTime = Date.now();
     scene.classList.add('freddy-incoming');
     if (status) status.textContent = T('mg.power.closeNow');
-    if (inst)   inst.textContent   = T('mg.power.clickNow');
-    if (door)   door.disabled = false;
+    if (inst) inst.textContent = T('mg.power.clickNow');
+    if (door) door.disabled = false;
     if (barWrap) barWrap.style.display = 'block';
     if (bar) { bar.style.transition = `width ${REACT_WINDOW}ms linear`; requestAnimationFrame(() => { bar.style.width = '0%'; }); }
 
@@ -4093,7 +4117,7 @@ function playFlashlight(room, mg) {
     <div class="mg-play" style="gap:6px">
       <div class="mg-hud">
         <span>🔦 ${T('mg.flashlight.name')}</span>
-        <span id="fl-time">${DURATION/1000}s</span>
+        <span id="fl-time">${DURATION / 1000}s</span>
         <span id="fl-clicks">${T('mg.flash.taps', { n: 0 })}</span>
       </div>
       <div id="fl-scene" class="fl-scene">
@@ -4105,10 +4129,10 @@ function playFlashlight(room, mg) {
       </div>
     </div>`;
 
-  const scene  = document.getElementById('fl-scene');
-  const beam   = document.getElementById('fl-beam');
+  const scene = document.getElementById('fl-scene');
+  const beam = document.getElementById('fl-beam');
   const foxyEl = document.getElementById('fl-foxy');
-  const hint   = document.getElementById('fl-tap-hint');
+  const hint = document.getElementById('fl-tap-hint');
 
   let lit = false;
   function flash() {
@@ -4164,10 +4188,10 @@ function playPizzaDough(room, mg) {
     const rMean = radii.reduce((s, r) => s + r, 0) / radii.length;
     if (rMean < 20) return 0;
     const variance = radii.reduce((s, r) => s + (r - rMean) ** 2, 0) / radii.length;
-    const stdDev   = Math.sqrt(variance);
+    const stdDev = Math.sqrt(variance);
     const roundness = Math.max(0, 1 - stdDev / rMean);
     // Closure: distance between first and last point vs radius
-    const closure = 1 - Math.min(1, Math.hypot(pts[0].x - pts[pts.length-1].x, pts[0].y - pts[pts.length-1].y) / (rMean * 2));
+    const closure = 1 - Math.min(1, Math.hypot(pts[0].x - pts[pts.length - 1].x, pts[0].y - pts[pts.length - 1].y) / (rMean * 2));
     return Math.round(roundness * 0.7 * 100 + closure * 0.3 * 100);
   }
 
@@ -4201,7 +4225,7 @@ function playPizzaDough(room, mg) {
     <div class="mg-play" style="gap:6px">
       <div class="mg-hud">
         <span>🍕 ${T('mg.pizzaDough.name')}</span>
-        <span id="pd-time">${DURATION/1000}s</span>
+        <span id="pd-time">${DURATION / 1000}s</span>
         <span id="pd-score">${T('mg.pizza.draw')}</span>
       </div>
       <canvas id="pd-canvas" class="pd-canvas" width="360" height="300"></canvas>
@@ -4241,13 +4265,13 @@ function playPizzaDough(room, mg) {
     const s = circleScore(path);
     drawPath(canvas, path, s);
     const sc = document.getElementById('pd-score');
-    if (sc) sc.textContent = `${s}% — ${s>80?T('mg.circle.perfect'):s>60?T('mg.circle.great'):s>40?T('mg.circle.notBad'):T('mg.circle.tryAgain')}`;
+    if (sc) sc.textContent = `${s}% - ${s > 80 ? T('mg.circle.perfect') : s > 60 ? T('mg.circle.great') : s > 40 ? T('mg.circle.notBad') : T('mg.circle.tryAgain')}`;
     // Auto-submit on release if < 5s left, otherwise let them redraw
     const elapsed2 = Date.now() - startTime;
     if (DURATION - elapsed2 < 5000) end(s);
   });
-  canvas.addEventListener('touchstart',  e => e.preventDefault(), { passive: false });
-  canvas.addEventListener('touchmove',   e => e.preventDefault(), { passive: false });
+  canvas.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
+  canvas.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
 
   startTime = Date.now();
   let elapsed = 0;
@@ -4270,11 +4294,11 @@ async function applyEndAwards(room) {
   const best = (key) => active.reduce((b, s) =>
     ((statsMap[s]?.[key] || 0) > (statsMap[b]?.[key] || 0) ? s : b), active[0]);
 
-  const mgChamp  = best('mgWins');
+  const mgChamp = best('mgWins');
   const badLucky = best('badLucks');
 
-  if ((statsMap[mgChamp]?.mgWins  || 0) > 0) {
-    st.pizzas[mgChamp]  = (st.pizzas[mgChamp]  || 0) + 1;
+  if ((statsMap[mgChamp]?.mgWins || 0) > 0) {
+    st.pizzas[mgChamp] = (st.pizzas[mgChamp] || 0) + 1;
     emitEvent(`🎮 ${room[`${mgChamp}_name`]} wins the Minigame Champion award! +1🍕`);
   }
   if ((statsMap[badLucky]?.badLucks || 0) > 0) {
@@ -4285,7 +4309,7 @@ async function applyEndAwards(room) {
   const ns = { ...statsMap, _awardsApplied: true };
   await db.from('party_rooms').update({
     player_pizzas: JSON.stringify(st.pizzas),
-    player_stats:  JSON.stringify(ns),
+    player_stats: JSON.stringify(ns),
   }).eq('id', roomId).eq('state', 'finished');
 }
 
@@ -4296,12 +4320,12 @@ function showResult(room) {
   const ranked = allSlots(pc)
     .filter(s => room[`${s}_name`])
     .map(s => ({
-      slot:   s,
-      name:   room[`${s}_name`],
-      char:   room[`${s}_char`] || 'freddy',
-      color:  PLAYER_COLORS[slotNum(s) - 1],
+      slot: s,
+      name: room[`${s}_name`],
+      char: room[`${s}_char`] || 'freddy',
+      color: PLAYER_COLORS[slotNum(s) - 1],
       pizzas: (st.pizzas[s] || 0),
-      coins:  (st.coins[s]  || 0),
+      coins: (st.coins[s] || 0),
     }))
     .sort((a, b) => b.pizzas !== a.pizzas ? b.pizzas - a.pizzas : b.coins - a.coins);
 
@@ -4311,7 +4335,7 @@ function showResult(room) {
   if (!winner) return;
 
   const statsMap = pStats(room);
-  const mostMgWins   = ranked.reduce((b, p) => ((statsMap[p.slot]?.mgWins  || 0) > (statsMap[b.slot]?.mgWins  || 0) ? p : b), ranked[0]);
+  const mostMgWins = ranked.reduce((b, p) => ((statsMap[p.slot]?.mgWins || 0) > (statsMap[b.slot]?.mgWins || 0) ? p : b), ranked[0]);
   const mostBadLucks = ranked.reduce((b, p) => ((statsMap[p.slot]?.badLucks || 0) > (statsMap[b.slot]?.badLucks || 0) ? p : b), ranked[0]);
 
   rankEl.innerHTML = `
@@ -4322,7 +4346,7 @@ function showResult(room) {
     </div>
     ${ranked.map((p, i) => `
       <div class="result-rank-row${i === 0 ? ' result-winner' : ''}">
-        <span class="result-medal">${['🥇','🥈','🥉','4️⃣'][i]}</span>
+        <span class="result-medal">${['🥇', '🥈', '🥉', '4️⃣'][i]}</span>
         <img class="result-avatar" src="${charImg(p.char)}" onerror="this.style.display='none'"/>
         <span class="result-player-name" style="color:${p.color}">${p.name}</span>
         <span class="result-score">🍕${p.pizzas} ${COIN_IMG}${p.coins}</span>
@@ -4348,7 +4372,7 @@ function showResult(room) {
   const rematchBtn = document.getElementById('rematch-btn');
   if (rematchBtn) rematchBtn.style.display = wonByLeave ? 'none' : '';
 
-  // Jumpscare — only for winner when opponents are present
+  // Jumpscare - only for winner when opponents are present
   const isWinner = winner.slot === playerSlot;
   if (isWinner && !wonByLeave) {
     const wrap = document.querySelector('.party-result-wrap');
@@ -4392,8 +4416,8 @@ async function voteRematch() {
   const btn = document.getElementById('rematch-btn');
   if (btn) { btn.disabled = true; btn.textContent = T('result.waiting'); }
 
-  const room   = roomData;
-  const pc     = room.player_count || 2;
+  const room = roomData;
+  const pc = room.player_count || 2;
   const current = room.mg_id || '';
   if (current.includes(playerSlot)) return;
 
@@ -4409,7 +4433,7 @@ async function voteRematch() {
 
 async function triggerPartyRematch(room) {
   // Parse voter slots from mg_id e.g. "player1:player3"
-  const voters  = (room.mg_id || '').split(':').filter(s => /^player\d+$/.test(s));
+  const voters = (room.mg_id || '').split(':').filter(s => /^player\d+$/.test(s));
   const ordered = voters.sort((a, b) => slotNum(a) - slotNum(b));
   if (!ordered.includes(playerSlot)) return; // I didn't vote, skip
   if (playerSlot !== ordered[0]) return;     // Only lowest voter executes
@@ -4431,7 +4455,7 @@ async function triggerPartyRematch(room) {
   // Compact voter slots → player1, player2, …
   ordered.forEach((origSlot, idx) => {
     const ns = `player${idx + 1}`;
-    update[`${ns}_id`]   = room[`${origSlot}_id`];
+    update[`${ns}_id`] = room[`${origSlot}_id`];
     update[`${ns}_name`] = room[`${origSlot}_name`];
     update[`${ns}_char`] = null; // must re-pick
     let p; do { p = Math.floor(Math.random() * rematchBoard.boardSize); } while (taken.includes(p));
@@ -4444,9 +4468,9 @@ async function triggerPartyRematch(room) {
     update[`${ns}_id`] = null; update[`${ns}_name`] = null; update[`${ns}_char`] = null;
   }
   Object.assign(update, {
-    player_pos:       JSON.stringify(pos),
-    player_coins:     JSON.stringify(coins),
-    player_pizzas:    JSON.stringify(pizzas),
+    player_pos: JSON.stringify(pos),
+    player_coins: JSON.stringify(coins),
+    player_pizzas: JSON.stringify(pizzas),
     player_cooldowns: JSON.stringify(cooldowns),
   });
 
@@ -4466,7 +4490,7 @@ function restartParty() {
 // ── Toast ─────────────────────────────────────────────────────────────────────
 function showToast(msg) {
   const t = document.createElement('div');
-  t.className   = 'party-toast';
+  t.className = 'party-toast';
   t.textContent = msg;
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 2500);
@@ -4480,35 +4504,35 @@ function toggleRules() {
 // ── Player leave detection ────────────────────────────────────────────────────
 async function cleanupPlayerLeft() {
   if (!roomId || !playerSlot || !roomData) return;
-  const room       = roomData;
-  const savedId    = roomId;
-  const savedSlot  = playerSlot;
+  const room = roomData;
+  const savedId = roomId;
+  const savedSlot = playerSlot;
   // Clear local state immediately
   roomId = null; playerSlot = null; roomData = null;
   if (mgCleanup) { mgCleanup(); mgCleanup = null; }
 
-  const pc     = room.player_count || 2;
+  const pc = room.player_count || 2;
   const active = allSlots(pc).filter(s => room[`${s}_name`] && s !== savedSlot);
   const update = {
     [`${savedSlot}_name`]: null,
-    [`${savedSlot}_id`]:   null,
+    [`${savedSlot}_id`]: null,
     [`${savedSlot}_char`]: null,
   };
 
   if (active.length === 0) {
-    // Empty — nothing to do
+    // Empty - nothing to do
 
   } else if (active.length === 1 && room.state === 'playing') {
     // Last player standing → auto-win
-    update.state  = 'finished';
-    update.mg_id  = null;
+    update.state = 'finished';
+    update.mg_id = null;
 
   } else if (active.length >= 1) {
     // Advance turn if it was the leaver's turn
     if (room.current_slot === savedSlot) {
       const order = allSlots(pc);
-      const idx   = order.indexOf(savedSlot);
-      const next  = order.slice(idx + 1).concat(order.slice(0, idx)).find(s => active.includes(s));
+      const idx = order.indexOf(savedSlot);
+      const next = order.slice(idx + 1).concat(order.slice(0, idx)).find(s => active.includes(s));
       if (next) { update.current_slot = next; update.turn_phase = 'roll'; update.dice_result = 0; }
     }
     // If a minigame was in progress, cancel it if not enough players remain
@@ -4528,12 +4552,12 @@ async function cleanupPlayerLeft() {
     }
   }
 
-  try { await db.from('party_rooms').update(update).eq('id', savedId); } catch (_) {}
+  try { await db.from('party_rooms').update(update).eq('id', savedId); } catch (_) { }
 }
 
 // Override goHome so leaving cleans up the room
 const _coreGoHome = window.goHome;
-window.goHome = async function() {
+window.goHome = async function () {
   await cleanupPlayerLeft();
   _coreGoHome?.();
 };
@@ -4541,19 +4565,19 @@ window.goHome = async function() {
 // Cleanup on tab close / browser back
 window.addEventListener('beforeunload', () => {
   if (!roomId || !playerSlot) return;
-  const savedId   = roomId;
+  const savedId = roomId;
   const savedSlot = playerSlot;
-  const room      = roomData || {};
+  const room = roomData || {};
   roomId = null; playerSlot = null; roomData = null;
 
-  const pc     = room.player_count || 2;
+  const pc = room.player_count || 2;
   const active = allSlots(pc).filter(s => room[`${s}_name`] && s !== savedSlot);
-  const body   = { [`${savedSlot}_name`]: null, [`${savedSlot}_id`]: null };
+  const body = { [`${savedSlot}_name`]: null, [`${savedSlot}_id`]: null };
   if (active.length === 1 && room.state === 'playing') body.state = 'finished';
   if (active.length > 0 && room.current_slot === savedSlot) {
     const order = allSlots(pc);
-    const idx   = order.indexOf(savedSlot);
-    const next  = order.slice(idx + 1).concat(order.slice(0, idx)).find(s => active.includes(s));
+    const idx = order.indexOf(savedSlot);
+    const next = order.slice(idx + 1).concat(order.slice(0, idx)).find(s => active.includes(s));
     if (next) { body.current_slot = next; body.turn_phase = 'roll'; }
   }
   fetch(`${cfg.SUPABASE_URL}/rest/v1/party_rooms?id=eq.${savedId}`, {

@@ -72,8 +72,10 @@ function getStats(key) {
       distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 }
     };
   } catch {
-    return { played: 0, won: 0, streak: 0, maxStreak: 0, lastWonDate: null,
-      distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 } };
+    return {
+      played: 0, won: 0, streak: 0, maxStreak: 0, lastWonDate: null,
+      distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 }
+    };
   }
 }
 
@@ -214,7 +216,7 @@ function showStreakWidget(key) {
        Freddy Jumpscare
 ======================================================= */
 const _JUMPSCARE_POOL = [
-  'freddy','bonnie','chica','foxy','golden_freddy'
+  'freddy', 'bonnie', 'chica', 'foxy', 'golden_freddy'
 ];
 
 // ── Animation duration parsers ────────────────────────────────────────────
@@ -251,10 +253,10 @@ function _parseWebP(b) {
   // Animated WebP: sum ANMF frame durations (stored as 24-bit LE, in ms)
   var ms = 0, p = 12;
   while (p + 8 <= b.length) {
-    var id = String.fromCharCode(b[p], b[p+1], b[p+2], b[p+3]);
-    var sz = b[p+4] | (b[p+5] << 8) | (b[p+6] << 16) | (b[p+7] << 24);
+    var id = String.fromCharCode(b[p], b[p + 1], b[p + 2], b[p + 3]);
+    var sz = b[p + 4] | (b[p + 5] << 8) | (b[p + 6] << 16) | (b[p + 7] << 24);
     p += 8;
-    if (id === 'ANMF') ms += b[p+12] | (b[p+13] << 8) | (b[p+14] << 16);
+    if (id === 'ANMF') ms += b[p + 12] | (b[p + 13] << 8) | (b[p + 14] << 16);
     p += sz + (sz & 1);
   }
   return ms;
@@ -263,12 +265,12 @@ function _parseWebP(b) {
 async function _getGifDurationMs(src) {
   if (_gifDurCache[src]) return _gifDurCache[src];
   try {
-    var b = new Uint8Array(await fetch(src).then(function(r) { return r.arrayBuffer(); }));
+    var b = new Uint8Array(await fetch(src).then(function (r) { return r.arrayBuffer(); }));
     var ms = 0;
     if (b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46) ms = _parseGif(b);   // GIF
     else if (b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46) ms = _parseWebP(b); // RIFF/WebP
     _gifDurCache[src] = ms > 50 ? ms : 1000;
-  } catch(e) { _gifDurCache[src] = 1000; }
+  } catch (e) { _gifDurCache[src] = 1000; }
   return _gifDurCache[src];
 }
 
@@ -278,7 +280,7 @@ const _jumpscarePreloaded = {};
 
 (function _preloadJumpscares() {
   var names = Object.keys(_JUMPSCARE_EXT);
-  names.forEach(function(name) {
+  names.forEach(function (name) {
     var ext = _JUMPSCARE_EXT[name];
     var base = _JUMPSCARE_FILE[name] || name;
     var src = `../assets/images/jumpscare/${base}.${ext}`;
@@ -312,11 +314,11 @@ function triggerJumpscare(gifName, callback) {
 
   overlay.appendChild(img);
   document.body.appendChild(overlay);
-  try { var a = new Audio('../assets/sounds/jumpscare.mp3'); a.volume = 1.0; a.play(); } catch(e) {}
+  try { var a = new Audio('../assets/sounds/jumpscare.mp3'); a.volume = 1.0; a.play(); } catch (e) { }
 
   var gone = false;
   var fallbackTimer = null;
-  var dismiss = function() {
+  var dismiss = function () {
     if (gone) return;
     gone = true;
     clearTimeout(fallbackTimer);
@@ -324,13 +326,13 @@ function triggerJumpscare(gifName, callback) {
     callback();
   };
 
-  // Safe fallback — always dismisses after 15 s even if GIF parse fails
+  // Safe fallback - always dismisses after 15 s even if GIF parse fails
   fallbackTimer = setTimeout(dismiss, 15000);
 
   overlay.addEventListener('click', dismiss);
 
   // Override fallback once we know the real GIF duration
-  _getGifDurationMs(src).then(function(ms) {
+  _getGifDurationMs(src).then(function (ms) {
     if (!gone) {
       clearTimeout(fallbackTimer);
       fallbackTimer = setTimeout(dismiss, ms);

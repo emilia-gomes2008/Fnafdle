@@ -42,7 +42,7 @@
   font-style: normal;
 }
 
-/* Emoji alignment fix — applied via manual spans in HTML or JS wrapping */
+/* Emoji alignment fix - applied via manual spans in HTML or JS wrapping */
 .e { display: inline-block; transform: translateY(-8px); }
 .stat_emoji { display: inline-block; transform: translateY(7px); }
 .mp_emoji { display: inline-block; transform: translateY(-1px); }
@@ -485,7 +485,7 @@ button:disabled {
 }
 
 /* =====================================================
-       Mobile base — shared across all modes
+       Mobile base - shared across all modes
        (extreme.css overrides what it needs to)
        ===================================================== */
 @media (max-width: 720px) {

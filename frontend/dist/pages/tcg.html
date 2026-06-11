@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <script>
     // Set base path and clean URL: Hide /frontend/dist/pages/ in address bar
-    (function() {
+    (function () {
       var base = document.createElement('base');
       base.href = window.location.protocol + '//' + window.location.host + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
       document.head.appendChild(base);
@@ -25,11 +26,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FNAFdle Reborn - FNAF TCG</title>
   <link rel="icon" type="icon/png" href="../assets/images/default.png">
-  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Oswald:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Oswald:wght@400;600&display=swap"
+    rel="stylesheet" />
   <link rel="stylesheet" href="../assets/css/global.css" />
   <link rel="stylesheet" href="../assets/css/tcg.css?v=10" />
-  <style>#lang-switcher{display:none!important}</style>
+  <style>
+    #lang-switcher {
+      display: none !important
+    }
+  </style>
 </head>
+
 <body>
 
   <div class="fnaf-header">
@@ -48,23 +55,29 @@
     <div id="screen-lobby" class="tcg-screen">
       <div class="tcg-lobby-wrap">
         <h2 class="tcg-title">FNAF TCG</h2>
-        <p class="tcg-sub" data-i18n="tcg.lobby.subtitle">Card Game · Pass &amp; Play · 2 players · 4 KOs to win · 1 Tool per animatronic</p>
+        <p class="tcg-sub" data-i18n="tcg.lobby.subtitle">Card Game · Pass &amp; Play · 2 players · 4 KOs to win · 1
+          Tool per animatronic</p>
 
         <div class="lobby-tabs">
-          <button class="lobby-tab active" onclick="switchTab('play')" id="tab-play" data-i18n="tcg.tab.play">Play</button>
-          <button class="lobby-tab" onclick="switchTab('online')" id="tab-online" data-i18n="tcg.tab.online">Online</button>
-          <button class="lobby-tab" onclick="switchTab('deck')" id="tab-deck" data-i18n="tcg.tab.deck">Deck Builder</button>
+          <button class="lobby-tab active" onclick="switchTab('play')" id="tab-play"
+            data-i18n="tcg.tab.play">Play</button>
+          <button class="lobby-tab" onclick="switchTab('online')" id="tab-online"
+            data-i18n="tcg.tab.online">Online</button>
+          <button class="lobby-tab" onclick="switchTab('deck')" id="tab-deck" data-i18n="tcg.tab.deck">Deck
+            Builder</button>
           <button class="lobby-tab" onclick="switchTab('collection')" id="tab-collection">Collection</button>
           <button class="lobby-tab" onclick="switchTab('booster')" id="tab-booster">Boosters</button>
           <button class="lobby-tab" onclick="switchTab('trade')" id="tab-trade">Trades</button>
-          <button class="lobby-tab" onclick="window.location.href='tcg-rules.html'" id="tab-rules" data-i18n="tcg.tab.rules">Rules</button>
+          <button class="lobby-tab" onclick="window.location.href='tcg-rules.html'" id="tab-rules"
+            data-i18n="tcg.tab.rules">Rules</button>
         </div>
 
         <div id="tab-content-play" class="tab-content">
           <div class="player-setup">
             <div class="player-setup-block">
               <div class="setup-label" data-i18n="tcg.lobby.player1">Player 1</div>
-              <input id="p1-name" class="tcg-input" type="text" data-i18n-placeholder="tcg.lobby.namePlaceholder" placeholder="Name" value="Player 1" maxlength="20" />
+              <input id="p1-name" class="tcg-input" type="text" data-i18n-placeholder="tcg.lobby.namePlaceholder"
+                placeholder="Name" value="Player 1" maxlength="20" />
               <div class="setup-label" style="margin-top:10px" data-i18n="tcg.lobby.deck">Deck</div>
               <select id="p1-deck" class="tcg-select"></select>
               <div id="p1-class-info" class="setup-class-info"></div>
@@ -72,17 +85,20 @@
             <div class="vs-divider">VS</div>
             <div class="player-setup-block">
               <div class="setup-label" data-i18n="tcg.lobby.player2">Player 2</div>
-              <input id="p2-name" class="tcg-input" type="text" data-i18n-placeholder="tcg.lobby.namePlaceholder" placeholder="Name" value="Player 2" maxlength="20" />
+              <input id="p2-name" class="tcg-input" type="text" data-i18n-placeholder="tcg.lobby.namePlaceholder"
+                placeholder="Name" value="Player 2" maxlength="20" />
               <div class="setup-label" style="margin-top:10px" data-i18n="tcg.lobby.deck">Deck</div>
               <select id="p2-deck" class="tcg-select"></select>
               <div id="p2-class-info" class="setup-class-info"></div>
             </div>
           </div>
-          <button class="tcg-btn primary" onclick="startGame()" style="margin-top:20px;width:100%;max-width:300px" data-i18n="tcg.lobby.startGame">Start Game</button>
+          <button class="tcg-btn primary" onclick="startGame()" style="margin-top:20px;width:100%;max-width:300px"
+            data-i18n="tcg.lobby.startGame">Start Game</button>
         </div>
 
         <div id="tab-content-online" class="tab-content" style="display:none">
-          <p class="tcg-sub" style="margin-bottom:8px" data-i18n="tcg.lobby.onlineDesc">Play with a friend online via room code. Works across two separate windows/devices.</p>
+          <p class="tcg-sub" style="margin-bottom:8px" data-i18n="tcg.lobby.onlineDesc">Play with a friend online via
+            room code. Works across two separate windows/devices.</p>
         </div>
 
         <!-- COLLECTION TAB -->
@@ -99,32 +115,54 @@
           <div class="deck-builder-wrap" id="deck-builder-wrap">
             <div class="deck-builder-left">
               <div class="setup-label" data-i18n="tcg.db.deckName">Deck Name</div>
-              <input id="db-name" class="tcg-input" type="text" placeholder="My Deck" maxlength="30" style="width:100%;max-width:none" />
+              <input id="db-name" class="tcg-input" type="text" placeholder="My Deck" maxlength="30"
+                style="width:100%;max-width:none" />
               <div class="setup-label" style="margin-top:8px" data-i18n="tcg.db.generator">Generator</div>
               <select id="db-generator" class="tcg-select" style="width:100%;max-width:none;margin-bottom:8px">
                 <option value="remnant">Generator ⚡ - 30 Generic Energies</option>
               </select>
-              <div style="font-size:.68rem;color:var(--text-muted);margin-bottom:8px" data-i18n="tcg.db.generatorDesc">The Generator produces 1 Energy per turn, accumulating if unused. Energy cards in the deck (○●◆) are for evolving and summoning Phantoms.</div>
+              <div style="font-size:.68rem;color:var(--text-muted);margin-bottom:8px" data-i18n="tcg.db.generatorDesc">
+                The Generator produces 1 Energy per turn, accumulating if unused. Energy cards in the deck (○●◆) are for
+                evolving and summoning Phantoms.</div>
               <div class="setup-label" data-i18n="tcg.db.filter">Filter</div>
               <div class="class-filter-row">
-                <button class="class-filter-btn active" data-class="all" onclick="filterCards('all',this)" data-i18n="tcg.db.filterAll">All</button>
-                <button class="class-filter-btn" data-class="endo" onclick="filterCards('endo',this)" data-i18n="tcg.db.filterEndo">Endos</button>
-                <button class="class-filter-btn" data-class="classic" onclick="filterCards('classic',this)">Classic</button>
+                <button class="class-filter-btn active" data-class="all" onclick="filterCards('all',this)"
+                  data-i18n="tcg.db.filterAll">All</button>
+                <button class="class-filter-btn" data-class="endo" onclick="filterCards('endo',this)"
+                  data-i18n="tcg.db.filterEndo">Endos</button>
+                <button class="class-filter-btn" data-class="classic"
+                  onclick="filterCards('classic',this)">Classic</button>
                 <button class="class-filter-btn" data-class="toy" onclick="filterCards('toy',this)">Toy</button>
-                <button class="class-filter-btn" data-class="withered" onclick="filterCards('withered',this)">Withered</button>
-                <button class="class-filter-btn" data-class="phantom" onclick="filterCards('phantom',this)">Phantom</button>
-                <button class="class-filter-btn" data-class="nightmare" onclick="filterCards('nightmare',this)">Nightmare</button>
+                <button class="class-filter-btn" data-class="withered"
+                  onclick="filterCards('withered',this)">Withered</button>
+                <button class="class-filter-btn" data-class="phantom"
+                  onclick="filterCards('phantom',this)">Phantom</button>
+                <button class="class-filter-btn" data-class="nightmare"
+                  onclick="filterCards('nightmare',this)">Nightmare</button>
                 <button class="class-filter-btn" data-class="jacko" onclick="filterCards('jacko',this)">Jack-O</button>
-                <button class="class-filter-btn" data-class="shadow" onclick="filterCards('shadow',this)">Shadow</button>
-                <button class="class-filter-btn" data-class="funtime" onclick="filterCards('funtime',this)">Funtime</button>
+                <button class="class-filter-btn" data-class="shadow"
+                  onclick="filterCards('shadow',this)">Shadow</button>
+                <button class="class-filter-btn" data-class="funtime"
+                  onclick="filterCards('funtime',this)">Funtime</button>
                 <button class="class-filter-btn" data-class="scrap" onclick="filterCards('scrap',this)">Scrap</button>
-                <button class="class-filter-btn" data-class="rockstar" onclick="filterCards('rockstar',this)">Rockstar</button>
+                <button class="class-filter-btn" data-class="rockstar"
+                  onclick="filterCards('rockstar',this)">Rockstar</button>
+                <button class="class-filter-btn" data-class="glamrock"
+                  onclick="filterCards('glamrock',this)">Glamrock</button>
+                <button class="class-filter-btn" data-class="ruined"
+                  onclick="filterCards('ruined',this)">Ruined</button>
+                <button class="class-filter-btn" data-class="mimic" onclick="filterCards('mimic',this)">Mimic</button>
                 <button class="class-filter-btn" data-class="item" onclick="filterCards('item',this)">Items</button>
                 <button class="class-filter-btn" data-class="tool" onclick="filterCards('tool',this)">Tools</button>
-                <button class="class-filter-btn" data-class="supporter" onclick="filterCards('supporter',this)" data-i18n="tcg.db.filterSupporter">Supporters</button>
-                <button class="class-filter-btn" data-class="energy" onclick="filterCards('energy',this)" data-i18n="tcg.db.filterEnergy">Energies</button>
-                <button class="class-filter-btn" data-class="class" onclick="filterCards('class',this)" style="border-color:var(--gold);color:var(--gold)" data-i18n="tcg.db.filterClass">★ Class</button>
+                <button class="class-filter-btn" data-class="supporter" onclick="filterCards('supporter',this)"
+                  data-i18n="tcg.db.filterSupporter">Supporters</button>
+                <button class="class-filter-btn" data-class="energy" onclick="filterCards('energy',this)"
+                  data-i18n="tcg.db.filterEnergy">Energies</button>
+                <button class="class-filter-btn" data-class="class" onclick="filterCards('class',this)"
+                  style="border-color:var(--gold);color:var(--gold)" data-i18n="tcg.db.filterClass">★ Class</button>
               </div>
+              <input id="db-search" class="tcg-input" type="text" placeholder="🔍 Search cards..." maxlength="40"
+                style="width:100%;max-width:none;margin:6px 0 4px" oninput="dbSearch=this.value.trim();renderCardPool()" />
               <div id="db-card-pool" class="db-card-pool"></div>
             </div>
             <div class="deck-builder-right">
@@ -138,7 +176,10 @@
                 </div>
               </div>
               <div id="db-deck-list" class="db-deck-list"></div>
-              <div class="setup-label" style="margin-top:10px" data-i18n="tcg.db.saved">Saved</div>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:10px">
+                <div class="setup-label" style="margin:0" data-i18n="tcg.db.saved">Saved</div>
+                <button class="tcg-btn small" id="db-load-cloud-btn" onclick="loadDecksFromDB(this)" title="Fetch decks saved on the server for your account">Load from Database</button>
+              </div>
               <div id="db-saved-decks" class="db-saved-decks"></div>
             </div>
           </div>
@@ -169,10 +210,12 @@
       <div id="turn-banner" class="turn-banner"></div>
 
       <div class="game-top-bar">
-        <button class="tcg-btn small" id="undo-btn" onclick="undoAction()" style="display:none" data-i18n="tcg.game.undo">↩ Undo</button>
+        <button class="tcg-btn small" id="undo-btn" onclick="undoAction()" style="display:none"
+          data-i18n="tcg.game.undo">↩ Undo</button>
         <button class="tcg-btn small danger" onclick="confirmConcede()" data-i18n="tcg.game.concede">Concede</button>
         <span id="ko-score" class="ko-score-inline"></span>
-        <button class="tcg-btn primary" id="end-turn-btn" onclick="endTurn()" data-i18n="tcg.game.endTurn">End Turn →</button>
+        <button class="tcg-btn primary" id="end-turn-btn" onclick="endTurn()" data-i18n="tcg.game.endTurn">End Turn
+          →</button>
       </div>
 
       <div class="game-layout">
@@ -199,8 +242,11 @@
           </div>
           <div id="pending-hint" class="pending-hint" style="display:none"></div>
           <div id="target-counter" class="target-counter" style="display:none"></div>
-          <button class="tcg-btn small" id="cancel-pending-btn" onclick="cancelPending()" style="display:none">✕ Cancelar</button>
-          <div id="class-card-info" style="display:none;font-size:1rem;color:var(--text);margin-top:8px;padding:10px 12px;background:var(--bg-card);border:1px solid var(--gold);border-radius:8px;width:100%;box-sizing:border-box;line-height:1.6;position:relative;flex:1;min-height:60px;max-height:160px;overflow-y:auto"></div>
+          <button class="tcg-btn small" id="cancel-pending-btn" onclick="cancelPending()" style="display:none">✕
+            Cancelar</button>
+          <div id="class-card-info"
+            style="display:none;font-size:1rem;color:var(--text);margin-top:8px;padding:10px 12px;background:var(--bg-card);border:1px solid var(--gold);border-radius:8px;width:100%;box-sizing:border-box;line-height:1.6;position:relative;flex:1;min-height:60px;max-height:160px;overflow-y:auto">
+          </div>
         </div>
 
         <!-- Active player -->
@@ -222,7 +268,8 @@
 
       <!-- Hand -->
       <div class="hand-area">
-        <div class="hand-label" id="hand-label">Hand (<span id="hand-count">0</span>) - click a card to see details</div>
+        <div class="hand-label" id="hand-label">Hand (<span id="hand-count">0</span>) - click a card to see details
+        </div>
         <div id="hand-cards" class="hand-cards"></div>
       </div>
 
@@ -238,7 +285,8 @@
         <div class="result-btns">
           <button class="tcg-btn primary" onclick="goLobby()" data-i18n="tcg.result.lobby">Lobby</button>
           <button class="tcg-btn" onclick="rematchGame()" data-i18n="tcg.result.rematch">Rematch</button>
-          <button class="tcg-btn" onclick="location.href='../../../index.html'" data-i18n="tcg.result.modes">← Modes</button>
+          <button class="tcg-btn" onclick="location.href='../../../index.html'" data-i18n="tcg.result.modes">←
+            Modes</button>
         </div>
       </div>
     </div>
@@ -260,14 +308,18 @@
       <span id="sp-title" class="sp-title"></span>
       <div style="display:flex;align-items:center;gap:8px">
         <span id="sp-sel-info" class="sp-sel-info"></span>
-        <button style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1rem" title="Cancel (item not used)" onclick="closeSearch()">✕</button>
+        <button style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1rem"
+          title="Cancel (item not used)" onclick="closeSearch()">✕</button>
       </div>
     </div>
     <div style="display:flex;flex:1;overflow:hidden;min-height:0">
       <div id="sp-cards" class="sp-cards" style="flex:0 0 auto;width:55%"></div>
-      <div id="sp-preview" style="flex:1;padding:8px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;border-left:1px solid var(--border);min-width:0"></div>
+      <div id="sp-preview"
+        style="flex:1;padding:8px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;border-left:1px solid var(--border);min-width:0">
+      </div>
     </div>
-    <button id="sp-confirm" class="tcg-btn primary" style="margin:8px;align-self:center" onclick="confirmSearch()" data-i18n="tcg.db.confirm">Confirm</button>
+    <button id="sp-confirm" class="tcg-btn primary" style="margin:8px;align-self:center" onclick="confirmSearch()"
+      data-i18n="tcg.db.confirm">Confirm</button>
   </div>
   <div id="search-bg" style="display:none;position:fixed;inset:0;z-index:199;background:rgba(0,0,0,.75)"></div>
 
@@ -275,11 +327,13 @@
   <div id="blob-panel" class="search-panel" style="display:none">
     <div class="sp-header">
       <span id="bp-title" class="sp-title"></span>
-      <button style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1rem" onclick="closeBlobPile()">✕</button>
+      <button style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1rem"
+        onclick="closeBlobPile()">✕</button>
     </div>
     <div id="bp-cards" class="sp-cards"></div>
   </div>
-  <div id="blob-bg" onclick="closeBlobPile()" style="display:none;position:fixed;inset:0;z-index:199;background:rgba(0,0,0,.75)"></div>
+  <div id="blob-bg" onclick="closeBlobPile()"
+    style="display:none;position:fixed;inset:0;z-index:199;background:rgba(0,0,0,.75)"></div>
 
   <div id="card-hover-preview"></div>
 
@@ -291,4 +345,5 @@
   <script src="../assets/js/tcg.js?v=55"></script>
   <script src="../assets/js/tcg-auth.js?v=1"></script>
 </body>
+
 </html>

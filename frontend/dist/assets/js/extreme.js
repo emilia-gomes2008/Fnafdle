@@ -1,5 +1,5 @@
 /* =======================================================
-       Extreme Mode — FNAF Night Watch
+       Extreme Mode - FNAF Night Watch
        Progressive nights · AI-based movement opportunities
        3 guesses · no year arrows · no partial colors
        Real-time clock: 4m30s per night, 45s per hour (12AM→6AM)
@@ -11,7 +11,7 @@
 
 const NIGHT_CONFIGS = [
   null, // index 0 unused
-  { // Night 1 — tutorial
+  { // Night 1 - tutorial
     targetAI: 4,
     threats: [],
   },
@@ -27,61 +27,61 @@ const NIGHT_CONFIGS = [
     targetAI: 14,
     threats: [{ ai: 12 }, { ai: 10 }, { ai: 8 }],
   },
-  { // Night 5 — max difficulty
+  { // Night 5 - max difficulty
     targetAI: 17,
     threats: [{ ai: 15 }, { ai: 13 }, { ai: 11 }, { ai: 9 }],
   },
-  { // Night 6 — EXTRA nightmare (all AI 20, 2 corrupted fields, 2× power drain)
+  { // Night 6 - EXTRA nightmare (all AI 20, 2 corrupted fields, 2× power drain)
     targetAI: 20,
     threats: [{ ai: 20 }, { ai: 20 }, { ai: 20 }, { ai: 20 }, { ai: 20 }],
     hiddenCount: 2,
-    powerMult:   2,
+    powerMult: 2,
   },
 ];
 
-const MAX_NIGHTS  = 6;
+const MAX_NIGHTS = 6;
 const MAX_GUESSES = 3;
 
 // ─── Camera data ─────────────────────────────────────────
 
 const CAM_ROOMS = [
-  { id: 'CAM 1A', room: 'Show Stage'     },
-  { id: 'CAM 1B', room: 'Dining Area'    },
-  { id: 'CAM 1C', room: 'Pirate Cove'    },
-  { id: 'CAM 2A', room: 'West Hall'      },
+  { id: 'CAM 1A', room: 'Show Stage' },
+  { id: 'CAM 1B', room: 'Dining Area' },
+  { id: 'CAM 1C', room: 'Pirate Cove' },
+  { id: 'CAM 2A', room: 'West Hall' },
   { id: 'CAM 2B', room: 'W. Hall Corner' },
-  { id: 'CAM 4A', room: 'East Hall'      },
+  { id: 'CAM 4A', room: 'East Hall' },
   { id: 'CAM 4B', room: 'E. Hall Corner' },
-  { id: 'CAM 5',  room: 'Backstage'      },
-  { id: 'CAM 7',  room: 'Restrooms'      },
+  { id: 'CAM 5', room: 'Backstage' },
+  { id: 'CAM 7', room: 'Restrooms' },
 ];
 const LAST_CAM = CAM_ROOMS.length - 1;
 
 // ─── Game constants ───────────────────────────────────────
 
-const MOVE_OPP_MS    = 10000;
-const PASSIVE_DRAIN  = 0.10;
-const MOVE_COST      = 2.0;
-const DOOR_DRAIN_0   = 0.5;
-const DOOR_RAMP      = 0.018;
+const MOVE_OPP_MS = 10000;
+const PASSIVE_DRAIN = 0.10;
+const MOVE_COST = 2.0;
+const DOOR_DRAIN_0 = 0.5;
+const DOOR_RAMP = 0.018;
 const DOOR_DRAIN_MAX = 2.8;
-const ENTRY_MS       = 4000;
+const ENTRY_MS = 4000;
 const RETREAT_MIN_MS = 2500;
 const RETREAT_MAX_MS = 7000;
 
 // Night timing: 4m30s total, 45s per hour, 6 hours (12AM-5AM), death at 6AM
 const NIGHT_TOTAL_MS = 270000;
-const HOUR_MS        = 45000;
-const HOUR_LABELS    = ['12 AM', '1 AM', '2 AM', '3 AM', '4 AM', '5 AM'];
+const HOUR_MS = 45000;
+const HOUR_LABELS = ['12 AM', '1 AM', '2 AM', '3 AM', '4 AM', '5 AM'];
 
 const HIDEABLE_FIELDS = ['animal', 'type', 'color', 'eyeColor', 'year'];
 const HEADER_IDS = {
   animal: 'header-animal', type: 'header-type',
-  color: 'header-color',   eyeColor: 'header-eyecolor', year: 'header-year',
+  color: 'header-color', eyeColor: 'header-eyecolor', year: 'header-year',
 };
 const HEADER_I18N = {
   animal: 'classic.colAnimal', type: 'classic.colType',
-  color: 'classic.colColor',   eyeColor: 'classic.colEyeColor', year: 'classic.colYear',
+  color: 'classic.colColor', eyeColor: 'classic.colEyeColor', year: 'classic.colYear',
 };
 
 // ─── Character pool helpers ───────────────────────────────
@@ -129,30 +129,30 @@ function pickSameAnimalChars(n) {
 // ─── Runtime state ────────────────────────────────────────
 
 let currentNight = loadNight();
-let currentCfg   = null;
+let currentCfg = null;
 
 let target, guesses, gameOver;
-let hiddenFields = [];   // array — 1 field normally, 2 on Night 6
-let wrongCount   = 0;
-let selIdx       = -1;
-let selCamIdx    = 0;
+let hiddenFields = [];   // array - 1 field normally, 2 on Night 6
+let wrongCount = 0;
+let selIdx = -1;
+let selCamIdx = 0;
 
-let battery      = 99;
-let doorClosed   = false;
-let doorHeldFor  = 0;
-let lastLoseReason  = null;
+let battery = 99;
+let doorClosed = false;
+let doorHeldFor = 0;
+let lastLoseReason = null;
 let lastNightResult = null;
 
 let nightElapsedMs = 0;  // real-time night clock (0 → NIGHT_TOTAL_MS)
 
-let gameLoopId   = null;
-let lastTickMs   = 0;
-let movOppTimer  = MOVE_OPP_MS;
+let gameLoopId = null;
+let lastTickMs = 0;
+let movOppTimer = MOVE_OPP_MS;
 
-let targetEntity   = null;
+let targetEntity = null;
 let threatEntities = [];
 
-const input    = document.getElementById('search-input');
+const input = document.getElementById('search-input');
 const dropdown = document.getElementById('dropdown');
 
 // ─── Persistence ─────────────────────────────────────────
@@ -169,16 +169,16 @@ function loadNight() {
 // ─── Init ─────────────────────────────────────────────────
 
 function initGame() {
-  const cfg    = NIGHT_CONFIGS[currentNight];
-  currentCfg   = cfg;
+  const cfg = NIGHT_CONFIGS[currentNight];
+  currentCfg = cfg;
 
-  const chars  = pickSameAnimalChars(1 + cfg.threats.length);
-  target       = chars[0];
+  const chars = pickSameAnimalChars(1 + cfg.threats.length);
+  target = chars[0];
 
   // Determine hidden fields
-  const hiddenCount    = cfg.hiddenCount || 1;
-  const otherFields    = HIDEABLE_FIELDS.filter(f => f !== 'animal');
-  hiddenFields         = [];
+  const hiddenCount = cfg.hiddenCount || 1;
+  const otherFields = HIDEABLE_FIELDS.filter(f => f !== 'animal');
+  hiddenFields = [];
 
   if (hiddenCount >= 1) {
     hiddenFields.push(
@@ -192,36 +192,36 @@ function initGame() {
     hiddenFields.push(remaining[Math.floor(Math.random() * remaining.length)]);
   }
 
-  wrongCount      = 0;
-  battery         = 99;
-  doorClosed      = false;
-  doorHeldFor     = 0;
-  movOppTimer     = MOVE_OPP_MS;
-  nightElapsedMs  = 0;
+  wrongCount = 0;
+  battery = 99;
+  doorClosed = false;
+  doorHeldFor = 0;
+  movOppTimer = MOVE_OPP_MS;
+  nightElapsedMs = 0;
 
   // Randomise distinct start cameras for all entities, never spawning at the last camera
   const totalEntities = 1 + cfg.threats.length;
-  const validCams     = Array.from({ length: LAST_CAM }, (_, i) => i); // [0 … LAST_CAM-1]
+  const validCams = Array.from({ length: LAST_CAM }, (_, i) => i); // [0 … LAST_CAM-1]
   for (let i = validCams.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [validCams[i], validCams[j]] = [validCams[j], validCams[i]];
   }
   const startCams = validCams.slice(0, totalEntities);
 
-  targetEntity   = makeEntity(chars[0], startCams[0], cfg.targetAI);
+  targetEntity = makeEntity(chars[0], startCams[0], cfg.targetAI);
   threatEntities = cfg.threats.map((t, i) => makeEntity(chars[i + 1], startCams[i + 1], t.ai));
 
   selCamIdx = 0;
 
   setupHeaders();
-  guesses  = [];
+  guesses = [];
   gameOver = false;
-  selIdx   = -1;
+  selIdx = -1;
 
   document.getElementById('guesses-container').innerHTML = '';
   document.getElementById('result-banner').classList.remove('show', 'lose');
-  input.disabled    = false;
-  input.value       = '';
+  input.disabled = false;
+  input.value = '';
   input.placeholder = T('extreme.placeholder');
   document.getElementById('search-area').style.display = '';
   dropdown.style.display = 'none';
@@ -273,13 +273,13 @@ function updateNightLabel() {
 }
 
 function updateNightWarning(cfg) {
-  const aiList      = [cfg.targetAI, ...cfg.threats.map(t => t.ai)].join(' / ');
-  const count       = 1 + cfg.threats.length;
+  const aiList = [cfg.targetAI, ...cfg.threats.map(t => t.ai)].join(' / ');
+  const count = 1 + cfg.threats.length;
   const hiddenCount = cfg.hiddenCount || 1;
-  const powerMult   = cfg.powerMult   || 1;
-  const el          = document.getElementById('extreme-warning');
+  const powerMult = cfg.powerMult || 1;
+  const el = document.getElementById('extreme-warning');
   if (!el) return;
-  const animWord  = T(count      > 1 ? 'extreme.warnAnims'  : 'extreme.warnAnim');
+  const animWord = T(count > 1 ? 'extreme.warnAnims' : 'extreme.warnAnim');
   const fieldWord = T(hiddenCount > 1 ? 'extreme.warnFields' : 'extreme.warnField');
   let extra = '';
   if (powerMult > 1) extra = ` · ⚡ <strong>${powerMult}× ${T('extreme.warnPowerDrain')}</strong>`;
@@ -291,7 +291,7 @@ function updateNightWarning(cfg) {
 function tick() {
   if (gameOver) return;
   const now = Date.now();
-  const dt  = (now - lastTickMs) / 1000;
+  const dt = (now - lastTickMs) / 1000;
   lastTickMs = now;
 
   // Battery drain (Night 6 applies 2× multiplier)
@@ -365,10 +365,10 @@ function fireMovementOpportunity(now) {
       flashTile(e.camIdx);
     } else {
       if (doorClosed) {
-        e.state  = 'blocked';
+        e.state = 'blocked';
         e.nextMs = now + rand(RETREAT_MIN_MS, RETREAT_MAX_MS);
       } else {
-        e.state  = 'entering';
+        e.state = 'entering';
         e.nextMs = now + ENTRY_MS;
       }
     }
@@ -382,7 +382,7 @@ function fireMovementOpportunity(now) {
 function processEntityTimer(e, now) {
   if (e.state === 'entering') {
     if (doorClosed) {
-      e.state  = 'blocked';
+      e.state = 'blocked';
       e.nextMs = now + rand(RETREAT_MIN_MS, RETREAT_MAX_MS);
     } else if (now >= e.nextMs) {
       stopLoop();
@@ -391,11 +391,11 @@ function processEntityTimer(e, now) {
     }
   } else if (e.state === 'blocked') {
     if (!doorClosed) {
-      e.state  = 'entering';
+      e.state = 'entering';
       e.nextMs = now + ENTRY_MS;
     } else if (now >= e.nextMs) {
       e.camIdx = 0;
-      e.state  = 'active';
+      e.state = 'active';
     }
   }
 }
@@ -411,9 +411,9 @@ function buildCamGrid() {
   grid.innerHTML = '';
   CAM_ROOMS.forEach((cam, i) => {
     const tile = document.createElement('div');
-    tile.id        = 'cam-tile-' + i;
+    tile.id = 'cam-tile-' + i;
     tile.className = 'cam-tile';
-    tile.onclick   = () => { selCamIdx = i; refreshCamGrid(); renderMainCam(); };
+    tile.onclick = () => { selCamIdx = i; refreshCamGrid(); renderMainCam(); };
 
     const imgWrap = document.createElement('div');
     imgWrap.className = 'cam-tile-img-wrap';
@@ -449,12 +449,12 @@ function refreshCamGrid() {
     const tile = document.getElementById('cam-tile-' + i);
     if (!tile) return;
 
-    const at          = entitiesAt(i);
+    const at = entitiesAt(i);
     const anyEntering = at.some(x => x.e.state === 'entering');
 
     tile.className = 'cam-tile'
       + (selCamIdx === i ? ' cam-selected' : '')
-      + (anyEntering     ? ' cam-entering' : '');
+      + (anyEntering ? ' cam-entering' : '');
 
     tile.querySelector('.cam-tile-img-wrap').innerHTML = '';
     tile.querySelector('.cam-tile-dots').innerHTML = '';
@@ -472,26 +472,26 @@ function glitchMainCam() {
 }
 
 function renderMainCam() {
-  const screen  = document.getElementById('main-cam-screen');
-  const img     = document.getElementById('main-cam-img');
+  const screen = document.getElementById('main-cam-screen');
+  const img = document.getElementById('main-cam-img');
   const labelId = document.getElementById('main-cam-id');
   const labelRm = document.getElementById('main-cam-room');
-  const tint    = document.getElementById('cam-tint');
+  const tint = document.getElementById('cam-tint');
 
-  const cam         = CAM_ROOMS[selCamIdx];
-  const at          = entitiesAt(selCamIdx);
-  const primary     = at[0] ?? null;
+  const cam = CAM_ROOMS[selCamIdx];
+  const at = entitiesAt(selCamIdx);
+  const primary = at[0] ?? null;
   const anyEntering = at.some(x => x.e.state === 'entering');
 
   labelId.textContent = cam.id;
   labelRm.textContent = cam.room.toUpperCase();
 
   if (primary && primary.e.char.img) {
-    img.src   = '../assets/' + primary.e.char.img;
+    img.src = '../assets/' + primary.e.char.img;
     img.style.display = '';
     screen.classList.remove('cam-empty');
   } else {
-    img.src   = '';
+    img.src = '';
     img.style.display = 'none';
     screen.classList.add('cam-empty');
   }
@@ -502,7 +502,7 @@ function renderMainCam() {
 // ─── Movement opportunity bar ─────────────────────────────
 
 function updateOppBar() {
-  const pct  = (movOppTimer / MOVE_OPP_MS) * 100;
+  const pct = (movOppTimer / MOVE_OPP_MS) * 100;
   const fill = document.getElementById('opp-fill');
   if (fill) fill.style.width = Math.max(0, pct) + '%';
   const cd = document.getElementById('opp-countdown');
@@ -513,7 +513,7 @@ function flashOppTick() {
   const fill = document.getElementById('opp-fill');
   const grid = document.getElementById('cam-grid');
   if (fill) { fill.style.background = 'rgba(200,60,60,0.9)'; setTimeout(() => { fill.style.background = ''; }, 400); }
-  if (grid) { grid.style.boxShadow  = '0 0 14px rgba(60,200,80,0.35)';  setTimeout(() => { grid.style.boxShadow = ''; }, 400); }
+  if (grid) { grid.style.boxShadow = '0 0 14px rgba(60,200,80,0.35)'; setTimeout(() => { grid.style.boxShadow = ''; }, 400); }
 }
 
 // ─── Door ─────────────────────────────────────────────────
@@ -530,10 +530,10 @@ function updateDoorBtn() {
   const btn = document.getElementById('door-btn');
   if (doorClosed) {
     btn.textContent = T('extreme.doorOpen');
-    btn.className   = 'door-btn door-closed';
+    btn.className = 'door-btn door-closed';
   } else {
     btn.textContent = T('extreme.doorClose');
-    btn.className   = 'door-btn door-open';
+    btn.className = 'door-btn door-open';
   }
 }
 
@@ -541,28 +541,28 @@ function updateDoorBtn() {
 
 function updateClock() {
   const hourIdx = Math.min(Math.floor(nightElapsedMs / HOUR_MS), HOUR_LABELS.length - 1);
-  const el      = document.getElementById('night-clock');
+  const el = document.getElementById('night-clock');
   if (!el) return;
   el.textContent = HOUR_LABELS[hourIdx];
-  el.className   = 'night-clock'
+  el.className = 'night-clock'
     + (hourIdx >= 4 ? ' danger' : hourIdx >= 2 ? ' warning' : '');
 }
 
 function updatePower() {
-  const pct  = Math.max(0, Math.round(battery));
+  const pct = Math.max(0, Math.round(battery));
   const fill = document.getElementById('power-fill');
   fill.style.width = pct + '%';
-  fill.className   = 'power-fill'
+  fill.className = 'power-fill'
     + (pct <= 15 ? ' critical' : pct <= 35 ? ' low' : '');
   document.getElementById('power-pct').textContent = pct + '%';
 }
 
 function updateAttemptsLeft() {
-  const el  = document.getElementById('attempts-left');
+  const el = document.getElementById('attempts-left');
   const rem = MAX_GUESSES - guesses.length;
   if (gameOver) { el.textContent = ''; return; }
   el.textContent = T('extreme.attempts', { rem, max: MAX_GUESSES });
-  el.className   = 'attempts-left' + (rem === 1 ? ' danger' : '');
+  el.className = 'attempts-left' + (rem === 1 ? ' danger' : '');
 }
 
 // ─── Guess rendering ──────────────────────────────────────
@@ -574,28 +574,28 @@ function colorMatchExtreme(gVal, tVal) {
 }
 
 function makeSwatch(colorName) {
-  const s    = document.createElement('span');
+  const s = document.createElement('span');
   s.className = 'color-swatch';
   const fill = COLOR_HEX[colorName.toLowerCase()] || '#666';
   if (fill.startsWith('linear')) s.style.backgroundImage = fill;
-  else                           s.style.backgroundColor = fill;
+  else s.style.backgroundColor = fill;
   s.title = colorName;
   return s;
 }
 
 function makeColorLabel(colors) {
-  const arr  = toArr(colors);
+  const arr = toArr(colors);
   const wrap = document.createElement('div');
   wrap.className = 'color-label';
   arr.forEach((c, i) => {
     wrap.appendChild(makeSwatch(c));
     const txt = document.createElement('span');
-    txt.className   = 'color-name';
+    txt.className = 'color-name';
     txt.textContent = T('db.color.' + c);
     wrap.appendChild(txt);
     if (i < arr.length - 1) {
       const sep = document.createElement('span');
-      sep.className   = 'color-sep';
+      sep.className = 'color-sep';
       sep.textContent = '/';
       wrap.appendChild(sep);
     }
@@ -605,12 +605,12 @@ function makeColorLabel(colors) {
 
 function renderGuess(char) {
   const fields = [
-    { key: 'name',     isColor: false },
-    { key: 'animal',   isColor: false },
-    { key: 'type',     isColor: false },
-    { key: 'color',    isColor: true  },
-    { key: 'eyeColor', isColor: true  },
-    { key: 'year',     isColor: false },
+    { key: 'name', isColor: false },
+    { key: 'animal', isColor: false },
+    { key: 'type', isColor: false },
+    { key: 'color', isColor: true },
+    { key: 'eyeColor', isColor: true },
+    { key: 'year', isColor: false },
   ];
 
   const row = document.createElement('div');
@@ -620,20 +620,20 @@ function renderGuess(char) {
   imgCell.className = 'cell cell-img';
   if (char.img) {
     const img = document.createElement('img');
-    img.src     = '../assets/' + char.img;
-    img.alt     = char.name;
+    img.src = '../assets/' + char.img;
+    img.alt = char.name;
     if (char.imgFocusFace) { img.style.objectFit = 'cover'; img.style.objectPosition = 'top center'; }
     img.onerror = () => {
       imgCell.innerHTML = '';
       const ph = document.createElement('div');
-      ph.className   = 'placeholder-avatar';
+      ph.className = 'placeholder-avatar';
       ph.textContent = char.emoji || '?';
       imgCell.appendChild(ph);
     };
     imgCell.appendChild(img);
   } else {
     const ph = document.createElement('div');
-    ph.className   = 'placeholder-avatar';
+    ph.className = 'placeholder-avatar';
     ph.textContent = char.emoji || '?';
     imgCell.appendChild(ph);
   }
@@ -646,7 +646,7 @@ function renderGuess(char) {
     if (f.key !== 'name' && hiddenFields.includes(f.key)) {
       cell.classList.add('hidden-cell');
       const lbl = document.createElement('div');
-      lbl.className   = 'cell-label hidden-label';
+      lbl.className = 'cell-label hidden-label';
       lbl.textContent = '???';
       cell.appendChild(lbl);
       row.appendChild(cell);
@@ -729,22 +729,22 @@ function endGame(won, loseReason) {
   renderMainCam();
   refreshCamGrid();
 
-  const banner        = document.getElementById('result-banner');
-  const titleEl       = document.getElementById('result-title');
-  const msgEl         = document.getElementById('result-msg');
-  const playAgainBtn  = document.getElementById('play-again-btn');
+  const banner = document.getElementById('result-banner');
+  const titleEl = document.getElementById('result-title');
+  const msgEl = document.getElementById('result-msg');
+  const playAgainBtn = document.getElementById('play-again-btn');
   const nightJustDone = currentNight;
-  lastLoseReason      = loseReason || null;
+  lastLoseReason = loseReason || null;
 
   banner.classList.add('show');
 
   if (won) {
     banner.classList.remove('lose');
     if (nightJustDone >= MAX_NIGHTS) {
-      titleEl.textContent      = T('extreme.allComplete');
-      msgEl.textContent        = T('extreme.allCompleteMsg', { name: target.name });
+      titleEl.textContent = T('extreme.allComplete');
+      msgEl.textContent = T('extreme.allCompleteMsg', { name: target.name });
       playAgainBtn.textContent = T('extreme.restartNight1');
-      lastNightResult          = { won: true, nightJustDone };
+      lastNightResult = { won: true, nightJustDone };
       currentNight = 1;
       saveNight();
     } else {
@@ -752,10 +752,10 @@ function endGame(won, loseReason) {
       const teaser = next === 6
         ? T('extreme.teaser6')
         : T('extreme.teaser', { n: next });
-      titleEl.textContent      = T('extreme.nightSurvived', { n: nightJustDone });
-      msgEl.textContent        = T('extreme.nightSurvivedMsg', { name: target.name, teaser });
+      titleEl.textContent = T('extreme.nightSurvived', { n: nightJustDone });
+      msgEl.textContent = T('extreme.nightSurvivedMsg', { name: target.name, teaser });
       playAgainBtn.textContent = T('extreme.continueNight', { n: next });
-      lastNightResult          = { won: true, nightJustDone };
+      lastNightResult = { won: true, nightJustDone };
       currentNight = next;
       saveNight();
     }
@@ -766,10 +766,10 @@ function endGame(won, loseReason) {
       : loseReason === 'battery'
         ? T('extreme.loseBattery')
         : T('extreme.loseGuesses');
-    titleEl.textContent      = reason;
-    msgEl.textContent        = T('extreme.loseMsg', { name: target.name, n: nightJustDone });
+    titleEl.textContent = reason;
+    msgEl.textContent = T('extreme.loseMsg', { name: target.name, n: nightJustDone });
     playAgainBtn.textContent = T('extreme.retryNight', { n: nightJustDone });
-    lastNightResult          = { won: false, nightJustDone };
+    lastNightResult = { won: false, nightJustDone };
   }
 
   const imgCont = document.getElementById('result-char-container');
@@ -794,7 +794,7 @@ function renderDropdown() {
   filtered.forEach(char => {
     const item = document.createElement('div');
     item.className = 'dropdown-item';
-    item.tabIndex  = -1;
+    item.tabIndex = -1;
     if (char.img) {
       const img = document.createElement('img');
       img.src = '../assets/' + char.img;
@@ -882,19 +882,19 @@ window.onLangChange = function () {
   guesses.forEach(function (g) { renderGuess(g); });
   if (gameOver && lastNightResult) {
     const { won, nightJustDone } = lastNightResult;
-    const titleEl      = document.getElementById('result-title');
-    const msgEl        = document.getElementById('result-msg');
+    const titleEl = document.getElementById('result-title');
+    const msgEl = document.getElementById('result-msg');
     const playAgainBtn = document.getElementById('play-again-btn');
     if (won) {
       if (nightJustDone >= MAX_NIGHTS) {
-        titleEl.textContent      = T('extreme.allComplete');
-        msgEl.textContent        = T('extreme.allCompleteMsg', { name: target.name });
+        titleEl.textContent = T('extreme.allComplete');
+        msgEl.textContent = T('extreme.allCompleteMsg', { name: target.name });
         playAgainBtn.textContent = T('extreme.restartNight1');
       } else {
-        const next   = nightJustDone + 1;
+        const next = nightJustDone + 1;
         const teaser = next === 6 ? T('extreme.teaser6') : T('extreme.teaser', { n: next });
-        titleEl.textContent      = T('extreme.nightSurvived', { n: nightJustDone });
-        msgEl.textContent        = T('extreme.nightSurvivedMsg', { name: target.name, teaser });
+        titleEl.textContent = T('extreme.nightSurvived', { n: nightJustDone });
+        msgEl.textContent = T('extreme.nightSurvivedMsg', { name: target.name, teaser });
         playAgainBtn.textContent = T('extreme.continueNight', { n: next });
       }
     } else {
@@ -903,8 +903,8 @@ window.onLangChange = function () {
         : lastLoseReason === 'battery'
           ? T('extreme.loseBattery')
           : T('extreme.loseGuesses');
-      titleEl.textContent      = reason;
-      msgEl.textContent        = T('extreme.loseMsg', { name: target.name, n: nightJustDone });
+      titleEl.textContent = reason;
+      msgEl.textContent = T('extreme.loseMsg', { name: target.name, n: nightJustDone });
       playAgainBtn.textContent = T('extreme.retryNight', { n: nightJustDone });
     }
   }

@@ -233,9 +233,9 @@
         </label>
       </div>
       <div class="prop-group" id="prop-skip-wrap" style="display:none">
-        <div class="prop-label" style="color:#c48b14">💰 Path A — Pay → node #</div>
+        <div class="prop-label" style="color:#c48b14">💰 Path A - Pay → node #</div>
         <input class="prop-input" id="prop-skip" type="number" min="0" placeholder="e.g. 9" oninput="propSkip()">
-        <div class="prop-label" style="color:#cc4433;margin-top:6px">😰 Path B — Free → node #</div>
+        <div class="prop-label" style="color:#cc4433;margin-top:6px">😰 Path B - Free → node #</div>
         <input class="prop-input" id="prop-free" type="number" min="0" placeholder="e.g. 6" oninput="propFree()">
         <div style="font-size:.6rem;color:#444;margin-top:3px">Gold dashed = pay path · Red dashed = free path</div>
       </div>
@@ -422,8 +422,8 @@ function render() {
       }));
     }
 
-    drawArrow(n.skipTo, '#c48b14', 'arr-skip');  // Path A (pay) — gold
-    drawArrow(n.freeTo, '#cc3322', 'arr-free');   // Path B (free) — red
+    drawArrow(n.skipTo, '#c48b14', 'arr-skip');  // Path A (pay) - gold
+    drawArrow(n.freeTo, '#cc3322', 'arr-free');   // Path B (free) - red
   });
 
   // ── Draw nodes ──
@@ -897,7 +897,7 @@ function generateExport() {
   const constName  = rawName.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'').toUpperCase();
   const mapKey     = constName.toLowerCase();
 
-  // Node positions (just x,y — type info goes into tiles)
+  // Node positions (just x,y - type info goes into tiles)
   const nodesLines = nodes.map((n, i) => {
     const lbl = [i === 0 ? 'START' : '', n.label].filter(Boolean).join(' · ');
     return `  { x: ${n.x.toFixed(1)}, y: ${n.y.toFixed(1)} },${lbl ? `  // ${i}  ${lbl}` : `  // ${i}`}`;

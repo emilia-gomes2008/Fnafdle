@@ -105,14 +105,14 @@ A Mario Party-inspired online board game for 2-6 players, powered by Supabase re
 | ❓ Purple | Random FNAF event |
 | ⚔️ Blue | Challenge: 1v all |
 | 🐻 Tollbooth | Pay coins → shortcut, or take the free (longer) path. Price rises per visit! |
-| 💰 Jackpot | Growing coin pool — claim it first! |
+| 💰 Jackpot | Growing coin pool - claim it first! |
 
 **Characters** (7 total, each with a unique ability):
 | Character | Ability | Cooldown |
 |-----------|---------|----------|
 | 🐻 Freddy | Take tollbooth Path A for free | 3 turns |
 | 🎸 Bonnie | Jump exactly 4 spaces | 3 turns |
-| 🐔 Chica | Throw Cupcake — steal 5 coins from a nearby player | 3 turns |
+| 🐔 Chica | Throw Cupcake - steal 5 coins from a nearby player | 3 turns |
 | 🦊 Foxy | Re-roll after seeing the first result | 2 turns |
 | 🎀 Mangle | Shuffle all non-locked board spaces | 5 turns |
 | 🎭 Puppet | Convert 10 coins → 1 pizza for any nearby player | 5 turns |
@@ -123,11 +123,11 @@ A Mario Party-inspired online board game for 2-6 players, powered by Supabase re
 **Minigames** (7 total, played simultaneously on each device):
 | Minigame | Description |
 |----------|-------------|
-| 👃 Helpy Boop | Tap Helpy's nose as many times as possible — 30s |
-| 💰 Money Laundering | Drag coins to Rockstar Freddy — most deposited in 30s wins |
-| 🍕 Feeding Frenzy | Follow Chica's recipe in order; wrong ingredient = penalty — race to finish |
+| 👃 Helpy Boop | Tap Helpy's nose as many times as possible - 30s |
+| 💰 Money Laundering | Drag coins to Rockstar Freddy - most deposited in 30s wins |
+| 🍕 Feeding Frenzy | Follow Chica's recipe in order; wrong ingredient = penalty - race to finish |
 | 🎸 Guitar Finder | Find Bonnie's guitar in a 4×4 grid as fast as possible |
-| 🔦 Power Out | Close the door before Freddy lunges — random timing |
+| 🔦 Power Out | Close the door before Freddy lunges - random timing |
 | 🔦 Flashlight | Tap as fast as you can for 15s. Watch for Withered Foxy... |
 | 🍕 Pizza Dough | Draw the most perfect circle in 5 seconds |
 

@@ -1,5 +1,5 @@
 /* =====================================================
-       Extreme Mode — FNAF Security Office
+       Extreme Mode - FNAF Security Office
 ===================================================== */
 
 :root {
@@ -619,7 +619,7 @@ button:hover { background-color: var(--ex-red-dk) !important; }
 }
 
 /* ══════════════════════════════════════════════════════
-       MOBILE — stacked layout, fixed door button
+       MOBILE - stacked layout, fixed door button
 ══════════════════════════════════════════════════════ */
 @media (max-width: 720px) {
 

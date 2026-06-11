@@ -1,5 +1,5 @@
 /* ════════════════════════════════════════════════════════════
-   FNAF TCG — Auth, Collection, Boosters & Trading  (tcg-auth.js)
+   FNAF TCG - Auth, Collection, Boosters & Trading  (tcg-auth.js)
    Depends on: tcg-cards.js, tcg.js (CARDS, GENERIC globals)
    ════════════════════════════════════════════════════════════ */
 
@@ -9,62 +9,62 @@ async function tcgHash(str) {
   if (typeof crypto !== 'undefined' && crypto.subtle) {
     try {
       const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-    } catch(e) {}
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    } catch (e) { }
   }
   return _sha256(str);
 }
 
 function _sha256(msg) {
   const K = [
-    0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
-    0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
-    0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
-    0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
-    0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
-    0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
-    0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
-    0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2
+    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
   ];
   const rr = (x, n) => (x >>> n) | (x << (32 - n));
   // UTF-8 encode
   const b = [];
   for (let i = 0; i < msg.length; i++) {
     const c = msg.charCodeAt(i);
-    if (c < 0x80)       b.push(c);
-    else if (c < 0x800) b.push((c>>6)|0xC0, (c&0x3F)|0x80);
-    else                b.push((c>>12)|0xE0, ((c>>6)&0x3F)|0x80, (c&0x3F)|0x80);
+    if (c < 0x80) b.push(c);
+    else if (c < 0x800) b.push((c >> 6) | 0xC0, (c & 0x3F) | 0x80);
+    else b.push((c >> 12) | 0xE0, ((c >> 6) & 0x3F) | 0x80, (c & 0x3F) | 0x80);
   }
   const bitLen = b.length * 8;
   b.push(0x80);
   while ((b.length % 64) !== 56) b.push(0);
-  for (let i = 7; i >= 0; i--) b.push((bitLen / Math.pow(2, i*8)) & 0xFF);
-  let H = [0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  for (let i = 7; i >= 0; i--) b.push((bitLen / Math.pow(2, i * 8)) & 0xFF);
+  let H = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
   for (let blk = 0; blk < b.length; blk += 64) {
     const W = Array(64);
-    for (let j=0;j<16;j++) W[j]=(b[blk+j*4]<<24)|(b[blk+j*4+1]<<16)|(b[blk+j*4+2]<<8)|b[blk+j*4+3];
-    for (let j=16;j<64;j++) {
-      const s0 = rr(W[j-15],7)^rr(W[j-15],18)^(W[j-15]>>>3);
-      const s1 = rr(W[j-2],17)^rr(W[j-2],19)^(W[j-2]>>>10);
-      W[j] = (W[j-16]+s0+W[j-7]+s1)|0;
+    for (let j = 0; j < 16; j++) W[j] = (b[blk + j * 4] << 24) | (b[blk + j * 4 + 1] << 16) | (b[blk + j * 4 + 2] << 8) | b[blk + j * 4 + 3];
+    for (let j = 16; j < 64; j++) {
+      const s0 = rr(W[j - 15], 7) ^ rr(W[j - 15], 18) ^ (W[j - 15] >>> 3);
+      const s1 = rr(W[j - 2], 17) ^ rr(W[j - 2], 19) ^ (W[j - 2] >>> 10);
+      W[j] = (W[j - 16] + s0 + W[j - 7] + s1) | 0;
     }
-    let [a,b2,c,d,e,f,g,h] = H;
-    for (let j=0;j<64;j++) {
-      const S1=(rr(e,6)^rr(e,11)^rr(e,25)), ch=(e&f)^(~e&g);
-      const T1=(h+S1+ch+K[j]+W[j])|0;
-      const S0=(rr(a,2)^rr(a,13)^rr(a,22)), maj=(a&b2)^(a&c)^(b2&c);
-      const T2=(S0+maj)|0;
-      h=g;g=f;f=e;e=(d+T1)|0;d=c;c=b2;b2=a;a=(T1+T2)|0;
+    let [a, b2, c, d, e, f, g, h] = H;
+    for (let j = 0; j < 64; j++) {
+      const S1 = (rr(e, 6) ^ rr(e, 11) ^ rr(e, 25)), ch = (e & f) ^ (~e & g);
+      const T1 = (h + S1 + ch + K[j] + W[j]) | 0;
+      const S0 = (rr(a, 2) ^ rr(a, 13) ^ rr(a, 22)), maj = (a & b2) ^ (a & c) ^ (b2 & c);
+      const T2 = (S0 + maj) | 0;
+      h = g; g = f; f = e; e = (d + T1) | 0; d = c; c = b2; b2 = a; a = (T1 + T2) | 0;
     }
-    H[0]=(H[0]+a)|0;H[1]=(H[1]+b2)|0;H[2]=(H[2]+c)|0;H[3]=(H[3]+d)|0;
-    H[4]=(H[4]+e)|0;H[5]=(H[5]+f)|0;H[6]=(H[6]+g)|0;H[7]=(H[7]+h)|0;
+    H[0] = (H[0] + a) | 0; H[1] = (H[1] + b2) | 0; H[2] = (H[2] + c) | 0; H[3] = (H[3] + d) | 0;
+    H[4] = (H[4] + e) | 0; H[5] = (H[5] + f) | 0; H[6] = (H[6] + g) | 0; H[7] = (H[7] + h) | 0;
   }
-  return H.map(x => (x>>>0).toString(16).padStart(8,'0')).join('');
+  return H.map(x => (x >>> 0).toString(16).padStart(8, '0')).join('');
 }
 
 // ── Session (localStorage) ───────────────────────────────────
 const TCG_AUTH_KEY = 'tcg_auth_v1';
-window.TCG_USER    = null;       // { id, username, points }
+window.TCG_USER = null;       // { id, username, points }
 window.TCG_COLLECTION = {};      // { card_id: quantity }
 
 function _authLoad() {
@@ -119,7 +119,7 @@ async function tcgRegister(username, password) {
 
 // ── IP Rate Limiting ─────────────────────────────────────────
 const _IP_MAX_ATTEMPTS = 5;
-const _IP_BLOCK_MS     = 2 * 60 * 60 * 1000; // 2 hours
+const _IP_BLOCK_MS = 2 * 60 * 60 * 1000; // 2 hours
 
 async function _getClientIP() {
   try {
@@ -199,6 +199,7 @@ async function tcgLogin(username, password) {
 // ── Logout ───────────────────────────────────────────────────
 function tcgLogout() {
   _authClear();
+  if (typeof initCloudDecks === 'function') initCloudDecks(); // resets _cloudDecks to null
   renderAuthBar();
   switchTab('play');
 }
@@ -226,6 +227,20 @@ async function tcgRefreshPoints() {
     _authSave(window.TCG_USER);
     renderAuthBar();
   }
+}
+
+// ── Cloud Decks ───────────────────────────────────────────────
+async function tcgGetCloudDecks() {
+  const db = _getDB(); if (!db || !window.TCG_USER) return null;
+  const { data, error } = await db.from('tcg_users')
+    .select('decks').eq('id', window.TCG_USER.id).maybeSingle();
+  if (error || !data) return null;
+  return Array.isArray(data.decks) ? data.decks : [];
+}
+
+async function tcgSaveCloudDecks(decks) {
+  const db = _getDB(); if (!db || !window.TCG_USER) return;
+  await db.from('tcg_users').update({ decks }).eq('id', window.TCG_USER.id);
 }
 
 // ── Collection ───────────────────────────────────────────────
@@ -268,38 +283,38 @@ const BOOSTERS = {
     desc: 'Classics, Toys, Withereds, Shadows & Phantoms',
     color: '#7ad',
     bg: '#07141f',
-    classPool: ['class_classic','class_toy','class_withered','class_phantom','class_shadow'],
+    classPool: ['class_classic', 'class_toy', 'class_withered', 'class_phantom', 'class_shadow'],
     classChance: 0.05,
-    energyPool: ['energy_remnant','energy_agony','energy_phantom_agony'],
+    energyPool: ['energy_remnant', 'energy_agony', 'energy_phantom_agony'],
     regularPool: [
       // Endos (higher weight = multiple entries)
-      'endo_01','endo_01','endo_01',
-      'endo_02','endo_02','endo_02',
-      'spring_endo','spring_endo',
+      'endo_01', 'endo_01', 'endo_01',
+      'endo_02', 'endo_02', 'endo_02',
+      'spring_endo', 'spring_endo',
       // Classic
-      'freddy','bonnie','chica','foxy','golden_freddy',
+      'freddy', 'bonnie', 'chica', 'foxy', 'golden_freddy',
       // Toy
-      'toy_freddy','toy_bonnie','toy_chica','mangle','bb','jj','puppet',
+      'toy_freddy', 'toy_bonnie', 'toy_chica', 'mangle', 'bb', 'jj', 'puppet',
       // Withered
-      'withered_freddy','withered_bonnie','withered_chica','withered_foxy','withered_golden',
+      'withered_freddy', 'withered_bonnie', 'withered_chica', 'withered_foxy', 'withered_golden',
       // Phantom
-      'springtrap','fredbear','springbonnie',
-      'p_freddy','p_chica','p_bb','p_foxy','p_mangle','p_puppet',
+      'springtrap', 'fredbear', 'springbonnie',
+      'p_freddy', 'p_chica', 'p_bb', 'p_foxy', 'p_mangle', 'p_puppet',
       // Shadow
-      'shadow_freddy','rwqfsfasxc',
+      'shadow_freddy', 'rwqfsfasxc',
       // Items (common ones get extra weight)
-      'cupcake','cupcake','mini_cupcake','mini_cupcake',
-      'birthday_cake','birthday_cake',
-      'energy_recharge','energy_recharge',
-      'lantern','power_out','dee_dee_pearl',
-      'power_battery','security_tape','antidote','data_escape','system_corrupt',
+      'cupcake', 'cupcake', 'mini_cupcake', 'mini_cupcake',
+      'birthday_cake', 'birthday_cake',
+      'energy_recharge', 'energy_recharge',
+      'lantern', 'power_out', 'dee_dee_pearl',
+      'power_battery', 'security_tape', 'antidote', 'data_escape', 'system_corrupt',
       // Tools
-      'freddy_mask','mendos_endos','hat_mic','guitar_axe','hook',
-      'springlock_device','fireproof_suit','static_dampener','puppet_box',
-      'fragmento_remnant','purple_guy',
+      'freddy_mask', 'mendos_endos', 'hat_mic', 'guitar_axe', 'hook',
+      'springlock_device', 'fireproof_suit', 'static_dampener', 'puppet_box',
+      'fragmento_remnant', 'purple_guy',
       // Supporters
-      'phone_guy','phone_guy','henry_emily','fazbear_tech',
-      'william_afton','helpy','william_search','mrs_afton','night_guard'
+      'phone_guy', 'phone_guy', 'henry_emily', 'fazbear_tech',
+      'william_afton', 'helpy', 'william_search', 'mrs_afton', 'night_guard'
     ]
   },
   flames_of_agony: {
@@ -309,34 +324,109 @@ const BOOSTERS = {
     desc: 'Nightmares, Jack-Os, Funtimes, Scraps & Rockstars',
     color: '#e84',
     bg: '#1f0900',
-    classPool: ['class_nightmare','class_jacko','class_funtime','class_scrap','class_rockstar'],
+    classPool: ['class_nightmare', 'class_jacko', 'class_funtime', 'class_scrap', 'class_rockstar'],
     classChance: 0.05,
-    energyPool: ['energy_remnant','energy_agony','energy_phantom_agony'],
+    energyPool: ['energy_remnant', 'energy_agony', 'energy_phantom_agony'],
     regularPool: [
       // Endos
-      'endo_nm','endo_nm','endo_nm',
-      'yenndo','yenndo','yenndo',
-      'rockstar','rockstar',
+      'endo_nm', 'endo_nm', 'endo_nm',
+      'yenndo', 'yenndo', 'yenndo',
+      'rockstar', 'rockstar',
       // Nightmare
-      'nightmare_freddy','nightmare_bonnie','nightmare_chica','nightmare_foxy',
-      'nightmare_fredbear','plushtrap','nightmare_bb','nightmarionne',
+      'nightmare_freddy', 'nightmare_bonnie', 'nightmare_chica', 'nightmare_foxy',
+      'nightmare_fredbear', 'plushtrap', 'nightmare_bb', 'nightmarionne',
       // Jack-O
-      'jacko_bonnie','jacko_chica','jacko_lantern',
+      'jacko_bonnie', 'jacko_chica', 'jacko_lantern',
+      'grim_foxy', 'grim_foxy',
       // Funtime
-      'baby','ballora','funtime_freddy','funtime_foxy','yenndo_shell','lolbit','ennard',
+      'baby', 'ballora', 'funtime_freddy', 'funtime_foxy', 'yenndo_shell', 'lolbit', 'ennard',
       // Scrap
-      'scraptrap','scrap_baby','molten_freddy','lefty',
+      'scraptrap', 'scrap_baby', 'molten_freddy', 'lefty',
       // Rockstar
-      'rockstar_freddy','rockstar_bonnie','rockstar_chica','rockstar_foxy','carnie',
+      'rockstar_freddy', 'rockstar_bonnie', 'rockstar_chica', 'rockstar_foxy', 'carnie',
       // Trash n' Gang items (extra weight)
-      'bucket_bob','bucket_bob','pan_stan','pan_stan',
-      'no_1_crate','no_1_crate','mr_hugs','mr_hugs',
+      'bucket_bob', 'bucket_bob', 'pan_stan', 'pan_stan',
+      'no_1_crate', 'no_1_crate', 'mr_hugs', 'mr_hugs',
       'ennard_summon',
       // Tools
-      'mr_can_do','mr_can_do',
+      'mr_can_do', 'mr_can_do',
       // Mediocre Melodies supporters (extra weight)
-      'happy_frog','happy_frog','mr_hippo','mr_hippo',
-      'pigpatch','pigpatch','nedd_bear','nedd_bear','orville_elephant','orville_elephant'
+      'happy_frog', 'happy_frog', 'mr_hippo', 'mr_hippo',
+      'pigpatch', 'pigpatch', 'nedd_bear', 'nedd_bear', 'orville_elephant', 'orville_elephant',
+    ]
+  },
+  haunting_future: {
+    id: 'haunting_future',
+    name: 'Haunting Future',
+    subtitle: 'FNAF Help Wanted',
+    desc: 'Glitchtrap, Grim Foxy, Dreadbear & more from the Steel Wool era',
+    color: '#b47fff',
+    bg: '#0d001a',
+    classPool: ['class_nightmare', 'class_jacko', 'class_glamrock', 'class_ruined', 'class_mimic'],
+    classChance: 0.05,
+    energyPool: ['energy_remnant', 'energy_agony', 'energy_phantom_agony'],
+    regularPool: [
+      // Endos
+      'endo_nm', 'endo_nm', 'endo_nm', 'endo_01',
+      'm2_endo', 'm2_endo', 'm2_endo',
+      // Shells - Haunting Future
+      'dreadbear', 'dreadbear',
+      'glitchtrap',
+      // Shells - Mimic
+      'jackie', 'jackie',
+      'big_top', 'big_top',
+      'nurse_dollie', 'nurse_dollie',
+      'party_time_chica', 'party_time_chica',
+      'tiger_rock', 'm2_mimic',
+      // Shells - Classic Variants
+      'dark_freddy', 'dark_freddy', 'party_freddy', 'party_freddy',
+      'neon_bonnie', 'neon_bonnie', 'neon_chica', 'neon_chica',
+      'burnt_foxy', 'burnt_foxy',
+      // Shells - Shadow
+      'shadow_mangle', 'shadow_mangle',
+      // Items
+      'party_popper', 'party_popper', 'strobe_flash', 'strobe_flash',
+      'party_hat', 'party_hat',
+      'tilt', 'tilt',
+      // Tools
+      'shadow_band', 'shadow_band', 'repair_kit', 'repair_kit',
+      // Supporters
+      'plush_baby', 'plush_baby', 'plush_baby',
+      'funtime_attendant', 'funtime_attendant', 'crying_child', 'crying_child',
+      'party_guests', 'party_guests', 'vanny',
+      // Endos
+      'glamrock_endo', 'glamrock_endo', 'glamrock_endo',
+      'tangle_blob', 'tangle_blob',
+      // Glamrock Shells
+      'glamrock_freddy', 'glamrock_freddy',
+      'glamrock_chica', 'glamrock_chica',
+      'roxy', 'roxy',
+      'monty', 'monty',
+      'sun', 'sun',
+      'moon', 'moon',
+      'glamrock_bonnie', 'glamrock_bonnie',
+      // Ruined Shells
+      'ruined_roxy', 'ruined_roxy',
+      'ruined_freddy', 'ruined_freddy',
+      'ruined_chica', 'ruined_chica',
+      'ruined_monty', 'ruined_monty',
+      'eclipse',
+      // Special Shells
+      'burntrap',
+      'mxes', 'mxes',
+      // Items
+      'ruined_lil', 'ruined_lil',
+      'ruined_dj', 'ruined_dj',
+      // Tools
+      'ruined_sun', 'ruined_sun',
+      'ruined_moon', 'ruined_moon',
+      // Supporters
+      'glamrock_mr_hippo', 'glamrock_mr_hippo',
+      'dj_music_man', 'dj_music_man',
+      'edwin', 'edwin',
+      'fiona', 'fiona',
+      'david', 'david',
+      'm1', 'm1'
     ]
   }
 };
@@ -377,8 +467,8 @@ async function tcgOpenBooster(boosterId, qty = 1) {
 async function tcgGetTrades() {
   const db = _getDB(); if (!db) return [];
   const { data } = await db.from('tcg_trades')
-    .select('*').eq('status','pending')
-    .order('created_at',{ ascending:false }).limit(60);
+    .select('*').eq('status', 'pending')
+    .order('created_at', { ascending: false }).limit(60);
   return data || [];
 }
 
@@ -414,11 +504,11 @@ async function tcgAcceptTrade(tradeId) {
   // Execute swap
   await _tcgUpsertCards(trade.from_user_id, [
     { card_id: trade.offer_card_id, delta: -1 },
-    { card_id: trade.want_card_id,  delta:  1 }
+    { card_id: trade.want_card_id, delta: 1 }
   ]);
   await _tcgUpsertCards(window.TCG_USER.id, [
-    { card_id: trade.want_card_id,  delta: -1 },
-    { card_id: trade.offer_card_id, delta:  1 }
+    { card_id: trade.want_card_id, delta: -1 },
+    { card_id: trade.offer_card_id, delta: 1 }
   ]);
 
   await db.from('tcg_trades').update({
@@ -436,7 +526,7 @@ async function tcgCancelTrade(tradeId) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// UI — Auth Bar
+// UI - Auth Bar
 // ═══════════════════════════════════════════════════════════════
 function renderAuthBar() {
   const bar = document.getElementById('tcg-auth-bar');
@@ -455,7 +545,7 @@ function renderAuthBar() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// UI — Auth Modal (Login / Register)
+// UI - Auth Modal (Login / Register)
 // ═══════════════════════════════════════════════════════════════
 function showAuthModal(mode) {
   const existing = document.getElementById('tcg-auth-modal-overlay');
@@ -470,18 +560,18 @@ function showAuthModal(mode) {
     <div class="auth-modal">
       <h3 class="auth-modal-title">${mode === 'login' ? 'Login' : 'Register'}</h3>
       <div class="auth-tabs">
-        <button class="auth-tab${mode==='login'?' active':''}" onclick="switchAuthMode('login',this)">Login</button>
-        <button class="auth-tab${mode==='register'?' active':''}" onclick="switchAuthMode('register',this)">Register</button>
+        <button class="auth-tab${mode === 'login' ? ' active' : ''}" onclick="switchAuthMode('login',this)">Login</button>
+        <button class="auth-tab${mode === 'register' ? ' active' : ''}" onclick="switchAuthMode('register',this)">Register</button>
       </div>
 
-      <div id="auth-form-login" class="auth-form" style="${mode!=='login'?'display:none':''}">
+      <div id="auth-form-login" class="auth-form" style="${mode !== 'login' ? 'display:none' : ''}">
         <input id="auth-login-user" class="tcg-input" type="text" placeholder="Username" autocomplete="username" />
         <input id="auth-login-pass" class="tcg-input" type="password" placeholder="Password" autocomplete="current-password" />
         <div id="auth-login-err" class="auth-error"></div>
         <button class="tcg-btn primary" style="width:100%" onclick="doLogin()">Log In</button>
       </div>
 
-      <div id="auth-form-register" class="auth-form" style="${mode!=='register'?'display:none':''}">
+      <div id="auth-form-register" class="auth-form" style="${mode !== 'register' ? 'display:none' : ''}">
         <input id="auth-reg-user" class="tcg-input" type="text" placeholder="Username (3+ chars, a-z0-9_)" autocomplete="username" />
         <input id="auth-reg-pass" class="tcg-input" type="password" placeholder="Password (4+ chars)" autocomplete="new-password" />
         <input id="auth-reg-conf" class="tcg-input" type="password" placeholder="Confirm Password" autocomplete="new-password" />
@@ -506,7 +596,7 @@ function showAuthModal(mode) {
 function switchAuthMode(mode, btn) {
   btn.closest('.auth-modal').querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
-  ['login','register'].forEach(m => {
+  ['login', 'register'].forEach(m => {
     const f = document.getElementById(`auth-form-${m}`);
     if (f) f.style.display = m === mode ? '' : 'none';
   });
@@ -524,6 +614,7 @@ async function doLogin() {
     document.getElementById('tcg-auth-modal-overlay')?.remove();
     renderAuthBar();
     _prefillPlayerName();
+    if (typeof initCloudDecks === 'function') await initCloudDecks();
     // Refresh whatever tab is currently active
     const active = document.querySelector('.lobby-tab.active')?.id;
     if (active === 'tab-deck') {
@@ -531,8 +622,8 @@ async function doLogin() {
       renderCardPool(); renderDeckList(); renderSavedDecks();
     }
     if (active === 'tab-collection') renderCollectionTab();
-    if (active === 'tab-booster')    renderBoosterTab();
-    if (active === 'tab-trade')      renderTradeTab();
+    if (active === 'tab-booster') renderBoosterTab();
+    if (active === 'tab-trade') renderTradeTab();
   } catch (e) {
     errEl.textContent = e.message;
   } finally {
@@ -561,7 +652,7 @@ async function doRegister() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// UI — Collection Tab
+// UI - Collection Tab
 // ═══════════════════════════════════════════════════════════════
 function renderCollectionTab() {
   const wrap = document.getElementById('tab-content-collection');
@@ -576,27 +667,27 @@ function renderCollectionTab() {
   }
 
   const col = window.TCG_COLLECTION;
-  const owned = Object.entries(col).filter(([,q])=>q>0);
-  const totalOwned = owned.reduce((s,[,q])=>s+q,0);
+  const owned = Object.entries(col).filter(([, q]) => q > 0);
+  const totalOwned = owned.reduce((s, [, q]) => s + q, 0);
 
   const GROUPS = [
-    { key:'all',       label:'All' },
-    { key:'endo',      label:'Endos' },
-    { key:'classic',   label:'Classic' },
-    { key:'toy',       label:'Toy' },
-    { key:'withered',  label:'Withered' },
-    { key:'phantom',   label:'Phantom' },
-    { key:'shadow',    label:'Shadow' },
-    { key:'nightmare', label:'Nightmare' },
-    { key:'jacko',     label:'Jack-O' },
-    { key:'funtime',   label:'Funtime' },
-    { key:'scrap',     label:'Scrap' },
-    { key:'rockstar',  label:'Rockstar' },
-    { key:'item',      label:'Items' },
-    { key:'tool',      label:'Tools' },
-    { key:'supporter', label:'Supporters' },
-    { key:'energy',    label:'Energies' },
-    { key:'class',     label:'★ Classes' },
+    { key: 'all', label: 'All' },
+    { key: 'endo', label: 'Endos' },
+    { key: 'classic', label: 'Classic' },
+    { key: 'toy', label: 'Toy' },
+    { key: 'withered', label: 'Withered' },
+    { key: 'phantom', label: 'Phantom' },
+    { key: 'shadow', label: 'Shadow' },
+    { key: 'nightmare', label: 'Nightmare' },
+    { key: 'jacko', label: 'Jack-O' },
+    { key: 'funtime', label: 'Funtime' },
+    { key: 'scrap', label: 'Scrap' },
+    { key: 'rockstar', label: 'Rockstar' },
+    { key: 'item', label: 'Items' },
+    { key: 'tool', label: 'Tools' },
+    { key: 'supporter', label: 'Supporters' },
+    { key: 'energy', label: 'Energies' },
+    { key: 'class', label: '★ Classes' },
   ];
 
   wrap.innerHTML = `
@@ -604,7 +695,7 @@ function renderCollectionTab() {
       <span class="col-total">Collection: <strong>${totalOwned}</strong> cards (${owned.length} unique)</span>
     </div>
     <div class="class-filter-row">
-      ${GROUPS.map(g=>`<button class="class-filter-btn${g.key==='all'?' active':''}" data-col-filter="${g.key}" onclick="colFilter('${g.key}',this)">${g.label}</button>`).join('')}
+      ${GROUPS.map(g => `<button class="class-filter-btn${g.key === 'all' ? ' active' : ''}" data-col-filter="${g.key}" onclick="colFilter('${g.key}',this)">${g.label}</button>`).join('')}
     </div>
     <div id="col-card-grid" class="db-card-pool"></div>`;
 
@@ -614,7 +705,7 @@ function renderCollectionTab() {
 let _colFilter = 'all';
 function colFilter(cls, btn) {
   _colFilter = cls;
-  document.querySelectorAll('[data-col-filter]').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('[data-col-filter]').forEach(b => b.classList.remove('active'));
   btn?.classList.add('active');
   renderCollectionGrid(cls);
 }
@@ -629,13 +720,13 @@ function renderCollectionGrid(filter) {
   const cards = Object.values(CARDS_OBJ).filter(c => {
     if (c.summonOnly) return false;
     const owned = (col[c.id] || 0);
-    if (filter === 'all')      return true;
-    if (filter === 'class')    return c.type === 'class';
-    if (filter === 'endo')     return c.type === 'endo';
-    if (filter === 'item')     return c.type === 'item';
-    if (filter === 'tool')     return c.type === 'tool';
-    if (filter === 'supporter')return c.type === 'supporter';
-    if (filter === 'energy')   return c.type === 'energy';
+    if (filter === 'all') return true;
+    if (filter === 'class') return c.type === 'class';
+    if (filter === 'endo') return c.type === 'endo';
+    if (filter === 'item') return c.type === 'item';
+    if (filter === 'tool') return c.type === 'tool';
+    if (filter === 'supporter') return c.type === 'supporter';
+    if (filter === 'energy') return c.type === 'energy';
     return c.class === filter;
   });
 
@@ -655,7 +746,7 @@ function renderCollectionGrid(filter) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// UI — Booster Tab
+// UI - Booster Tab
 // ═══════════════════════════════════════════════════════════════
 let _boosterQty = 1;
 function changeBoosterQty(delta) {
@@ -707,9 +798,9 @@ function renderBoosterTab() {
           <div class="booster-card-desc">${b.desc}</div>
           <div class="booster-card-classes">
             ${b.classPool.map(cls => {
-              const cc = (window.CARDS||{})[cls];
-              return cc ? `<img src="${cc.img}" title="${cc.name}" class="booster-class-icon" onerror="this.style.display='none'" />` : '';
-            }).join('')}
+    const cc = (window.CARDS || {})[cls];
+    return cc ? `<img src="${cc.img}" title="${cc.name}" class="booster-class-icon" onerror="this.style.display='none'" />` : '';
+  }).join('')}
           </div>
           <button class="tcg-btn primary booster-open-btn" style="border-color:${b.color}"
             data-booster-id="${b.id}"
@@ -739,7 +830,7 @@ async function openBoosterUI(boosterId) {
 
   wrap.innerHTML = `
     <div class="booster-reveal" style="--bc:${bDef.color}">
-      <div class="booster-reveal-title" style="color:${bDef.color}">${bDef.name}${qty > 1 ? ` ×${qty}` : ''} — ${drawn.length} cards obtained!</div>
+      <div class="booster-reveal-title" style="color:${bDef.color}">${bDef.name}${qty > 1 ? ` ×${qty}` : ''} - ${drawn.length} cards obtained!</div>
       <div id="booster-reveal-grid" class="booster-reveal-grid"></div>
       <button class="tcg-btn primary" style="margin-top:16px;border-color:${bDef.color}" onclick="renderBoosterTab()">← Back</button>
     </div>`;
@@ -788,16 +879,16 @@ const _HATE_RX = [
 function _containsHate(msg) { return _HATE_RX.some(p => p.test(msg)); }
 
 // ── Room state ────────────────────────────────────────────────
-let _tradeRoom     = null;
-let _tradeRoomSub  = null;
+let _tradeRoom = null;
+let _tradeRoomSub = null;
 let _tradeRoomPoll = null;   // polling fallback interval
 let _tradeOtherCol = {};
-let _tradeMyPick   = {};     // { card_id: count } — +/- controlled
-let _tradeTheirPick= {};     // { card_id: count }
+let _tradeMyPick = {};     // { card_id: count } - +/- controlled
+let _tradeTheirPick = {};     // { card_id: count }
 
 function _genRoomCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  return Array.from({length:6}, ()=>chars[Math.floor(Math.random()*chars.length)]).join('');
+  return Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
 }
 
 // ── DB layer ──────────────────────────────────────────────────
@@ -826,7 +917,7 @@ async function tcgJoinTradeRoom(code) {
   if (!window.TCG_USER) throw new Error('Not logged in');
   const db = _getDB();
   const { data: room } = await db.from('tcg_trade_rooms')
-    .select('*').eq('code', code.toUpperCase().trim()).eq('status','waiting').maybeSingle();
+    .select('*').eq('code', code.toUpperCase().trim()).eq('status', 'waiting').maybeSingle();
   if (!room) throw new Error('Room not found or already full');
   if (room.creator_id === window.TCG_USER.id) throw new Error("Can't join your own room");
   const { data, error } = await db.from('tcg_trade_rooms').update({
@@ -838,16 +929,16 @@ async function tcgJoinTradeRoom(code) {
 }
 
 async function tcgCloseTradeRoom(roomId) {
-  await _getDB().from('tcg_trade_rooms').update({ status:'closed' }).eq('id', roomId);
+  await _getDB().from('tcg_trade_rooms').update({ status: 'closed' }).eq('id', roomId);
 }
 
 async function tcgSendTradeOffer(roomId, offeredCards, requestedCards) {
   if (!window.TCG_USER) throw new Error('Not logged in');
   if (!offeredCards.length && !requestedCards.length) throw new Error('Select at least one card');
   const tally = {};
-  offeredCards.forEach(id => { tally[id]=(tally[id]||0)+1; });
-  for (const [id,n] of Object.entries(tally))
-    if ((window.TCG_COLLECTION[id]||0) < n) throw new Error(`Not enough ${(window.CARDS||{})[id]?.name||id}`);
+  offeredCards.forEach(id => { tally[id] = (tally[id] || 0) + 1; });
+  for (const [id, n] of Object.entries(tally))
+    if ((window.TCG_COLLECTION[id] || 0) < n) throw new Error(`Not enough ${(window.CARDS || {})[id]?.name || id}`);
   const db = _getDB();
   const { data, error } = await db.from('tcg_trade_offers').insert({
     room_id: roomId, from_user_id: window.TCG_USER.id,
@@ -862,7 +953,7 @@ async function tcgRespondTradeOffer(offerId, accept) {
   if (!window.TCG_USER) throw new Error('Not logged in');
   const db = _getDB();
   if (!accept) {
-    await db.from('tcg_trade_offers').update({ status:'declined' })
+    await db.from('tcg_trade_offers').update({ status: 'declined' })
       .eq('id', offerId).neq('from_user_id', window.TCG_USER.id);
     return;
   }
@@ -870,34 +961,34 @@ async function tcgRespondTradeOffer(offerId, accept) {
   if (!offer || offer.status !== 'pending') throw new Error('Offer no longer available');
   if (offer.from_user_id === window.TCG_USER.id) throw new Error("Can't accept your own offer");
   const theirCol = await tcgGetCollection(offer.from_user_id);
-  const tO={}, tR={};
-  offer.offered_cards.forEach(id=>{tO[id]=(tO[id]||0)+1;});
-  offer.requested_cards.forEach(id=>{tR[id]=(tR[id]||0)+1;});
-  for (const [id,n] of Object.entries(tO))
-    if ((theirCol[id]||0)<n) throw new Error('Offerer no longer has all those cards');
-  for (const [id,n] of Object.entries(tR))
-    if ((window.TCG_COLLECTION[id]||0)<n) throw new Error(`Not enough ${(window.CARDS||{})[id]?.name||id}`);
+  const tO = {}, tR = {};
+  offer.offered_cards.forEach(id => { tO[id] = (tO[id] || 0) + 1; });
+  offer.requested_cards.forEach(id => { tR[id] = (tR[id] || 0) + 1; });
+  for (const [id, n] of Object.entries(tO))
+    if ((theirCol[id] || 0) < n) throw new Error('Offerer no longer has all those cards');
+  for (const [id, n] of Object.entries(tR))
+    if ((window.TCG_COLLECTION[id] || 0) < n) throw new Error(`Not enough ${(window.CARDS || {})[id]?.name || id}`);
   await _tcgUpsertCards(window.TCG_USER.id, [
-    ...Object.entries(tO).map(([id,n])=>({card_id:id,delta:+n})),
-    ...Object.entries(tR).map(([id,n])=>({card_id:id,delta:-n})),
+    ...Object.entries(tO).map(([id, n]) => ({ card_id: id, delta: +n })),
+    ...Object.entries(tR).map(([id, n]) => ({ card_id: id, delta: -n })),
   ]);
   await _tcgUpsertCards(offer.from_user_id, [
-    ...Object.entries(tO).map(([id,n])=>({card_id:id,delta:-n})),
-    ...Object.entries(tR).map(([id,n])=>({card_id:id,delta:+n})),
+    ...Object.entries(tO).map(([id, n]) => ({ card_id: id, delta: -n })),
+    ...Object.entries(tR).map(([id, n]) => ({ card_id: id, delta: +n })),
   ]);
-  await db.from('tcg_trade_offers').update({ status:'accepted' }).eq('id', offerId);
+  await db.from('tcg_trade_offers').update({ status: 'accepted' }).eq('id', offerId);
 }
 
 async function tcgCancelTradeOffer(offerId) {
-  await _getDB().from('tcg_trade_offers').update({ status:'cancelled' })
+  await _getDB().from('tcg_trade_offers').update({ status: 'cancelled' })
     .eq('id', offerId).eq('from_user_id', window.TCG_USER?.id);
 }
 
 async function tcgGetTradeOffers(roomId) {
   const { data } = await _getDB().from('tcg_trade_offers').select('*')
-    .eq('room_id', roomId).in('status',['pending','accepted','declined'])
-    .order('created_at',{ascending:false}).limit(30);
-  return data||[];
+    .eq('room_id', roomId).in('status', ['pending', 'accepted', 'declined'])
+    .order('created_at', { ascending: false }).limit(30);
+  return data || [];
 }
 
 async function tcgSendChat(roomId, msg) {
@@ -915,8 +1006,8 @@ async function tcgSendChat(roomId, msg) {
 
 async function tcgGetChat(roomId) {
   const { data } = await _getDB().from('tcg_trade_chat').select('*')
-    .eq('room_id', roomId).order('created_at',{ascending:true}).limit(100);
-  return data||[];
+    .eq('room_id', roomId).order('created_at', { ascending: true }).limit(100);
+  return data || [];
 }
 
 // ── Realtime + polling fallback ───────────────────────────────
@@ -925,15 +1016,15 @@ async function _subscribeTradeRoom(roomId) {
   const db = _getDB(); if (!db) return;
 
   _tradeRoomSub = db.channel(`tcg_tr_${roomId}`)
-    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'tcg_trade_rooms',filter:`id=eq.${roomId}`},
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'tcg_trade_rooms', filter: `id=eq.${roomId}` },
       async p => { await _handleRoomUpdate(p.new); })
-    .on('postgres_changes',{event:'*',schema:'public',table:'tcg_trade_offers',filter:`room_id=eq.${roomId}`},
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'tcg_trade_offers', filter: `room_id=eq.${roomId}` },
       () => _refreshOffers())
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'tcg_trade_chat',filter:`room_id=eq.${roomId}`},
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'tcg_trade_chat', filter: `room_id=eq.${roomId}` },
       p => _appendChatMsg(p.new))
     .subscribe();
 
-  // Always poll (2.5s) as fallback — works even without Realtime or same-window testing
+  // Always poll (2.5s) as fallback - works even without Realtime or same-window testing
   _tradeRoomPoll = setInterval(() => _pollTradeRoom(roomId), 2500);
 }
 
@@ -960,34 +1051,34 @@ async function _pollTradeRoom(roomId) {
 async function _handleRoomUpdate(roomData) {
   _tradeRoom = roomData;
   if (_tradeRoom.status === 'active' && !Object.keys(_tradeOtherCol).length) {
-    const oid = _tradeRoom.creator_id===window.TCG_USER?.id ? _tradeRoom.joiner_id : _tradeRoom.creator_id;
+    const oid = _tradeRoom.creator_id === window.TCG_USER?.id ? _tradeRoom.joiner_id : _tradeRoom.creator_id;
     if (oid) _tradeOtherCol = await tcgGetCollection(oid);
   }
   if (_tradeRoom.status === 'closed') {
-    _stopTradePoll(); _tradeRoom=null; renderTradeTab(); alert('The other player left.'); return;
+    _stopTradePoll(); _tradeRoom = null; renderTradeTab(); alert('The other player left.'); return;
   }
   _reRenderTradeRoom();
 }
 
 function _stopTradePoll() {
-  if (_tradeRoomPoll) { clearInterval(_tradeRoomPoll); _tradeRoomPoll=null; }
-  if (_tradeRoomSub) { try{_tradeRoomSub.unsubscribe();}catch(e){} _tradeRoomSub=null; }
+  if (_tradeRoomPoll) { clearInterval(_tradeRoomPoll); _tradeRoomPoll = null; }
+  if (_tradeRoomSub) { try { _tradeRoomSub.unsubscribe(); } catch (e) { } _tradeRoomSub = null; }
 }
 
 // ── Copy helper (fixes .then(b=>b.textContent) bug) ──────────
-window.copyTradeCode = function(code, btn) {
+window.copyTradeCode = function (code, btn) {
   const doFallback = () => {
     try {
       const ta = document.createElement('textarea');
-      ta.value = code; ta.style.position='fixed'; ta.style.opacity='0';
+      ta.value = code; ta.style.position = 'fixed'; ta.style.opacity = '0';
       document.body.appendChild(ta); ta.select(); document.execCommand('copy');
       document.body.removeChild(ta);
-    } catch(e) {}
-    btn.textContent = '✓ Copied'; setTimeout(()=>btn.textContent='Copy', 1500);
+    } catch (e) { }
+    btn.textContent = '✓ Copied'; setTimeout(() => btn.textContent = 'Copy', 1500);
   };
   if (navigator.clipboard) {
     navigator.clipboard.writeText(code)
-      .then(() => { btn.textContent='✓ Copied'; setTimeout(()=>btn.textContent='Copy',1500); })
+      .then(() => { btn.textContent = '✓ Copied'; setTimeout(() => btn.textContent = 'Copy', 1500); })
       .catch(doFallback);
   } else doFallback();
 };
@@ -1001,8 +1092,8 @@ function renderTradeTab() {
       <button class="tcg-btn primary" onclick="showAuthModal('login')">Login</button></div>`;
     return;
   }
-  if (_tradeRoom && _tradeRoom.status!=='closed') { _renderTradeRoomUI(); return; }
-  _tradeRoom=null;
+  if (_tradeRoom && _tradeRoom.status !== 'closed') { _renderTradeRoomUI(); return; }
+  _tradeRoom = null;
   wrap.innerHTML = `
     <div class="trade-landing">
       <h3 class="trade-section-title">Trading Room</h3>
@@ -1034,7 +1125,7 @@ function renderTradeTab() {
         <div id="trade-public-list">Loading…</div>
       </div>
     </div>`;
-  document.getElementById('trade-join-code')?.addEventListener('keydown', e=>{ if(e.key==='Enter') joinTradeRoomUI(); });
+  document.getElementById('trade-join-code')?.addEventListener('keydown', e => { if (e.key === 'Enter') joinTradeRoomUI(); });
   refreshPublicRooms();
 }
 
@@ -1058,7 +1149,7 @@ async function refreshPublicRooms() {
         <button class="tcg-btn small primary" onclick="joinPublicRoom('${r.code}')">Join</button>`;
       el.appendChild(row);
     });
-  } catch(e) { el.textContent = 'Could not load public rooms.'; }
+  } catch (e) { el.textContent = 'Could not load public rooms.'; }
 }
 window.refreshPublicRooms = refreshPublicRooms;
 
@@ -1070,58 +1161,58 @@ window.joinPublicRoom = joinPublicRoom;
 
 async function createTradeRoomUI() {
   const err = document.getElementById('trade-landing-err');
-  if(err) err.textContent='';
+  if (err) err.textContent = '';
   const isPublic = document.getElementById('trade-public-cb')?.checked || false;
   try {
     const room = await tcgCreateTradeRoom(isPublic);
-    _tradeRoom=room; _tradeOtherCol={}; _tradeMyPick={}; _tradeTheirPick={};
+    _tradeRoom = room; _tradeOtherCol = {}; _tradeMyPick = {}; _tradeTheirPick = {};
     await _subscribeTradeRoom(room.id);
     _renderTradeRoomUI();
-  } catch(e) { if(err) err.textContent=e.message; }
+  } catch (e) { if (err) err.textContent = e.message; }
 }
 
 async function joinTradeRoomUI() {
   const code = document.getElementById('trade-join-code')?.value?.trim();
   const err = document.getElementById('trade-landing-err');
-  if(err) err.textContent='';
-  if(!code){ if(err) err.textContent='Enter a room code'; return; }
+  if (err) err.textContent = '';
+  if (!code) { if (err) err.textContent = 'Enter a room code'; return; }
   try {
     const room = await tcgJoinTradeRoom(code);
-    _tradeRoom=room; _tradeMyPick={}; _tradeTheirPick={};
-    const oid = room.creator_id===window.TCG_USER.id ? room.joiner_id : room.creator_id;
+    _tradeRoom = room; _tradeMyPick = {}; _tradeTheirPick = {};
+    const oid = room.creator_id === window.TCG_USER.id ? room.joiner_id : room.creator_id;
     _tradeOtherCol = oid ? await tcgGetCollection(oid) : {};
     await _subscribeTradeRoom(room.id);
     _renderTradeRoomUI();
-  } catch(e) { if(err) err.textContent=e.message; }
+  } catch (e) { if (err) err.textContent = e.message; }
 }
 
 async function leaveTradeRoomUI() {
-  if(!_tradeRoom) return;
-  if(!confirm('Leave this trade room? Both players will be disconnected.')) return;
+  if (!_tradeRoom) return;
+  if (!confirm('Leave this trade room? Both players will be disconnected.')) return;
   await tcgCloseTradeRoom(_tradeRoom.id);
   _stopTradePoll();
-  _tradeRoom=null; _tradeOtherCol={}; _tradeMyPick={}; _tradeTheirPick={};
+  _tradeRoom = null; _tradeOtherCol = {}; _tradeMyPick = {}; _tradeTheirPick = {};
   renderTradeTab();
 }
-window.leaveTradeRoomUI=leaveTradeRoomUI;
+window.leaveTradeRoomUI = leaveTradeRoomUI;
 
 // ── Room UI ───────────────────────────────────────────────────
 function _renderTradeRoomUI() {
   const wrap = document.getElementById('tab-content-trade');
-  if(!wrap||!_tradeRoom) return;
-  const room=_tradeRoom;
-  const isCreator = room.creator_id===window.TCG_USER?.id;
+  if (!wrap || !_tradeRoom) return;
+  const room = _tradeRoom;
+  const isCreator = room.creator_id === window.TCG_USER?.id;
   const myName = window.TCG_USER.username;
-  const otherName = (isCreator ? room.joiner_username : room.creator_username)||'—';
+  const otherName = (isCreator ? room.joiner_username : room.creator_username) || '-';
 
-  if(room.status==='waiting') {
-    wrap.innerHTML=`
+  if (room.status === 'waiting') {
+    wrap.innerHTML = `
       <div class="trade-room-waiting">
         <div class="trade-room-code-display">
           <span>Room Code:</span>
           <strong class="trade-room-code">${room.code}</strong>
           <button class="tcg-btn small" onclick="copyTradeCode('${room.code}',this)">Copy</button>
-          <span class="trade-visibility-badge ${room.is_public?'pub':'prv'}">${room.is_public?'🌐 Public':'🔒 Private'}</span>
+          <span class="trade-visibility-badge ${room.is_public ? 'pub' : 'prv'}">${room.is_public ? '🌐 Public' : '🔒 Private'}</span>
         </div>
         <p style="color:var(--text-muted);font-size:.85rem;margin:10px 0">Waiting for another player to join…</p>
         <div class="trade-spinner"></div>
@@ -1130,7 +1221,7 @@ function _renderTradeRoomUI() {
     return;
   }
 
-  wrap.innerHTML=`
+  wrap.innerHTML = `
     <div class="trade-room-header">
       <button class="tcg-btn small danger" onclick="leaveTradeRoomUI()">✕ Leave</button>
       <span class="trade-room-id">Room <strong>${room.code}</strong></span>
@@ -1156,9 +1247,9 @@ function _renderTradeRoomUI() {
         </div>
         <div class="trade-propose-bar">
           <div class="trade-propose-summary">
-            <div id="trade-my-picks" class="trade-picks-list">—</div>
+            <div id="trade-my-picks" class="trade-picks-list">-</div>
             <span class="trade-propose-arrow">⇄</span>
-            <div id="trade-their-picks" class="trade-picks-list">—</div>
+            <div id="trade-their-picks" class="trade-picks-list">-</div>
           </div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
             <button class="tcg-btn primary" onclick="proposeTradeUI()">Propose Trade</button>
@@ -1185,54 +1276,54 @@ function _renderTradeRoomUI() {
     </div>`;
 
   _renderMyCol(); _renderTheirCol(); _refreshOffers(); _loadChatHistory();
-  document.getElementById('trade-chat-input')?.addEventListener('keydown', e=>{ if(e.key==='Enter') sendChatUI(); });
+  document.getElementById('trade-chat-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') sendChatUI(); });
 }
 
 function _reRenderTradeRoom() {
-  if(!_tradeRoom||_tradeRoom.status==='closed') return;
-  if(document.querySelector('.trade-room-body')) { _refreshOffers(); _renderMyCol(); _renderTheirCol(); }
+  if (!_tradeRoom || _tradeRoom.status === 'closed') return;
+  if (document.querySelector('.trade-room-body')) { _refreshOffers(); _renderMyCol(); _renderTheirCol(); }
   else _renderTradeRoomUI();
 }
 
 // ── Collection cards inside room (+/- selection) ─────────────
 function _renderMyCol() {
-  const grid=document.getElementById('trade-my-col'); if(!grid) return;
-  grid.innerHTML='';
-  const myCards = Object.values(window.CARDS||{})
-    .filter(c=>!c.summonOnly && (window.TCG_COLLECTION[c.id]||0)>0);
+  const grid = document.getElementById('trade-my-col'); if (!grid) return;
+  grid.innerHTML = '';
+  const myCards = Object.values(window.CARDS || {})
+    .filter(c => !c.summonOnly && (window.TCG_COLLECTION[c.id] || 0) > 0);
   if (!myCards.length) {
-    grid.innerHTML='<div style="color:var(--text-muted);font-size:.72rem;padding:8px">No cards to offer.<br>Open boosters to get cards!</div>';
+    grid.innerHTML = '<div style="color:var(--text-muted);font-size:.72rem;padding:8px">No cards to offer.<br>Open boosters to get cards!</div>';
   } else {
-    myCards.forEach(card=>grid.appendChild(
-      _tradeCardEl(card, window.TCG_COLLECTION[card.id]||0, _tradeMyPick[card.id]||0, 'my')));
+    myCards.forEach(card => grid.appendChild(
+      _tradeCardEl(card, window.TCG_COLLECTION[card.id] || 0, _tradeMyPick[card.id] || 0, 'my')));
   }
   _updatePickSummary();
 }
 
 function _renderTheirCol() {
-  const grid=document.getElementById('trade-their-col'); if(!grid) return;
-  grid.innerHTML='';
-  const theirCards = Object.entries(_tradeOtherCol).filter(([,q])=>q>0);
+  const grid = document.getElementById('trade-their-col'); if (!grid) return;
+  grid.innerHTML = '';
+  const theirCards = Object.entries(_tradeOtherCol).filter(([, q]) => q > 0);
   if (!theirCards.length) {
     const msg = Object.keys(_tradeOtherCol).length === 0
       ? '<div style="color:var(--text-muted);font-size:.72rem;padding:8px">Waiting for their collection to load…</div>'
       : '<div style="color:var(--text-muted);font-size:.72rem;padding:8px">Other player has no cards.</div>';
     grid.innerHTML = msg;
   } else {
-    theirCards.forEach(([id,qty])=>{
-      const card=(window.CARDS||{})[id]; if(!card||card.summonOnly) return;
-      grid.appendChild(_tradeCardEl(card, qty, _tradeTheirPick[id]||0, 'their'));
+    theirCards.forEach(([id, qty]) => {
+      const card = (window.CARDS || {})[id]; if (!card || card.summonOnly) return;
+      grid.appendChild(_tradeCardEl(card, qty, _tradeTheirPick[id] || 0, 'their'));
     });
   }
   _updatePickSummary();
 }
 
 function _tradeCardEl(card, owned, selected, side) {
-  const el=document.createElement('div');
-  el.className='trade-card-item'+(selected>0?' selected':'');
-  el.dataset.cardId=card.id; el.dataset.side=side;
-  el.innerHTML=`
-    <img src="${card.img}" onerror="this.src='${window.GENERIC||''}'" />
+  const el = document.createElement('div');
+  el.className = 'trade-card-item' + (selected > 0 ? ' selected' : '');
+  el.dataset.cardId = card.id; el.dataset.side = side;
+  el.innerHTML = `
+    <img src="${card.img}" onerror="this.src='${window.GENERIC || ''}'" />
     <div class="tci-name">${card.name}</div>
     <div class="tci-owned">Own: ${owned}</div>
     <div class="tci-controls">
@@ -1244,95 +1335,95 @@ function _tradeCardEl(card, owned, selected, side) {
 }
 
 function tradePickDelta(side, cardId, delta) {
-  const picks = side==='my' ? _tradeMyPick : _tradeTheirPick;
-  const maxOwned = side==='my' ? (window.TCG_COLLECTION[cardId]||0) : (_tradeOtherCol[cardId]||0);
-  const cur = picks[cardId]||0;
-  const next = Math.max(0, Math.min(maxOwned, cur+delta));
-  if(next===0) delete picks[cardId]; else picks[cardId]=next;
+  const picks = side === 'my' ? _tradeMyPick : _tradeTheirPick;
+  const maxOwned = side === 'my' ? (window.TCG_COLLECTION[cardId] || 0) : (_tradeOtherCol[cardId] || 0);
+  const cur = picks[cardId] || 0;
+  const next = Math.max(0, Math.min(maxOwned, cur + delta));
+  if (next === 0) delete picks[cardId]; else picks[cardId] = next;
 
   // Update count display and card highlight without full re-render
-  const countEl=document.getElementById(`tci-count-${side}-${cardId}`);
-  if(countEl) countEl.textContent=next;
-  const cardEl=countEl?.closest('.trade-card-item');
-  if(cardEl) cardEl.className='trade-card-item'+(next>0?' selected':'');
+  const countEl = document.getElementById(`tci-count-${side}-${cardId}`);
+  if (countEl) countEl.textContent = next;
+  const cardEl = countEl?.closest('.trade-card-item');
+  if (cardEl) cardEl.className = 'trade-card-item' + (next > 0 ? ' selected' : '');
 
   _updatePickSummary();
 }
-window.tradePickDelta=tradePickDelta;
+window.tradePickDelta = tradePickDelta;
 
 function _updatePickSummary() {
-  const C=window.CARDS||{};
-  const _fmt=picks=>{
-    const entries=Object.entries(picks).filter(([,n])=>n>0);
-    if(!entries.length) return '<em style="color:var(--text-muted)">Nothing</em>';
-    return entries.map(([id,n])=>`<span class="trade-pick-chip">
-      <img src="${C[id]?.img||''}" onerror="this.style.display='none'" />${C[id]?.name||id}${n>1?` ×${n}`:''}</span>`).join('');
+  const C = window.CARDS || {};
+  const _fmt = picks => {
+    const entries = Object.entries(picks).filter(([, n]) => n > 0);
+    if (!entries.length) return '<em style="color:var(--text-muted)">Nothing</em>';
+    return entries.map(([id, n]) => `<span class="trade-pick-chip">
+      <img src="${C[id]?.img || ''}" onerror="this.style.display='none'" />${C[id]?.name || id}${n > 1 ? ` ×${n}` : ''}</span>`).join('');
   };
-  const mp=document.getElementById('trade-my-picks'), tp=document.getElementById('trade-their-picks');
-  const mb=document.getElementById('my-pick-badge'), tb=document.getElementById('their-pick-badge');
-  const myTotal=Object.values(_tradeMyPick).reduce((a,b)=>a+b,0);
-  const theirTotal=Object.values(_tradeTheirPick).reduce((a,b)=>a+b,0);
-  if(mp) mp.innerHTML=_fmt(_tradeMyPick);
-  if(tp) tp.innerHTML=_fmt(_tradeTheirPick);
-  if(mb) mb.textContent=myTotal?`(${myTotal})`:'';
-  if(tb) tb.textContent=theirTotal?`(${theirTotal})`:'';
+  const mp = document.getElementById('trade-my-picks'), tp = document.getElementById('trade-their-picks');
+  const mb = document.getElementById('my-pick-badge'), tb = document.getElementById('their-pick-badge');
+  const myTotal = Object.values(_tradeMyPick).reduce((a, b) => a + b, 0);
+  const theirTotal = Object.values(_tradeTheirPick).reduce((a, b) => a + b, 0);
+  if (mp) mp.innerHTML = _fmt(_tradeMyPick);
+  if (tp) tp.innerHTML = _fmt(_tradeTheirPick);
+  if (mb) mb.textContent = myTotal ? `(${myTotal})` : '';
+  if (tb) tb.textContent = theirTotal ? `(${theirTotal})` : '';
 }
 
-function clearTradePicksUI(){
-  _tradeMyPick={}; _tradeTheirPick={};
+function clearTradePicksUI() {
+  _tradeMyPick = {}; _tradeTheirPick = {};
   // Reset all counters without full re-render
-  document.querySelectorAll('.tci-count').forEach(el=>el.textContent='0');
-  document.querySelectorAll('.trade-card-item.selected').forEach(el=>el.classList.remove('selected'));
+  document.querySelectorAll('.tci-count').forEach(el => el.textContent = '0');
+  document.querySelectorAll('.trade-card-item.selected').forEach(el => el.classList.remove('selected'));
   _updatePickSummary();
 }
-window.clearTradePicksUI=clearTradePicksUI;
+window.clearTradePicksUI = clearTradePicksUI;
 
-async function proposeTradeUI(){
-  const err=document.getElementById('trade-propose-err'); if(err) err.textContent='';
+async function proposeTradeUI() {
+  const err = document.getElementById('trade-propose-err'); if (err) err.textContent = '';
   // Convert objects to flat arrays (repeated entries for quantity)
-  const myCards = Object.entries(_tradeMyPick).flatMap(([id,n])=>Array(n).fill(id));
-  const theirCards = Object.entries(_tradeTheirPick).flatMap(([id,n])=>Array(n).fill(id));
-  try{
+  const myCards = Object.entries(_tradeMyPick).flatMap(([id, n]) => Array(n).fill(id));
+  const theirCards = Object.entries(_tradeTheirPick).flatMap(([id, n]) => Array(n).fill(id));
+  try {
     await tcgSendTradeOffer(_tradeRoom.id, myCards, theirCards);
-    _tradeMyPick={}; _tradeTheirPick={};
-    document.querySelectorAll('.tci-count').forEach(el=>el.textContent='0');
-    document.querySelectorAll('.trade-card-item.selected').forEach(el=>el.classList.remove('selected'));
+    _tradeMyPick = {}; _tradeTheirPick = {};
+    document.querySelectorAll('.tci-count').forEach(el => el.textContent = '0');
+    document.querySelectorAll('.trade-card-item.selected').forEach(el => el.classList.remove('selected'));
     _updatePickSummary(); _refreshOffers();
-  }catch(e){if(err)err.textContent=e.message;}
+  } catch (e) { if (err) err.textContent = e.message; }
 }
-window.proposeTradeUI=proposeTradeUI;
+window.proposeTradeUI = proposeTradeUI;
 
 // ── Offers ────────────────────────────────────────────────────
-async function _refreshOffers(){
-  const el=document.getElementById('trade-offers-list'); if(!el||!_tradeRoom) return;
-  const offers=await tcgGetTradeOffers(_tradeRoom.id);
+async function _refreshOffers() {
+  const el = document.getElementById('trade-offers-list'); if (!el || !_tradeRoom) return;
+  const offers = await tcgGetTradeOffers(_tradeRoom.id);
 
   // If any of MY offers just got accepted, reload my collection from DB
-  const myAccepted = offers.find(o => o.from_user_id===window.TCG_USER?.id && o.status==='accepted');
+  const myAccepted = offers.find(o => o.from_user_id === window.TCG_USER?.id && o.status === 'accepted');
   if (myAccepted && window.TCG_USER) {
     const fresh = await tcgGetCollection(window.TCG_USER.id);
     // Only update if something actually changed
-    const changed = Object.entries(fresh).some(([id,q]) => window.TCG_COLLECTION[id] !== q)
-                 || Object.keys(window.TCG_COLLECTION).some(id => !(id in fresh));
+    const changed = Object.entries(fresh).some(([id, q]) => window.TCG_COLLECTION[id] !== q)
+      || Object.keys(window.TCG_COLLECTION).some(id => !(id in fresh));
     if (changed) {
       window.TCG_COLLECTION = fresh;
       _renderMyCol();
       // Also refresh their col since trade changed it
-      const oid = _tradeRoom.creator_id===window.TCG_USER.id ? _tradeRoom.joiner_id : _tradeRoom.creator_id;
+      const oid = _tradeRoom.creator_id === window.TCG_USER.id ? _tradeRoom.joiner_id : _tradeRoom.creator_id;
       if (oid) { _tradeOtherCol = await tcgGetCollection(oid); _renderTheirCol(); }
     }
   }
-  const C=window.CARDS||{};
-  const chips=arr=>arr.map(id=>`<span class="trade-pick-chip sm">
-    <img src="${C[id]?.img||''}" onerror="this.style.display='none'"/>${C[id]?.name||id}</span>`).join('');
-  if(!offers.length){el.innerHTML='<div style="color:var(--text-muted);font-size:.8rem;padding:6px">No offers yet.</div>';return;}
-  el.innerHTML='';
-  offers.forEach(o=>{
-    const isMine=o.from_user_id===window.TCG_USER?.id;
-    const sc={pending:'#aaa',accepted:'#7d7',declined:'#d77',cancelled:'#888'}[o.status]||'#aaa';
-    const div=document.createElement('div');
-    div.className='trade-offer-row';
-    div.innerHTML=`
+  const C = window.CARDS || {};
+  const chips = arr => arr.map(id => `<span class="trade-pick-chip sm">
+    <img src="${C[id]?.img || ''}" onerror="this.style.display='none'"/>${C[id]?.name || id}</span>`).join('');
+  if (!offers.length) { el.innerHTML = '<div style="color:var(--text-muted);font-size:.8rem;padding:6px">No offers yet.</div>'; return; }
+  el.innerHTML = '';
+  offers.forEach(o => {
+    const isMine = o.from_user_id === window.TCG_USER?.id;
+    const sc = { pending: '#aaa', accepted: '#7d7', declined: '#d77', cancelled: '#888' }[o.status] || '#aaa';
+    const div = document.createElement('div');
+    div.className = 'trade-offer-row';
+    div.innerHTML = `
       <span class="trade-offer-by">👤 ${_escHtml(o.from_username)}</span>
       <div class="trade-offer-cards">
         <div class="trade-picks-list sm">${chips(o.offered_cards)}</div>
@@ -1341,11 +1432,11 @@ async function _refreshOffers(){
       </div>
       <span class="trade-offer-status" style="color:${sc}">${o.status}</span>
       <div class="trade-offer-btns">
-        ${o.status==='pending'?(isMine
-          ?`<button class="tcg-btn small" onclick="cancelOfferUI('${o.id}')">Cancel</button>`
-          :`<button class="tcg-btn small primary" onclick="acceptOfferUI('${o.id}')">Accept</button>
+        ${o.status === 'pending' ? (isMine
+        ? `<button class="tcg-btn small" onclick="cancelOfferUI('${o.id}')">Cancel</button>`
+        : `<button class="tcg-btn small primary" onclick="acceptOfferUI('${o.id}')">Accept</button>
             <button class="tcg-btn small" onclick="declineOfferUI('${o.id}')">Decline</button>`
-        ):''}
+      ) : ''}
       </div>`;
     el.appendChild(div);
   });
@@ -1360,46 +1451,46 @@ async function acceptOfferUI(id) {
       ? _tradeRoom?.joiner_id : _tradeRoom?.creator_id;
     if (oid) _tradeOtherCol = await tcgGetCollection(oid);
     _renderMyCol(); _renderTheirCol(); _refreshOffers();
-  } catch(e) { alert(e.message); }
+  } catch (e) { alert(e.message); }
 }
-async function declineOfferUI(id){try{await tcgRespondTradeOffer(id,false);_refreshOffers();}catch(e){alert(e.message);}}
-async function cancelOfferUI(id){try{await tcgCancelTradeOffer(id);_refreshOffers();}catch(e){alert(e.message);}}
-window.acceptOfferUI=acceptOfferUI;window.declineOfferUI=declineOfferUI;window.cancelOfferUI=cancelOfferUI;
+async function declineOfferUI(id) { try { await tcgRespondTradeOffer(id, false); _refreshOffers(); } catch (e) { alert(e.message); } }
+async function cancelOfferUI(id) { try { await tcgCancelTradeOffer(id); _refreshOffers(); } catch (e) { alert(e.message); } }
+window.acceptOfferUI = acceptOfferUI; window.declineOfferUI = declineOfferUI; window.cancelOfferUI = cancelOfferUI;
 
 // ── Chat ──────────────────────────────────────────────────────
-async function _loadChatHistory(){
-  const msgs=await tcgGetChat(_tradeRoom?.id);
-  const box=document.getElementById('trade-chat-msgs'); if(!box) return;
-  box.innerHTML='';
-  msgs.forEach(m=>_appendChatMsg(m));
+async function _loadChatHistory() {
+  const msgs = await tcgGetChat(_tradeRoom?.id);
+  const box = document.getElementById('trade-chat-msgs'); if (!box) return;
+  box.innerHTML = '';
+  msgs.forEach(m => _appendChatMsg(m));
 }
 
-function _appendChatMsg(msg){
-  const box=document.getElementById('trade-chat-msgs'); if(!box) return;
-  const isMine=msg.user_id===window.TCG_USER?.id;
-  const div=document.createElement('div');
-  div.className='trade-chat-msg'+(isMine?' mine':'');
-  div.innerHTML=`<span class="chat-user">${_escHtml(msg.username)}</span><span class="chat-text">${_escHtml(msg.message)}</span>`;
+function _appendChatMsg(msg) {
+  const box = document.getElementById('trade-chat-msgs'); if (!box) return;
+  const isMine = msg.user_id === window.TCG_USER?.id;
+  const div = document.createElement('div');
+  div.className = 'trade-chat-msg' + (isMine ? ' mine' : '');
+  div.innerHTML = `<span class="chat-user">${_escHtml(msg.username)}</span><span class="chat-text">${_escHtml(msg.message)}</span>`;
   box.appendChild(div);
-  box.scrollTop=box.scrollHeight;
+  box.scrollTop = box.scrollHeight;
 }
 
-async function sendChatUI(){
-  const input=document.getElementById('trade-chat-input');
-  const err=document.getElementById('trade-chat-err');
-  if(!input||!_tradeRoom) return;
-  if(err) err.textContent='';
-  try{ const ok=await tcgSendChat(_tradeRoom.id,input.value); if(ok) input.value=''; }
-  catch(e){ if(err) err.textContent=e.message; }
+async function sendChatUI() {
+  const input = document.getElementById('trade-chat-input');
+  const err = document.getElementById('trade-chat-err');
+  if (!input || !_tradeRoom) return;
+  if (err) err.textContent = '';
+  try { const ok = await tcgSendChat(_tradeRoom.id, input.value); if (ok) input.value = ''; }
+  catch (e) { if (err) err.textContent = e.message; }
 }
-window.sendChatUI=sendChatUI;
+window.sendChatUI = sendChatUI;
 
 // ═══════════════════════════════════════════════════════════════
-// Deck Builder — collection awareness
+// Deck Builder - collection awareness
 // ═══════════════════════════════════════════════════════════════
 
 // Called by tcg.js renderCardPool to get the effective limit for a card
-window.tcgCollectionLimit = function(cardId, cardMaxCopies) {
+window.tcgCollectionLimit = function (cardId, cardMaxCopies) {
   if (!window.TCG_USER) return null; // null = no restriction (not logged in)
   return Math.min(cardMaxCopies || 3, window.TCG_COLLECTION[cardId] || 0);
 };
@@ -1427,7 +1518,7 @@ function renderDeckBuilderGate() {
 // ═══════════════════════════════════════════════════════════════
 // Points award helper (called from tcg.js after a game ends)
 // ═══════════════════════════════════════════════════════════════
-window.tcgAwardMatchPoints = async function(winnerName) {
+window.tcgAwardMatchPoints = async function (winnerName) {
   if (!window.TCG_USER) return null;
   const isWinner = window.TCG_USER.username === winnerName?.toLowerCase();
   const pts = 5 + (isWinner ? 5 : 0);
@@ -1457,14 +1548,14 @@ function switchTab(tab) {
 
   // New tabs
   if (tab === 'collection') renderCollectionTab();
-  if (tab === 'booster')    renderBoosterTab();
-  if (tab === 'trade')      renderTradeTab();
+  if (tab === 'booster') renderBoosterTab();
+  if (tab === 'trade') renderTradeTab();
 }
 window.switchTab = switchTab;
 
 // ── Utility ───────────────────────────────────────────────────
 function _escHtml(s) {
-  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1495,3 +1586,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   renderAuthBar();
 });
+
+// ── Dev: tcgGiveAll(n) ───────────────────────────────────────
+// Call from the browser console: tcgGiveAll() or tcgGiveAll(4)
+window.tcgGiveAll = async function(n = 12) {
+  if (!window.TCG_USER) { console.error('[tcgGiveAll] Not logged in!'); return; }
+  const db = _getDB(); if (!db) { console.error('[tcgGiveAll] No DB!'); return; }
+  const allIds = Object.keys(window.CARDS || {});
+  if (!allIds.length) { console.error('[tcgGiveAll] CARDS not loaded yet!'); return; }
+  console.log(`[tcgGiveAll] Setting ${allIds.length} cards to ${n}…`);
+  await db.from('tcg_user_cards').delete().eq('user_id', window.TCG_USER.id);
+  const rows = allIds.map(card_id => ({ user_id: window.TCG_USER.id, card_id, quantity: n }));
+  const { error } = await db.from('tcg_user_cards').insert(rows);
+  if (error) { console.error('[tcgGiveAll] DB error:', error); return; }
+  allIds.forEach(id => { window.TCG_COLLECTION[id] = n; });
+  console.log(`[tcgGiveAll] Done! ${allIds.length} cards set to ${n}.`);
+  if (typeof renderCollectionTab === 'function') renderCollectionTab();
+};

@@ -1,9 +1,9 @@
 /* =======================================================
        Quote Guesser Mode
-       — Show a random quote from QUOTES
-       — Dropdown only shows characters that have at least one quote
-       — Endless or Daily mode via ?mode= URL param
-       — 6 attempts
+       - Show a random quote from QUOTES
+       - Dropdown only shows characters that have at least one quote
+       - Endless or Daily mode via ?mode= URL param
+       - 6 attempts
 ======================================================= */
 
 // Characters that have at least one quote in the QUOTES array
@@ -18,14 +18,14 @@ const QUOTES_FILTERED = QUOTES.filter(q =>
 
 const QUOTE_MAX_GUESSES = 6;
 
-let quoteTarget  = null;  // { quote, said } — the active quote entry
-let quoteChar    = null;  // CHARS entry for quoteTarget.said
+let quoteTarget = null;  // { quote, said } - the active quote entry
+let quoteChar = null;  // CHARS entry for quoteTarget.said
 let quoteGuesses = [];
 let quoteGameOver = false;
-let quoteMode    = 'endless';
-let quoteSelIdx  = -1;
+let quoteMode = 'endless';
+let quoteSelIdx = -1;
 
-const qInput    = document.getElementById('search-input');
+const qInput = document.getElementById('search-input');
 const qDropdown = document.getElementById('dropdown');
 
 // ─── Censor character name ────────────────────────────────
@@ -37,7 +37,7 @@ function censorName(name) {
 // ─── Daily seed ───────────────────────────────────────────
 
 function getDailyQuoteIndex() {
-  const now  = new Date();
+  const now = new Date();
   const seed = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate() + 3141;
   let h = seed ^ 0xdeadbeef;
   h = Math.imul(h ^ (h >>> 16), 0x45d9f3b);
@@ -79,7 +79,7 @@ function getDailyQuoteProgressKey() {
   return `fnaf_quote_daily_progress_${now.getFullYear()}_${now.getMonth() + 1}_${now.getDate()}`;
 }
 function saveDailyQuoteProgress() {
-  try { localStorage.setItem(getDailyQuoteProgressKey(), JSON.stringify({ guessNames: quoteGuesses.map(g => g.name) })); } catch {}
+  try { localStorage.setItem(getDailyQuoteProgressKey(), JSON.stringify({ guessNames: quoteGuesses.map(g => g.name) })); } catch { }
 }
 function clearDailyQuoteProgress() {
   localStorage.removeItem(getDailyQuoteProgressKey());
@@ -88,10 +88,10 @@ function clearDailyQuoteProgress() {
 // ─── Init ─────────────────────────────────────────────────
 
 function initQuote(mode) {
-  quoteMode     = mode || 'endless';
-  quoteGuesses  = [];
+  quoteMode = mode || 'endless';
+  quoteGuesses = [];
   quoteGameOver = false;
-  quoteSelIdx   = -1;
+  quoteSelIdx = -1;
 
   if (quoteMode === 'daily') {
     document.getElementById('quote-mode-badge').textContent = T('quote.badgeDaily');
@@ -115,9 +115,9 @@ function initQuote(mode) {
         : T('quote.alreadyLostMsg', { said: previous.saidName });
 
       renderResultChar(quoteChar);
-      document.getElementById('quote-text').textContent = (function(t) {
-    return _isAprilFools() ? t.split('').map(function(c){return (c===' '||c==='\n')?c:(Math.random()<0.95?'█':c);}).join('') : t;
-  })(censorQuoteText(quoteTarget.quote, quoteTarget.said));
+      document.getElementById('quote-text').textContent = (function (t) {
+        return _isAprilFools() ? t.split('').map(function (c) { return (c === ' ' || c === '\n') ? c : (Math.random() < 0.95 ? '█' : c); }).join('') : t;
+      })(censorQuoteText(quoteTarget.quote, quoteTarget.said));
       return;
     }
 
@@ -134,8 +134,8 @@ function initQuote(mode) {
       qInput.placeholder = T('quote.placeholder');
       document.getElementById('search-area').style.display = '';
       qDropdown.style.display = 'none';
-      document.getElementById('quote-text').textContent = (function(t) {
-        return _isAprilFools() ? t.split('').map(function(c){return (c===' '||c==='\n')?c:(Math.random()<0.95?'█':c);}).join('') : t;
+      document.getElementById('quote-text').textContent = (function (t) {
+        return _isAprilFools() ? t.split('').map(function (c) { return (c === ' ' || c === '\n') ? c : (Math.random() < 0.95 ? '█' : c); }).join('') : t;
       })(censorQuoteText(quoteTarget.quote, quoteTarget.said));
       qProgress.guessNames.forEach(function (name) {
         const char = CHARS_WITH_QUOTES.find(function (c) { return c.name === name; });
@@ -151,15 +151,15 @@ function initQuote(mode) {
 
   quoteChar = CHARS.find(c => c.name === quoteTarget.said) || null;
 
-  document.getElementById('quote-text').textContent = (function(t) {
-    return _isAprilFools() ? t.split('').map(function(c){return (c===' '||c==='\n')?c:(Math.random()<0.95?'█':c);}).join('') : t;
+  document.getElementById('quote-text').textContent = (function (t) {
+    return _isAprilFools() ? t.split('').map(function (c) { return (c === ' ' || c === '\n') ? c : (Math.random() < 0.95 ? '█' : c); }).join('') : t;
   })(censorQuoteText(quoteTarget.quote, quoteTarget.said));
   document.getElementById('guesses-list').innerHTML = '';
   document.getElementById('result-banner').classList.remove('show', 'lose');
   document.getElementById('attempts-left').textContent = '';
 
-  qInput.disabled    = false;
-  qInput.value       = '';
+  qInput.disabled = false;
+  qInput.value = '';
   qInput.placeholder = T('quote.placeholder');
   document.getElementById('search-area').style.display = '';
   qDropdown.style.display = 'none';
@@ -171,7 +171,7 @@ function initQuote(mode) {
 // ─── Attempts display ─────────────────────────────────────
 
 function updateQuoteAttemptsLeft() {
-  const el  = document.getElementById('attempts-left');
+  const el = document.getElementById('attempts-left');
   const rem = QUOTE_MAX_GUESSES - quoteGuesses.length;
   el.textContent = quoteGameOver ? '' : T('quote.triesLeft', { rem, max: QUOTE_MAX_GUESSES });
 }
@@ -179,7 +179,7 @@ function updateQuoteAttemptsLeft() {
 // ─── Dropdown ─────────────────────────────────────────────
 
 function renderQuoteDropdown() {
-  const q        = qInput.value.trim().toLowerCase();
+  const q = qInput.value.trim().toLowerCase();
   const filtered = CHARS_WITH_QUOTES.filter(c =>
     (q === '' || c.name.toLowerCase().includes(q)) &&
     !quoteGuesses.some(g => g.name === c.name)
@@ -191,7 +191,7 @@ function renderQuoteDropdown() {
   filtered.forEach(char => {
     const item = document.createElement('div');
     item.className = 'dropdown-item';
-    item.tabIndex  = -1;
+    item.tabIndex = -1;
 
     if (char.img) {
       const img = document.createElement('img');
@@ -226,7 +226,7 @@ function submitQuoteGuess(char) {
   if (quoteMode === 'daily') saveDailyQuoteProgress();
   qInput.value = '';
   qDropdown.style.display = 'none';
-  quoteSelIdx  = -1;
+  quoteSelIdx = -1;
 
   const correct = char.name === quoteTarget.said;
   renderQuoteGuess(char, correct);
@@ -252,19 +252,19 @@ function renderQuoteGuess(char, correct) {
     item.appendChild(img);
   } else {
     const ph = document.createElement('div');
-    ph.className   = 'placeholder-avatar';
+    ph.className = 'placeholder-avatar';
     ph.textContent = '?';
     ph.style.cssText = 'width:40px;height:40px;font-size:1.2rem;flex-shrink:0;';
     item.appendChild(ph);
   }
 
   const nameEl = document.createElement('span');
-  nameEl.className   = 'guess-name';
+  nameEl.className = 'guess-name';
   nameEl.textContent = char.name;
   item.appendChild(nameEl);
 
   const icon = document.createElement('span');
-  icon.className   = 'quote-guess-icon';
+  icon.className = 'quote-guess-icon';
   icon.textContent = correct ? '✅' : '❌';
   item.appendChild(icon);
 
@@ -298,17 +298,17 @@ function endQuoteGame(won) {
     updateStats('endless', won, quoteGuesses.length);
   }
 
-  const banner  = document.getElementById('result-banner');
+  const banner = document.getElementById('result-banner');
   const titleEl = document.getElementById('result-title');
-  const msgEl   = document.getElementById('result-msg');
+  const msgEl = document.getElementById('result-msg');
 
-  if (!won) triggerFreddyJumpscare(() => {});
+  if (!won) triggerFreddyJumpscare(() => { });
 
   banner.classList.add('show');
   if (!won) banner.classList.add('lose');
 
   titleEl.textContent = won ? T('quote.won') : T('game.gameOver');
-  msgEl.textContent   = won
+  msgEl.textContent = won
     ? T('quote.guessedIn', { said: quoteTarget.said, count: quoteGuesses.length, pl: quoteGuesses.length !== 1 ? 'ies' : 'y' })
     : T('quote.betterLuck', { said: quoteTarget.said });
 
