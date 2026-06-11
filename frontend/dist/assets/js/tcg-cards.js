@@ -161,10 +161,10 @@ window.CARDS_DB = {
   },
   party_freddy: {
     id: 'party_freddy', name: 'Party Freddy', type: 'shell', class: 'classic',
-    hp: 175, wakeThreshold: 2, energyType: 'remnant', requiredShell: 'golden_freddy',
+    hp: 175, wakeThreshold: 4, energyType: 'remnant', requiredShell: 'golden_freddy',
     img: 'classic/party_freddy.png',
     attacks: [
-      { name: 'Grand Finale', cost: 3, type: 'single', damage: 100, desc: 'Deals 100 damage to 1 enemy.' }
+      { name: 'Grand Finale', cost: 5, type: 'single', damage: 100, desc: 'Deals 100 damage to 1 enemy.' }
     ],
     ability: { name: 'Party Spirit', desc: 'Once per turn: heal 10 HP to all allies.', id: 'party_spirit' }
   },
@@ -297,7 +297,7 @@ window.CARDS_DB = {
     img: 'springlock/fredbear.png',
     attacks: [
       { name: 'Fredbear Bite', cost: 2, type: 'stall', stallTargets: 2, stallTurns: 2 },
-      { name: 'Golden Collapse', cost: 3, type: 'single', damage: 90 }
+      { name: 'Golden Collapse', cost: 4, type: 'single', damage: 90 }
     ]
   },
   springbonnie: {
@@ -407,7 +407,7 @@ window.CARDS_DB = {
     img: 'nightmare/nightmare_fredbear.png',
     attacks: [
       { name: 'Supreme Terror', cost: 2, type: 'stall', stallTargets: 3, stallTurns: 3 },
-      { name: 'Final Nightmare', cost: 4, type: 'single', damage: 100 }
+      { name: 'Final Nightmare', cost: 4, type: 'single', damage: 90 }
     ]
   },
   plushtrap: {
@@ -662,10 +662,9 @@ window.CARDS_DB = {
     hp: 255, wakeThreshold: 3, energyType: 'agony', requiredEndo: 'endo_nm',
     img: 'nightmare/dreadbear.png',
     attacks: [
-      { name: 'Monster Grip', cost: 3, type: 'single', damage: 90, desc: 'Deals 90 damage to 1 enemy.' },
-      { name: 'Thunderstrike', cost: 4, type: 'multi', targets: -1, damage: 60, effect: 'stall_all1', desc: 'Deals 60 damage to ALL enemies and stalls each for 1 turn.' }
+      { name: 'Thunderstrike', cost: 4, type: 'multi', targets: -1, damage: 45, postEffect: 'stall_pick2', desc: 'Deals 45 damage to ALL enemies. Choose 2 to stall for 1 turn.' }
     ],
-    ability: { name: 'Undying Terror', desc: 'Once per turn: stall all enemies for 1 turn.', id: 'dreadbear_stall_all' }
+    ability: { name: 'Undying Terror', desc: 'Once per turn: choose 2 enemies to stall for 1 turn.', id: 'dreadbear_stall_pick2' }
   },
   grim_foxy: {
     id: 'grim_foxy', name: 'Grimm Foxy', type: 'shell', class: 'jacko',
@@ -708,11 +707,11 @@ window.CARDS_DB = {
   },
   monty: {
     id: 'monty', name: 'Montgomery Gator', type: 'shell', class: 'glamrock',
-    hp: 180, wakeThreshold: 3, energyType: 'agony', requiredEndo: 'glamrock_endo',
+    hp: 180, wakeThreshold: 4, energyType: 'agony', requiredEndo: 'glamrock_endo',
     img: 'glamrock/monty.png',
     attacks: [
-      { name: 'Power Slam', cost: 2, type: 'single', damage: 75, desc: 'Deals 75 damage to 1 enemy.' },
-      { name: 'Gator Smash', cost: 4, type: 'single', damage: 145, desc: 'Deals 145 damage to 1 enemy.' }
+      { name: 'Power Slam', cost: 2, type: 'single', damage: 30, desc: 'Deals 30 damage to 1 enemy.' },
+      { name: 'Gator Smash', cost: 5, type: 'single', damage: 100, desc: 'Deals 100 damage to 1 enemy.' }
     ]
   },
   sun: {
@@ -726,10 +725,10 @@ window.CARDS_DB = {
   },
   moon: {
     id: 'moon', name: 'Moon', type: 'shell', class: 'glamrock',
-    hp: 155, wakeThreshold: 2, energyType: 'agony', requiredEndo: 'glamrock_endo',
+    hp: 120, wakeThreshold: 2, energyType: 'agony', requiredEndo: 'glamrock_endo',
     img: 'other/moon.png',
     attacks: [
-      { name: 'Crescent Strike', cost: 2, type: 'single', damage: 65, desc: 'Deals 65 damage to 1 enemy.' }
+      { name: 'Crescent Strike', cost: 2, type: 'single', damage: 45, desc: 'Deals 45 damage to 1 enemy.' }
     ],
     ability: { name: 'Bedtime', desc: 'Once per turn: stall 1 enemy for 1 turn.', id: 'moon_bedtime' }
   },
@@ -760,7 +759,7 @@ window.CARDS_DB = {
     attacks: [
       { name: 'Ruined Encore', cost: 3, type: 'multi', targets: 2, damage: 70, desc: 'Deals 70 damage to 2 enemies.' }
     ],
-    ability: { name: 'Fractured Stage', desc: 'Once per turn: deal 20 damage to all enemies in standby.', id: 'ruined_freddy_stage' }
+    ability: { name: 'Fractured Stage', desc: 'Once per turn: deal 25 damage to all enemies in standby.', id: 'ruined_freddy_stage' }
   },
   ruined_chica: {
     id: 'ruined_chica', name: 'Ruined Chica', type: 'shell', class: 'ruined',
@@ -778,15 +777,15 @@ window.CARDS_DB = {
     attacks: [
       { name: 'Reckless Slash', cost: 2, type: 'single', damage: 80, desc: 'Deals 80 damage to 1 enemy.' }
     ],
-    ability: { name: 'Feral Charge', desc: 'Once per turn: deal 25 damage to all enemies in standby.', id: 'ruined_roxy_charge' }
+    ability: { name: 'Salvage', desc: 'Once per turn: move 1 energy from the Blob Pile onto a Ruined ally.', id: 'ruined_roxy_salvage' }
   },
   ruined_monty: {
     id: 'ruined_monty', name: 'Ruined Monty', type: 'shell', class: 'ruined',
     hp: 215, wakeThreshold: 3, energyType: 'agony', requiredShell: 'monty',
     img: 'ruined/monty.png',
     attacks: [
-      { name: 'Feral Crush', cost: 2, type: 'single', damage: 90, desc: 'Deals 90 damage to 1 enemy.' },
-      { name: 'Gator Frenzy', cost: 4, type: 'multi', targets: -1, damage: 60, desc: 'Deals 60 damage to ALL enemies.' }
+      { name: 'Feral Crush', cost: 3, type: 'single', damage: 90, desc: 'Deals 90 damage to 1 enemy.' },
+      { name: 'Gator Frenzy', cost: 4, type: 'multi', targets: -1, damage: 45, postEffect: 'stall_pick2', desc: 'Deals 45 damage to ALL enemies. Choose 2 to stall for 1 turn.' }
     ]
   },
   eclipse: {
@@ -794,7 +793,7 @@ window.CARDS_DB = {
     hp: 200, wakeThreshold: 3, energyType: 'remnant', requiredShellAny: ['sun', 'moon'],
     img: 'ruined/eclipse.png',
     attacks: [
-      { name: 'Total Eclipse', cost: 3, type: 'single', damage: 100, desc: 'Deals 100 damage to 1 enemy.' }
+      { name: 'Total Eclipse', cost: 3, type: 'single', damage: 60, desc: 'Deals 60 damage to 1 enemy.' }
     ],
     ability: { name: 'Equilibrium', desc: 'Once per turn: heal 15 HP to all allies and stall all enemies for 1 turn.', id: 'eclipse_equilibrium' }
   },
@@ -824,9 +823,9 @@ window.CARDS_DB = {
     img: 'endo/m2_ruin.png',
     desc: 'Requires Remnant Fragment equipped on M2 to evolve or transform.',
     attacks: [
-      { name: 'Total Mimicry', cost: 3, type: 'multi', targets: -1, damage: 75, desc: 'Deals 75 damage to ALL enemies.' }
+      { name: 'Total Mimicry', cost: 4, type: 'multi', targets: -1, damage: 45, effect: 'draw1', desc: 'Deals 45 damage to ALL enemies. Draw 1 card.' }
     ],
-    ability: { name: 'Endless Adaptation', desc: 'Once per turn: deal 20 damage to all enemies.', id: 'm2_mimic_aoe' }
+    ability: { name: 'Endless Adaptation', desc: 'Once per turn: deal 20 damage to 2 random enemies.', id: 'm2_mimic_aoe' }
   },
 
   /* ─── MIMIC CLASS ────────────────────────────────── */
@@ -853,7 +852,7 @@ window.CARDS_DB = {
     hp: 155, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'm2_endo',
     img: 'sotm/dollie.png',
     attacks: [
-      { name: 'Deep Sedation', cost: 2, type: 'single', damage: 40, effect: 'stall3', desc: 'Deals 40 damage and stalls the target for 3 turns.' }
+      { name: 'Deep Sedation', cost: 2, type: 'single', damage: 40, effect: 'stall1', desc: 'Deals 40 damage and stalls the target for 1 turn.' }
     ],
     ability: { name: 'Field Medic', desc: 'Once per turn: restore 30 HP to 1 ally.', id: 'nurse_dollie_heal' }
   },
@@ -862,7 +861,7 @@ window.CARDS_DB = {
     hp: 170, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'm2_endo',
     img: 'sotm/mascot/party_time_chica.png',
     attacks: [
-      { name: 'Party Revive', cost: 2, type: 'heal', healAmount: 75, healTargets: -1, desc: 'Heals 75 HP to ALL allies.' }
+      { name: 'Party Revive', cost: 2, type: 'heal', healAmount: 75, healTargets: 2, desc: 'Heals 75 HP to 2 allies.' }
     ],
     ability: { name: 'Encore', desc: 'Once per turn: draw 1 card from your deck.', id: 'party_chica_encore' }
   },
@@ -871,9 +870,9 @@ window.CARDS_DB = {
     hp: 195, wakeThreshold: 2, energyType: 'agony', requiredEndo: 'm2_endo',
     img: 'sotm/mascot/tiger_rock.png',
     attacks: [
-      { name: 'Tiger Rock', cost: 2, type: 'multi', targets: -1, damage: 55, desc: 'Deals 55 damage to ALL enemies.' }
+      { name: 'Tiger Rock', cost: 2, type: 'multi', targets: -1, damage: 25, desc: 'Deals 25 damage to ALL enemies.' }
     ],
-    ability: { name: 'Claw Rend', desc: 'Once per turn: discard 1⚡ from Tiger Rock to deal 20 damage to all sleeping enemies.', id: 'claw_rend' }
+    ability: { name: 'Claw Rend', desc: 'Once per turn: deal 20 damage to all sleeping enemies.', id: 'claw_rend' }
   },
 
   /* ─── ITEMS ──────────────────────────────────────── */

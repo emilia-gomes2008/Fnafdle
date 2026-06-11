@@ -1349,12 +1349,22 @@ function playShell(handIdx, card) {
       handIdx = p.hand.indexOf(card);
     }
 
+    // Require 1 matching energy card in hand for hand-evolution (KO path is free)
+    if (!isCarnieEvo) {
+      const eType = card.energyType;
+      const eIdx = p.hand.findIndex((c, i) => c.type === 'energy' && c.energyType === eType && i !== handIdx);
+      if (eIdx < 0) { addLog(`Need 1 ${ENERGY_META[eType]?.name || eType} energy in hand to evolve ${card.name}!`, 'ko'); return; }
+      p.discard.push(p.hand.splice(eIdx, 1)[0]);
+      handIdx = eIdx < handIdx ? handIdx - 1 : handIdx;
+    }
     const pred = p.party[predIdx];
-    p.discard.push(pred.card); pred.tools.forEach(t => p.discard.push(t)); // predecessor to Blob
+    // Save predecessor's attached energy to Blob Pile
+    for (let i = 0; i < pred.elec; i++) p.discard.push({ id: 'energy_spent', name: 'Energy', type: 'energy', energyType: 'generic', img: GENERIC });
+    p.discard.push(pred.card); pred.tools.forEach(t => p.discard.push(t));
     if (pred.card.class === 'funtime') syncEnnardMoveset(G.activePlayer);
     p.hand.splice(handIdx, 1);
     const s = newSlot(card); s.justPlaced = true;
-    p.party[predIdx] = s; // replace in the SAME slot
+    p.party[predIdx] = s;
     addLog(T('tcg.log.scrapRevived', { from: pred.card.name, to: card.name }), 'good');
     renderGame(); pushGameState(); return;
   }
@@ -1997,6 +2007,14 @@ function clickSlot(pidx, slotIdx) {
     updateTargetCounter(pt.selected.length, pt.needed);
     if (pt.selected.length >= pt.needed) finalizeStallAttack(pt); return;
   }
+  if (pt?.action === 'postStallPick') {
+    if (pidx === G.activePlayer || !slot) return;
+    if (slot.tools?.some(t => t.passive === 'shadow_band')) { addLog(`Shadow Band: ${slot.card.name} cannot be stalled!`, 'good'); return; }
+    if (pt.selected.some(s => s.slotIdx === slotIdx)) return;
+    pt.selected.push({ pidx, slotIdx }); addLog(`Stall target: ${slot.card.name} (${pt.selected.length}/${pt.needed})`, 'ko');
+    updateTargetCounter(pt.selected.length, pt.needed);
+    if (pt.selected.length >= pt.needed) finalizePostStall(pt); else renderGame(); return;
+  }
   if (pt?.action === 'selectHealTargets') {
     if (pidx !== G.activePlayer || !slot) return;
     if (pt.selected.some(s => s.slotIdx === slotIdx)) return;
@@ -2123,6 +2141,14 @@ function clickSlot(pidx, slotIdx) {
     G.pendingTarget = null; renderGame(); pushGameState(); return;
   }
   // Ability: Sun - Solar Care (heal 30 to 1 ally)
+  if (pt?.action === 'abilityTarget' && pt.ability === 'ruined_roxy_salvage') {
+    if (!isOwn || !slot || slot.card.class !== 'ruined') return;
+    const eIdx = p.discard.findIndex(c => c.type === 'energy');
+    if (eIdx < 0) { addLog('Salvage: no energy in Blob Pile!', 'ko'); G.pendingTarget = null; renderGame(); return; }
+    p.discard.splice(eIdx, 1); slot.elec++; checkAwake(slot);
+    addLog(`Ruined Roxy: Salvage! Attached 1 energy to ${slot.card.name}.`, 'good');
+    G.pendingTarget = null; renderGame(); pushGameState(); return;
+  }
   if (pt?.action === 'abilityTarget' && pt.ability === 'sun_solar_care') {
     if (!isOwn || !slot) return;
     const h = Math.min(30, slot.card.hp - slot.hp); slot.hp += h;
@@ -2459,6 +2485,15 @@ function finalizeMultiAttack(pt) {
     checkRevenge(dp, def, att, pt.attackerPidx); checkKO(dp, def);
   });
   addLog(T('tcg.log.multiUsed', { card: att.card.name, move: pt.atk.name, n: targets.length }));
+  if (pt.atk.postEffect === 'stall_pick2') {
+    const ep = 1 - G.activePlayer;
+    const enemies = G.players[ep].party.filter(Boolean);
+    if (!enemies.length) { markAttacked(att); G.pendingTarget = null; checkWin(); renderGame(); pushGameState(); return; }
+    const needed = Math.min(2, enemies.length);
+    G.pendingTarget = { action: 'postStallPick', needed, selected: [], attackerPidx: pt.attackerPidx, attackerSlotIdx: pt.attackerSlotIdx };
+    addLog(`Choose ${needed} enem${needed > 1 ? 'ies' : 'y'} to stall for 1 turn!`, 'info');
+    updateTargetCounter(0, needed); renderGame(); return;
+  }
   markAttacked(att); G.pendingTarget = null; checkWin(); renderGame(); pushGameState();
 }
 
@@ -2492,6 +2527,19 @@ function finalizeStallAttack(pt) {
   });
   addLog(T('tcg.log.stallUsed', { card: att.card.name, move: pt.atk.name }));
   markAttacked(att); G.pendingTarget = null; checkWin(); renderGame(); pushGameState();
+}
+
+/* ── Post-AoE stall pick ─────────────────────────── */
+function finalizePostStall(pt) {
+  const att = G.players[pt.attackerPidx]?.party[pt.attackerSlotIdx];
+  pt.selected.forEach(({ pidx: dp, slotIdx: di }) => {
+    const def = G.players[dp].party[di]; if (!def) return;
+    if (consumeStatusShield(def, 'Stall')) return;
+    if (def.tools?.some(t => t.passive === 'stall_immune')) { addLog(`${def.card.name} is immune to Stall!`, 'good'); return; }
+    def.stalledTurns = Math.max(def.stalledTurns, 2); addLog(`${def.card.name} stalled 1 turn!`, 'ko');
+  });
+  if (att && !pt.fromAbility) markAttacked(att);
+  G.pendingTarget = null; checkWin(); renderGame(); pushGameState();
 }
 
 /* ── Defense ─────────────────────────────────────── */
@@ -2995,19 +3043,13 @@ function useAbility(slotIdx, abilityId) {
     renderGame(); pushGameState(); return;
   }
 
-  // ── Ruined Roxy: Feral Charge (25 dmg to all standby enemies) ──
-  if (abilityId === 'ruined_roxy_charge') {
-    const ep = 1 - G.activePlayer;
-    let hit = 0;
-    G.players[ep].party.forEach(s => {
-      if (!s || s.awake) return;
-      if (s.tools?.some(t => t.passive === 'shadow_band')) { addLog(`Shadow Band shielded ${s.card.name}!`, 'good'); return; }
-      s.hp = Math.max(0, s.hp - 25); hit++;
-      addLog(`Feral Charge hit ${s.card.name} for 25 damage!`, 'ko');
-      checkKO(ep, s);
-    });
-    if (!hit) addLog('Feral Charge: no enemies in Standby.', 'info');
-    checkWin(); renderGame(); pushGameState(); return;
+  // ── Ruined Roxy: Salvage (move 1 energy from Blob Pile to a Ruined ally) ──
+  if (abilityId === 'ruined_roxy_salvage') {
+    if (!p.discard.some(c => c.type === 'energy')) { addLog('Salvage: no energy in the Blob Pile!', 'ko'); slot.usedAbilityThisTurn = false; return; }
+    if (!p.party.some(s => s && s.card.class === 'ruined')) { addLog('Salvage: no Ruined allies on the field!', 'ko'); slot.usedAbilityThisTurn = false; return; }
+    G.pendingTarget = { action: 'abilityTarget', ability: 'ruined_roxy_salvage', slotIdx };
+    addLog('Salvage! Click a Ruined ally to attach 1 energy from the Blob Pile.', 'info');
+    renderGame(); return;
   }
 
   // ── Ruined Freddy: Fractured Stage (20 dmg to all standby enemies) ──
@@ -3052,22 +3094,18 @@ function useAbility(slotIdx, abilityId) {
   }
 
   // ── Dreadbear: Undying Terror (stall all enemies 1T) ──
-  if (abilityId === 'dreadbear_stall_all') {
+  if (abilityId === 'dreadbear_stall_pick2') {
     const ep = 1 - G.activePlayer;
-    let hit = 0;
-    G.players[ep].party.forEach(s => {
-      if (!s) return;
-      if (s.tools?.some(t => t.passive === 'shadow_band')) { addLog(`Shadow Band shielded ${s.card.name}!`, 'good'); return; }
-      if (!consumeStatusShield(s, 'Stall')) { s.stalledTurns = Math.max(s.stalledTurns, 2); hit++; addLog(`${s.card.name} stalled 1 turn by Undying Terror!`, 'ko'); }
-    });
-    if (!hit) addLog('Undying Terror: no valid targets.', 'info');
-    renderGame(); pushGameState(); return;
+    const enemies = G.players[ep].party.filter(Boolean);
+    if (!enemies.length) { addLog('Undying Terror: no valid targets.', 'info'); slot.usedAbilityThisTurn = false; return; }
+    const needed = Math.min(2, enemies.length);
+    G.pendingTarget = { action: 'postStallPick', needed, selected: [], attackerPidx: G.activePlayer, attackerSlotIdx: slotIdx, fromAbility: true };
+    addLog(`Undying Terror: choose ${needed} enem${needed > 1 ? 'ies' : 'y'} to stall for 1 turn!`, 'info');
+    updateTargetCounter(0, needed); renderGame(); return;
   }
 
-  // ── Tiger Rock: Claw Rend (discard 1 energy → 20 dmg to all sleeping enemies) ──
+  // ── Tiger Rock: Claw Rend (20 dmg to all sleeping enemies) ──
   if (abilityId === 'claw_rend') {
-    if (slot.elec <= 0) { addLog('No energy on Tiger Rock for Claw Rend!', 'ko'); slot.usedAbilityThisTurn = false; return; }
-    slot.elec--;
     const ep = 1 - G.activePlayer;
     let hit = 0;
     G.players[ep].party.forEach(s => {
@@ -3096,15 +3134,15 @@ function useAbility(slotIdx, abilityId) {
   // ── M2 Mimic: Endless Adaptation (deal 20 to all enemies) ──
   if (abilityId === 'm2_mimic_aoe') {
     const ep = 1 - G.activePlayer;
-    let hit = 0;
-    G.players[ep].party.forEach(s => {
-      if (!s) return;
-      if (s.tools?.some(t => t.passive === 'shadow_band')) { addLog(`Shadow Band shielded ${s.card.name}!`, 'good'); return; }
-      s.hp = Math.max(0, s.hp - 20); hit++;
+    const candidates = G.players[ep].party.map((s, i) => s ? { s, i } : null).filter(Boolean)
+      .filter(({ s }) => { if (s.tools?.some(t => t.passive === 'shadow_band')) { addLog(`Shadow Band shielded ${s.card.name}!`, 'good'); return false; } return true; });
+    if (!candidates.length) { addLog('Endless Adaptation: no valid targets.', 'info'); checkWin(); renderGame(); pushGameState(); return; }
+    for (let i = candidates.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [candidates[i], candidates[j]] = [candidates[j], candidates[i]]; }
+    candidates.slice(0, 2).forEach(({ s }) => {
+      s.hp = Math.max(0, s.hp - 20);
       addLog(`${s.card.name} took 20 damage from Endless Adaptation!`, 'ko');
       checkKO(ep, s);
     });
-    if (!hit) addLog('Endless Adaptation: no valid targets.', 'info');
     checkWin(); renderGame(); pushGameState(); return;
   }
 
@@ -3269,6 +3307,7 @@ function triggerScrapTransform(pidx, idx, dyingSlot) {
   att.koPoints++;
   addLog(T('tcg.log.scrapKo', { card: dyingSlot.card.name, name: att.name }), 'ko');
   p.discard.push(dyingSlot.card); dyingSlot.tools.forEach(t => p.discard.push(t));
+  for (let i = 0; i < dyingSlot.elec; i++) p.discard.push({ id: 'energy_spent', name: 'Energy', type: 'energy', energyType: 'generic', img: GENERIC });
   if (dyingSlot.card.class === 'funtime') syncEnnardMoveset(pidx);
   if (dyingSlot.card.class === 'mimic') syncMimicMoveset(pidx);
 
@@ -3879,13 +3918,14 @@ function showCardInfo(card, slot, slotIdx, pidx, isHand, handIdx) {
         if (abl.id === 'rockstar_freddy_draw') { abled = G.players[pidx].alliedDeathLastOpponentTurn; }
         if (abl.id === 'rockstar_bonnie_item') { abled = G.players[pidx].alliedDeathLastOpponentTurn && G.players[pidx].deck.some(c => c.type === 'item'); }
         if (abl.id === 'dreadbear_aoe') { abled = G.players[1 - pidx].party.some(s => s && !s.awake); }
+        if (abl.id === 'ruined_roxy_salvage') { abled = G.players[pidx].discard.some(c => c.type === 'energy') && G.players[pidx].party.some(s => s && s.card.class === 'ruined'); }
         if (abl.id === 'live_wire') { abled = slot.elec > 0 && G.players[1 - pidx].party.some(s => s); }
         if (abl.id === 'strobe_effect') { abled = slot.elec > 0 && G.players[1 - pidx].party.some(s => s); }
         if (abl.id === 'ruined_chica_shriek') { abled = slot.elec > 0 && G.players[1 - pidx].party.some(s => s); }
         if (abl.id === 'sun_solar_care') { abled = G.players[pidx].party.some(s => s && s.hp < s.card.hp); }
         if (abl.id === 'moon_bedtime') { abled = G.players[1 - pidx].party.some(s => s); }
-        if (abl.id === 'dreadbear_stall_all') { abled = G.players[1 - pidx].party.some(s => s); }
-        if (abl.id === 'claw_rend') { abled = slot.elec > 0 && G.players[1 - pidx].party.some(s => s && !s.awake); }
+        if (abl.id === 'dreadbear_stall_pick2') { abled = G.players[1 - pidx].party.some(s => s); }
+        if (abl.id === 'claw_rend') { abled = G.players[1 - pidx].party.some(s => s && !s.awake); }
         if (abl.id === 'glitchtrap_corrupt') { abled = G.players[1 - pidx].hand.length > 0; }
         if (abl.id === 'm2_mimic_aoe') { abled = G.players[1 - pidx].party.some(s => s); }
         if (abl.id === 'm2_data_absorb') { abled = G.players[pidx].hand.some(c => c.class === 'mimic' && c.type === 'shell'); }
@@ -4104,11 +4144,11 @@ function renderGame() {
       hintEl.style.display = ''; cancelBtn.style.display = 'none';
       if (tcEl) tcEl.style.display = 'none';
     } else {
-      const hints = { attachEnergy: T('tcg.hint.attachEnergy'), evolve: T('tcg.hint.evolve'), equipTool: T('tcg.hint.equipTool'), itemTarget: T('tcg.hint.itemTarget'), itemEnemyEffect: 'Select an enemy target', selectSingleTarget: T('tcg.hint.selectSingle'), selectMultiTarget: T('tcg.hint.selectMulti'), selectHealTargets: T('tcg.hint.selectHeal'), selectStallTargets: T('tcg.hint.selectStall'), abilityTarget: T('tcg.hint.ability'), ennardGeneratorBoost: T('tcg.hint.ennard'), classCardTarget: T('tcg.hint.classCard') };
+      const hints = { attachEnergy: T('tcg.hint.attachEnergy'), evolve: T('tcg.hint.evolve'), equipTool: T('tcg.hint.equipTool'), itemTarget: T('tcg.hint.itemTarget'), itemEnemyEffect: 'Select an enemy target', selectSingleTarget: T('tcg.hint.selectSingle'), selectMultiTarget: T('tcg.hint.selectMulti'), selectHealTargets: T('tcg.hint.selectHeal'), selectStallTargets: T('tcg.hint.selectStall'), postStallPick: 'Choose enemies to stall for 1 turn', abilityTarget: T('tcg.hint.ability'), ennardGeneratorBoost: T('tcg.hint.ennard'), classCardTarget: T('tcg.hint.classCard') };
       if (pt.ability === 'baby_trap_target') hints.abilityTarget = T('tcg.hint.babyTrap');
       if (pt.ability === 'ballora_steal') hints.abilityTarget = T('tcg.hint.balloraSteal');
       hintEl.textContent = hints[pt.action] || ''; hintEl.style.display = ''; cancelBtn.style.display = '';
-      if (tcEl && ['selectMultiTarget', 'selectHealTargets', 'selectStallTargets'].includes(pt.action)) { tcEl.style.display = ''; tcEl.textContent = `${pt.selected?.length || 0}/${pt.needed}`; }
+      if (tcEl && ['selectMultiTarget', 'selectHealTargets', 'selectStallTargets', 'postStallPick'].includes(pt.action)) { tcEl.style.display = ''; tcEl.textContent = `${pt.selected?.length || 0}/${pt.needed}`; }
       else if (tcEl) tcEl.style.display = 'none';
     }
   } else { hintEl.style.display = 'none'; cancelBtn.style.display = 'none'; if (tcEl) tcEl.style.display = 'none'; }
@@ -4155,7 +4195,7 @@ function renderSlot(slot, pidx, slotIdx, pt) {
   else cls += ' standby';
   if (canEvo) cls += ' can-evolve';
 
-  const selMulti = pt && ['selectMultiTarget', 'selectStallTargets'].includes(pt.action) && isEnemy && pt.selected?.some(s => s.slotIdx === slotIdx);
+  const selMulti = pt && ['selectMultiTarget', 'selectStallTargets', 'postStallPick'].includes(pt.action) && isEnemy && pt.selected?.some(s => s.slotIdx === slotIdx);
   if (selMulti) cls += ' selected-target';
   const isEnemyAbility = pt?.action === 'abilityTarget' && ['baby_trap_target', 'ballora_steal', 'molten_steal', 'toy_freddy_stall', 'funtime_foxy_showstopper', 'plushtrap_plush_trap', 'live_wire', 'strobe_effect', 'blob_drain', 'moon_bedtime', 'burntrap_ignite', 'mxes_override', 'glamrock_chica_beat_drop'].includes(pt?.ability);
   const isClassEnemyTarget = pt?.action === 'classCardTarget' && ['class_shadow_drain', 'class_jacko_burn', 'class_phantom_stall'].includes(pt?.ability);
