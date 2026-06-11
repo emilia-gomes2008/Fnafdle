@@ -509,6 +509,14 @@ async function mpStartGame() {
   const p1Deck = mpParseDeck(room.host_deck);
   const p2Deck = mpParseDeck(room.guest_deck);
 
+  const _badIds = d => (d?.list || []).filter(([id]) => !CARDS[id]).map(([id]) => id);
+  const _validTotal = d => (d?.list || []).reduce((s, [id, c]) => CARDS[id] ? s + c : s, 0);
+  const b1 = _badIds(p1Deck), b2 = _badIds(p2Deck);
+  if (b1.length) { alert(`Host deck has unknown card ID(s): ${b1.join(', ')}. The host must edit their deck.`); return; }
+  if (b2.length) { alert(`Guest deck has unknown card ID(s): ${b2.join(', ')}. The guest must edit their deck.`); return; }
+  if (_validTotal(p1Deck) !== 40) { alert('Host deck does not have exactly 40 valid cards.'); return; }
+  if (_validTotal(p2Deck) !== 40) { alert('Guest deck does not have exactly 40 valid cards.'); return; }
+
   MP.mode = 'online';
 
   initGame({

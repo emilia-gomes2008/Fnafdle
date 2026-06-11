@@ -84,15 +84,25 @@ const STARTER_DECKS = {
     ]
   },
   fnaf4: {
-    name: 'Sleepless Nights', generator: 'remnant', classCard: 'class_jacko',
+    name: 'Sleepless Nights', generator: 'remnant', classCard: 'class_nightmare',
     list: [
-      ['endo_nm', 6],
-      ['nightmare_freddy', 2], ['nightmare_bonnie', 1], ['nightmare_fredbear', 2], ['nightmare_chica', 1], ['nightmare_bb', 1], ['nightmare_foxy', 1], ['nightmarionne', 1],
-      ['jacko_bonnie', 2], ['jacko_lantern', 1], ['jacko_chica', 1],
-      ['energy_agony', 6],
-      ['dee_dee_pearl', 3], ['birthday_cake', 3], ['system_corrupt', 3], ['energy_recharge', 2],
-      ['hat_mic', 1], ['puppet_box', 1],
-      ['phone_guy', 2]
+      ['endo_nm', 5],
+      ['nightmare_freddy', 2], ['nightmare_bonnie', 1], ['nightmare_chica', 1], ['nightmare_foxy', 1], ['nightmare_fredbear', 1],
+      ['plushtrap', 2], ['nightmare_bb', 1], ['dreadbear', 1], ['nightmarionne', 1],
+      ['birthday_cake', 3], ['energy_agony', 6], ['dee_dee_pearl', 3],
+      ['data_escape', 2], ['strobe_flash', 1], ['party_hat', 2],
+      ['phone_guy', 3], ['fazbear_tech', 2], ['power_battery', 2]
+    ]
+  },
+  fnaf4_jacko: {
+    name: 'Fiery Night', generator: 'remnant', classCard: 'class_jacko',
+    list: [
+      ['endo_nm', 4],
+      ['jacko_bonnie', 2], ['jacko_lantern', 2], ['jacko_chica', 1], ['grim_foxy', 2],
+      ['energy_agony', 4],
+      ['birthday_cake', 3], ['dee_dee_pearl', 3], ['power_battery', 2], ['data_escape', 2],
+      ['party_guests', 1], ['shadow_band', 2], ['static_dampener', 3], ['puppet_box', 2],
+      ['phone_guy', 3], ['fazbear_tech', 3], ['david', 1]
     ]
   },
   sl: {
@@ -115,6 +125,28 @@ const STARTER_DECKS = {
       ['energy_agony', 3], ['energy_remnant', 1],
       ['birthday_cake', 3], ['system_corrupt', 2], ['data_escape', 1], ['energy_recharge', 2], ['dee_dee_pearl', 1],
       ['phone_guy', 3], ['william_search', 2], ['fazbear_tech', 2]
+    ]
+  },
+  fnaf_sb: {
+    name: 'Gator Golf', generator: 'remnant', classCard: 'class_glamrock',
+    list: [
+      ['glamrock_endo', 5],
+      ['monty', 3], ['glamrock_freddy', 1], ['glamrock_chica', 1], ['roxy', 1], ['sun', 1], ['moon', 1], ['glamrock_bonnie', 1],
+      ['energy_agony', 4], ['energy_remnant', 4],
+      ['dee_dee_pearl', 3], ['power_battery', 2], ['birthday_cake', 3],
+      ['data_escape', 1], ['mr_hugs', 1], ['party_hat', 2], ['guitar_axe', 1],
+      ['phone_guy', 3], ['william_search', 2]
+    ]
+  },
+  sotm: {
+    name: 'Mimic', generator: 'remnant', classCard: 'class_mimic',
+    list: [
+      ['m2_endo', 5],
+      ['jackie', 2], ['big_top', 2], ['nurse_dollie', 1], ['party_time_chica', 1], ['tiger_rock', 1],
+      ['energy_remnant', 4], ['energy_agony', 1],
+      ['dee_dee_pearl', 3], ['power_battery', 2], ['birthday_cake', 3],
+      ['strobe_flash', 2], ['party_hat', 2], ['ruined_dj', 1],
+      ['phone_guy', 3], ['william_search', 2], ['edwin', 2], ['m1', 1], ['fiona', 1], ['david', 1]
     ]
   }
 };
@@ -142,8 +174,10 @@ function deckFromList(list) { return shuffle(expandDeck(list)); }
 // (for debugging)
 function validateDecks() {
   for (const [k, d] of Object.entries(STARTER_DECKS)) {
-    const t = d.list.reduce((s, [, c]) => s + c, 0);
-    if (t !== 40) console.warn(`${k} has ${t} cards (expected 40)`);
+    const bad = d.list.filter(([id]) => !CARDS[id]).map(([id]) => id);
+    if (bad.length) console.warn(`${k} has unknown card IDs: ${bad.join(', ')}`);
+    const t = d.list.reduce((s, [id, c]) => CARDS[id] ? s + c : s, 0);
+    if (t !== 40) console.warn(`${k} has ${t} valid cards (expected 40)`);
   }
 }
 
@@ -759,8 +793,12 @@ function startGame() {
   const p1d = resolve(document.getElementById('p1-deck')?.value);
   const p2d = resolve(document.getElementById('p2-deck')?.value);
   if (!p1d || !p2d) { alert(T('tcg.db.selectDecks')); return; }
-  const _deckTotal = d => (d.list || []).reduce((s, [, c]) => s + c, 0);
+  const _deckBadIds = d => (d.list || []).filter(([id]) => !CARDS[id]).map(([id]) => id);
+  const _deckTotal = d => (d.list || []).reduce((s, [id, c]) => CARDS[id] ? s + c : s, 0);
   const _deckCardOver = d => (d.list || []).some(([id, c]) => c > (CARDS[id]?.maxCopies || 3));
+  const b1 = _deckBadIds(p1d), b2 = _deckBadIds(p2d);
+  if (b1.length) { alert(`"${p1d.name}" has unknown card ID(s): ${b1.join(', ')}. Edit the deck to fix it.`); return; }
+  if (b2.length) { alert(`"${p2d.name}" has unknown card ID(s): ${b2.join(', ')}. Edit the deck to fix it.`); return; }
   if (_deckTotal(p1d) !== 40 || _deckCardOver(p1d) || p1d.overLimit) { alert(`"${p1d.name}" must have exactly 40 cards (within copy limits) to play.`); return; }
   if (_deckTotal(p2d) !== 40 || _deckCardOver(p2d) || p2d.overLimit) { alert(`"${p2d.name}" must have exactly 40 cards (within copy limits) to play.`); return; }
   const p1Name = document.getElementById('p1-name')?.value.trim() || 'Player 1';
