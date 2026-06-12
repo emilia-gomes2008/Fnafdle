@@ -163,12 +163,16 @@
               </div>
               <div style="display:flex;gap:4px;margin:4px 0 2px;flex-wrap:wrap">
                 <span style="font-size:.68rem;color:var(--text-muted);align-self:center;margin-right:2px">Energy:</span>
-                <button class="energy-filter-btn class-filter-btn" onclick="toggleEnergyFilter('remnant',this)" style="color:#7ad;border-color:#7ad">○ Remnant</button>
-                <button class="energy-filter-btn class-filter-btn" onclick="toggleEnergyFilter('agony',this)" style="color:#d77;border-color:#d77">● Agony</button>
-                <button class="energy-filter-btn class-filter-btn" onclick="toggleEnergyFilter('phantom_agony',this)" style="color:#a7d;border-color:#a7d">◆ Phantom</button>
+                <button class="energy-filter-btn class-filter-btn" onclick="toggleEnergyFilter('remnant',this)"
+                  style="color:#7ad;border-color:#7ad">○ Remnant</button>
+                <button class="energy-filter-btn class-filter-btn" onclick="toggleEnergyFilter('agony',this)"
+                  style="color:#d77;border-color:#d77">● Agony</button>
+                <button class="energy-filter-btn class-filter-btn" onclick="toggleEnergyFilter('phantom_agony',this)"
+                  style="color:#a7d;border-color:#a7d">◆ Phantom</button>
               </div>
               <input id="db-search" class="tcg-input" type="text" placeholder="🔍 Search cards..." maxlength="40"
-                style="width:100%;max-width:none;margin:6px 0 4px" oninput="dbSearch=this.value.trim();renderCardPool()" />
+                style="width:100%;max-width:none;margin:6px 0 4px"
+                oninput="dbSearch=this.value.trim();renderCardPool()" />
               <div id="db-card-pool" class="db-card-pool"></div>
             </div>
             <div class="deck-builder-right">
@@ -183,9 +187,12 @@
               </div>
               <div id="db-deck-list" class="db-deck-list"></div>
               <div style="display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap">
-                <div class="setup-label" style="margin:0" data-i18n="tcg.db.saved">Saved</div>
-                <button class="tcg-btn small" id="db-load-cloud-btn" onclick="loadDecksFromDB(this)" title="Fetch decks saved on the server for your account">Load from Database</button>
-                <button class="tcg-btn small" onclick="exportDecksToDB(this)" title="Export all local decks to the database">Export to Database</button>
+                <button class="tcg-btn small" id="db-load-cloud-btn" onclick="loadDecksFromDB(this)"
+                  title="Fetch decks saved on the server for your account"
+                  style="border-color:#d4af37;color:#d4af37">Load from DB</button>
+                <button class="tcg-btn small" onclick="exportDecksToDB(this)"
+                  title="Export all local decks to the database" style="border-color:#4c8;color:#4c8">Export to
+                  DB</button>
               </div>
               <div id="db-saved-decks" class="db-saved-decks"></div>
             </div>

@@ -4276,7 +4276,7 @@ function renderSlot(slot, pidx, slotIdx, pt) {
   const isEnemyAbility = pt?.action === 'abilityTarget' && ['baby_trap_target', 'ballora_steal', 'molten_steal', 'toy_freddy_stall', 'funtime_foxy_showstopper', 'plushtrap_plush_trap', 'live_wire', 'strobe_effect', 'blob_drain', 'moon_bedtime', 'burntrap_ignite', 'mxes_override', 'glamrock_chica_beat_drop'].includes(pt?.ability);
   const isClassEnemyTarget = pt?.action === 'classCardTarget' && ['class_shadow_drain', 'class_jacko_burn', 'class_phantom_stall'].includes(pt?.ability);
   const isClassAllyTarget = pt?.action === 'classCardTarget' && ['class_toy_heal', 'class_withered_def', 'class_rockstar_discount'].includes(pt?.ability);
-  if (isEnemy && pt && (['selectSingleTarget', 'selectMultiTarget', 'selectStallTargets'].includes(pt.action) || isEnemyAbility || isClassEnemyTarget)) cls += ' enemy-target';
+  if (isEnemy && pt && (['selectSingleTarget', 'selectMultiTarget', 'selectStallTargets', 'itemEnemyEffect'].includes(pt.action) || isEnemyAbility || isClassEnemyTarget)) cls += ' enemy-target';
   const isEquipToolValid = pt?.action === 'equipTool' && (!pt.card.toolTarget || (slot && pt.card.toolTarget.includes(slot.card.id)));
   if (!isEnemy && pt && ((['selectHealTargets', 'evolve', 'attachEnergy', 'ennardGeneratorBoost', 'removeBurnTarget'].includes(pt.action)) || (pt.action === 'equipTool' && isEquipToolValid) || (pt.action === 'abilityTarget' && !isEnemyAbility) || isClassAllyTarget)) cls += ' ally-target';
 
