@@ -112,8 +112,20 @@ async function tcgRegister(username, password) {
     .select('id, username, points').single();
   if (error) throw new Error(error.message);
 
+  // Starter collection: FNAF1 prebuilt deck cards
+  const STARTER = [
+    ['endo_01', 6], ['freddy', 2], ['bonnie', 1], ['chica', 1], ['foxy', 2], ['golden_freddy', 1],
+    ['energy_remnant', 6], ['energy_agony', 1],
+    ['cupcake', 2], ['power_out', 1], ['dee_dee_pearl', 3], ['birthday_cake', 3],
+    ['system_corrupt', 2], ['energy_recharge', 3],
+    ['phone_guy', 3], ['henry_emily', 1], ['fazbear_tech', 2],
+    ['class_classic', 1]
+  ];
+  const starterRows = STARTER.map(([card_id, quantity]) => ({ user_id: data.id, card_id, quantity }));
+  await db.from('tcg_user_cards').insert(starterRows);
+  window.TCG_COLLECTION = Object.fromEntries(STARTER);
+
   _authSave({ id: data.id, username: data.username, points: data.points });
-  window.TCG_COLLECTION = {};
   return data;
 }
 

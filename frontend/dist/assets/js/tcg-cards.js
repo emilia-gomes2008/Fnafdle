@@ -603,7 +603,7 @@ window.CARDS_DB = {
   },
   rockstar_freddy: {
     id: 'rockstar_freddy', name: 'Rockstar Freddy', type: 'shell', class: 'rockstar',
-    hp: 130, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'rockstar',
+    hp: 130, wakeThreshold: 2, energyType: 'remnant', anyEnergy: true, requiredEndo: 'rockstar',
     img: 'rockstar/rockstar_freddy.png',
     attacks: [
       { name: 'Please Deposit 5 Coins', cost: 4, type: 'single', damage: 5, effect: 'discard5', desc: "Discards the top 5 cards of your opponent's deck." }
@@ -642,7 +642,7 @@ window.CARDS_DB = {
     hp: 90, wakeThreshold: 1, energyType: 'remnant', requiredEndo: 'rockstar',
     img: 'rockstar/carnie.png',
     attacks: [
-      { name: 'Prize Booth Music', cost: 4, type: 'multi', damage: 20, targets: -1, postEffect: 'stall_pick2', desc: 'Deals 20 damage to all targets. Choose 2 to stall for 1 turn.' },
+      { name: 'Prize Booth Music', cost: 4, type: 'multi', damage: 30, targets: -1, postEffect: 'stall_pick2', desc: 'Deals 20 damage to all targets. Choose 2 to stall for 1 turn.' },
     ],
     ability: { name: 'Fairground Defense', desc: 'Discard 1⚡ to give +15 defense to Carnie for this turn.', id: 'rockstar_lefty_ability' }
   },

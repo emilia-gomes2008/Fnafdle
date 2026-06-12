@@ -337,12 +337,19 @@ function populateDeckSelects() {
   });
 }
 
-let dbDeck = {}, dbClassCard = null, dbFilter = 'all', dbEditIdx = -1, dbSearch = '';
+let dbDeck = {}, dbClassCard = null, dbFilters = new Set(), dbEditIdx = -1, dbSearch = '';
 let dbEnergyFilters = new Set();
 function filterCards(cls, btn) {
-  dbFilter = cls;
-  document.querySelectorAll('.class-filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active'); renderCardPool();
+  if (cls === 'all') {
+    dbFilters.clear(); dbEnergyFilters.clear();
+    document.querySelectorAll('.class-filter-btn, .energy-filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  } else {
+    document.querySelector('[data-class="all"]')?.classList.remove('active');
+    if (dbFilters.has(cls)) { dbFilters.delete(cls); btn.classList.remove('active'); }
+    else { dbFilters.add(cls); btn.classList.add('active'); }
+  }
+  renderCardPool();
 }
 function toggleEnergyFilter(type, btn) {
   if (dbEnergyFilters.has(type)) { dbEnergyFilters.delete(type); btn.classList.remove('active'); }
@@ -424,8 +431,8 @@ function buildCardFace(card, count, max) {
     const eMeta = ENERGY_META[card.energyType] || {};
     const typeLabel = card.type === 'endo' ? T('tcg.card.typeEndo') : T('tcg.card.typeShell');
     const evoLabel = card.wakeThreshold > 0
-      ? `${eMeta.sym || '⚡'} ×${card.wakeThreshold}`
-      : `${eMeta.sym || '⚡'} ∞`;
+      ? `${eMeta.sym || '⚡'}`
+      : `${eMeta.sym || '⚡'}`;
     const moves = [];
     const _abl = card.ability || (card.abilities && card.abilities[0]);
     if (_abl) {
@@ -493,21 +500,34 @@ function renderCardPool() {
   const pool = document.getElementById('db-card-pool'); if (!pool) return; pool.innerHTML = '';
   const isLoggedIn = !!window.TCG_USER;
   const _srch = dbSearch.toLowerCase();
+  const TYPE_FILTERS = new Set(['endo', 'item', 'tool', 'supporter', 'energy', 'class']);
   Object.values(CARDS).filter(c => {
     if (c.summonOnly) return false;
     if (_srch && !c.name.toLowerCase().includes(_srch)) return false;
-    if (c.type === 'class') return _srch || dbFilter === 'class' || dbFilter === 'all';
-    if (dbFilter === 'class') return false;
+    // Class filter (multi-select)
+    if (dbFilters.size > 0 && !_srch) {
+      let pass = false;
+      for (const f of dbFilters) {
+        if (f === 'class' && c.type === 'class') { pass = true; break; }
+        if (f === 'endo' && c.type === 'endo') { pass = true; break; }
+        if (f === 'item' && c.type === 'item') { pass = true; break; }
+        if (f === 'tool' && c.type === 'tool') { pass = true; break; }
+        if (f === 'supporter' && c.type === 'supporter') { pass = true; break; }
+        if (f === 'energy' && c.type === 'energy') { pass = true; break; }
+        if (!TYPE_FILTERS.has(f) && c.class === f) { pass = true; break; }
+      }
+      if (!pass) return false;
+    }
+    // Class cards hidden unless 'class' filter active or searching
+    if (c.type === 'class' && !_srch && !dbFilters.has('class') && dbFilters.size > 0) return false;
+    // Energy type filter (only affects animatronics)
     const isAnim = c.type === 'endo' || c.type === 'shell';
-    if (dbEnergyFilters.size > 0 && isAnim && !dbEnergyFilters.has(c.energyType)) return false;
-    if (dbFilter === 'all' || _srch) return true;
-    if (dbFilter === 'funtime') return c.class === 'funtime';
-    if (dbFilter === 'endo') return c.type === 'endo';
-    if (dbFilter === 'item') return c.type === 'item';
-    if (dbFilter === 'tool') return c.type === 'tool';
-    if (dbFilter === 'supporter') return c.type === 'supporter';
-    if (dbFilter === 'energy') return c.type === 'energy';
-    return c.class === dbFilter;
+    if (dbEnergyFilters.size > 0 && isAnim) {
+      if (c.anyEnergy) return true; // accepts any energy (e.g. Rockstar Freddy)
+      if (c.shadowSummon) return dbEnergyFilters.has('agony') || dbEnergyFilters.has('phantom_agony');
+      if (!dbEnergyFilters.has(c.energyType)) return false;
+    }
+    return true;
   }).forEach(card => {
     const isClassCard = card.type === 'class';
     const count = isClassCard ? (dbClassCard === card.id ? 1 : 0) : (dbDeck[card.id] || 0);
