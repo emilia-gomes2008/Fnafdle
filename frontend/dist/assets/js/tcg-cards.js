@@ -642,7 +642,7 @@ window.CARDS_DB = {
     hp: 90, wakeThreshold: 1, energyType: 'remnant', requiredEndo: 'rockstar',
     img: 'rockstar/carnie.png',
     attacks: [
-      { name: 'Prize Booth Music', cost: 3, type: 'multi', damage: 20, targets: 2, effect: 'lefty_rockstar', desc: 'Deals 20 damage to 2 targets and stalls them for 1 turn.' }
+      { name: 'Prize Booth Music', cost: 4, type: 'multi', damage: 20, targets: -1, postEffect: 'stall_pick2', desc: 'Deals 20 damage to all targets. Choose 2 to stall for 1 turn.' },
     ],
     ability: { name: 'Fairground Defense', desc: 'Discard 1⚡ to give +15 defense to Carnie for this turn.', id: 'rockstar_lefty_ability' }
   },
@@ -969,8 +969,8 @@ window.CARDS_DB = {
   no_1_crate: {
     id: 'no_1_crate', name: '#1 Crate', type: 'item', class: 'neutral',
     img: 'trash/no_1_crate.png',
-    desc: 'Stalls 1 enemy animatronic for 2 turns.',
-    effect: 'trash_stall'
+    desc: 'Stalls 2 random enemy animatronics for 2 turns.',
+    effect: 'no1_crate_stall'
   },
   mr_hugs: {
     id: 'mr_hugs', name: 'Mr. Hugs', type: 'item', class: 'neutral',
@@ -987,7 +987,7 @@ window.CARDS_DB = {
   ruined_dj: {
     id: 'ruined_dj', name: 'DJ Music Man', type: 'item', class: 'neutral',
     img: 'ruined/ruined_dj_music_man.png',
-    desc: 'Stall all enemies for 1 turn and draw 1 card.',
+    desc: 'Requires 2 energies in pool: discard them to stall all enemies for 1 turn and draw 1 card.',
     effect: 'ruined_dj_stall'
   },
   party_popper: {
@@ -1100,7 +1100,7 @@ window.CARDS_DB = {
   shadow_band: {
     id: 'shadow_band', name: 'Shadow Band', type: 'tool', class: 'neutral',
     img: 'tcg/tools/shadow_band.png',
-    desc: 'The bearer cannot be targeted by multi-target attacks or AoE effects. Single-target attacks still apply.',
+    desc: 'The bearer takes no damage from multi-target attacks when multiple targets are selected. Items, abilities, and single-target attacks still apply.',
     passive: 'shadow_band'
   },
   repair_kit: {

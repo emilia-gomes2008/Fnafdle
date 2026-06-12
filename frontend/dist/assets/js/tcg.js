@@ -337,11 +337,17 @@ function populateDeckSelects() {
   });
 }
 
-let dbDeck = {}, dbClassCard = null, dbFilter = 'all', dbEditIdx = -1, dbSearch = ''; // dbEditIdx: index of loaded deck (-1 = new)
+let dbDeck = {}, dbClassCard = null, dbFilter = 'all', dbEditIdx = -1, dbSearch = '';
+let dbEnergyFilters = new Set();
 function filterCards(cls, btn) {
   dbFilter = cls;
   document.querySelectorAll('.class-filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active'); renderCardPool();
+}
+function toggleEnergyFilter(type, btn) {
+  if (dbEnergyFilters.has(type)) { dbEnergyFilters.delete(type); btn.classList.remove('active'); }
+  else { dbEnergyFilters.add(type); btn.classList.add('active'); }
+  renderCardPool();
 }
 
 /* ── Card Face Builder ───────────────────────────── */
@@ -418,8 +424,8 @@ function buildCardFace(card, count, max) {
     const eMeta = ENERGY_META[card.energyType] || {};
     const typeLabel = card.type === 'endo' ? T('tcg.card.typeEndo') : T('tcg.card.typeShell');
     const evoLabel = card.wakeThreshold > 0
-      ? `${eMeta.sym || '⚡'}`
-      : T('tcg.card.standbyAlways');
+      ? `${eMeta.sym || '⚡'} ×${card.wakeThreshold}`
+      : `${eMeta.sym || '⚡'} ∞`;
     const moves = [];
     const _abl = card.ability || (card.abilities && card.abilities[0]);
     if (_abl) {
@@ -472,7 +478,7 @@ function buildCardFace(card, count, max) {
       </div>
       ${card.requiredShellAny ? `<div class="cf-endo-line">${T('tcg.card.evoFrom', { name: card.requiredShellAny.map(id => CARDS[id]?.name || id).join(' / ') })}</div>` : (card.requiredEndo || card.requiredShell) ? `<div class="cf-endo-line">${T('tcg.card.evoFrom', { name: CARDS[card.requiredEndo || card.requiredShell]?.name || (card.requiredEndo || card.requiredShell) })}</div>` : ''}
       <div class="cf-moves">${moves.join('')}</div>
-      <div class="cf-footer">${T('tcg.card.standby', { n: card.wakeThreshold })}</div>`;
+      <div class="cf-footer">${card.wakeThreshold === 0 ? T('tcg.card.standbyAlways') : T('tcg.card.standby', { n: card.wakeThreshold })}</div>`;
   }
   if (count !== undefined) {
     const cntEl = document.createElement('div');
@@ -492,6 +498,8 @@ function renderCardPool() {
     if (_srch && !c.name.toLowerCase().includes(_srch)) return false;
     if (c.type === 'class') return _srch || dbFilter === 'class' || dbFilter === 'all';
     if (dbFilter === 'class') return false;
+    const isAnim = c.type === 'endo' || c.type === 'shell';
+    if (dbEnergyFilters.size > 0 && isAnim && !dbEnergyFilters.has(c.energyType)) return false;
     if (dbFilter === 'all' || _srch) return true;
     if (dbFilter === 'funtime') return c.class === 'funtime';
     if (dbFilter === 'endo') return c.type === 'endo';
@@ -1474,6 +1482,7 @@ function playShell(handIdx, card) {
 function playItem(handIdx, card) {
   const p = G.players[G.activePlayer];
   if (p.itemLocked > 0) { addLog(T('tcg.log.itemLocked'), 'ko'); return; }
+  if (card.effect === 'ruined_dj_stall' && p.energyPool < 2) { addLog('DJ Music Man: need at least 2 energy in pool!', 'ko'); return; }
   if (card.effect === 'summon_ennard') {
     const ennardInHand = p.hand.find((c, i) => c.id === 'ennard' && i !== handIdx);
     if (!ennardInHand) { addLog(T('tcg.log.noEnnard'), 'ko'); return; }
@@ -2362,6 +2371,12 @@ function initiateAttack(slotIdx, atkIdx) {
   if (atk.type === 'stall') {
     const ep = 1 - G.activePlayer;
     if (atk.stallTargets === -1) { finalizeStallAttack({ ...base, action: 'selectStallTargets', needed: -1, selected: [] }); return; }
+    if (atk.stallRandom) {
+      const avail = G.players[ep].party.map((s, i) => s ? { pidx: ep, slotIdx: i } : null).filter(Boolean);
+      avail.sort(() => Math.random() - 0.5);
+      finalizeStallAttack({ ...base, action: 'selectStallTargets', needed: avail.slice(0, atk.stallTargets).length, selected: avail.slice(0, atk.stallTargets) });
+      return;
+    }
     const ec = G.players[ep].party.filter(s => s).length;
     const needed = Math.min(atk.stallTargets, ec);
     if (!needed) { addLog(T('tcg.log.noEnemies')); return; }
@@ -3507,19 +3522,15 @@ function applyItemEffect(effect, pidx) {
     if (!hit) addLog('No enemies to stall.', 'info');
   }
   if (effect === 'ruined_dj_stall') {
-    if (p.energyPool >= 2) {
-      p.energyPool -= 2;
-      addLog(`${p.name} discarded 2 energy from pool for DJ Music Man.`, 'info');
-      const ep = G.players[1 - pidx];
-      let hit = false;
-      ep.party.forEach(s => {
-        if (!s) return;
-        if (!consumeStatusShield(s, 'Stall')) { s.stalledTurns = Math.max(s.stalledTurns, 2); addLog(`Ruined DJ Music Man stalled ${s.card.name}!`, 'ko'); hit = true; }
-      });
-      if (!hit) addLog('No enemies to stall.', 'info');
-    } else {
-      addLog('DJ Music Man: need 2 energy in pool to stall (still drawing).', 'info');
-    }
+    p.energyPool -= 2;
+    addLog(`${p.name} discarded 2 energy from pool for DJ Music Man.`, 'info');
+    const ep = G.players[1 - pidx];
+    let hit = false;
+    ep.party.forEach(s => {
+      if (!s) return;
+      if (!consumeStatusShield(s, 'Stall')) { s.stalledTurns = Math.max(s.stalledTurns, 2); addLog(`Ruined DJ Music Man stalled ${s.card.name}!`, 'ko'); hit = true; }
+    });
+    if (!hit) addLog('No enemies to stall.', 'info');
     drawCardImmediate(pidx);
     addLog(`${p.name} drew 1 card from Ruined DJ.`, 'good');
   }
@@ -3957,10 +3968,22 @@ function showCardInfo(card, slot, slotIdx, pidx, isHand, handIdx) {
         const tBtn = mk('button', 'tcg-btn small', T('tcg.game.toolActivate', { name: tool.name }), () => {
           slot.usedToolThisTurn = true;
           if (tool.once_per_turn === 'draw1') drawCardImmediate(G.activePlayer);
+          G._lastPlayedCard = { card: tool, playerIdx: G.activePlayer, seq: (G._lastPlayedCard?.seq || 0) + 1 };
           addLog(T('tcg.log.toolEquipped', { tool: tool.name, card: slot.card.name }), 'good');
-          closeCardInfo(); renderGame();
+          closeCardInfo(); renderGame(); pushGameState();
         }); actions.appendChild(tBtn);
       }
+      // View tool button (own and enemy)
+      const viewBtn = mk('button', 'tcg-btn small', `🔍 ${tool.name}`, () => openCardInfoPanel(tool));
+      viewBtn.style.cssText = 'margin-top:4px;width:100%';
+      actions.appendChild(viewBtn);
+    });
+  } else if (slot && !isOwn && !isHand) {
+    // Enemy animatronic: show tool view button if equipped
+    slot.tools.forEach(tool => {
+      const viewBtn = mk('button', 'tcg-btn small', `🔍 ${tool.name}`, () => openCardInfoPanel(tool));
+      viewBtn.style.cssText = 'margin-top:4px;width:100%';
+      actions.appendChild(viewBtn);
     });
   }
   document.getElementById('card-info-panel').style.display = '';
@@ -4593,6 +4616,9 @@ function pullGameState(gs) {
   const prevPhase = G ? G.phase : null;
   G = gs;
 
+  // Always keep M2 moveset in sync with Mimic shells in both Blob Piles
+  syncMimicMoveset(0); syncMimicMoveset(1);
+
   // Show opponent's played card if it's new
   if (G._lastPlayedCard && G._lastPlayedCard.playerIdx !== MP.myIdx && G._lastPlayedCard.seq > _lastShownCardSeq) {
     _lastShownCardSeq = G._lastPlayedCard.seq;
@@ -4615,8 +4641,7 @@ function pullGameState(gs) {
       beginTurn();
     } else if (G.activePlayer !== MP.myIdx) {
       // Opponent's turn - refresh view (their action arrived)
-      const infoOpen = document.getElementById('card-info-panel')?.style.display !== 'none';
-      if (!infoOpen) { showScreen('game'); renderGame(); }
+      renderGame();
     }
     // else: already my turn, no handoff (class card push etc.) - skip
   } else if (G.phase === 'dice') {

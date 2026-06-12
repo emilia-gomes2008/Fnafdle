@@ -161,6 +161,12 @@
                 <button class="class-filter-btn" data-class="class" onclick="filterCards('class',this)"
                   style="border-color:var(--gold);color:var(--gold)" data-i18n="tcg.db.filterClass">★ Class</button>
               </div>
+              <div style="display:flex;gap:4px;margin:4px 0 2px;flex-wrap:wrap">
+                <span style="font-size:.68rem;color:var(--text-muted);align-self:center;margin-right:2px">Energy:</span>
+                <button class="energy-filter-btn class-filter-btn" onclick="toggleEnergyFilter('remnant',this)" style="color:#7ad;border-color:#7ad">○ Remnant</button>
+                <button class="energy-filter-btn class-filter-btn" onclick="toggleEnergyFilter('agony',this)" style="color:#d77;border-color:#d77">● Agony</button>
+                <button class="energy-filter-btn class-filter-btn" onclick="toggleEnergyFilter('phantom_agony',this)" style="color:#a7d;border-color:#a7d">◆ Phantom</button>
+              </div>
               <input id="db-search" class="tcg-input" type="text" placeholder="🔍 Search cards..." maxlength="40"
                 style="width:100%;max-width:none;margin:6px 0 4px" oninput="dbSearch=this.value.trim();renderCardPool()" />
               <div id="db-card-pool" class="db-card-pool"></div>
