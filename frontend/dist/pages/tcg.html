@@ -182,9 +182,10 @@
                 </div>
               </div>
               <div id="db-deck-list" class="db-deck-list"></div>
-              <div style="display:flex;align-items:center;gap:8px;margin-top:10px">
+              <div style="display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap">
                 <div class="setup-label" style="margin:0" data-i18n="tcg.db.saved">Saved</div>
                 <button class="tcg-btn small" id="db-load-cloud-btn" onclick="loadDecksFromDB(this)" title="Fetch decks saved on the server for your account">Load from Database</button>
+                <button class="tcg-btn small" onclick="exportDecksToDB(this)" title="Export all local decks to the database">Export to Database</button>
               </div>
               <div id="db-saved-decks" class="db-saved-decks"></div>
             </div>

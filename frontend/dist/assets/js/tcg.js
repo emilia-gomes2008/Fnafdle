@@ -282,6 +282,29 @@ async function initCloudDecks() {
   }
 }
 
+async function exportDecksToDB(btn) {
+  if (typeof tcgSaveCloudDecks !== 'function' || !window.TCG_USER) {
+    alert('You need to be logged in to export decks to the database.'); return;
+  }
+  const orig = btn?.textContent;
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  try {
+    const local = (() => { try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch { return []; } })();
+    const cloud = _cloudDecks ?? [];
+    // Merge: cloud base + any local decks not already in cloud (by name)
+    const cloudNames = new Set(cloud.map(d => d.name));
+    const merged = [...cloud, ...local.filter(d => !cloudNames.has(d.name))];
+    await tcgSaveCloudDecks(merged);
+    _cloudDecks = merged;
+    renderSavedDecks?.(); populateDeckSelects?.();
+    if (btn) btn.textContent = `Saved ${merged.length} deck${merged.length !== 1 ? 's' : ''}!`;
+    setTimeout(() => { if (btn) { btn.textContent = orig; btn.disabled = false; } }, 2000);
+  } catch (e) {
+    if (btn) { btn.textContent = 'Error!'; btn.disabled = false; }
+    alert('Failed to export decks: ' + e.message);
+  }
+}
+
 async function loadDecksFromDB(btn) {
   if (typeof tcgGetCloudDecks !== 'function' || !window.TCG_USER) {
     alert('You need to be logged in to load decks from the database.');
