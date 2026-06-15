@@ -726,6 +726,15 @@
       </table>
     </div>
   </div><!-- /.rules-wrap -->
+  <script>
+    document.querySelector('.rules-toc').addEventListener('click', function (e) {
+      var a = e.target.closest('a[href^="#"]');
+      if (!a) return;
+      e.preventDefault();
+      var el = document.getElementById(a.getAttribute('href').slice(1));
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    });
+  </script>
 </body>
 
 </html>

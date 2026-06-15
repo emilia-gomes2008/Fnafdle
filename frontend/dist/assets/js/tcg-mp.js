@@ -312,6 +312,7 @@ function mpShowWaiting(row) {
     else document.getElementById('tcg-root')?.appendChild(waitEl);
   }
   waitEl.style.display = '';
+  location.hash = 'lobby/online/waiting';
   mpRenderWaiting(row);
 }
 
@@ -475,6 +476,7 @@ function mpSubscribe(roomId, role) {
 function mpHandleRow(row, role) {
   // Room abandoned by host
   if (row.status === 'abandoned' && role === 'guest') {
+    history.replaceState(null, '', '#lobby/online');
     mpHideWaiting();
     renderMpLobby();
     mpStatusHtml(`<div style="color:var(--red-text)">${T('tcg.mp.hostLeft')}</div>`);
@@ -498,6 +500,8 @@ function mpHandleRow(row, role) {
   // Hide waiting screen, enter game
   mpHideWaiting();
   if (MP.mode !== 'online') MP.mode = 'online';
+  history.replaceState(null, '', '#lobby/online');
+  location.hash = 'dice';
   pullGameState(gs);
 }
 
@@ -518,6 +522,9 @@ async function mpStartGame() {
   if (_validTotal(p2Deck) !== 40) { alert('Guest deck does not have exactly 40 valid cards.'); return; }
 
   MP.mode = 'online';
+
+  // Replace waiting-room history entry so pressing back from game returns to online lobby
+  history.replaceState(null, '', '#lobby/online');
 
   initGame({
     p1Name: room.host_name || 'Host',

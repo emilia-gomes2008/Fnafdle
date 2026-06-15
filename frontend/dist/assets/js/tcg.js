@@ -823,7 +823,9 @@ function renderSavedDecks() {
     el.appendChild(row);
   });
 }
-function switchTab(tab) {
+let _currentTab = 'play';
+function _switchTabRaw(tab) {
+  _currentTab = tab;
   ['play', 'deck', 'rules', 'online', 'collection', 'booster', 'trade'].forEach(t => {
     const c = document.getElementById('tab-content-' + t);
     const b = document.getElementById('tab-' + t);
@@ -832,6 +834,10 @@ function switchTab(tab) {
   });
   if (tab === 'deck') { renderCardPool(); renderDeckList(); renderSavedDecks(); }
   if (tab === 'online' && window.tcgMpInit) tcgMpInit();
+}
+function switchTab(tab) {
+  _switchTabRaw(tab);          // visual update imediato
+  location.hash = 'lobby/' + tab; // cria entrada no histórico → back funciona
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -4678,7 +4684,7 @@ function pullGameState(gs) {
           if (slot >= 0) { p.party[slot] = newSlot(endo); p.hand = p.hand.filter(h => h.uid !== endo.uid); }
         });
       });
-      showScreen('game'); renderGame();
+      _showScreenRaw('game'); renderGame();
     } else if (G.activePlayer === MP.myIdx && prevActive !== MP.myIdx) {
       showYourTurnBanner(); // only fires on real turn transition via Realtime
       beginTurn();
@@ -4688,11 +4694,11 @@ function pullGameState(gs) {
     }
     // else: already my turn, no handoff (class card push etc.) - skip
   } else if (G.phase === 'dice') {
-    showScreen('dice');
+    _showScreenRaw('dice');
     if (!_mpDiceRolling) renderDiceFromState(); // skip if mid-animation
 
   } else if (G.phase === 'mulligan' || G.phase === 'setup') {
-    showScreen('mulligan');
+    _showScreenRaw('mulligan');
     const mt = G._mulliganTurn; // whose mulligan it currently is
     if (mt === MP.myIdx) {
       // It's my turn to mulligan
@@ -4722,7 +4728,13 @@ function renderDiceFromState() {
 /* ═══════════════════════════════════════════════════════
    SCREENS
    ═══════════════════════════════════════════════════════ */
-function showScreen(id) { ['lobby', 'dice', 'mulligan', 'game', 'result'].forEach(s => { const el = document.getElementById('screen-' + s); if (el) el.style.display = s === id ? '' : 'none'; }); }
+function _showScreenRaw(id) { ['lobby', 'dice', 'mulligan', 'game', 'result'].forEach(s => { const el = document.getElementById('screen-' + s); if (el) el.style.display = s === id ? '' : 'none'; }); }
+function showScreen(id) {
+  if (id === 'dice') location.hash = 'dice';           // nova entrada no histórico
+  else if (id === 'lobby') location.hash = 'lobby/' + _currentTab;
+  else history.replaceState(null, '', '#' + id);       // mulligan/game/result: sem entrada extra
+  _showScreenRaw(id);
+}
 async function showResult() {
   showScreen('result');
   window.scrollTo(0, 0); document.getElementById('tcg-root')?.scrollTo(0, 0);
@@ -4744,7 +4756,7 @@ async function showResult() {
     } catch (e) { ptsEl.style.display = 'none'; }
   }
 }
-function goLobby() { closeCardInfo(); showScreen('lobby'); populateDeckSelects(); }
+function goLobby() { closeCardInfo(); location.hash = 'lobby/' + _currentTab; _showScreenRaw('lobby'); populateDeckSelects(); }
 function rematchGame() { if (_startConfig) initGame(_startConfig); }
 function confirmConcede() {
   if (confirm(T('tcg.result.concede'))) {
@@ -4768,12 +4780,56 @@ document.addEventListener('keydown', e => {
   }
 });
 
+function _tcgRestoreFromHash(hash) {
+  const TABS = ['play','deck','online','collection','booster','trade'];
+  const GAME_SCREENS = ['dice','mulligan','game','result'];
+  if (hash.startsWith('lobby/') || hash === 'lobby' || !hash) {
+    const rest = hash.startsWith('lobby/') ? hash.slice(6) : '';
+    const parts = rest.split('/');
+    const tab = TABS.includes(parts[0]) ? parts[0] : 'play';
+    const subscreen = parts[1];
+    const waitEl = document.getElementById('tcg-mp-waiting');
+    const isWaiting = waitEl && waitEl.style.display !== 'none';
+    if (subscreen === 'waiting') {
+      const lobbyWrap = document.getElementById('tab-content-online');
+      if (lobbyWrap) lobbyWrap.style.display = 'none';
+      if (waitEl) waitEl.style.display = '';
+      _showScreenRaw('lobby');
+      _currentTab = 'online';
+    } else {
+      if (isWaiting && typeof mpLeaveWaiting === 'function') mpLeaveWaiting();
+      _showScreenRaw('lobby');
+      _switchTabRaw(tab);
+    }
+  } else if (GAME_SCREENS.includes(hash)) {
+    _showScreenRaw(hash);
+  } else {
+    _showScreenRaw('lobby');
+    _switchTabRaw('play');
+  }
+}
+window.addEventListener('hashchange', () => {
+  _tcgRestoreFromHash(location.hash.replace(/^#/, ''));
+});
+
 document.addEventListener('DOMContentLoaded', () => {
   validateDecks();
   populateDeckSelects();
   initCloudDecks(); // load cloud decks if already logged in (fire-and-forget)
-  // Remove rematch button if missing (added in result screen)
-  showScreen('lobby');
+
+  // Restore screen from URL hash on load
+  const hash = location.hash.replace(/^#/, '');
+  const TABS = ['play','deck','online','collection','booster','trade'];
+  let initScreen = 'lobby', initTab = 'play';
+  if (hash.startsWith('lobby/')) {
+    const parts = hash.slice(6).split('/');
+    initTab = TABS.includes(parts[0]) ? parts[0] : 'play';
+  } else if (hash && ['dice','mulligan','game','result'].includes(hash)) {
+    initScreen = hash;
+  }
+  history.replaceState(null, '', initScreen === 'lobby' ? '#lobby/' + initTab : '#' + initScreen);
+  _showScreenRaw(initScreen);
+  _switchTabRaw(initTab);
   // Apply translations to all static elements
   document.querySelectorAll('[data-i18n]').forEach(el => {
     if (el.dataset.i18n) {

@@ -1562,6 +1562,9 @@ function switchTab(tab) {
   if (tab === 'collection') renderCollectionTab();
   if (tab === 'booster') renderBoosterTab();
   if (tab === 'trade') renderTradeTab();
+
+  // Update URL hash for back-navigation
+  if (location.hash !== '#lobby/' + tab) location.hash = 'lobby/' + tab;
 }
 window.switchTab = switchTab;
 
