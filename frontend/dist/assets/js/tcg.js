@@ -1213,6 +1213,53 @@ function showYourTurnBanner() {
   }
 }
 
+/* ── Inactivity timer (online only) ────────────────────── */
+let _inactivityInterval = null;
+let _lastActivity = 0;
+const INACTIVITY_LIMIT = 180; // seconds before auto-concede
+
+function _startInactivityTimer() {
+  _stopInactivityTimer();
+  _lastActivity = Date.now();
+  _inactivityInterval = setInterval(() => {
+    if (!window.MP || MP.mode !== 'online' || !G || G.activePlayer !== MP.myIdx || G.winner) {
+      _stopInactivityTimer(); return;
+    }
+    const elapsed = (Date.now() - _lastActivity) / 1000;
+    const remaining = Math.ceil(INACTIVITY_LIMIT - elapsed);
+    const el = document.getElementById('turn-timer');
+    if (remaining <= 0) {
+      _stopInactivityTimer();
+      if (el) el.style.display = 'none';
+      G.winner = G.players[1 - MP.myIdx];
+      if (MP.channel) { try { MP.channel.unsubscribe(); } catch (e) { } MP.channel = null; }
+      pushGameState(); // fire-and-forget: notify opponent
+      showResult();   // show result immediately without waiting for network
+      return;
+    }
+    if (el) {
+      if (remaining <= 60) {
+        el.style.display = '';
+        el.style.color = remaining <= 20 ? 'var(--red-text)' : remaining <= 40 ? '#e84' : '#fa0';
+        el.textContent = `⏱ ${remaining}s`;
+      } else {
+        el.style.display = 'none';
+      }
+    }
+  }, 500);
+}
+
+function _stopInactivityTimer() {
+  if (_inactivityInterval) { clearInterval(_inactivityInterval); _inactivityInterval = null; }
+  const el = document.getElementById('turn-timer');
+  if (el) el.style.display = 'none';
+}
+
+function _resetInactivity() { _lastActivity = Date.now(); }
+
+// Any click anywhere in the game screen resets the inactivity clock
+document.addEventListener('click', () => { if (_inactivityInterval) _resetInactivity(); });
+
 function beginTurn() {
   syncEnnardMoveset(0); syncEnnardMoveset(1); // keep Ennard in sync with Blob state
   syncMimicMoveset(0); syncMimicMoveset(1);   // keep M2 in sync with Blob state
@@ -1250,6 +1297,8 @@ function beginTurn() {
   drawEnergyToPool(G.activePlayer, 1);
 
   addLog(T('tcg.log.turn', { name: p.name, round: G.turn }), 'info');
+  if (window.MP && MP.mode === 'online' && G.activePlayer === MP.myIdx) _startInactivityTimer();
+  else _stopInactivityTimer();
   renderGame();
 }
 
@@ -1282,6 +1331,7 @@ function endTurn() {
   if (_endTurnGuard) return; // prevent double-call
   if (window.MP && MP.mode === 'online' && G.activePlayer !== MP.myIdx) return;
   if (G.winner) return;
+  _stopInactivityTimer();
   _endTurnGuard = true;
   G.pendingTarget = null; // clear any pending action (attach energy, target selection, etc.)
   closeCardInfo();
@@ -3873,7 +3923,7 @@ function closeSearch() {
   const panel = document.getElementById('search-panel'), bg = document.getElementById('search-bg');
   if (panel) panel.style.display = 'none'; if (bg) bg.style.display = 'none';
   // Reset class card used state so the player can retry after cancelling
-  if (window.G && G && !G.winner) {
+  if (G && !G.winner) {
     const pidx = ps != null ? ps.pidx : G.activePlayer;
     const p = G.players[pidx];
     if (p) p.classCardUsed = false; // only per-turn flag; classCardUsedForever stays
@@ -4389,7 +4439,7 @@ function _closeClassCardInfo(pidx) {
   const box = document.getElementById('class-card-info');
   if (box) { box.style.display = 'none'; _classInfoShownFor = null; }
   if (pendingSearch) closeSearch();           // close search + reset classCardUsed
-  else if (window.G && G && G.pendingTarget?.action === 'classCardTarget') cancelPending(); // cancel target
+  else if (G && G.pendingTarget?.action === 'classCardTarget') cancelPending(); // cancel target
 }
 function _showClassCardInfo(pidx) {
   const box = document.getElementById('class-card-info'); if (!box) return;
@@ -4415,6 +4465,7 @@ function useClassCard(pidx) {
   if (!cc || G.activePlayer !== pidx) return;
   if (cc.oncePer === 'passive') { addLog(T('tcg.log.classCardPassive'), 'info'); return; }
   if (p.classCardUsed || p.classCardUsedForever) { addLog(T('tcg.log.classCardUsed'), 'info'); return; }
+  if (pendingSearch) return;
 
   const eid = cc.effectId;
   G._lastPlayedCard = { card: cc, playerIdx: pidx, seq: (G._lastPlayedCard?.seq || 0) + 1 };
@@ -4460,16 +4511,15 @@ function applyClassCardEffect(pidx, effectId, targetInfo) {
     }
     case 'class_funtime_draw': {
       if (!p.hand.length) { addLog(T('tcg.log.classNoHand'), 'info'); return; }
-      p.classCardUsed = true;
-      if (cc.oncePer === 'game') p.classCardUsedForever = true;
       G.pendingTarget = null;
       startDeckSearch(T('tcg.search.funtime'), [...p.hand], 1, pidx, (sel) => {
         if (!sel.length) { addLog(T('tcg.log.classNoneDiscarded', { card: cc.name }), 'info'); renderGame(); return; }
-        const discCard = sel[0]; const i = p.hand.indexOf(discCard); if (i >= 0) p.hand.splice(i, 1);
-        p.discard.push(discCard);
+        const cp = G.players[pidx]; cp.classCardUsed = true; if (cc.oncePer === 'game') cp.classCardUsedForever = true;
+        const discCard = sel[0]; const i = cp.hand.indexOf(discCard); if (i >= 0) cp.hand.splice(i, 1);
+        cp.discard.push(discCard);
         let drew = 0;
-        for (let j = 0; j < 2; j++) { const dc = p.deck.pop(); if (dc) { p.hand.push(dc); drew++; } }
-        addLog(T('tcg.log.classFuntimeDiscarded', { name: p.name, card: cc.name, discarded: discCard.name, n: drew }), 'info');
+        for (let j = 0; j < 2; j++) { const dc = cp.deck.pop(); if (dc) { cp.hand.push(dc); drew++; } }
+        addLog(T('tcg.log.classFuntimeDiscarded', { name: cp.name, card: cc.name, discarded: discCard.name, n: drew }), 'info');
         syncEnnardMoveset(pidx);
         renderGame(); pushGameState();
       });
@@ -4613,29 +4663,27 @@ function applyClassCardEffect(pidx, effectId, targetInfo) {
     }
     case 'class_glamrock_boost': {
       if (!p.hand.length) { addLog('Neon Attraction: no cards in hand to discard.', 'info'); return; }
-      p.classCardUsed = true;
-      if (cc.oncePer === 'game') p.classCardUsedForever = true;
       G.pendingTarget = null;
       startDeckSearch('Neon Attraction — discard 1 card from your hand', [...p.hand], 1, pidx, (sel) => {
-        if (!sel.length) { addLog('Neon Attraction cancelled.', 'info'); p.classCardUsed = false; renderGame(); return; }
-        sel.forEach(c => { const i = p.hand.indexOf(c); if (i >= 0) p.hand.splice(i, 1); p.discard.push(c); });
+        if (!sel.length) { addLog('Neon Attraction cancelled.', 'info'); renderGame(); return; }
+        const cp = G.players[pidx]; cp.classCardUsed = true; if (cc.oncePer === 'game') cp.classCardUsedForever = true;
+        sel.forEach(c => { const i = cp.hand.indexOf(c); if (i >= 0) cp.hand.splice(i, 1); cp.discard.push(c); });
         for (let i = 0; i < 2; i++) drawCardImmediate(pidx);
-        p.energyPool++;
-        addLog(`${p.name}: Neon Attraction — discarded ${sel[0].name}, drew 2 cards and gained 1 Energy!`, 'good');
+        cp.energyPool++;
+        addLog(`${cp.name}: Neon Attraction — discarded ${sel[0].name}, drew 2 cards and gained 1 Energy!`, 'good');
         G.pendingTarget = null; renderGame(); pushGameState();
       });
       return;
     }
     case 'class_ruined_energize': {
       if (!p.hand.length) { addLog("Ruined Signal: no cards in hand to discard.", 'info'); return; }
-      p.classCardUsed = true;
-      if (cc.oncePer === 'game') p.classCardUsedForever = true;
       G.pendingTarget = null;
       startDeckSearch("Ruined Signal — discard 1 card from your hand", [...p.hand], 1, pidx, (sel) => {
-        if (!sel.length) { addLog("Ruined Signal cancelled.", 'info'); p.classCardUsed = false; renderGame(); return; }
-        const c = sel[0]; const i = p.hand.indexOf(c); if (i >= 0) p.hand.splice(i, 1); p.discard.push(c);
+        if (!sel.length) { addLog("Ruined Signal cancelled.", 'info'); renderGame(); return; }
+        const cp = G.players[pidx]; cp.classCardUsed = true; if (cc.oncePer === 'game') cp.classCardUsedForever = true;
+        const c = sel[0]; const i = cp.hand.indexOf(c); if (i >= 0) cp.hand.splice(i, 1); cp.discard.push(c);
         drawEnergyToPool(pidx, 2);
-        addLog(`${p.name}: Ruined Signal — discarded ${c.name}, gained 2 energy from Generator!`, 'good');
+        addLog(`${cp.name}: Ruined Signal — discarded ${c.name}, gained 2 energy from Generator!`, 'good');
         G.pendingTarget = null; renderGame(); pushGameState();
       });
       return;
@@ -4685,6 +4733,8 @@ function pullGameState(gs) {
         });
       });
       _showScreenRaw('game'); renderGame();
+      // Start inactivity timer if it's already our turn at game start (guest going first)
+      if (G.activePlayer === MP.myIdx) _startInactivityTimer();
     } else if (G.activePlayer === MP.myIdx && prevActive !== MP.myIdx) {
       showYourTurnBanner(); // only fires on real turn transition via Realtime
       beginTurn();
@@ -4736,6 +4786,7 @@ function showScreen(id) {
   _showScreenRaw(id);
 }
 async function showResult() {
+  _stopInactivityTimer();
   showScreen('result');
   window.scrollTo(0, 0); document.getElementById('tcg-root')?.scrollTo(0, 0);
   document.getElementById('result-title').textContent = G.winner ? T('tcg.result.win', { name: G.winner.name }) : T('tcg.result.draw');
@@ -4781,8 +4832,19 @@ document.addEventListener('keydown', e => {
 });
 
 function _tcgRestoreFromHash(hash) {
-  const TABS = ['play','deck','online','collection','booster','trade'];
-  const GAME_SCREENS = ['dice','mulligan','game','result'];
+  const TABS = ['play', 'deck', 'online', 'collection', 'booster', 'trade'];
+  const GAME_SCREENS = ['dice', 'mulligan', 'game', 'result'];
+
+  // Back-button during active online game → concede
+  const navigatingToLobby = hash.startsWith('lobby/') || hash === 'lobby' || !hash;
+  if (navigatingToLobby && window.MP && MP.mode === 'online' && G && G.phase && G.phase !== 'result' && !G.winner) {
+    G.winner = G.players[1 - (MP.myIdx ?? 0)];
+    pushGameState(); // pushGameState captures roomId synchronously before the await
+    // Unsubscribe so our own echo doesn't re-enter the game; clear roomId
+    if (MP.channel) { try { MP.channel.unsubscribe(); } catch (e) { } MP.channel = null; }
+    MP.roomId = null;
+  }
+
   if (hash.startsWith('lobby/') || hash === 'lobby' || !hash) {
     const rest = hash.startsWith('lobby/') ? hash.slice(6) : '';
     const parts = rest.split('/');
@@ -4812,6 +4874,13 @@ window.addEventListener('hashchange', () => {
   _tcgRestoreFromHash(location.hash.replace(/^#/, ''));
 });
 
+window.addEventListener('beforeunload', () => {
+  if (window.MP && MP.mode === 'online' && G && G.phase && G.phase !== 'result' && !G.winner) {
+    G.winner = G.players[1 - (MP.myIdx ?? 0)];
+    pushGameState(); // best-effort — browser may or may not complete the fetch before unload
+  }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
   validateDecks();
   populateDeckSelects();
@@ -4819,12 +4888,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Restore screen from URL hash on load
   const hash = location.hash.replace(/^#/, '');
-  const TABS = ['play','deck','online','collection','booster','trade'];
+  const TABS = ['play', 'deck', 'online', 'collection', 'booster', 'trade'];
   let initScreen = 'lobby', initTab = 'play';
   if (hash.startsWith('lobby/')) {
     const parts = hash.slice(6).split('/');
     initTab = TABS.includes(parts[0]) ? parts[0] : 'play';
-  } else if (hash && ['dice','mulligan','game','result'].includes(hash)) {
+  } else if (hash && ['dice', 'mulligan', 'game', 'result'].includes(hash)) {
     initScreen = hash;
   }
   history.replaceState(null, '', initScreen === 'lobby' ? '#lobby/' + initTab : '#' + initScreen);

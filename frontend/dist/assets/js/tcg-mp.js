@@ -494,14 +494,17 @@ function mpHandleRow(row, role) {
   const gs = row.game_state;
 
   const dbSeq = gs._seq || 0;
-  const localSeq = (window.G && G) ? (G._seq || 0) : -1;
+  const localSeq = (typeof G !== 'undefined' && G) ? (G._seq || 0) : -1;
   if (dbSeq <= localSeq) return;
 
   // Hide waiting screen, enter game
   mpHideWaiting();
-  if (MP.mode !== 'online') MP.mode = 'online';
-  history.replaceState(null, '', '#lobby/online');
-  location.hash = 'dice';
+  if (MP.mode !== 'online') {
+    // First game-state receive: transition from waiting/lobby to the dice screen
+    MP.mode = 'online';
+    history.replaceState(null, '', '#lobby/online');
+    location.hash = 'dice';
+  }
   pullGameState(gs);
 }
 
