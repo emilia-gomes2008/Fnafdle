@@ -284,6 +284,7 @@ async function confirmCreateRoom() {
   cancelCreateRoom();
   showScreen('waiting');
   subscribeRoom();
+  if (typeof initMpChat === 'function') initMpChat(roomId, 'mp', name);
 }
 
 async function joinRoom() {
@@ -317,6 +318,7 @@ async function joinRoom() {
   if (isLast) {
     selectionShown = true;
     showSelectionScreen();
+    if (typeof initMpChat === 'function') initMpChat(roomId, 'mp', name);
   } else {
     document.getElementById('waiting-code').textContent = room.room_code;
     document.getElementById('waiting-filter-label').textContent = '🎮 ' + filterLabel(room.game_filter);
@@ -325,6 +327,7 @@ async function joinRoom() {
     updateWaitingPlayerList(data);
     showScreen('waiting');
     selectionShown = false;
+    if (typeof initMpChat === 'function') initMpChat(roomId, 'mp', name);
   }
 }
 
@@ -1450,11 +1453,13 @@ async function cleanupMpPlayerLeft() {
 
 const _mpCoreGoHome = window.goHome;
 window.goHome = async function () {
+  if (typeof stopMpChat === 'function') stopMpChat();
   await cleanupMpPlayerLeft();
   _mpCoreGoHome?.();
 };
 
 window.addEventListener('beforeunload', () => {
+  if (typeof stopMpChat === 'function') stopMpChat();
   if (!roomId || !playerSlot) return;
   const savedId = roomId;
   const savedSlot = playerSlot;

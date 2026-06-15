@@ -543,10 +543,11 @@ async function tcgCancelTrade(tradeId) {
 function renderAuthBar() {
   const bar = document.getElementById('tcg-auth-bar');
   if (!bar) return;
+  const showPts = bar.dataset.showPoints === 'true';
   if (window.TCG_USER) {
     bar.innerHTML = `
       <span class="auth-username">👤 ${_escHtml(window.TCG_USER.username)}</span>
-      <span class="auth-points" id="auth-points-display">⭐ ${window.TCG_USER.points} pts</span>
+      ${showPts ? `<span class="auth-points" id="auth-points-display">⭐ ${window.TCG_USER.points} pts</span>` : ''}
       <button class="tcg-btn small" onclick="tcgLogout()">Log Out</button>`;
   } else {
     bar.innerHTML = `
@@ -881,14 +882,24 @@ async function openBoosterUI(boosterId) {
 
 // ── Word filter: blocks hate slurs, allows regular swear words ─
 const _HATE_RX = [
-  /n[i1|!][g9q]{1,2}[ae3]r/i, /n[i1|!][g9q]{2,}a/i,
-  /f[a@4][g9]{1,2}[o0][t7]?/i, /\bfag\b/i,
-  /tr[a@4]n{1,2}[i1][e3e]?/i,
-  /\bd[yi1][k][e3]\b/i,
-  /\bc[o0]{2}n\b/i, /\bsp[i1][ck]\b/i, /\bk[i1]k[e3]\b/i,
-  /\bwetback/i, /\bbeaner/i, /\bgook\b/i, /\bchink/i, /\bretard/i,
+  /n[i1!|][g9q]{1,2}[ae3@*4]r?/i,
+  /n[i1!|][g9q]{2,}[@a4]/i,
+  /f[a@4][g9]{1,2}[o0][t7]?s?/i, /\bf[a@4][g9]s?\b/i,
+  /tr[a@4]n+[iy1][e3]?/i,
+  /\bd[yi1]k[e3]s?\b/i,
+  /\b[ck][u0v@*][n*][t*]s?\b/i, /\bc[o0]{2}n\b/i,
+  /\bsp[i1][ck]\b/i, /\bk[i1]k[e3]s?\b/i,
+  /\bwetbacks?\b/i, /\bbeaners?\b/i, /\bgooks?\b/i, /\bchinks?\b/i, /\bretards?\b/i,
+  /\bkys\b/i,
+  /k[i!1][l1]{1,2}[\s_-]*(?:your?|ur)[\s_-]*s[e3]lf/i,
+  /m[a@4]t[a@4][\s-]*t[e3]/i,
+  /\bse[\s-]*m[a@4]t[a@4]/i,
+  /\bsmt\b/i,
 ];
-function _containsHate(msg) { return _HATE_RX.some(p => p.test(msg)); }
+function _normHate(s) {
+  return s.replace(/\|</g, 'k').replace(/\/\//g, 'n').replace(/\(\)/g, 'o').replace(/\|3/g, 'b');
+}
+function _containsHate(msg) { const t = _normHate(msg); return _HATE_RX.some(p => p.test(t)); }
 
 // ── Room state ────────────────────────────────────────────────
 let _tradeRoom = null;
@@ -1581,25 +1592,27 @@ function _prefillPlayerName() {
   const username = window.TCG_USER.username;
   const p1 = document.getElementById('p1-name');
   if (p1 && (p1.value === 'Player 1' || !p1.value)) p1.value = username;
-  // Also pre-fill MP name
   const mpName = document.getElementById('mp-name');
   if (mpName && !mpName.value) mpName.value = username;
-  sessionStorage.setItem('tcg_mp_name', username);
+  const lobbyName = document.getElementById('lobby-name');
+  if (lobbyName && !lobbyName.value) lobbyName.value = username;
+  localStorage.setItem('tcg_player_name', username);
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
   _authLoad();
+  _prefillPlayerName();
+  renderAuthBar();
   if (window.TCG_USER) {
     const db = _getDB();
     if (db) {
       try {
         window.TCG_COLLECTION = await tcgGetCollection(window.TCG_USER.id);
         await tcgRefreshPoints();
+        renderAuthBar();
       } catch (e) { /* offline */ }
     }
-    _prefillPlayerName();
   }
-  renderAuthBar();
 });
 
 // ── Dev: tcgGiveAll(n) ───────────────────────────────────────

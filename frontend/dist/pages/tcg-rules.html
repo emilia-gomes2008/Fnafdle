@@ -1,18 +1,6 @@
 <!DOCTYPE html>
 
 <head>
-  <script>
-    (function () {
-      var base = document.createElement('base');
-      base.href = window.location.protocol + '//' + window.location.host + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
-      document.head.appendChild(base);
-      if (window.location.pathname.includes('/frontend/dist/pages/')) {
-        var cleanPath = window.location.pathname.replace('/frontend/dist/pages/', '/');
-        window.history.replaceState(null, '', cleanPath + window.location.search);
-      }
-    })();
-  </script>
-
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FNAF TCG - Official Rulebook</title>

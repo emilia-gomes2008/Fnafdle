@@ -38,6 +38,7 @@
 
 <body>
 
+  <div id="tcg-auth-bar" class="tcg-auth-bar"></div>
   <div class="fnaf-header">
     <div class="fnaf-title">
       <img src="frontend/dist/assets/images/title/fnafdlereborn.png" alt="Fnafdle" />
@@ -185,10 +186,13 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="frontend/dist/assets/js/config.js"></script>
   <script src="frontend/dist/assets/js/translations.js"></script>
   <script src="backend/src/db/database.js"></script>
   <script src="backend/src/db/books_database.js"></script>
   <script src="frontend/dist/assets/js/core.js?v=3"></script>
+  <script src="frontend/dist/assets/js/tcg-auth.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       initLangSwitcher();

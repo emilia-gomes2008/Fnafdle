@@ -1,0 +1,319 @@
+/* ═══════════════════════════════════════════════════════════════
+   mp-chat.js  –  Real-time in-game chat for Guess Who & Party
+   ═══════════════════════════════════════════════════════════════ */
+
+(function () {
+  const _HATE_RX = [
+    /n[i1!|][g9q]{1,2}[ae3@*4]r?/i,
+    /n[i1!|][g9q]{2,}[@a4]/i,
+    /f[a@4][g9]{1,2}[o0][t7]?s?/i, /\bf[a@4][g9]s?\b/i,
+    /tr[a@4]n+[iy1][e3]?/i,
+    /\bd[yi1]k[e3]s?\b/i,
+    /\b[ck][u0v@*][n*][t*]s?\b/i,
+    /\bc[o0]{2}n\b/i, /\bsp[i1][ck]\b/i, /\bk[i1]k[e3]s?\b/i,
+    /\bwetbacks?\b/i, /\bbeaners?\b/i, /\bgooks?\b/i, /\bchinks?\b/i, /\bretards?\b/i,
+    /\bkys\b/i,
+    /k[i!1][l1]{1,2}[\s_-]*(?:your?|ur)[\s_-]*s[e3]lf/i,
+    /m[a@4]t[a@4][\s-]*t[e3]/i,
+    /\bse[\s-]*m[a@4]t[a@4]/i,
+    /\bsmt\b/i,
+  ];
+  function _norm(s) {
+    return s.replace(/\|</g, 'k').replace(/\/\//g, 'n').replace(/\(\)/g, 'o').replace(/\|3/g, 'b');
+  }
+  function _hate(msg) { const t = _norm(msg); return _HATE_RX.some(p => p.test(t)); }
+  function _esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  let _db = null;
+  let _sub = null;
+  let _poll = null;
+  let _roomId = null;
+  let _roomType = null;
+  let _username = null;
+  let _msgCount = 0;
+  let _open = false;
+  let _unread = 0;
+  let _gifOpen = false;
+  let _gifTimeout = null;
+
+  function _getDb() {
+    if (_db) return _db;
+    if (window.MP?.db) { _db = window.MP.db; return _db; }
+    const cfg = window.FNAF_CONFIG || {};
+    if (typeof supabase !== 'undefined' && cfg.SUPABASE_URL) {
+      if (!window.MP) window.MP = {};
+      _db = window.MP.db = supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+      return _db;
+    }
+    return null;
+  }
+
+  // ── Public API ──────────────────────────────────────────────
+  window.initMpChat = function (roomId, roomType, username) {
+    if (_roomId === roomId && document.getElementById('mp-chat-widget')) return;
+    stopMpChat();
+    _roomId = roomId;
+    _roomType = roomType;
+    _username = username || 'Player';
+    _msgCount = 0;
+    _unread = 0;
+    _open = false;
+    _gifOpen = false;
+
+    _renderWidget();
+    _subscribeChat();
+    _loadHistory();
+  };
+
+  window.stopMpChat = function () {
+    _roomId = null;
+    _roomType = null;
+    if (_sub) { try { _sub.unsubscribe(); } catch (e) {} _sub = null; }
+    if (_poll) { clearInterval(_poll); _poll = null; }
+    if (_gifTimeout) { clearTimeout(_gifTimeout); _gifTimeout = null; }
+    const w = document.getElementById('mp-chat-widget');
+    if (w) w.remove();
+    _db = null;
+  };
+
+  // ── Widget rendering ────────────────────────────────────────
+  function _renderWidget() {
+    let w = document.getElementById('mp-chat-widget');
+    if (w) w.remove();
+    w = document.createElement('div');
+    w.id = 'mp-chat-widget';
+    w.className = 'mpc-widget';
+    w.innerHTML = `
+      <button class="mpc-toggle" id="mpc-toggle" onclick="window._mpChatToggle()">
+        💬 Chat <span class="mpc-badge" id="mpc-badge" style="display:none">0</span>
+      </button>
+      <div class="mpc-box" id="mpc-box" style="display:none">
+        <div class="mpc-header">
+          💬 Chat
+          <button class="mpc-close" onclick="window._mpChatToggle()">✕</button>
+        </div>
+        <div class="mpc-msgs" id="mpc-msgs"></div>
+        <div class="mpc-gif-picker" id="mpc-gif-picker" style="display:none">
+          <input class="mpc-gif-search" id="mpc-gif-search" type="text" placeholder="🔍 Search GIFs…" autocomplete="off" />
+          <div class="mpc-gif-grid" id="mpc-gif-grid"></div>
+          <div class="mpc-tenor-attr">Powered by Tenor</div>
+        </div>
+        <div class="mpc-footer">
+          <input id="mpc-input" class="mpc-input" type="text" placeholder="Type a message…" maxlength="200" />
+          <button class="mpc-gif-btn" id="mpc-gif-btn" onclick="window._mpChatGif()">GIF</button>
+          <button class="mpc-send" id="mpc-send">→</button>
+        </div>
+      </div>`;
+    document.body.appendChild(w);
+
+    document.getElementById('mpc-send').onclick = _send;
+    document.getElementById('mpc-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') _send();
+    });
+    document.getElementById('mpc-gif-search').addEventListener('input', e => {
+      clearTimeout(_gifTimeout);
+      _gifTimeout = setTimeout(() => _loadGifs(e.target.value), 400);
+    });
+  }
+
+  window._mpChatToggle = function () {
+    const box = document.getElementById('mpc-box');
+    const badge = document.getElementById('mpc-badge');
+    if (!box) return;
+    _open = !_open;
+    box.style.display = _open ? 'flex' : 'none';
+    if (_open) {
+      _unread = 0;
+      if (badge) badge.style.display = 'none';
+      const msgs = document.getElementById('mpc-msgs');
+      if (msgs) msgs.scrollTop = msgs.scrollHeight;
+      document.getElementById('mpc-input')?.focus();
+    } else {
+      _closeGifPicker();
+    }
+  };
+
+  // ── GIF picker ──────────────────────────────────────────────
+  window._mpChatGif = function () {
+    _gifOpen = !_gifOpen;
+    const picker = document.getElementById('mpc-gif-picker');
+    const btn = document.getElementById('mpc-gif-btn');
+    if (!picker) return;
+    picker.style.display = _gifOpen ? 'flex' : 'none';
+    if (btn) btn.classList.toggle('active', _gifOpen);
+    if (_gifOpen) {
+      const grid = document.getElementById('mpc-gif-grid');
+      if (grid && !grid.children.length) _loadGifs('');
+      document.getElementById('mpc-gif-search')?.focus();
+    }
+  };
+
+  function _closeGifPicker() {
+    _gifOpen = false;
+    const picker = document.getElementById('mpc-gif-picker');
+    if (picker) picker.style.display = 'none';
+    const btn = document.getElementById('mpc-gif-btn');
+    if (btn) btn.classList.remove('active');
+  }
+
+  async function _loadGifs(q) {
+    const grid = document.getElementById('mpc-gif-grid');
+    if (!grid) return;
+    grid.innerHTML = '<div class="mpc-gif-loading">Loading…</div>';
+    try {
+      const key = (window.FNAF_CONFIG || {}).TENOR_KEY || '';
+      let gifs;
+
+      if (key) {
+        // Tenor v2 (requires Google API key in FNAF_CONFIG.TENOR_KEY)
+        const base = q.trim()
+          ? `https://tenor.googleapis.com/v2/search?q=${encodeURIComponent(q)}&key=${key}&client_key=fnafdle_reborn&limit=15&media_filter=gif`
+          : `https://tenor.googleapis.com/v2/featured?key=${key}&client_key=fnafdle_reborn&limit=15&media_filter=gif`;
+        const r = await fetch(base);
+        const data = await r.json();
+        gifs = (data.results || []).map(item => ({
+          preview: item.media_formats?.nanogif?.url || item.media_formats?.tinygif?.url,
+          url: item.media_formats?.gif?.url,
+        })).filter(g => g.preview && g.url);
+      } else {
+        // Tenor v1 fallback (deprecated but still accessible)
+        const base = q.trim()
+          ? `https://api.tenor.com/v1/search?q=${encodeURIComponent(q)}&key=LIVDSRZULELA&limit=15&media_filter=minimal&contentfilter=low`
+          : `https://api.tenor.com/v1/trending?key=LIVDSRZULELA&limit=15&media_filter=minimal&contentfilter=low`;
+        const r = await fetch(base);
+        const data = await r.json();
+        gifs = (data.results || []).map(item => ({
+          preview: item.media?.[0]?.tinygif?.url || item.media?.[0]?.gif?.url,
+          url: item.media?.[0]?.mediumgif?.url || item.media?.[0]?.gif?.url,
+        })).filter(g => g.preview && g.url);
+      }
+
+      grid.innerHTML = '';
+      if (!gifs.length) {
+        grid.innerHTML = '<div class="mpc-gif-loading">No results</div>';
+        return;
+      }
+      gifs.forEach(g => {
+        const img = document.createElement('img');
+        img.className = 'mpc-gif-thumb';
+        img.src = g.preview;
+        img.loading = 'lazy';
+        img.title = 'Send GIF';
+        img.onclick = () => _sendGif(g.url);
+        grid.appendChild(img);
+      });
+    } catch (e) {
+      grid.innerHTML = '<div class="mpc-gif-loading">Failed to load</div>';
+    }
+  }
+
+  async function _sendGif(url) {
+    _closeGifPicker();
+    const msg = 'gif:' + url;
+    _appendMsg({ username: _username, message: msg });
+    const db = _getDb();
+    if (!db || !_roomId) return;
+    try {
+      await db.from('mp_chat').insert({
+        room_type: _roomType, room_id: _roomId,
+        username: _username, message: msg,
+      });
+    } catch (e) { _sysMsg('Failed to send GIF'); }
+  }
+
+  // ── Send ─────────────────────────────────────────────────────
+  async function _send() {
+    const input = document.getElementById('mpc-input');
+    if (!input || !_roomId) return;
+    const msg = input.value.trim();
+    if (!msg) return;
+    if (msg.length > 200) { _sysMsg('Message too long (200 chars max)'); return; }
+    if (_hate(msg)) { _sysMsg('Message not allowed'); return; }
+    input.value = '';
+
+    _appendMsg({ username: _username, message: msg });
+
+    const db = _getDb();
+    if (!db) { _sysMsg('Not connected'); return; }
+    try {
+      await db.from('mp_chat').insert({
+        room_type: _roomType, room_id: _roomId,
+        username: _username, message: msg,
+      });
+    } catch (e) { _sysMsg('Failed to send'); }
+  }
+
+  // ── Receive ──────────────────────────────────────────────────
+  function _appendMsg(row) {
+    const box = document.getElementById('mpc-msgs');
+    if (!box) return;
+    const isMine = row.username === _username;
+    const div = document.createElement('div');
+    div.className = 'mpc-msg ' + (isMine ? 'mpc-mine' : 'mpc-other');
+
+    const isGif = typeof row.message === 'string' && row.message.startsWith('gif:');
+    const content = isGif
+      ? `<img class="mpc-gif-msg" src="${_esc(row.message.slice(4))}" alt="GIF" loading="lazy" />`
+      : `<span class="mpc-text">${_esc(row.message)}</span>`;
+
+    div.innerHTML = `<span class="mpc-who">${_esc(row.username)}</span>${content}`;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+    _msgCount++;
+
+    if (!_open) {
+      _unread++;
+      const badge = document.getElementById('mpc-badge');
+      if (badge) { badge.textContent = _unread; badge.style.display = ''; }
+    }
+  }
+
+  function _sysMsg(text) {
+    const box = document.getElementById('mpc-msgs');
+    if (!box) return;
+    const div = document.createElement('div');
+    div.className = 'mpc-msg mpc-system';
+    div.textContent = text;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  async function _loadHistory() {
+    const db = _getDb();
+    if (!db || !_roomId) return;
+    const { data } = await db.from('mp_chat')
+      .select('*').eq('room_type', _roomType).eq('room_id', _roomId)
+      .order('created_at', { ascending: true }).limit(100);
+    if (!data) return;
+    data.forEach(m => _appendMsg(m));
+    _msgCount = data.length;
+    _unread = 0;
+    const badge = document.getElementById('mpc-badge');
+    if (badge) badge.style.display = 'none';
+  }
+
+  function _subscribeChat() {
+    const db = _getDb();
+    if (!db || !_roomId) return;
+
+    _sub = db.channel(`mp_chat_${_roomType}_${_roomId}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mp_chat',
+          filter: `room_id=eq.${_roomId}` }, p => {
+        if (p.new.username !== _username || _msgCount === 0) _appendMsg(p.new);
+      })
+      .subscribe();
+
+    _poll = setInterval(async () => {
+      if (!_roomId) return;
+      const db2 = _getDb();
+      if (!db2) return;
+      const { data } = await db2.from('mp_chat')
+        .select('*').eq('room_type', _roomType).eq('room_id', _roomId)
+        .order('created_at', { ascending: true }).limit(100);
+      if (!data || data.length <= _msgCount) return;
+      data.slice(_msgCount).forEach(m => _appendMsg(m));
+    }, 3000);
+  }
+})();

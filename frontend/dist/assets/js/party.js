@@ -934,6 +934,10 @@ function showWaiting(room) {
   const rnEl = document.getElementById('waiting-room-name');
   if (rnEl) rnEl.textContent = room.room_name || '';
   updateWaitingScreen(room);
+  if (typeof initMpChat === 'function' && roomId) {
+    const myName = roomData ? (roomData[`${playerSlot}_name`] || playerSlot) : playerSlot;
+    initMpChat(roomId, 'party', myName);
+  }
 }
 
 function updateWaitingScreen(room) {
@@ -4558,6 +4562,7 @@ async function cleanupPlayerLeft() {
 // Override goHome so leaving cleans up the room
 const _coreGoHome = window.goHome;
 window.goHome = async function () {
+  if (typeof stopMpChat === 'function') stopMpChat();
   await cleanupPlayerLeft();
   _coreGoHome?.();
 };
