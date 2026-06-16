@@ -1246,7 +1246,7 @@ const CHARS = [
   },
   {
     name: "Old Man Consequences",
-    animal: "Aligator",
+    animal: "Alligator",
     type: "Other",
     color: ["Red"],
     eyeColor: ["Red"],

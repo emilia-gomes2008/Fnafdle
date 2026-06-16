@@ -299,6 +299,10 @@
       'mg.flashlight.desc':    'Tap as fast as you can for 15 seconds! Watch out for Withered Foxy...',
       'mg.pizzaDough.name':    'Pizza Dough',
       'mg.pizzaDough.desc':    'Draw the most perfect circle you can in 5 seconds!',
+      'mg.giveGifts.name':     'Give Gifts, Give Life',
+      'mg.giveGifts.desc':     'Drag each gift to the matching soul! Complete all waves as fast as possible.',
+      'mg.fishingConsequences.name': 'Fishing Consequences',
+      'mg.fishingConsequences.desc': 'Click to cast when the fish is under the crosshair! Catch as many as you can in 30 seconds.',
 
       // ── Minigame UI ───────────────────────────────────────────────────────
       'mg.reward':         '🏆 Winner +{n}🪙 · 🤝 Tie: split equally',
@@ -1411,6 +1415,10 @@
       'mg.flashlight.desc':    'Toca o mais rápido que consegues durante 15 segundos! Cuidado com o Foxy Danificado...',
       'mg.pizzaDough.name':    'Massa de Pizza',
       'mg.pizzaDough.desc':    'Desenha o círculo mais perfeito que conseguires em 5 segundos!',
+      'mg.giveGifts.name':     'Dá Presentes, Dá Vida',
+      'mg.giveGifts.desc':     'Arrasta cada presente para a alma correspondente! Completa todas as ondas o mais rápido possível.',
+      'mg.fishingConsequences.name': 'Consequências da Pesca',
+      'mg.fishingConsequences.desc': 'Clica para lançar quando o peixe estiver sob a mira! Apanha o máximo possível em 30 segundos.',
 
       'mg.reward':         '🏆 Vencedor +{n}🪙 · 🤝 Empate: divisão igual',
       'mg.imReady':        '⚡ Estou Pronto!',

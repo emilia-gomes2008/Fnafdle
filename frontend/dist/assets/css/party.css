@@ -179,7 +179,7 @@
 .sl-available  { cursor: pointer; box-shadow: 0 0 0 2px #f93, 0 0 8px #f930 !important; animation: sl-pulse .9s infinite alternate; }
 .sl-invalid    { opacity: .35; cursor: not-allowed; }
 @keyframes sl-pulse { from { box-shadow: 0 0 0 2px #f93; } to { box-shadow: 0 0 0 3px #fa6, 0 0 10px #f936; } }
-.cup-available { cursor: pointer; box-shadow: 0 0 0 2px #d4a017, 0 0 8px #d4a0170 !important; animation: cup-pulse .9s infinite alternate; }
+.cup-available { cursor: pointer; box-shadow: 0 0 0 2px #d4a017, 0 0 8px #d4a01780 !important; animation: cup-pulse .9s infinite alternate; }
 .cup-invalid   { opacity: .35; cursor: not-allowed; }
 @keyframes cup-pulse { from { box-shadow: 0 0 0 2px #d4a017; } to { box-shadow: 0 0 0 3px #e8b820, 0 0 10px #d4a01760; } }
 
@@ -386,6 +386,131 @@
 }
 .gf-item { font-size: 1.4rem !important; padding: 9px !important; aspect-ratio: 1; }
 .gf-item:disabled { opacity: .35; cursor: default; }
+
+/* ── Give Gifts Give Life ─────────────────────────────── */
+.give-gifts { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.gg-title {
+  font-size: .78rem; color: #ccc; text-align: center;
+  margin: 0; letter-spacing: .03em;
+}
+.give-gifts .gg-scene {
+  position: relative; width: 100%; max-width: 460px; height: 250px;
+  background: #0b0c12;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+  background-size: 32px 32px;
+  border: 1px solid #222; border-radius: 10px; overflow: hidden;
+}
+.gg-puppet {
+  position: absolute; left: 2%; top: 50%; transform: translateY(-50%);
+  width: 18%; max-width: 72px; object-fit: contain;
+  image-rendering: pixelated; pointer-events: none;
+  filter: drop-shadow(0 0 9px rgba(170,90,255,.45));
+}
+.gg-soul {
+  position: absolute; width: 58px; height: 58px;
+  display: flex; align-items: center; justify-content: center;
+  transition: filter .15s;
+}
+.gg-soul img {
+  width: 100%; height: 100%; object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 5px rgba(255,255,255,.25));
+}
+.gg-soul.gg-correct { filter: drop-shadow(0 0 12px rgba(50,255,100,.9)); animation: gg-pulse .35s ease; }
+.gg-soul.gg-wrong   { animation: gg-shake-st .3s ease; }
+@keyframes gg-pulse    { 0%,100%{transform:scale(1)} 50%{transform:scale(1.18)} }
+@keyframes gg-shake-st { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+.gg-gift {
+  position: absolute; width: 52px; height: 52px;
+  cursor: grab; user-select: none; z-index: 10;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .08s;
+}
+.gg-gift img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+.gg-gift.gg-dragging { cursor: grabbing; z-index: 200; transform: scale(1.16); }
+.gg-gift.gg-shake { animation: gg-shake-st .35s ease; }
+
+/* ── Fishing Consequences ─────────────────────────────── */
+.fishing-cons { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.fc-title {
+  font-size: .82rem; font-weight: 600; color: #ccc;
+  text-align: center; margin: 0; letter-spacing: .04em;
+}
+.fc-scene {
+  position: relative; width: 100%; max-width: 480px; height: 230px;
+  background: radial-gradient(ellipse at 18% 28%, #3a0905 0%, #1c0203 45%, #080102 100%);
+  border: 1px solid #3a0a05; border-radius: 10px;
+  overflow: hidden; cursor: pointer; user-select: none;
+}
+/*
+ * omc.png is 815×500: OMC character at bottom-left, rod tip at top-right (~95%,5%).
+ * Rendered at 200×123px → rod tip lands at x≈205, y≈10.
+ * Platform at y=120 (OMC feet: top:4 + 122*0.95 ≈ 120).
+ * Vline: from tip (x=204, y=10) to crosshair (y=175).
+ * rod.png (17×382 vertical thin rod) overlaid at tip — only stretches on cast.
+ */
+.fc-omc-img {
+  position: absolute; left: 15px; top: 4px;
+  width: 200px; height: 123px; object-fit: contain;
+  image-rendering: pixelated; pointer-events: none;
+  z-index: 2;
+}
+.fc-platform {
+  position: absolute; left: 0; top: 120px;
+  width: 95px; height: 7px;
+  background: linear-gradient(#5a4030, #2a1808);
+  border-right: 3px solid #7a5a38;
+  pointer-events: none; z-index: 2;
+}
+/* rod.png sits at the rod-tip area; only stretches on cast */
+.fc-rod-img {
+  position: absolute; left: 200px; top: 3px;
+  width: 5px; height: 20px; object-fit: fill;
+  image-rendering: pixelated;
+  transform-origin: top center;
+  transition: transform .18s ease;
+  pointer-events: none; z-index: 3;
+}
+.fc-rod-img.fc-casting { transform: scaleY(4); }
+/* Vline from rod tip (x≈204, y=10) to crosshair (y=175) */
+.fc-vline {
+  position: absolute; left: 203px; top: 10px;
+  width: 2px; height: 165px;
+  border-left: 2px dashed rgba(210,210,190,.55);
+  pointer-events: none; transition: border-color .12s; z-index: 1;
+}
+.fc-vline.fc-cast-flash { border-color: rgba(255,255,160,.9); }
+/* Water surface line */
+.fc-waterline {
+  position: absolute; left: 0; right: 0; top: 128px; height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(80,130,190,.4) 15%, rgba(80,130,190,.4) 85%, transparent 100%);
+  pointer-events: none; z-index: 1;
+}
+/* Crosshair center at (204, 175) → left:182, top:153 */
+.fc-crosshair {
+  position: absolute; left: 182px; top: 153px;
+  width: 44px; height: 44px; object-fit: contain;
+  pointer-events: none; z-index: 4;
+  filter: drop-shadow(0 0 4px rgba(255,255,100,.75));
+  transition: filter .18s;
+}
+.fc-crosshair.fc-miss { filter: drop-shadow(0 0 8px rgba(255,55,55,.95)); }
+/* Fish at crosshair level (center y=175 → top=158) */
+.fc-fish {
+  position: absolute; top: 158px;
+  width: 55px; height: 44px; object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 3px rgba(0,190,255,.5));
+  pointer-events: none; z-index: 3;
+}
+.fc-fish.fc-caught { animation: fc-catch .45s ease forwards; }
+@keyframes fc-catch {
+  0%   { transform: scale(1)   translateY(0);     opacity: 1; }
+  60%  { transform: scale(1.3) translateY(-70px);  opacity: .9; }
+  100% { transform: scale(.35) translateY(-160px); opacity: 0; }
+}
 
 /* ── Power Out ────────────────────────────────────────── */
 .po-scene {

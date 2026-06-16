@@ -633,6 +633,45 @@ document.getElementById('confirm-selection-btn').addEventListener('click', async
   }
 });
 
+// ── Inactivity timer (3 min AFK → leave room) ────────────────────────────────
+let _gwInactivityInterval = null;
+let _gwLastActivity = 0;
+const GW_INACTIVITY_LIMIT = 180;
+
+function _gwStartInactivityTimer() {
+  if (_gwInactivityInterval) return; // already running
+  _gwLastActivity = Date.now();
+  _gwInactivityInterval = setInterval(() => {
+    if (!roomId || !playerSlot) { _gwStopInactivityTimer(); return; }
+    const elapsed = (Date.now() - _gwLastActivity) / 1000;
+    const remaining = Math.ceil(GW_INACTIVITY_LIMIT - elapsed);
+    const el = document.getElementById('turn-timer');
+    if (remaining <= 0) {
+      _gwStopInactivityTimer();
+      window.goHome();
+      return;
+    }
+    if (el) {
+      if (remaining <= 60) {
+        el.style.display = '';
+        el.style.color = remaining <= 20 ? '#e74c3c' : remaining <= 40 ? '#e87416' : '#fa0';
+        el.textContent = `⏱ AFK: ${remaining}s`;
+      } else {
+        el.style.display = 'none';
+      }
+    }
+  }, 500);
+}
+
+function _gwStopInactivityTimer() {
+  if (_gwInactivityInterval) { clearInterval(_gwInactivityInterval); _gwInactivityInterval = null; }
+  const el = document.getElementById('turn-timer');
+  if (el) el.style.display = 'none';
+}
+
+document.addEventListener('click', () => { if (_gwInactivityInterval) _gwLastActivity = Date.now(); });
+document.addEventListener('touchstart', () => { if (_gwInactivityInterval) _gwLastActivity = Date.now(); }, { passive: true });
+
 // ── Periodic sync ─────────────────────────────────────────────────────────────
 let _syncTimer = null;
 
@@ -853,6 +892,9 @@ async function updateTurnUI(phase, questionField) {
   const isMyAct = action === 'act' && asker === playerSlot;
   const isMyAnswer = action === 'answer' && target === playerSlot;
   const iAsked = action === 'answer' && asker === playerSlot;
+
+  if (isMyAsk || isMyAct) _gwStartInactivityTimer();
+  else _gwStopInactivityTimer();
 
   if (isMyAsk) {
     const myRank = getRankings().indexOf(playerSlot);
@@ -1424,6 +1466,7 @@ document.getElementById('rematch-btn').addEventListener('click', async () => {
 // ── Player leave detection ────────────────────────────────────────────────────
 async function cleanupMpPlayerLeft() {
   if (!roomId || !playerSlot) return;
+  _gwStopInactivityTimer();
   const room = roomData;
   const savedId = roomId;
   const savedSlot = playerSlot;

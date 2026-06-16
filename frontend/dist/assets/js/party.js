@@ -186,6 +186,8 @@ const MINIGAME_LIST = [
   { id: 'powerOut', name: 'Power Out', emoji: '🔦', desc: 'Close the door before Freddy attacks! Random timing.' },
   { id: 'flashlight', name: 'Flashlight', emoji: '🔦', desc: 'Tap as fast as you can for 15 seconds! Watch out for Withered Foxy...' },
   { id: 'pizzaDough', name: 'Pizza Dough', emoji: '🍕', desc: 'Draw the most perfect circle you can in 5 seconds!' },
+  { id: 'giveGifts', name: 'Give Gifts Give Life', emoji: '🎁', desc: 'Drag the right colored gift to the matching child! Most correct deliveries in 30s wins.' },
+  { id: 'fishingConsequences', name: 'Fishing Consequences', emoji: '🎣', desc: "Click to cast OMC's rod when a fish passes the crosshair! Most fish caught in 30s wins." },
 ];
 
 const QUESTION_EVENTS = [
@@ -240,6 +242,45 @@ let lapCompletedLocal = false;     // local backup so lap-minigame survives Supa
 let devScoreBonus = 0;
 let eventLog = [];              // local event history (broadcast to all clients)
 let prevPlayerPos = {};            // track positions for movement animation
+
+// ── Inactivity timer (3 min AFK → leave room) ────────────────────────────────
+let _partyInactivityInterval = null;
+let _partyLastActivity = 0;
+const PARTY_INACTIVITY_LIMIT = 180;
+
+function _partyStartInactivityTimer() {
+  if (_partyInactivityInterval) return; // already running
+  _partyLastActivity = Date.now();
+  _partyInactivityInterval = setInterval(() => {
+    if (!roomId || !playerSlot) { _partyStopInactivityTimer(); return; }
+    const elapsed = (Date.now() - _partyLastActivity) / 1000;
+    const remaining = Math.ceil(PARTY_INACTIVITY_LIMIT - elapsed);
+    const el = document.getElementById('turn-timer');
+    if (remaining <= 0) {
+      _partyStopInactivityTimer();
+      window.goHome();
+      return;
+    }
+    if (el) {
+      if (remaining <= 60) {
+        el.style.display = '';
+        el.style.color = remaining <= 20 ? '#e74c3c' : remaining <= 40 ? '#e87416' : '#fa0';
+        el.textContent = `⏱ AFK: ${remaining}s`;
+      } else {
+        el.style.display = 'none';
+      }
+    }
+  }, 500);
+}
+
+function _partyStopInactivityTimer() {
+  if (_partyInactivityInterval) { clearInterval(_partyInactivityInterval); _partyInactivityInterval = null; }
+  const el = document.getElementById('turn-timer');
+  if (el) el.style.display = 'none';
+}
+
+document.addEventListener('click', () => { if (_partyInactivityInterval) _partyLastActivity = Date.now(); });
+document.addEventListener('touchstart', () => { if (_partyInactivityInterval) _partyLastActivity = Date.now(); }, { passive: true });
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const imgPath = rel => '../assets/' + rel;
@@ -1273,6 +1314,8 @@ async function handleRoomUpdate(room) {
       showScreen('board');
       if (prev?.board !== room.board) renderBoard(room);
       renderActionUI(room);
+      if (isMyTurn(room) && room.turn_phase === 'roll') _partyStartInactivityTimer();
+      else _partyStopInactivityTimer();
     }
     return;
   }
@@ -3463,6 +3506,8 @@ function startMinigameScreen(room) {
     powerOut: () => playPowerOut(room, mg),
     flashlight: () => playFlashlight(room, mg),
     pizzaDough: () => playPizzaDough(room, mg),
+    giveGifts: () => playGiveGifts(room, mg),
+    fishingConsequences: () => playFishingConsequences(room, mg),
   };
   runners[mg.id]?.();
 }
@@ -3472,11 +3517,12 @@ function buildLiveBar(room, involved) {
   const bar = document.getElementById('mg-live-bar');
   bar.style.display = 'flex';
   bar.innerHTML = involved.map(s => {
-    const char = room[`${s}_char`] || 'freddy';
+    const src = room[`${s}_name`] ? room : (roomData || room);
+    const char = src[`${s}_char`] || 'freddy';
     const color = PLAYER_COLORS[slotNum(s) - 1];
     return `<div class="mg-live-row${s === playerSlot ? ' me' : ''}" id="live-${s}" style="border-color:${color}">
       <img class="mg-live-avatar" src="${charImg(char)}" onerror="this.style.display='none'"/>
-      <span class="mg-live-name" style="color:${color}">${room[`${s}_name`]}</span>
+      <span class="mg-live-name" style="color:${color}">${src[`${s}_name`] || s}</span>
       <span class="mg-live-score" id="live-score-${s}">0</span>
     </div>`;
   }).join('');
@@ -4508,6 +4554,7 @@ function toggleRules() {
 // ── Player leave detection ────────────────────────────────────────────────────
 async function cleanupPlayerLeft() {
   if (!roomId || !playerSlot || !roomData) return;
+  _partyStopInactivityTimer();
   const room = roomData;
   const savedId = roomId;
   const savedSlot = playerSlot;
@@ -4598,6 +4645,310 @@ window.addEventListener('beforeunload', () => {
   });
 });
 
+
+// ── Give Gifts Give Life ──────────────────────────────────────────────────────
+function playGiveGifts(room, mg) {
+  const P = '../assets/images/party/';
+  const CHARS = [
+    { id: 'freddy', filter: 'hue-rotate(62deg) saturate(7) brightness(1.1)' },
+    { id: 'bonnie', filter: 'hue-rotate(220deg) saturate(3) brightness(1.05)' },
+    { id: 'chica', filter: 'grayscale(1) sepia(1) hue-rotate(5deg) saturate(6) brightness(1.3)' },
+    { id: 'foxy', filter: 'saturate(3) brightness(1.05)' },
+  ];
+  // 4 soul target slots — right half of scene (percentages of 460×250)
+  const SOUL_SLOTS = [
+    { sx: 55, sy: 8 },
+    { sx: 72, sy: 20 },
+    { sx: 57, sy: 53 },
+    { sx: 74, sy: 67 },
+  ];
+  // 4 gift spawn slots — left-center area
+  const GIFT_SLOTS = [
+    { gx: 8, gy: 10 },
+    { gx: 30, gy: 12 },
+    { gx: 8, gy: 62 },
+    { gx: 30, gy: 66 },
+  ];
+
+  let score = 0, timeLeft = 30, done = false, pending = 0;
+  let dragGift = null, dragOX = 0, dragOY = 0;
+  let countTimer;
+
+  function _shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function end() {
+    if (done) return; done = true;
+    clearInterval(countTimer);
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    document.removeEventListener('touchmove', onMove);
+    document.removeEventListener('touchend', onUp);
+    document.body.style.cursor = '';
+    const el = document.getElementById('mg-content');
+    if (el) el.innerHTML = `<div class="mg-done-msg">${T('mg.waitingResults')}</div>`;
+    submitScore(score);
+  }
+  mgCleanup = end;
+
+  document.getElementById('mg-content').innerHTML = `<div class="mg-play give-gifts">
+    <p class="gg-title">Drag the gifts to the souls</p>
+    <div class="gg-scene" id="gg-scene">
+      <img class="gg-puppet" src="${P}pixel_puppet.png" draggable="false" onerror="this.style.display='none'"/>
+      ${CHARS.map(c => `
+        <div class="gg-soul" id="gg-s-${c.id}" data-char="${c.id}">
+          <img src="${P}${c.id}_head.png" draggable="false" onerror="this.style.display='none'"/>
+        </div>`).join('')}
+    </div>
+    <div class="mg-hud" style="margin-top:4px">
+      <span id="gg-score">🎁 0</span>
+      <span id="gg-timer">⏱ 30s</span>
+    </div>
+  </div>`;
+
+  const scene = document.getElementById('gg-scene');
+  const scoreEl = document.getElementById('gg-score');
+  const timerEl = document.getElementById('gg-timer');
+
+  function startWave() {
+    if (done) return;
+    scene.querySelectorAll('.gg-gift').forEach(g => g.remove());
+    pending = 4;
+    const sw = scene.clientWidth || 460;
+    const sh = scene.clientHeight || 250;
+    // Randomise which soul goes to which slot
+    const soulOrder = _shuffle([...CHARS]);
+    soulOrder.forEach((c, i) => {
+      const soul = document.getElementById(`gg-s-${c.id}`);
+      if (!soul) return;
+      soul.style.left = (sw * SOUL_SLOTS[i].sx / 100) + 'px';
+      soul.style.top = (sh * SOUL_SLOTS[i].sy / 100) + 'px';
+    });
+    // Spawn one gift per char at shuffled positions
+    const giftOrder = _shuffle([...GIFT_SLOTS]);
+    CHARS.forEach((c, i) => {
+      const g = document.createElement('div');
+      g.className = 'gg-gift'; g.dataset.char = c.id;
+      g.innerHTML = `<img src="${P}red_gift.png" draggable="false"
+        style="width:100%;height:100%;object-fit:contain;filter:${c.filter};pointer-events:none"/>`;
+      g.style.left = (sw * giftOrder[i].gx / 100) + 'px';
+      g.style.top = (sh * giftOrder[i].gy / 100) + 'px';
+      g.addEventListener('mousedown', startDrag);
+      g.addEventListener('touchstart', startDrag, { passive: false });
+      scene.appendChild(g);
+    });
+  }
+
+  function startDrag(e) {
+    if (done || dragGift) return; e.preventDefault();
+    dragGift = e.currentTarget;
+    const cl = e.touches ? e.touches[0] : e;
+    const r = dragGift.getBoundingClientRect();
+    dragOX = cl.clientX - r.left; dragOY = cl.clientY - r.top;
+    dragGift.classList.add('gg-dragging');
+    document.body.style.cursor = `url('${P}pixel_puppet.png') 16 16, grab`;
+  }
+
+  const onMove = e => {
+    if (!dragGift) return; e.preventDefault();
+    const cl = e.touches ? e.touches[0] : e;
+    const sr = scene.getBoundingClientRect();
+    dragGift.style.left = (cl.clientX - sr.left - dragOX) + 'px';
+    dragGift.style.top = (cl.clientY - sr.top - dragOY) + 'px';
+  };
+
+  const onUp = e => {
+    if (!dragGift) return;
+    const cl = e.changedTouches ? e.changedTouches[0] : e;
+    dragGift.classList.remove('gg-dragging');
+    document.body.style.cursor = '';
+
+    let matched = false, wrongSoul = false;
+    CHARS.forEach(c => {
+      const soul = document.getElementById(`gg-s-${c.id}`);
+      if (!soul) return;
+      const r = soul.getBoundingClientRect();
+      if (cl.clientX >= r.left && cl.clientX <= r.right &&
+        cl.clientY >= r.top && cl.clientY <= r.bottom) {
+        if (dragGift.dataset.char === c.id) {
+          score++;
+          scoreEl.textContent = `🎁 ${score}`;
+          liveScores[playerSlot] = score; updateLiveBar();
+          broadcastCh?.send({ type: 'broadcast', event: 'mg_score', payload: { slot: playerSlot, score } });
+          soul.classList.add('gg-correct'); setTimeout(() => soul.classList.remove('gg-correct'), 500);
+          matched = true;
+        } else {
+          soul.classList.add('gg-wrong'); setTimeout(() => soul.classList.remove('gg-wrong'), 400);
+          wrongSoul = true;
+        }
+      }
+    });
+
+    const dg = dragGift; dragGift = null;
+    if (matched) {
+      dg.remove();
+      pending--;
+      if (pending === 0) setTimeout(startWave, 600);
+    } else if (wrongSoul) {
+      dg.classList.add('gg-shake'); setTimeout(() => dg.classList.remove('gg-shake'), 400);
+    }
+  };
+
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+  document.addEventListener('touchmove', onMove, { passive: false });
+  document.addEventListener('touchend', onUp);
+
+  buildLiveBar(room, JSON.parse(room.mg_players || '[]'));
+  startWave();
+
+  countTimer = setInterval(() => {
+    timeLeft--;
+    if (timerEl) timerEl.textContent = `⏱ ${timeLeft}s`;
+    if (timeLeft <= 0) end();
+  }, 1000);
+}
+
+// ── Fishing Consequences ──────────────────────────────────────────────────────
+function playFishingConsequences(room, mg) {
+  const P = '../assets/images/party/';
+  let score = 0, timeLeft = 30, done = false;
+  let casting = false, animFrame;
+  const fishPool = [];
+  let spawnTimer, countTimer;
+
+  function end() {
+    if (done) return; done = true;
+    clearInterval(countTimer); clearTimeout(spawnTimer);
+    cancelAnimationFrame(animFrame);
+    const el = document.getElementById('mg-content');
+    if (el) el.innerHTML = `<div class="mg-done-msg">${T('mg.waitingResults')}</div>`;
+    submitScore(score);
+  }
+  mgCleanup = end;
+
+  document.getElementById('mg-content').innerHTML = `<div class="mg-play fishing-cons">
+    <p class="fc-title">Click to Catch</p>
+    <div class="fc-scene" id="fc-scene">
+      <img class="fc-rod-img" id="fc-rod" src="${P}rod.png" draggable="false" onerror="this.style.display='none'"/>
+      <div class="fc-vline" id="fc-vline"></div>
+      <img class="fc-omc-img" src="${P}omc.png" draggable="false" onerror="this.style.display='none'"/>
+      <div class="fc-platform"></div>
+      <div class="fc-waterline"></div>
+      <img class="fc-crosshair" id="fc-crosshair" src="${P}crosshair.png" draggable="false" onerror="this.textContent='+'"/>
+    </div>
+    <div class="mg-hud" style="margin-top:4px">
+      <span id="fc-score">🐟 0</span>
+      <span id="fc-timer">⏱ 30s</span>
+    </div>
+  </div>`;
+
+  const scene = document.getElementById('fc-scene');
+  const rod = document.getElementById('fc-rod');
+  const vline = document.getElementById('fc-vline');
+  const chEl = document.getElementById('fc-crosshair');
+  const scoreEl = document.getElementById('fc-score');
+  const timerEl = document.getElementById('fc-timer');
+
+  // crosshair x-center within scene (matches CSS left position)
+  function chCenterX() {
+    const cr = chEl.getBoundingClientRect();
+    const sr = scene.getBoundingClientRect();
+    return cr.left - sr.left + cr.width / 2;
+  }
+
+  function spawnFish() {
+    if (done || fishPool.length > 0) return;
+    const el = document.createElement('img');
+    el.className = 'fc-fish'; el.src = `${P}omc_fish.png`; el.draggable = false;
+    el.style.width = '55px'; el.style.height = '44px'; el.style.objectFit = 'contain';
+    const sw = scene.clientWidth || 460;
+    const spd = 1.2 + Math.random() * 2.2;
+    const fromRight = Math.random() > 0.35;
+    const x = fromRight ? sw - 65 : 0;
+    const vx = fromRight ? -spd : spd;
+    el.style.transform = fromRight ? '' : 'scaleX(-1)';
+    el.style.left = x + 'px';
+    scene.appendChild(el);
+    fishPool.push({ el, x, vx, caught: false, facingLeft: fromRight });
+  }
+
+  function animate() {
+    if (done) return;
+    const sw = scene.clientWidth || 460;
+    fishPool.forEach(f => {
+      if (f.caught) return;
+      f.x += f.vx;
+      if (f.x <= 0) {
+        f.x = 0;
+        f.vx = Math.abs(f.vx);
+        f.facingLeft = false;
+        f.el.style.transform = 'scaleX(-1)';
+      } else if (f.x + 55 >= sw) {
+        f.x = sw - 55;
+        f.vx = -Math.abs(f.vx);
+        f.facingLeft = true;
+        f.el.style.transform = '';
+      }
+      f.el.style.left = f.x + 'px';
+    });
+    animFrame = requestAnimationFrame(animate);
+  }
+
+  function doCast(e) {
+    if (done || casting) return;
+    if (e) e.preventDefault();
+    casting = true;
+    rod.classList.add('fc-casting');
+    vline.classList.add('fc-cast-flash');
+
+    const cx = chCenterX();
+    let caught = false;
+    for (let i = fishPool.length - 1; i >= 0; i--) {
+      const f = fishPool[i];
+      if (f.caught) continue;
+      if (Math.abs(f.x + 30 - cx) < 32) {
+        f.caught = true; caught = true;
+        f.el.classList.add('fc-caught');
+        score++;
+        scoreEl.textContent = `🐟 ${score}`;
+        liveScores[playerSlot] = score; updateLiveBar();
+        broadcastCh?.send({ type: 'broadcast', event: 'mg_score', payload: { slot: playerSlot, score } });
+        const fe = f.el; fishPool.splice(i, 1);
+        setTimeout(() => {
+          fe.remove();
+          if (!done) spawnTimer = setTimeout(spawnFish, 500 + Math.random() * 300);
+        }, 450);
+      }
+    }
+    if (!caught) chEl.classList.add('fc-miss');
+
+    setTimeout(() => {
+      rod.classList.remove('fc-casting');
+      vline.classList.remove('fc-cast-flash');
+      chEl.classList.remove('fc-miss');
+      casting = false;
+    }, 350);
+  }
+
+  scene.addEventListener('click', doCast);
+  scene.addEventListener('touchstart', doCast, { passive: false });
+
+  buildLiveBar(room, JSON.parse(room.mg_players || '[]'));
+  spawnTimer = setTimeout(spawnFish, 500);
+  animate();
+
+  countTimer = setInterval(() => {
+    timeLeft--;
+    if (timerEl) timerEl.textContent = `⏱ ${timeLeft}s`;
+    if (timeLeft <= 0) end();
+  }, 1000);
+}
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {

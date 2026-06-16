@@ -167,7 +167,10 @@
 
       <!-- Turn indicator + my char badge -->
       <div class="game-header-row">
-        <div id="turn-indicator" class="turn-indicator opponent-turn">Loading...</div>
+        <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">
+          <div id="turn-indicator" class="turn-indicator opponent-turn">Loading...</div>
+          <div id="turn-timer" style="display:none;text-align:center;font-weight:700;font-size:.88rem;letter-spacing:1px;padding:1px 0"></div>
+        </div>
         <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
           <button id="resync-btn" class="mp-btn small" title="Stuck? Force sync the game state" onclick="resyncGameState()" style="font-size:.7rem;padding:5px 10px;opacity:.6;">⟳ Sync</button>
           <div class="my-char-badge" id="my-char-badge" style="display:none">
