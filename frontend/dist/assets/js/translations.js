@@ -303,6 +303,22 @@
       'mg.giveGifts.desc':     'Drag each gift to the matching soul! Complete all waves as fast as possible.',
       'mg.fishingConsequences.name': 'Fishing Consequences',
       'mg.fishingConsequences.desc': 'Click to cast when the fish is under the crosshair! Catch as many as you can in 30 seconds.',
+      'mg.deeDeesFishing.name': "DeeDee's Fishing",
+      'mg.deeDeesFishing.desc': 'Move Freddy and drop the plunger to catch fish! Deeper fish are worth more coins!',
+      'mg.bonBonBounce.name': 'Bon-Bon Bounce',
+      'mg.bonBonBounce.desc': 'Click Bon-Bon before he bounces away! The faster he goes, the harder it gets!',
+      'mg.nightCam.name': 'Night Cam',
+      'mg.nightCam.desc': 'Watch the security cameras and click animatronics when you spot them!',
+      'mg.musicBoxFrenzy.name': 'Music Box Frenzy',
+      'mg.musicBoxFrenzy.desc': 'Wind the music box! Put on the Freddy Mask when animatronics appear or face a jumpscare!',
+
+      // ── FNAF Battle
+      'battle.title':     '⚔️ FNAF Battle — Round {round}',
+      'battle.ended':     '⚔️ Battle Ended!',
+      'battle.won':       '🏆 You won! +5🪙',
+      'battle.lost':      '💀 You lost! -5🪙',
+      'battle.waiting':   '⏳ Waiting for opponent...',
+      'battle.resolving': '⏳ Resolving...',
 
       // ── Minigame UI ───────────────────────────────────────────────────────
       'mg.reward':         '🏆 Winner +{n}🪙 · 🤝 Tie: split equally',
@@ -1419,6 +1435,22 @@
       'mg.giveGifts.desc':     'Arrasta cada presente para a alma correspondente! Completa todas as ondas o mais rápido possível.',
       'mg.fishingConsequences.name': 'Consequências da Pesca',
       'mg.fishingConsequences.desc': 'Clica para lançar quando o peixe estiver sob a mira! Apanha o máximo possível em 30 segundos.',
+      'mg.deeDeesFishing.name': 'Pesca da DeeDee',
+      'mg.deeDeesFishing.desc': 'Move o Freddy e lança o plunger para apanhar peixes! Peixes mais fundo valem mais moedas!',
+      'mg.bonBonBounce.name': 'Salto do Bon-Bon',
+      'mg.bonBonBounce.desc': 'Clica no Bon-Bon antes que ele escape! Quanto mais rápido vai, mais difícil fica!',
+      'mg.nightCam.name': 'Câmera Noturna',
+      'mg.nightCam.desc': 'Vigia as câmeras de segurança e clica nos animatronics quando os vires!',
+      'mg.musicBoxFrenzy.name': 'Frenesi da Caixa de Música',
+      'mg.musicBoxFrenzy.desc': 'Dá corda à caixa de música! Põe a Máscara do Freddy quando aparecerem animatronics ou leva um jumpscare!',
+
+      // ── FNAF Battle
+      'battle.title':     '⚔️ Batalha FNAF — Round {round}',
+      'battle.ended':     '⚔️ Batalha Terminada!',
+      'battle.won':       '🏆 Ganhaste! +5🪙',
+      'battle.lost':      '💀 Perdeste! -5🪙',
+      'battle.waiting':   '⏳ À espera do adversário...',
+      'battle.resolving': '⏳ A resolver...',
 
       'mg.reward':         '🏆 Vencedor +{n}🪙 · 🤝 Empate: divisão igual',
       'mg.imReady':        '⚡ Estou Pronto!',

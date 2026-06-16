@@ -179,15 +179,19 @@ const ITEM_CFG = [
 ];
 
 const MINIGAME_LIST = [
-  { id: 'helpyBoop', name: 'Helpy Boop', emoji: '👃', desc: 'Click Helpy\'s nose as many times as you can in 30 seconds!' },
-  { id: 'moneyLaundry', name: 'Money Laundering', emoji: '💰', desc: 'Drag coins to Rockstar Freddy! Most coins deposited in 30s wins.' },
-  { id: 'feedingFrenzy', name: 'Feeding Frenzy', emoji: '🍕', desc: 'Make Chica\'s pizza as fast as possible! Wrong ingredient = -1 pizza.' },
-  { id: 'guitarFinder', name: 'Guitar Finder', emoji: '🎸', desc: 'Find Bonnie\'s guitar hidden in the grid as fast as possible!' },
-  { id: 'powerOut', name: 'Power Out', emoji: '🔦', desc: 'Close the door before Freddy attacks! Random timing.' },
-  { id: 'flashlight', name: 'Flashlight', emoji: '🔦', desc: 'Tap as fast as you can for 15 seconds! Watch out for Withered Foxy...' },
-  { id: 'pizzaDough', name: 'Pizza Dough', emoji: '🍕', desc: 'Draw the most perfect circle you can in 5 seconds!' },
-  { id: 'giveGifts', name: 'Give Gifts Give Life', emoji: '🎁', desc: 'Drag the right colored gift to the matching child! Most correct deliveries in 30s wins.' },
-  { id: 'fishingConsequences', name: 'Fishing Consequences', emoji: '🎣', desc: "Click to cast OMC's rod when a fish passes the crosshair! Most fish caught in 30s wins." },
+  { id: 'helpyBoop',          name: 'Helpy Boop',            emoji: '👃', reward:  1, desc: 'Click Helpy\'s nose as many times as you can in 30 seconds!' },
+  { id: 'moneyLaundry',       name: 'Money Laundering',      emoji: '💰', reward:  5, desc: 'Drag coins to Rockstar Freddy! Most coins deposited in 30s wins.' },
+  { id: 'feedingFrenzy',      name: 'Feeding Frenzy',        emoji: '🍕', reward:  3, desc: 'Make Chica\'s pizza as fast as possible! Wrong ingredient = -1 pizza.' },
+  { id: 'guitarFinder',       name: 'Guitar Finder',         emoji: '🎸', reward:  2, desc: 'Find Bonnie\'s guitar hidden in the grid as fast as possible!' },
+  { id: 'powerOut',           name: 'Power Out',             emoji: '🔦', reward:  2, desc: 'Close the door before Freddy attacks! Random timing.' },
+  { id: 'flashlight',         name: 'Flashlight',            emoji: '🔦', reward:  3, desc: 'Tap as fast as you can for 15 seconds! Watch out for Withered Foxy...' },
+  { id: 'pizzaDough',         name: 'Pizza Dough',           emoji: '🍕', reward:  5, desc: 'Draw the most perfect circle you can in 5 seconds!' },
+  { id: 'giveGifts',         name: 'Give Gifts Give Life',  emoji: '🎁', reward: 10, desc: 'Drag the right colored gift to the matching child! Most correct deliveries in 30s wins.' },
+  { id: 'fishingConsequences',name: 'Fishing Consequences',  emoji: '🎣', reward:  7, desc: "Click to cast OMC's rod when a fish passes the crosshair! Most fish caught in 30s wins." },
+  { id: 'deeDeesFishing',     name: "DeeDee's Fishing",      emoji: '🎣',             desc: 'Move Freddy and drop the plunger to catch fish! Deeper fish are worth more coins!' },
+  { id: 'bonBonBounce',       name: 'Bon-Bon Bounce',        emoji: '🎈', reward: 10, desc: 'Click Bon-Bon before he bounces away! The faster he goes, the harder it gets!' },
+  { id: 'nightCam',           name: 'Night Cam',             emoji: '📹', reward:  7, desc: 'Watch the security cameras and click animatronics when you spot them!' },
+  { id: 'musicBoxFrenzy',     name: 'Music Box Frenzy',      emoji: '🎵', reward: 10, desc: 'Wind the music box! Put on the Freddy Mask when animatronics appear or face a jumpscare!' },
 ];
 
 const QUESTION_EVENTS = [
@@ -418,12 +422,12 @@ function checkPodiumAllConfirmedLocal() {
     try { nextPlayer = JSON.parse(roomData.mg_config || '{}').nextPlayer; } catch { }
     nextPlayer = nextPlayer || nextSlot(roomData);
     db.from('party_rooms').update({
-      turn_phase: 'roll', current_slot: nextPlayer, mg_id: null,
+      turn_phase: 'roll', current_slot: nextPlayer,
       mg_done_p1: false, mg_done_p2: false, mg_done_p3: false, mg_done_p4: false,
     }).eq('id', roomId).eq('turn_phase', 'mg_podium').then(() => { }, () => { });
     // Also advance locally without waiting for subscription
     document.getElementById('mg-result-overlay')?.remove();
-    roomData = { ...roomData, turn_phase: 'roll', current_slot: nextPlayer, mg_id: null };
+    roomData = { ...roomData, turn_phase: 'roll', current_slot: nextPlayer };
     showScreen('board');
     renderBoard(roomData);
     renderActionUI(roomData);
@@ -1302,15 +1306,45 @@ async function handleRoomUpdate(room) {
         try { nextPlayer = JSON.parse(room.mg_config || '{}').nextPlayer; } catch { }
         nextPlayer = nextPlayer || nextSlot(room);
         await db.from('party_rooms').update({
-          turn_phase: 'roll', current_slot: nextPlayer, mg_id: null,
+          turn_phase: 'roll', current_slot: nextPlayer,
           mg_done_p1: false, mg_done_p2: false, mg_done_p3: false, mg_done_p4: false,
         }).eq('id', roomId).eq('turn_phase', 'mg_podium');
       } else if (!podiumConfirmedLocal.has(playerSlot)) {
         showMgPodium(room);
         showDiceShop(room);
       }
+    } else if (room.turn_phase === 'fnaf_battle' || room.turn_phase === 'fnaf_battle_end') {
+      _partyStopInactivityTimer();
+      showScreen('board');
+      if (prev?.board !== room.board) renderBoard(room);
+      renderStatusBar(room);
+      updateTokens(room);
+      showFnafBattle(room);
+      if (room.turn_phase === 'fnaf_battle') {
+        let bs; try { bs = JSON.parse(room.mg_config || '{}'); } catch { bs = {}; }
+        if (room.mg_done_p1 && room.mg_done_p2 && !bs.winner) {
+          const inv = JSON.parse(room.mg_players || '[]');
+          if ((inv.sort()[0] || 'player1') === playerSlot) await resolveFnafBattleRound(room);
+        }
+      } else if (room.turn_phase === 'fnaf_battle_end') {
+        let bs; try { bs = JSON.parse(room.mg_config || '{}'); } catch { bs = {}; }
+        if (bs.winner === playerSlot) setTimeout(async () => { if (roomId) await endFnafBattle(roomData || room); }, 3000);
+      }
+    } else if (room.turn_phase === 'springlock_roulette' || room.turn_phase === 'springlock_roulette_end') {
+      _partyStopInactivityTimer();
+      showScreen('board');
+      if (prev?.board !== room.board) renderBoard(room);
+      renderStatusBar(room);
+      updateTokens(room);
+      showSpringlockRoulette(room);
+      if (room.turn_phase === 'springlock_roulette_end') {
+        let bs; try { bs = JSON.parse(room.mg_config || '{}'); } catch { bs = {}; }
+        if (bs.winner === playerSlot) setTimeout(async () => { if (roomId) await endSpringlockRoulette(roomData || room); }, 2500);
+      }
     } else if (room.turn_phase === 'roll' || room.turn_phase === 'rolled' || room.turn_phase === 'moved') {
       document.getElementById('mg-result-overlay')?.remove();
+      document.getElementById('fnaf-battle-overlay')?.remove();
+      document.getElementById('springlock-overlay')?.remove();
       showScreen('board');
       if (prev?.board !== room.board) renderBoard(room);
       renderActionUI(room);
@@ -1320,6 +1354,8 @@ async function handleRoomUpdate(room) {
     return;
   }
   if (room.state === 'finished') {
+    document.getElementById('fnaf-battle-overlay')?.remove();
+    document.getElementById('springlock-overlay')?.remove();
     const pc = room.player_count || 2;
     const statsMap = pStats(room);
     if (!statsMap._awardsApplied) {
@@ -2084,8 +2120,13 @@ async function resolveSpace(room, updates, others) {
       await db.from('party_rooms').update(updates).eq('id', roomId);
     }
     const involved = [playerSlot, ...others];
-    emitEvent(`💥 ${involved.map(s => room[`${s}_name`]).join(' & ')} on the same space! Minigame!`);
-    await triggerMinigame(involved);
+    if ((room.player_count || 2) === 2 && involved.length === 2) {
+      emitEvent(`⚔️ ${involved.map(s => room[`${s}_name`]).join(' & ')} crossed paths! FNAF Battle!`);
+      await triggerFnafBattle(involved, room);
+    } else {
+      emitEvent(`💥 ${involved.map(s => room[`${s}_name`]).join(' & ')} on the same space! Minigame!`);
+      await triggerMinigame(involved);
+    }
   } else {
     await passOrMinigame(room, updates);
   }
@@ -2167,6 +2208,17 @@ async function handleSpace() {
       emitEvent(`🔒 ${room[`${playerSlot}_name`]} triggered ${room[`${sl.ownerSlot}_name`]}'s Springlock! -5🪙 → ${room[`${sl.ownerSlot}_name`]}`);
       showToast('🔒 Springlock! -5🪙');
     }
+  }
+
+  // 1v1: same-space collision always triggers FNAF Battle (overrides space effect)
+  if (others.length > 0 && (room.player_count || 2) === 2 && type !== 'challenge' && type !== 'minigame') {
+    if (mbIdx !== -1 || cupIdx !== -1 || slIdx !== -1) {
+      await db.from('party_rooms').update({ player_coins: JSON.stringify(st.coins), player_pizzas: JSON.stringify(st.pizzas), player_stats: JSON.stringify(ns) }).eq('id', roomId);
+    }
+    const involved = [playerSlot, ...others];
+    emitEvent(`⚔️ ${involved.map(s => room[`${s}_name`]).join(' & ')} crossed paths! FNAF Battle!`);
+    await triggerFnafBattle(involved, room);
+    return;
   }
 
   if (type === 'coin') {
@@ -3373,10 +3425,24 @@ async function freddyTollPass() {
 
 // ── Minigame trigger ──────────────────────────────────────────────────────────
 async function triggerMinigame(involvedSlots, extraCfg = {}) {
+  // In 1v1: 20% FNAF Battle, 10% Spring Lock Roulette, 70% regular minigame
+  if (!extraCfg.isChallenge && (roomData?.player_count || 2) === 2) {
+    const r = Math.random();
+    if (r < 0.20) {
+      emitEvent(`⚔️ FNAF Battle instead of a minigame!`);
+      await triggerFnafBattle(involvedSlots, roomData);
+      return;
+    } else if (r < 0.30) {
+      emitEvent(`🔒 Spring Lock Roulette instead of a minigame!`);
+      await triggerSpringlockRoulette(involvedSlots, roomData);
+      return;
+    }
+  }
+
   const lastMgId = roomData?.mg_id;
   const mgPool = MINIGAME_LIST.filter(m => m.id !== lastMgId);
   const cfg = (mgPool.length > 0 ? mgPool : MINIGAME_LIST)[Math.floor(Math.random() * (mgPool.length || MINIGAME_LIST.length))];
-  let reward = extraCfg.challengeReward !== undefined ? extraCfg.challengeReward : Math.floor(Math.random() * 3) + 1;
+  let reward = extraCfg.challengeReward !== undefined ? extraCfg.challengeReward : (cfg.reward ?? 1);
 
   // Double multiplier: last-lap double phase OR triggering player has 2d6 equipped
   let rewardMul = 1;
@@ -3508,6 +3574,10 @@ function startMinigameScreen(room) {
     pizzaDough: () => playPizzaDough(room, mg),
     giveGifts: () => playGiveGifts(room, mg),
     fishingConsequences: () => playFishingConsequences(room, mg),
+    deeDeesFishing: () => playDeeDeesFishing(room, mg),
+    bonBonBounce: () => playBonBonBounce(room, mg),
+    nightCam: () => playNightCam(room, mg),
+    musicBoxFrenzy: () => playMusicBoxFrenzy(room, mg),
   };
   runners[mg.id]?.();
 }
@@ -3617,7 +3687,15 @@ async function finishMinigame(room) {
     let challengeCoinsChange = {};
     const actualCoinsChange = {}; // tracks real coin deltas for podium display
 
-    if (isChallenge) {
+    if (room.mg_id === 'deeDeesFishing') {
+      // Each player earns exactly what they caught — no winner bonus
+      ranked.forEach(r => {
+        const earned = r.score || 0;
+        if (earned > 0) st.coins[r.slot] = (st.coins[r.slot] || 0) + earned;
+        actualCoinsChange[r.slot] = earned;
+      });
+      emitEvent(`🎣 ${ranked.map(r => `${room[`${r.slot}_name`] || r.slot}: +${r.score || 0}🪙`).join(' · ')}`);
+    } else if (isChallenge) {
       const challenger = mgConfig.challenger;
       const challengeReward = (mgConfig.challengeReward || 5) * rewardMul;
       const isPizzaReward = !!mgConfig.isPizzaReward;
@@ -4574,6 +4652,17 @@ async function cleanupPlayerLeft() {
     // Empty - nothing to do
 
   } else if (active.length === 1 && room.state === 'playing') {
+    // If a battle was in progress, transfer coins before ending
+    if (room.turn_phase === 'fnaf_battle' || room.turn_phase === 'fnaf_battle_end' ||
+      room.turn_phase === 'springlock_roulette' || room.turn_phase === 'springlock_roulette_end') {
+      const remainingSlot = active[0];
+      const coins = JSON.parse(room.player_coins || '{}');
+      coins[remainingSlot] = (coins[remainingSlot] || 0) + 5;
+      coins[savedSlot] = (coins[savedSlot] || 0) - 5;
+      update.player_coins = JSON.stringify(coins);
+      update.mg_config = '{}'; update.mg_players = '[]';
+      update.mg_done_p1 = false; update.mg_done_p2 = false;
+    }
     // Last player standing → auto-win
     update.state = 'finished';
     update.mg_id = null;
@@ -4648,7 +4737,7 @@ window.addEventListener('beforeunload', () => {
 
 // ── Give Gifts Give Life ──────────────────────────────────────────────────────
 function playGiveGifts(room, mg) {
-  const P = '../assets/images/party/';
+  const P = '../assets/images/party/gift/';
   const CHARS = [
     { id: 'freddy', filter: 'hue-rotate(62deg) saturate(7) brightness(1.1)' },
     { id: 'bonnie', filter: 'hue-rotate(220deg) saturate(3) brightness(1.05)' },
@@ -4816,7 +4905,7 @@ function playGiveGifts(room, mg) {
 
 // ── Fishing Consequences ──────────────────────────────────────────────────────
 function playFishingConsequences(room, mg) {
-  const P = '../assets/images/party/';
+  const P = '../assets/images/party/omc/';
   let score = 0, timeLeft = 30, done = false;
   let casting = false, animFrame;
   const fishPool = [];
@@ -4949,6 +5038,1132 @@ function playFishingConsequences(room, mg) {
     if (timeLeft <= 0) end();
   }, 1000);
 }
+
+// ── DeeDee's Fishing ──────────────────────────────────────────────────────────
+function playDeeDeesFishing(room, mg) {
+  const P = '../assets/images/party/deedee/';
+  let score = 0, done = false;
+  let freddyPct = 0.68;   // Freddy horizontal position (0–1 fraction of scene width)
+  let canMove = true;
+  let plungerActive = false, plungerY = 0, plungerX = 0, plungerDir = 'down', plungerCatch = null;
+  let animFrame, countTimer, holdInterval, respawnInterval;
+  const entities = [];
+  let pearlSpawned = false;
+  const FREDDY_W = 82, FREDDY_BOT = 72;  // px from scene top where the line starts
+
+  const FISH_TYPES = [
+    { gif: 'orange_fish.gif', value: 1, depthPct: 0.18 },
+    { gif: 'green_fish.gif', value: 2, depthPct: 0.29 },
+    { gif: 'purple_fish.gif', value: 3, depthPct: 0.40 },
+    { gif: 'blue_fish.gif', value: 4, depthPct: 0.51 },
+    { gif: 'pink_fish.gif', value: 5, depthPct: 0.62 },
+    { gif: 'yellow_fish.gif', value: 6, depthPct: 0.73 },
+  ];
+
+  const onMouseUp = () => { leftHeld = false; rightHeld = false; };
+  const onTouchEnd = () => { leftHeld = false; rightHeld = false; };
+
+  function end() {
+    if (done) return; done = true;
+    clearTimeout(countTimer); clearInterval(holdInterval); clearInterval(respawnInterval);
+    cancelAnimationFrame(animFrame);
+    document.removeEventListener('mouseup', onMouseUp);
+    document.removeEventListener('touchend', onTouchEnd);
+    document.removeEventListener('keydown', onKeyDown);
+    document.removeEventListener('keyup', onKeyUp);
+    const el = document.getElementById('mg-content');
+    if (el) el.innerHTML = `<div class="mg-done-msg">${T('mg.waitingResults')}</div>`;
+    submitScore(score);
+  }
+  mgCleanup = end;
+
+  document.getElementById('mg-content').innerHTML = `
+    <div class="mg-play df-wrap">
+      <div class="df-scene" id="df-scene">
+        <img class="df-bg" src="${P}bg.png" draggable="false" onerror="this.style.background='#1a5276'"/>
+        <img class="df-freddy-img" id="df-freddy" src="${P}freddy.png" draggable="false"/>
+        <div  class="df-pline" id="df-pline"></div>
+        <img  class="df-phead" id="df-phead" src="${P}plunger.png" draggable="false"/>
+        <button class="df-drop-btn" id="df-drop-btn">
+          <img src="${P}drop_button.png" draggable="false" onerror="this.outerHTML='<span class=df-drop-txt>DROP</span>'"/>
+        </button>
+        <button class="df-arr df-arr-l" id="df-left">
+          <img src="${P}arrow.png" style="transform:scaleX(-1)" draggable="false"/>
+        </button>
+        <button class="df-arr df-arr-r" id="df-right">
+          <img src="${P}arrow.png" draggable="false"/>
+        </button>
+        <div class="df-hud">
+          <span id="df-coins">🪙 0</span>
+        </div>
+      </div>
+    </div>`;
+
+  const scene = document.getElementById('df-scene');
+  const freddyEl = document.getElementById('df-freddy');
+  const pline = document.getElementById('df-pline');
+  const phead = document.getElementById('df-phead');
+  const coinsEl = document.getElementById('df-coins');
+  function sw() { return scene.clientWidth || 460; }
+  function sh() { return scene.clientHeight || 390; }
+
+  function updateFreddyPos() {
+    freddyEl.style.left = Math.round(freddyPct * sw() - FREDDY_W / 2) + 'px';
+  }
+
+  function spawnSchool(type) {
+    const count = 2 + Math.floor(Math.random() * 2); // 2-3 fish, more spread out
+    const baseSpd = 0.7 + Math.random() * 1.5;
+    const fromRight = Math.random() > 0.5;
+    const baseY = type.depthPct * sh();
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement('img');
+      el.className = 'df-fish'; el.src = `${P}${type.gif}`; el.draggable = false;
+      const x = fromRight ? sw() + i * 120 : -(i + 1) * 120;
+      const y = baseY + (Math.random() - 0.5) * 22;
+      const vx = (fromRight ? -1 : 1) * (baseSpd + (Math.random() - 0.5) * 0.3);
+      const flip = vx < 0;
+      el.style.left = x + 'px'; el.style.top = y + 'px';
+      el.style.transform = flip ? 'scaleX(-1)' : '';
+      scene.appendChild(el);
+      entities.push({ el, x, y, vx, value: type.value, w: 56, h: 40, flip });
+    }
+  }
+
+  function spawnPearl() {
+    if (pearlSpawned) return; pearlSpawned = true;
+    const el = document.createElement('img');
+    el.className = 'df-pearl'; el.src = `${P}pearl.gif`; el.draggable = false;
+    const fromRight = Math.random() > 0.5;
+    const x = fromRight ? sw() - 50 : 10;
+    const y = 0.85 * sh() + (Math.random() - 0.5) * 20;
+    const vx = (fromRight ? -1 : 1) * (0.6 + Math.random() * 0.7);
+    el.style.left = x + 'px'; el.style.top = y + 'px';
+    scene.appendChild(el);
+    entities.push({ el, x, y, vx, value: 10, w: 40, h: 40, isPearl: true });
+  }
+
+  let leftHeld = false, rightHeld = false;
+  holdInterval = setInterval(() => {
+    if (done || !canMove) return;
+    if (leftHeld) { freddyPct = Math.max(0.06, freddyPct - 0.018); updateFreddyPos(); }
+    if (rightHeld) { freddyPct = Math.min(0.94, freddyPct + 0.018); updateFreddyPos(); }
+  }, 50);
+
+  document.getElementById('df-left').addEventListener('mousedown', () => { leftHeld = true; });
+  document.getElementById('df-right').addEventListener('mousedown', () => { rightHeld = true; });
+  document.getElementById('df-left').addEventListener('touchstart', e => { e.preventDefault(); leftHeld = true; }, { passive: false });
+  document.getElementById('df-right').addEventListener('touchstart', e => { e.preventDefault(); rightHeld = true; }, { passive: false });
+  document.addEventListener('mouseup', onMouseUp);
+  document.addEventListener('touchend', onTouchEnd);
+
+  const onKeyDown = e => {
+    if (e.key === 'ArrowLeft') { e.preventDefault(); leftHeld = true; }
+    if (e.key === 'ArrowRight') { e.preventDefault(); rightHeld = true; }
+    if (e.key === ' ' && canMove && !plungerActive && !done) {
+      e.preventDefault();
+      canMove = false; plungerActive = true;
+      plungerX = Math.round(freddyPct * sw());
+      plungerY = FREDDY_BOT; plungerDir = 'down'; plungerCatch = null;
+    }
+  };
+  const onKeyUp = e => {
+    if (e.key === 'ArrowLeft') leftHeld = false;
+    if (e.key === 'ArrowRight') rightHeld = false;
+  };
+  document.addEventListener('keydown', onKeyDown);
+  document.addEventListener('keyup', onKeyUp);
+
+  document.getElementById('df-drop-btn').addEventListener('click', () => {
+    if (!canMove || plungerActive || done) return;
+    canMove = false; plungerActive = true;
+    plungerX = Math.round(freddyPct * sw());
+    plungerY = FREDDY_BOT;
+    plungerDir = 'down';
+    plungerCatch = null;
+  });
+
+  function updatePlungerVisual() {
+    if (!plungerActive) { pline.style.display = 'none'; phead.style.display = 'none'; return; }
+    const lineH = Math.max(0, plungerY - FREDDY_BOT);
+    pline.style.display = 'block';
+    pline.style.left = (plungerX - 2) + 'px';
+    pline.style.top = FREDDY_BOT + 'px';
+    pline.style.height = lineH + 'px';
+    phead.style.display = 'block';
+    phead.style.left = (plungerX - 14) + 'px';
+    phead.style.top = plungerY + 'px';
+  }
+
+  function animate() {
+    if (done) return;
+    const W = sw(), H = sh();
+
+    // Move all entities
+    for (const e of entities) {
+      e.x += e.vx;
+      if (e.x <= 0) { e.x = 0; e.vx = Math.abs(e.vx); }
+      else if (e.x + e.w >= W) { e.x = W - e.w; e.vx = -Math.abs(e.vx); }
+      e.el.style.left = e.x + 'px';
+      const flip = e.vx < 0;
+      if (flip !== e.flip) { e.flip = flip; e.el.style.transform = flip ? 'scaleX(-1)' : ''; }
+    }
+
+    // Plunger physics
+    if (plungerActive) {
+      const spd = 5;
+      if (plungerDir === 'down') {
+        plungerY += spd;
+        // Collision
+        for (let i = entities.length - 1; i >= 0; i--) {
+          const e = entities[i];
+          if (e === plungerCatch) continue;
+          if (Math.abs((e.x + e.w / 2) - plungerX) < 34 &&
+            plungerY >= e.y && plungerY <= e.y + e.h) {
+            plungerCatch = e; plungerDir = 'up'; break;
+          }
+        }
+        if (plungerY >= H - 8) plungerDir = 'up'; // hit bottom
+      } else {
+        plungerY -= spd;
+        if (plungerCatch) {
+          plungerCatch.y = plungerY + 4;
+          plungerCatch.el.style.top = plungerCatch.y + 'px';
+          plungerCatch.el.style.left = (plungerX - plungerCatch.w / 2) + 'px';
+        }
+        if (plungerY <= FREDDY_BOT) {
+          // Reached top
+          if (plungerCatch) {
+            score += plungerCatch.value;
+            coinsEl.textContent = `🪙 ${score}`;
+            liveScores[playerSlot] = score; updateLiveBar();
+            broadcastCh?.send({ type: 'broadcast', event: 'mg_score', payload: { slot: playerSlot, score } });
+            plungerCatch.el.remove();
+            entities.splice(entities.indexOf(plungerCatch), 1);
+            plungerCatch = null;
+          }
+          end();
+        }
+      }
+    }
+
+    updatePlungerVisual();
+    animFrame = requestAnimationFrame(animate);
+  }
+
+  // Initial setup
+  updateFreddyPos();
+  FISH_TYPES.forEach((t, i) => setTimeout(() => { if (!done) spawnSchool(t); }, i * 380));
+  setTimeout(() => { if (!done) spawnPearl(); }, 6000 + Math.random() * 6000);
+
+  respawnInterval = setInterval(() => {
+    if (done) return;
+    FISH_TYPES.forEach(t => {
+      const alive = entities.filter(e => e.value === t.value);
+      if (alive.length < 2) spawnSchool(t);
+    });
+  }, 7000);
+
+  buildLiveBar(room, JSON.parse(room.mg_players || '[]'));
+  animate();
+
+  // 50s silent fallback in case the drop never happens
+  countTimer = setTimeout(() => { if (!done) end(); }, 50000);
+}
+
+// ── Bon-Bon Bounce ────────────────────────────────────────────────────────────
+function playBonBonBounce(room, mg) {
+  const CHARS = [
+    { src: '../assets/images/chars/funtime/bon-bon.png', size: 68, spd: 1.8, pts: 1, label: 'Bon-Bon' },
+    { src: '../assets/images/chars/funtime/bonnet.png', size: 52, spd: 2.8, pts: 2, label: 'Bonnet' },
+  ];
+  let score = 0, timeLeft = 30, done = false;
+  let animFrame, countTimer;
+  const entities = [];
+
+  document.getElementById('mg-content').innerHTML = `
+    <div class="bbb-wrap">
+      <div class="bbb-scene" id="bbb-scene"></div>
+      <div class="bbb-hud"><span id="bbb-score">🎈 0</span><span id="bbb-timer">⏱ 30s</span></div>
+    </div>`;
+
+  const scene = document.getElementById('bbb-scene');
+  const scoreEl = document.getElementById('bbb-score');
+  const timerEl = document.getElementById('bbb-timer');
+  const W = () => scene.clientWidth || 400;
+  const H = () => scene.clientHeight || 320;
+
+  CHARS.forEach((ch, i) => {
+    const img = document.createElement('img');
+    img.className = 'bbb-entity'; img.src = ch.src; img.draggable = false;
+    const x = 80 + i * 200 + Math.random() * 60;
+    const y = 40 + Math.random() * 180;
+    const vx = (Math.random() > .5 ? 1 : -1) * ch.spd;
+    const vy = (Math.random() > .5 ? 1 : -1) * ch.spd;
+    img.style.cssText = `position:absolute;left:${x}px;top:${y}px;width:${ch.size}px;height:${ch.size}px;cursor:pointer;user-select:none`;
+    img.addEventListener('click', () => {
+      if (done) return;
+      score += ch.pts;
+      scoreEl.textContent = `🎈 ${score}`;
+      liveScores[playerSlot] = score; updateLiveBar();
+      broadcastCh?.send({ type: 'broadcast', event: 'mg_score', payload: { slot: playerSlot, score } });
+      img.style.transform = 'scale(1.4)';
+      setTimeout(() => { if (!done) img.style.transform = ''; }, 130);
+    });
+    scene.appendChild(img);
+    entities.push({ img, x, y, vx, vy, size: ch.size });
+  });
+
+  function animate() {
+    if (done) return;
+    const w = W(), h = H();
+    for (const e of entities) {
+      e.x += e.vx; e.y += e.vy;
+      if (e.x <= 0) { e.x = 0; e.vx = Math.abs(e.vx); }
+      else if (e.x + e.size >= w) { e.x = w - e.size; e.vx = -Math.abs(e.vx); }
+      if (e.y <= 0) { e.y = 0; e.vy = Math.abs(e.vy); }
+      else if (e.y + e.size >= h) { e.y = h - e.size; e.vy = -Math.abs(e.vy); }
+      e.img.style.left = e.x + 'px'; e.img.style.top = e.y + 'px';
+    }
+    animFrame = requestAnimationFrame(animate);
+  }
+
+  function end() {
+    if (done) return; done = true;
+    clearInterval(countTimer); cancelAnimationFrame(animFrame);
+    const el = document.getElementById('mg-content');
+    if (el) el.innerHTML = `<div class="mg-done-msg">${T('mg.waitingResults')}</div>`;
+    submitScore(score);
+  }
+
+  buildLiveBar(room, JSON.parse(room.mg_players || '[]'));
+  animate();
+  countTimer = setInterval(() => {
+    timeLeft--;
+    if (timerEl) timerEl.textContent = `⏱ ${timeLeft}s`;
+    if (timeLeft <= 0) end();
+  }, 1000);
+  mgCleanup = end;
+}
+
+// ── Night Cam ─────────────────────────────────────────────────────────────────
+function playNightCam(room, mg) {
+  const ANIM_SRC = '../assets/images/party/cam/animatronic.png';
+  const ROOMS = ['Parts & Service', 'Show Stage', "Pirate's Cove", 'Prize Corner'];
+  let score = 0, timeLeft = 30, done = false, currentCam = 0;
+  const camState = new Array(4).fill(null); // {clickable, expireId} — no src variation
+  let flashActive = false, flashCooldown = false;
+  let countTimer;
+
+  document.getElementById('mg-content').innerHTML = `
+    <div class="nc-wrap">
+      <div class="nc-screen" id="nc-screen" onclick="window._ncFlash()">
+        <div class="nc-room-label" id="nc-rlabel">${ROOMS[0]}</div>
+        <div class="nc-feed" id="nc-feed"><div class="nc-dark"></div></div>
+        <div class="nc-static" id="nc-static"></div>
+      </div>
+      <div class="nc-cams">
+        ${ROOMS.map((r, i) => `<button class="nc-cam-btn${i === 0 ? ' nc-active' : ''}" id="nc-cb-${i}" onclick="event.stopPropagation();window._ncCam(${i})">${i + 1}<small>${r}</small></button>`).join('')}
+      </div>
+      <div class="nc-hud">
+        <span id="nc-score">📹 0</span>
+        <span class="nc-hint">1–4: câmera · Espaço/clique: flash</span>
+        <span id="nc-timer">⏱ 30s</span>
+      </div>
+    </div>`;
+
+  const scoreEl = document.getElementById('nc-score');
+  const timerEl = document.getElementById('nc-timer');
+  const feed = document.getElementById('nc-feed');
+  const rlabel = document.getElementById('nc-rlabel');
+  const staticEl = document.getElementById('nc-static');
+
+  function renderDark() {
+    feed.innerHTML = '<div class="nc-dark"></div>';
+  }
+
+  window._ncCam = (i) => {
+    if (i === currentCam || done) return;
+    if (flashActive) { flashActive = false; feed.classList.remove('nc-illuminated'); }
+    currentCam = i;
+    rlabel.textContent = ROOMS[i];
+    for (let j = 0; j < 4; j++) document.getElementById(`nc-cb-${j}`)?.classList.toggle('nc-active', j === i);
+    staticEl.classList.add('nc-flash'); setTimeout(() => staticEl.classList.remove('nc-flash'), 160);
+    renderDark();
+  };
+
+  window._ncFlash = () => {
+    if (done || flashActive || flashCooldown) return;
+    flashActive = true; flashCooldown = true;
+    feed.classList.add('nc-illuminated');
+    const e = camState[currentCam];
+    if (e && e.clickable) {
+      feed.innerHTML = `<img class="nc-anim-img" src="${ANIM_SRC}" onclick="event.stopPropagation();window._ncClick(${currentCam})"/>`;
+    } else {
+      feed.innerHTML = '<div class="nc-clear">✓</div>';
+    }
+    setTimeout(() => {
+      flashActive = false;
+      feed.classList.remove('nc-illuminated');
+      renderDark();
+      setTimeout(() => { flashCooldown = false; }, 500);
+    }, 750);
+  };
+
+  window._ncClick = (camIdx) => {
+    if (done || camIdx !== currentCam || !flashActive) return;
+    const e = camState[camIdx];
+    if (!e || !e.clickable) return;
+    e.clickable = false;
+    score++;
+    scoreEl.textContent = `📹 ${score}`;
+    liveScores[playerSlot] = score; updateLiveBar();
+    broadcastCh?.send({ type: 'broadcast', event: 'mg_score', payload: { slot: playerSlot, score } });
+    feed.innerHTML = '<div class="nc-got">⚡ GOT IT!</div>';
+  };
+
+  // Seeded schedule — same across all clients
+  const rng = seededRand(mg.config.seed || Date.now());
+  let t = 1200;
+  while (t < 28000) {
+    const ri = Math.floor(rng() * 4);
+    const dur = 3500 + Math.floor(rng() * 3000);
+    (function (st, r, d) {
+      setTimeout(() => {
+        if (done || camState[r]) return;
+        const entry = { clickable: true };
+        camState[r] = entry;
+        entry.expireId = setTimeout(() => {
+          if (camState[r] === entry) camState[r] = null;
+        }, d);
+      }, st);
+    })(t, ri, dur);
+    t += 2000 + Math.floor(rng() * 2500);
+  }
+
+  const onKey = e => {
+    if (done) return;
+    if (['1', '2', '3', '4'].includes(e.key)) { e.preventDefault(); window._ncCam(parseInt(e.key) - 1); }
+    if (e.code === 'Space') { e.preventDefault(); window._ncFlash(); }
+  };
+  document.addEventListener('keydown', onKey);
+
+  function end() {
+    if (done) return; done = true;
+    clearInterval(countTimer);
+    document.removeEventListener('keydown', onKey);
+    window._ncCam = null; window._ncFlash = null; window._ncClick = null;
+    const el = document.getElementById('mg-content');
+    if (el) el.innerHTML = `<div class="mg-done-msg">${T('mg.waitingResults')}</div>`;
+    submitScore(score);
+  }
+
+  buildLiveBar(room, JSON.parse(room.mg_players || '[]'));
+  countTimer = setInterval(() => {
+    timeLeft--;
+    if (timerEl) timerEl.textContent = `⏱ ${timeLeft}s`;
+    if (timeLeft <= 0) end();
+  }, 1000);
+  mgCleanup = end;
+}
+
+// ── Music Box Frenzy ──────────────────────────────────────────────────────────
+function playMusicBoxFrenzy(room, mg) {
+  const MB = '../assets/images/party/music_box/';
+  const CHARS = [
+    { name: 'Toy Freddy', img: `${MB}toy_freddy.png`, pos: 'center' },
+    { name: 'Toy Bonnie', img: `${MB}toy_bonnie.png`, pos: 'right' },
+    { name: 'Toy Chica', img: `${MB}toy_chica.png`, pos: 'left' },
+    { name: 'Withered Bonnie', img: `${MB}withered_bonnie.png`, pos: 'center' },
+    { name: 'Withered Freddy', img: `${MB}withered_freddy.png`, pos: 'center' },
+  ];
+  const MASK_SRC = `${MB}mask.png`;
+  const DRAIN = 7;   // %/s drain rate
+  const WIND = 22;  // %/s wind rate
+  const REACT = 2800; // ms to apply mask
+  const MASK_DUR = 1500; // ms mask must be held to clear animatronic
+
+  let done = false, timeLeft = 30;
+  let musicBox = 55, windAmount = 0;
+  let windHeld = false, maskHeld = false;
+  let animVisible = false, maskHeldFor = 0, reactTimer = null;
+  let gameLoop, countTimer;
+
+  document.getElementById('mg-content').innerHTML = `
+    <div class="mbf-wrap">
+      <div class="mbf-office" id="mbf-office">
+        <div class="mbf-anim-slot" id="mbf-anim"></div>
+        <div class="mbf-mask-ov" id="mbf-mask-ov" style="display:none">
+          <img src="${MASK_SRC}" class="mbf-mask-img"/>
+        </div>
+      </div>
+      <div class="mbf-box-row">
+        <span class="mbf-box-label">🎵 Music Box</span>
+        <div class="mbf-bar-bg"><div class="mbf-bar-fill" id="mbf-fill" style="width:55%"></div></div>
+      </div>
+      <div class="mbf-controls">
+        <button class="mbf-btn mbf-wind-btn" id="mbf-wind-btn">🎵 WIND<small>hold / Space</small></button>
+        <button class="mbf-btn mbf-mask-btn" id="mbf-mask-btn">🎭 MASK<small>hold / M</small></button>
+      </div>
+      <div class="mbf-hud"><span id="mbf-score">🎵 0</span><span id="mbf-timer">⏱ 30s</span></div>
+    </div>`;
+
+  const fillEl = document.getElementById('mbf-fill');
+  const scoreEl = document.getElementById('mbf-score');
+  const timerEl = document.getElementById('mbf-timer');
+  const animSlot = document.getElementById('mbf-anim');
+  const maskOv = document.getElementById('mbf-mask-ov');
+  const windBtn = document.getElementById('mbf-wind-btn');
+  const maskBtn = document.getElementById('mbf-mask-btn');
+
+  const setMask = (on) => { maskHeld = on; maskOv.style.display = on ? 'flex' : 'none'; };
+  windBtn.addEventListener('mousedown', () => { windHeld = true; });
+  windBtn.addEventListener('touchstart', e => { e.preventDefault(); windHeld = true; }, { passive: false });
+  maskBtn.addEventListener('mousedown', () => { setMask(true); });
+  maskBtn.addEventListener('touchstart', e => { e.preventDefault(); setMask(true); }, { passive: false });
+  const onUp = () => { windHeld = false; setMask(false); };
+  const onKey = e => {
+    if (e.type === 'keydown') {
+      if (e.code === 'Space') { e.preventDefault(); windHeld = true; }
+      if (e.code === 'KeyM') { e.preventDefault(); setMask(true); }
+    } else {
+      if (e.code === 'Space') windHeld = false;
+      if (e.code === 'KeyM') setMask(false);
+    }
+  };
+  document.addEventListener('mouseup', onUp);
+  document.addEventListener('touchend', onUp);
+  document.addEventListener('keydown', onKey);
+  document.addEventListener('keyup', onKey);
+
+  function showAnim(charIdx) {
+    animVisible = true; maskHeldFor = 0;
+    const ch = CHARS[charIdx];
+    const posStyle = ch.pos === 'left'
+      ? 'left:5%; right:auto; transform:none;'
+      : ch.pos === 'right'
+        ? 'right:5%; left:auto; transform:none;'
+        : 'left:50%; transform:translateX(-50%);';
+    animSlot.style.cssText = `position:absolute; bottom:0; display:flex; flex-direction:column; align-items:center; ${posStyle}`;
+    animSlot.innerHTML = `<img src="${ch.img}" class="mbf-anim-img"/><div class="mbf-anim-name">${ch.name}</div>`;
+    const so = document.createElement('div');
+    so.id = 'mbf-strobe'; so.className = 'mbf-strobe';
+    document.getElementById('mbf-office').appendChild(so);
+    reactTimer = setTimeout(() => { if (!done && animVisible) die(); }, REACT);
+  }
+  function clearAnim() {
+    animVisible = false; maskHeldFor = 0;
+    if (reactTimer) { clearTimeout(reactTimer); reactTimer = null; }
+    animSlot.innerHTML = '';
+    document.getElementById('mbf-strobe')?.remove();
+  }
+
+  let last = null;
+  function loop(ts) {
+    if (done) return;
+    const dt = last ? (ts - last) / 1000 : 0; last = ts;
+
+    if (animVisible) {
+      if (maskHeld) {
+        maskHeldFor += dt * 1000;
+        if (maskHeldFor >= MASK_DUR) clearAnim();
+      } else {
+        maskHeldFor = 0;
+      }
+    }
+
+    if (!maskHeld && windHeld) {
+      musicBox = Math.min(100, musicBox + WIND * dt);
+      windAmount += WIND * dt;
+      const s = Math.round(windAmount);
+      scoreEl.textContent = `🎵 ${s}`;
+      liveScores[playerSlot] = s; updateLiveBar();
+    }
+    musicBox = Math.max(0, musicBox - DRAIN * dt);
+    if (musicBox <= 0) { die(); return; }
+
+    fillEl.style.width = musicBox + '%';
+    fillEl.style.background = musicBox > 50 ? '#2ecc71' : musicBox > 25 ? '#f39c12' : '#e74c3c';
+    gameLoop = requestAnimationFrame(loop);
+  }
+
+  function die() {
+    if (done) return; done = true;
+    clearAnim(); clearInterval(countTimer); cancelAnimationFrame(gameLoop);
+    document.removeEventListener('mouseup', onUp); document.removeEventListener('touchend', onUp);
+    document.removeEventListener('keydown', onKey); document.removeEventListener('keyup', onKey);
+    animSlot.innerHTML = '<div class="mbf-dead">💀 JUMPSCARE!</div>';
+    setTimeout(() => {
+      const el = document.getElementById('mg-content');
+      if (el) el.innerHTML = `<div class="mg-done-msg">${T('mg.waitingResults')}</div>`;
+      submitScore(Math.max(1, Math.round(windAmount)));
+    }, 1500);
+  }
+
+  function end() {
+    if (done) return; done = true;
+    clearAnim(); clearInterval(countTimer); cancelAnimationFrame(gameLoop);
+    document.removeEventListener('mouseup', onUp); document.removeEventListener('touchend', onUp);
+    document.removeEventListener('keydown', onKey); document.removeEventListener('keyup', onKey);
+    const el = document.getElementById('mg-content');
+    if (el) el.innerHTML = `<div class="mg-done-msg">${T('mg.waitingResults')}</div>`;
+    submitScore(Math.round(windAmount));
+  }
+
+  // Seeded animatronic schedule
+  const rng = seededRand(mg.config.seed || Date.now());
+  let t = 4500;
+  while (t < 27000) {
+    const ci = Math.floor(rng() * CHARS.length);
+    (function (st, c) { setTimeout(() => { if (!done && !animVisible) showAnim(c); }, st); })(t, ci);
+    t += 4500 + Math.floor(rng() * 4000);
+  }
+
+  buildLiveBar(room, JSON.parse(room.mg_players || '[]'));
+  gameLoop = requestAnimationFrame(loop);
+  countTimer = setInterval(() => {
+    timeLeft--;
+    if (timerEl) timerEl.textContent = `⏱ ${timeLeft}s`;
+    if (timeLeft <= 0) end();
+  }, 1000);
+  mgCleanup = end;
+}
+
+// ── Spring Lock Roulette (1v1, separate turn_phase) ───────────────────────────
+async function triggerSpringlockRoulette(involved, room) {
+  const first = involved[Math.floor(Math.random() * involved.length)];
+  const state = {
+    type: 'springlock_roulette', involved,
+    currentTurn: first, probability: 10,
+    pressRewards: Object.fromEntries(involved.map(s => [s, 0])),
+    log: ['🔒 Spring Lock Roulette begins! Dare to press the suit?'],
+    winner: null,
+  };
+  await db.from('party_rooms').update({
+    turn_phase: 'springlock_roulette',
+    mg_config: JSON.stringify(state),
+    mg_players: JSON.stringify(involved),
+    mg_done_p1: false, mg_done_p2: false,
+    mg_score_p1: -1, mg_score_p2: -1,
+  }).eq('id', roomId);
+}
+
+function showSpringlockRoulette(room) {
+  let state; try { state = JSON.parse(room.mg_config || '{}'); } catch { return; }
+  if (state.type !== 'springlock_roulette') return;
+  const { involved, currentTurn, probability, pressRewards, log, winner } = state;
+  if (!involved || involved.length < 2) return;
+
+  const mySlot = playerSlot;
+  const oppSlot = involved.find(s => s !== mySlot);
+  if (!oppSlot) return;
+  const isMyTurn = currentTurn === mySlot;
+  const isEnded = room.turn_phase === 'springlock_roulette_end';
+  const pct = Math.round(probability);
+  const hue = Math.max(0, 120 - probability * 1.2);
+  const danger = `hsl(${hue},80%,48%)`;
+
+  let overlay = document.getElementById('springlock-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'springlock-overlay';
+    overlay.className = 'springlock-overlay';
+    document.body.appendChild(overlay);
+  }
+
+  const myR = pressRewards?.[mySlot] || 0;
+  const oppR = pressRewards?.[oppSlot] || 0;
+  const myName = room[`${mySlot}_name`] || mySlot;
+  const oppName = room[`${oppSlot}_name`] || oppSlot;
+
+  overlay.innerHTML = `
+    <div class="sl-card">
+      <div class="sl-title">🔒 Spring Lock Roulette</div>
+      <div class="sl-suit-wrap">
+        <img class="sl-suit" src="../assets/images/chars/springlock/springbonnie.png"
+          style="filter:drop-shadow(0 0 18px ${danger}) drop-shadow(0 0 36px ${danger})"/>
+        <div class="sl-pct" style="color:${danger}">${pct}% SPRING-LOCK CHANCE</div>
+      </div>
+      <div class="sl-players">
+        <div class="sl-p${currentTurn === mySlot ? ' sl-p-active' : ''}">
+          ${myName} <span class="sl-pr">+${myR}🪙</span></div>
+        <div class="sl-p${currentTurn === oppSlot ? ' sl-p-active' : ''}">
+          ${oppName} <span class="sl-pr">+${oppR}🪙</span></div>
+      </div>
+      <div class="sl-log">${(log || []).slice(-5).map(l => `<div class="sl-log-line">${l}</div>`).join('')}</div>
+      ${isEnded
+      ? `<div class="sl-result ${winner === mySlot ? 'sl-win' : 'sl-lose'}">
+             ${winner === mySlot ? `🏆 You survived! +5🪙${myR > 0 ? ' +' + myR + '🪙 bonus' : ''}` : `💀 SPRING LOCK! -5🪙`}
+           </div>`
+      : isMyTurn
+        ? `<div class="sl-btns">
+               <button class="sl-btn sl-press" onclick="window._slPress()">
+                 👇 PRESS <small>${pct}% risk · +1🪙 if survive</small>
+               </button>
+               <button class="sl-btn sl-pass" onclick="window._slPass()">
+                 🏃 PASS <small>${Math.min(95, pct + 20)}% risk next · no reward</small>
+               </button>
+             </div>`
+        : `<div class="sl-wait">⏳ ${room[`${currentTurn}_name`] || currentTurn}'s turn...</div>`
+    }
+    </div>`;
+
+  let _slBusy = false;
+  window._slPress = async () => {
+    if (_slBusy || state.currentTurn !== playerSlot || room.turn_phase !== 'springlock_roulette') return;
+    _slBusy = true;
+    const springlocked = Math.random() * 100 < state.probability;
+    const ns = { ...state, log: [...(state.log || [])] };
+    if (springlocked) {
+      ns.winner = oppSlot;
+      ns.log.push(`💀 ${myName} pressed... SPRING LOCK! 💀`);
+      await db.from('party_rooms').update({
+        turn_phase: 'springlock_roulette_end', mg_config: JSON.stringify(ns),
+      }).eq('id', roomId).eq('turn_phase', 'springlock_roulette');
+    } else {
+      ns.pressRewards = { ...(state.pressRewards || {}), [mySlot]: myR + 1 };
+      ns.probability = Math.min(95, state.probability + 10);
+      ns.currentTurn = oppSlot;
+      ns.log.push(`✅ ${myName} pressed and survived! (+1🪙, now ${Math.round(ns.probability)}% chance)`);
+      await db.from('party_rooms').update({
+        mg_config: JSON.stringify(ns),
+      }).eq('id', roomId).eq('turn_phase', 'springlock_roulette');
+    }
+  };
+
+  window._slPass = async () => {
+    if (_slBusy || state.currentTurn !== playerSlot || room.turn_phase !== 'springlock_roulette') return;
+    _slBusy = true;
+    const ns = { ...state, log: [...(state.log || [])] };
+    ns.probability = Math.min(95, state.probability + 20);
+    ns.currentTurn = oppSlot;
+    ns.log.push(`🏃 ${myName} passed! Risk is now ${Math.round(ns.probability)}%!`);
+    await db.from('party_rooms').update({
+      mg_config: JSON.stringify(ns),
+    }).eq('id', roomId).eq('turn_phase', 'springlock_roulette');
+  };
+}
+
+async function endSpringlockRoulette(room) {
+  let state; try { state = JSON.parse(room.mg_config || '{}'); } catch { return; }
+  const { involved, winner, pressRewards } = state;
+  if (!involved || !winner) return;
+
+  const loser = involved.find(s => s !== winner);
+  const st = pState(room);
+  const ns = pStats(room);
+  st.coins[winner] = (st.coins[winner] || 0) + 5;
+  if (loser) st.coins[loser] = (st.coins[loser] || 0) - 5;
+  involved.forEach(s => {
+    const earned = pressRewards?.[s] || 0;
+    if (earned > 0) st.coins[s] = (st.coins[s] || 0) + earned;
+  });
+  const myBonus = pressRewards?.[playerSlot] || 0;
+  emitEvent(`🔒 ${room[`${winner}_name`]} survived the Spring Lock! +5🪙${myBonus > 0 ? ` (+${myBonus}🪙 press bonus)` : ''}`);
+
+  await db.from('party_rooms').update({
+    turn_phase: 'roll', current_slot: nextSlot(room),
+    player_coins: JSON.stringify(st.coins), player_stats: JSON.stringify(ns),
+    mg_config: '{}', mg_players: '[]',
+    mg_done_p1: false, mg_done_p2: false, mg_score_p1: 0, mg_score_p2: 0,
+  }).eq('id', roomId).eq('turn_phase', 'springlock_roulette_end');
+}
+
+// ── FNAF Battle (1v1 collision minigame) ──────────────────────────────────────
+
+const BATTLE_P = '../assets/images/party/fights/';
+
+const BATTLE_CHARS = {
+  freddy: {
+    name: 'Freddy', hp: 85, speed: 4, type: 'original',
+    moves: [
+      { name: 'Mic Drop', desc: 'Throws the microphone', damage: 22, accuracy: 0.85, priority: false },
+      { name: 'Fazbear Tune', desc: 'Raises own damage by 30%', damage: 0, accuracy: 1, buff: { self: { damageMul: 1.3 } }, priority: true },
+    ]
+  },
+  bonnie: {
+    name: 'Bonnie', hp: 80, speed: 6, type: 'rock',
+    moves: [
+      { name: 'Guitar Smash', desc: 'Smashes with the guitar', damage: 20, accuracy: 0.9, priority: false },
+      { name: 'Sound Wave', desc: '15 dmg · lowers enemy attack', damage: 15, accuracy: 0.75, buff: { enemy: { damageMul: 0.8 } }, priority: true },
+    ]
+  },
+  chica: {
+    name: 'Chica', hp: 95, speed: 7, type: 'food',
+    moves: [
+      { name: 'Cupcake Toss', desc: 'Throws Mr. Cupcake', damage: 18, accuracy: 0.9, priority: false },
+      { name: 'Party Treat', desc: 'Recovers 35 HP', damage: 0, accuracy: 1, heal: 35, priority: false },
+    ]
+  },
+  foxy: {
+    name: 'Foxy', hp: 75, speed: 1, type: 'pirate',
+    moves: [
+      { name: "Captain's Claw", desc: 'Pirate hook attack', damage: 25, accuracy: 0.8, priority: false },
+      { name: 'Quick Rush', desc: 'Powerful rush · 30 dmg · 50% acc.', damage: 30, accuracy: 0.5, priority: true },
+    ]
+  },
+  springtrap: {
+    name: 'Springtrap', hp: 90, speed: 5, type: 'trap',
+    moves: [
+      { name: 'Spring Lock', desc: 'Painful spring trap', damage: 20, accuracy: 0.85, priority: false },
+      { name: 'Remnant Drain', desc: '25 dmg · steals 25 HP', damage: 25, accuracy: 0.7, drain: 25, priority: false },
+    ]
+  },
+  mangle: {
+    name: 'Mangle', hp: 70, speed: 2, type: 'toy',
+    moves: [
+      { name: 'Tangle', desc: 'Wraps with cables', damage: 20, accuracy: 0.85, priority: false },
+      { name: 'Freq. Blast', desc: '10 dmg · slows enemy', damage: 10, accuracy: 0.75, buff: { enemy: { speedMod: 3 } }, priority: true },
+    ]
+  },
+  puppet: {
+    name: 'The Puppet', hp: 80, speed: 3, type: 'music',
+    moves: [
+      { name: 'Gift Box', desc: 'Attacks with the gift box', damage: 20, accuracy: 0.9, priority: false },
+      { name: 'Life Gift', desc: '5 dmg · recovers 30 HP', damage: 5, accuracy: 1, heal: 30, priority: true },
+    ]
+  },
+  bb: {
+    name: 'Balloon Boy', hp: 65, speed: 8, type: 'child',
+    moves: [
+      { name: 'Balloon Bonk', desc: 'Hits with a balloon', damage: 15, accuracy: 0.9, priority: false },
+      { name: 'Hi! Hello!', desc: 'Lowers enemy attack 30% · prio.', damage: 0, accuracy: 1, buff: { enemy: { damageMul: 0.7 } }, priority: true },
+    ]
+  },
+};
+
+// Ciclo de 8 tipos: Pirate→Original→Music→Trap→Food→Child→Rock→Toy→Pirate
+const BATTLE_SUPER = {
+  pirate: ['original'],  // Foxy → Freddy
+  original: ['music'],   // Freddy → Puppet (a estrela domina o Music Box)
+  music: ['trap'],       // Puppet → Springtrap (Music Box mantinha Springtrap preso)
+  trap: ['food'],        // Springtrap → Chica (primeira vítima)
+  food: ['child'],       // Chica → BB (cuida das crianças)
+  child: ['rock'],       // BB → Bonnie (crianças destroem Bonnie à noite)
+  rock: ['toy'],         // Bonnie → Mangle (rock destrói as frequências da Mangle)
+  toy: ['pirate'],       // Mangle → Foxy (Mangle é a versão toy do Foxy)
+};
+
+let _battleLastRound = 0;
+
+async function triggerFnafBattle(involved, room) {
+  const reward = 5;
+  const state = {
+    type: 'fnaf_battle', involved, hp: {}, maxHp: {}, buffs: {},
+    log: ['⚔️ Battle started!'], round: 1, winner: null, reward, lastRoundAttacks: []
+  };
+  involved.forEach(s => {
+    const cfg = BATTLE_CHARS[room[`${s}_char`] || 'freddy'] || BATTLE_CHARS.freddy;
+    state.hp[s] = cfg.hp; state.maxHp[s] = cfg.hp; state.buffs[s] = {};
+  });
+  await db.from('party_rooms').update({
+    turn_phase: 'fnaf_battle',
+    mg_config: JSON.stringify(state),
+    mg_players: JSON.stringify(involved),
+    mg_done_p1: false, mg_done_p2: false,
+    mg_score_p1: -1, mg_score_p2: -1,
+    mg_reward: reward,
+  }).eq('id', roomId);
+}
+
+function showFnafBattle(room) {
+  let state; try { state = JSON.parse(room.mg_config || '{}'); } catch { return; }
+  if (state.type !== 'fnaf_battle') return;
+  const { involved, hp, maxHp, log, winner, reward, lastRoundAttacks, round } = state;
+  if (!involved || involved.length < 2) return;
+
+  const mySlot = playerSlot;
+  const oppSlot = involved.find(s => s !== mySlot);
+  if (!oppSlot) return;
+
+  const myChar = room[`${mySlot}_char`] || 'freddy';
+  const oppChar = room[`${oppSlot}_char`] || 'freddy';
+  const myCfg = BATTLE_CHARS[myChar] || BATTLE_CHARS.freddy;
+  const oppCfg = BATTLE_CHARS[oppChar] || BATTLE_CHARS.freddy;
+
+  const myHp = Math.max(0, hp[mySlot] || 0);
+  const oppHp = Math.max(0, hp[oppSlot] || 0);
+  const myMaxHp = maxHp[mySlot] || myCfg.hp;
+  const oppMaxHp = maxHp[oppSlot] || oppCfg.hp;
+  const myHpPct = (myHp / myMaxHp) * 100;
+  const oppHpPct = (oppHp / oppMaxHp) * 100;
+  const hpColor = pct => pct > 50 ? '#2ecc71' : pct > 25 ? '#f39c12' : '#e74c3c';
+
+  const mySn = slotNum(mySlot);
+  const oppSn = slotNum(oppSlot);
+  const myPicked = mySn <= 4 ? !!room[`mg_done_p${mySn}`] : false;
+  const oppPicked = oppSn <= 4 ? !!room[`mg_done_p${oppSn}`] : false;
+
+  const isNewRound = round > _battleLastRound && lastRoundAttacks?.length > 0;
+  const firstSlot = lastRoundAttacks?.[0]?.slot;
+  const secondSlot = lastRoundAttacks?.[1]?.slot;
+
+  // Show first attacker's animation immediately; second starts after 700ms
+  const myGif = isNewRound && firstSlot === mySlot ? `${BATTLE_P}${myChar}_attack.gif` : `${BATTLE_P}${myChar}_idle.gif`;
+  const oppGif = isNewRound && firstSlot === oppSlot ? `${BATTLE_P}${oppChar}_attack.gif` : `${BATTLE_P}${oppChar}_idle.gif`;
+  const logHtml = [...log].reverse().slice(0, 5).map(l => `<div class="fb-log-line">${l}</div>`).join('');
+
+  let overlay = document.getElementById('fnaf-battle-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'fnaf-battle-overlay';
+    overlay.className = 'fnaf-battle-overlay';
+    document.body.appendChild(overlay);
+  }
+
+  const hpBar = (pct, color) =>
+    `<div class="fb-hp-bar"><div class="fb-hp-fill" style="width:${Math.max(0, pct)}%;background:${color}"></div></div>`;
+
+  if (winner) {
+    const iWon = winner === mySlot;
+    overlay.innerHTML = `<div class="fb-card">
+      <div class="fb-title">${T('battle.ended')}</div>
+      <div class="fb-arena">
+        <div class="fb-fighter fb-me${myHp <= 0 ? ' fb-fainted' : ''}">
+          <div class="fb-fname">${room[`${mySlot}_name`] || mySlot}</div>
+          <img class="fb-sprite fb-flip" src="${BATTLE_P}${myChar}_idle.gif" onerror="this.style.opacity='.3'"/>
+          ${hpBar(myHpPct, hpColor(myHpPct))}
+          <div class="fb-hptxt">${myHp}/${myMaxHp}</div>
+        </div>
+        <div class="fb-vs">VS</div>
+        <div class="fb-fighter fb-opp${oppHp <= 0 ? ' fb-fainted' : ''}">
+          <div class="fb-fname">${room[`${oppSlot}_name`] || oppSlot}</div>
+          <img class="fb-sprite" src="${BATTLE_P}${oppChar}_idle.gif" onerror="this.style.opacity='.3'"/>
+          ${hpBar(oppHpPct, hpColor(oppHpPct))}
+          <div class="fb-hptxt">${oppHp}/${oppMaxHp}</div>
+        </div>
+      </div>
+      <div class="fb-result ${iWon ? 'fb-win' : 'fb-lose'}">${T(iWon ? 'battle.won' : 'battle.lost')}</div>
+      <div class="fb-log">${logHtml}</div>
+    </div>`;
+    return;
+  }
+
+  const moveBtns = !myPicked
+    ? myCfg.moves.map((m, i) => {
+      const accPct = Math.round((m.accuracy ?? 1) * 100);
+      const accColor = accPct >= 100 ? '#2ecc71' : accPct >= 85 ? '#a3d977' : accPct >= 75 ? '#f9c74f' : accPct >= 60 ? '#f77f00' : '#e74c3c';
+      return `<button class="fb-move-btn" onclick="window.pickFnafMove(${i})">
+          <div class="fb-mname-row">
+            <span class="fb-mname">${m.name}${m.priority ? ' <span class="fb-prio">▲</span>' : ''}</span>
+            <span class="fb-macc" style="color:${accColor}">${accPct}%</span>
+          </div>
+          <span class="fb-mdesc">${m.desc}</span>
+        </button>`;
+    }).join('')
+    : `<div class="fb-waiting">${T(oppPicked ? 'battle.resolving' : 'battle.waiting')}</div>`;
+
+  overlay.innerHTML = `<div class="fb-card">
+    <div class="fb-title">${T('battle.title', { round })}</div>
+    <div class="fb-arena">
+      <div class="fb-fighter fb-me">
+        <div class="fb-fname">${room[`${mySlot}_name`] || mySlot}</div>
+        <img class="fb-sprite fb-flip" id="fb-my-spr" src="${myGif}" onerror="this.style.opacity='.3'"/>
+        ${hpBar(myHpPct, hpColor(myHpPct))}
+        <div class="fb-hptxt">${myHp}/${myMaxHp}</div>
+      </div>
+      <div class="fb-vs">VS</div>
+      <div class="fb-fighter fb-opp">
+        <div class="fb-fname">${room[`${oppSlot}_name`] || oppSlot}</div>
+        <img class="fb-sprite" id="fb-opp-spr" src="${oppGif}" onerror="this.style.opacity='.3'"/>
+        ${hpBar(oppHpPct, hpColor(oppHpPct))}
+        <div class="fb-hptxt">${oppHp}/${oppMaxHp}</div>
+      </div>
+    </div>
+    <div class="fb-log">${logHtml}</div>
+    <div class="fb-moves">${moveBtns}</div>
+  </div>`;
+
+  if (isNewRound) {
+    _battleLastRound = round;
+    // After 700ms: first attacker → idle, second attacker → attack
+    if (secondSlot) {
+      setTimeout(() => {
+        const myS = document.getElementById('fb-my-spr');
+        const opS = document.getElementById('fb-opp-spr');
+        if (firstSlot === mySlot && myS) myS.src = `${BATTLE_P}${myChar}_idle.gif`;
+        if (firstSlot === oppSlot && opS) opS.src = `${BATTLE_P}${oppChar}_idle.gif`;
+        if (secondSlot === mySlot && myS) myS.src = `${BATTLE_P}${myChar}_attack.gif`;
+        if (secondSlot === oppSlot && opS) opS.src = `${BATTLE_P}${oppChar}_attack.gif`;
+      }, 700);
+    }
+    // After 1400ms: all → idle
+    setTimeout(() => {
+      const myS = document.getElementById('fb-my-spr');
+      const opS = document.getElementById('fb-opp-spr');
+      if (myS) myS.src = `${BATTLE_P}${myChar}_idle.gif`;
+      if (opS) opS.src = `${BATTLE_P}${oppChar}_idle.gif`;
+    }, 1400);
+  } else if (round !== _battleLastRound) {
+    _battleLastRound = round;
+  }
+}
+
+window.pickFnafMove = async function (moveIdx) {
+  if (!roomId || !playerSlot) return;
+  const sn = slotNum(playerSlot);
+  if (sn > 4) return;
+  await db.from('party_rooms').update({
+    [`mg_score_p${sn}`]: moveIdx,
+    [`mg_done_p${sn}`]: true,
+  }).eq('id', roomId).eq('turn_phase', 'fnaf_battle');
+};
+
+async function resolveFnafBattleRound(room) {
+  let state; try { state = JSON.parse(room.mg_config || '{}'); } catch { return; }
+  if (state.type !== 'fnaf_battle' || state.winner) return;
+
+  const [slotA, slotB] = state.involved;
+  const charA = room[`${slotA}_char`] || 'freddy';
+  const charB = room[`${slotB}_char`] || 'freddy';
+  const cfgA = BATTLE_CHARS[charA] || BATTLE_CHARS.freddy;
+  const cfgB = BATTLE_CHARS[charB] || BATTLE_CHARS.freddy;
+
+  const moveIdxA = room.mg_score_p1 ?? 0;
+  const moveIdxB = room.mg_score_p2 ?? 0;
+  const moveA = cfgA.moves[moveIdxA] || cfgA.moves[0];
+  const moveB = cfgB.moves[moveIdxB] || cfgB.moves[0];
+
+  const speedA = cfgA.speed + (state.buffs[slotA]?.speedMod || 0);
+  const speedB = cfgB.speed + (state.buffs[slotB]?.speedMod || 0);
+  const prioA = moveA.priority ? -999 : speedA;
+  const prioB = moveB.priority ? -999 : speedB;
+
+  const makeEntry = (slot, char, cfg, move, moveIdx, oppSlot, oppCfg) =>
+    ({ slot, char, cfg, move, moveIdx, oppSlot, oppCfg });
+
+  let order;
+  if (prioA < prioB) {
+    order = [makeEntry(slotA, charA, cfgA, moveA, moveIdxA, slotB, cfgB),
+    makeEntry(slotB, charB, cfgB, moveB, moveIdxB, slotA, cfgA)];
+  } else if (prioB < prioA) {
+    order = [makeEntry(slotB, charB, cfgB, moveB, moveIdxB, slotA, cfgA),
+    makeEntry(slotA, charA, cfgA, moveA, moveIdxA, slotB, cfgB)];
+  } else {
+    const coin = Math.random() < 0.5;
+    order = coin
+      ? [makeEntry(slotA, charA, cfgA, moveA, moveIdxA, slotB, cfgB), makeEntry(slotB, charB, cfgB, moveB, moveIdxB, slotA, cfgA)]
+      : [makeEntry(slotB, charB, cfgB, moveB, moveIdxB, slotA, cfgA), makeEntry(slotA, charA, cfgA, moveA, moveIdxA, slotB, cfgB)];
+  }
+
+  const ns = {
+    ...state,
+    hp: { ...state.hp },
+    buffs: { [slotA]: { ...state.buffs[slotA] }, [slotB]: { ...state.buffs[slotB] } },
+    log: [...state.log],
+    lastRoundAttacks: [],
+    winner: null,
+  };
+
+  for (const e of order) {
+    if ((ns.hp[e.slot] || 0) <= 0) continue;
+    ns.lastRoundAttacks.push({ slot: e.slot, moveIdx: e.moveIdx });
+
+    const acc = e.move.accuracy ?? 1;
+    if (Math.random() >= acc) {
+      ns.log.push(`${e.cfg.name} used ${e.move.name}! But it missed!`);
+      continue;
+    }
+
+    let dmg = e.move.damage || 0;
+    if (dmg > 0) {
+      dmg = Math.round(dmg * (ns.buffs[e.slot]?.damageMul || 1));
+      const isSuper = BATTLE_SUPER[e.cfg.type]?.includes(e.oppCfg.type);
+      if (isSuper) { dmg += 10; ns.log.push('⚡ Super effective! (+10 dmg)'); }
+      ns.hp[e.oppSlot] = Math.max(0, (ns.hp[e.oppSlot] || 0) - dmg);
+      ns.log.push(`${e.cfg.name} used ${e.move.name}! ${dmg} damage!`);
+    } else {
+      ns.log.push(`${e.cfg.name} used ${e.move.name}!`);
+    }
+
+    if (e.move.heal) {
+      const healed = Math.min(e.move.heal, (ns.maxHp[e.slot] || e.cfg.hp) - (ns.hp[e.slot] || 0));
+      ns.hp[e.slot] = Math.min(ns.maxHp[e.slot] || e.cfg.hp, (ns.hp[e.slot] || 0) + e.move.heal);
+      if (healed > 0) ns.log.push(`${e.cfg.name} recovered ${healed} HP!`);
+    }
+
+    if (e.move.drain && dmg > 0) {
+      const drained = Math.min(e.move.drain, (ns.maxHp[e.slot] || e.cfg.hp) - (ns.hp[e.slot] || 0));
+      ns.hp[e.slot] = Math.min(ns.maxHp[e.slot] || e.cfg.hp, (ns.hp[e.slot] || 0) + e.move.drain);
+      if (drained > 0) ns.log.push(`${e.cfg.name} drained ${drained} HP!`);
+    }
+
+    if (e.move.buff?.self) {
+      ns.buffs[e.slot] = { ...ns.buffs[e.slot], ...e.move.buff.self };
+      if (e.move.buff.self.damageMul > 1) ns.log.push(`${e.cfg.name}'s attack rose!`);
+      else if (e.move.buff.self.damageMul < 1) ns.log.push(`${e.cfg.name}'s attack fell!`);
+    }
+    if (e.move.buff?.enemy) {
+      ns.buffs[e.oppSlot] = { ...ns.buffs[e.oppSlot], ...e.move.buff.enemy };
+      if (e.move.buff.enemy.damageMul < 1) ns.log.push(`${e.oppCfg.name}'s attack fell!`);
+      if (e.move.buff.enemy.speedMod) ns.log.push(`${e.oppCfg.name} was slowed!`);
+    }
+
+    if ((ns.hp[e.oppSlot] || 0) <= 0) {
+      ns.log.push(`${e.oppCfg.name} fainted!`);
+      ns.winner = e.slot;
+      break;
+    }
+  }
+
+  ns.round++;
+  const update = {
+    mg_config: JSON.stringify(ns),
+    mg_done_p1: false, mg_done_p2: false,
+    mg_score_p1: -1, mg_score_p2: -1,
+  };
+  if (ns.winner) update.turn_phase = 'fnaf_battle_end';
+  await db.from('party_rooms').update(update).eq('id', roomId).eq('turn_phase', 'fnaf_battle');
+}
+
+async function endFnafBattle(room) {
+  let state; try { state = JSON.parse(room.mg_config || '{}'); } catch { return; }
+  const { involved, winner, reward } = state;
+  if (!involved || !winner) return;
+
+  const loser = involved.find(s => s !== winner);
+  const st = pState(room);
+  const ns = pStats(room);
+  st.coins[winner] = (st.coins[winner] || 0) + 5;
+  if (loser) st.coins[loser] = (st.coins[loser] || 0) - 5;
+  emitEvent(`⚔️ ${room[`${winner}_name`]} won the battle! +5🪙`);
+
+  await db.from('party_rooms').update({
+    turn_phase: 'roll',
+    current_slot: nextSlot(room),
+    player_coins: JSON.stringify(st.coins),
+    player_stats: JSON.stringify(ns),
+    mg_config: '{}', mg_players: '[]',
+    mg_done_p1: false, mg_done_p2: false,
+    mg_score_p1: 0, mg_score_p2: 0,
+  }).eq('id', roomId).eq('turn_phase', 'fnaf_battle_end');
+}
+
+// Debug: fight(playerName) — trigger FNAF Battle manually from console
+window.fight = async function (opponentName) {
+  if (!roomId || !playerSlot || !roomData) return console.warn('[fight] Não estás numa sala.');
+  const pc = roomData.player_count || 2;
+  const opp = allSlots(pc).find(s =>
+    s !== playerSlot &&
+    (roomData[`${s}_name`] || '').toLowerCase().includes((opponentName || '').toLowerCase())
+  );
+  if (!opp) return console.warn('[fight] Jogador não encontrado:', opponentName, '— slots disponíveis:', allSlots(pc).map(s => roomData[`${s}_name`]).join(', '));
+  console.log(`[fight] A iniciar batalha: ${playerSlot} vs ${opp}`);
+  await triggerFnafBattle([playerSlot, opp], roomData);
+};
+
+// Debug: springlock(playerName) — trigger Spring Lock Roulette manually from console
+window.springlock = async function (opponentName) {
+  if (!roomId || !playerSlot || !roomData) return console.warn('[springlock] Não estás numa sala.');
+  const pc = roomData.player_count || 2;
+  const opp = allSlots(pc).find(s =>
+    s !== playerSlot &&
+    (roomData[`${s}_name`] || '').toLowerCase().includes((opponentName || '').toLowerCase())
+  );
+  if (!opp) return console.warn('[springlock] Jogador não encontrado:', opponentName, '— slots disponíveis:', allSlots(pc).map(s => roomData[`${s}_name`]).join(', '));
+  console.log(`[springlock] A iniciar Spring Lock Roulette: ${playerSlot} vs ${opp}`);
+  await triggerSpringlockRoulette([playerSlot, opp], roomData);
+};
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
