@@ -4,8 +4,8 @@
 
 (function () {
   const _HATE_RX = [
-    /n[i1!|][g9q]{1,2}[ae3@*4]r?/i,
-    /n[i1!|][g9q]{2,}[@a4]/i,
+    /n[i1!|o0][g9q]{1,2}[ae3@*4]r?/i,
+    /n[i1!|o0][g9q]{2,}[@a4]/i,
     /f[a@4][g9]{1,2}[o0][t7]?s?/i, /\bf[a@4][g9]s?\b/i,
     /tr[a@4]n+[iy1][e3]?/i,
     /\bd[yi1]k[e3]s?\b/i,
@@ -22,6 +22,7 @@
     return s.replace(/\|</g, 'k').replace(/\/\//g, 'n').replace(/\(\)/g, 'o').replace(/\|3/g, 'b');
   }
   function _hate(msg) { const t = _norm(msg); return _HATE_RX.some(p => p.test(t)); }
+  window.mpChatContainsHate = _hate;
   function _esc(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }

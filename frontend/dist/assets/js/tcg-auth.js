@@ -882,8 +882,8 @@ async function openBoosterUI(boosterId) {
 
 // ── Word filter: blocks hate slurs, allows regular swear words ─
 const _HATE_RX = [
-  /n[i1!|][g9q]{1,2}[ae3@*4]r?/i,
-  /n[i1!|][g9q]{2,}[@a4]/i,
+  /n[i1!|o0][g9q]{1,2}[ae3@*4]r?/i,
+  /n[i1!|o0][g9q]{2,}[@a4]/i,
   /f[a@4][g9]{1,2}[o0][t7]?s?/i, /\bf[a@4][g9]s?\b/i,
   /tr[a@4]n+[iy1][e3]?/i,
   /\bd[yi1]k[e3]s?\b/i,

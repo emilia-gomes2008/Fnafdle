@@ -259,6 +259,7 @@ async function confirmCreateRoom() {
 
   const code = document.getElementById('create-room-code').textContent;
   const roomName = document.getElementById('create-room-name').value.trim() || `${name}'s Room`;
+  if (window.mpChatContainsHate?.(roomName)) return lobbyError('Room name not allowed.');
   const isPrivate = document.querySelector('input[name="mp-privacy"]:checked')?.value === 'private';
   const pc = parseInt(document.querySelector('input[name="player-count"]:checked')?.value || '2');
 

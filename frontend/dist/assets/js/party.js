@@ -816,6 +816,7 @@ async function confirmCreatePartyRoom() {
 
   const code = document.getElementById('create-room-code').textContent;
   const roomName = document.getElementById('create-room-name').value.trim() || `${name}'s Room`;
+  if (window.mpChatContainsHate?.(roomName)) { lobbyError(T('error.roomNameNotAllowed')); return; }
   const isPrivate = document.querySelector('input[name="party-privacy"]:checked')?.value === 'private';
   const pc = +document.querySelector('input[name="party-count"]:checked').value;
   const totalLaps = +document.querySelector('input[name="party-laps"]:checked').value;

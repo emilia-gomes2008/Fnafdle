@@ -57,6 +57,7 @@
 
       // ── Lobby errors ──────────────────────────────────────────────────────
       'error.enterName':       'Enter your name!',
+      'error.roomNameNotAllowed': 'Room name not allowed.',
       'error.invalidCode':     'Invalid code!',
       'error.roomNotFound':    'Room not found or already started!',
       'error.roomFull':        'Room is full!',
@@ -1207,6 +1208,7 @@
       'lobby.startWith':       'Começar com {n} jogadores',
 
       'error.enterName':       'Introduz o teu nome!',
+      'error.roomNameNotAllowed': 'Nome de sala não permitido.',
       'error.invalidCode':     'Código inválido!',
       'error.roomNotFound':    'Sala não encontrada ou já iniciada!',
       'error.roomFull':        'Sala cheia!',
@@ -2331,6 +2333,7 @@
       'lobby.startWith':       'Empezar con {n} jugadores',
 
       'error.enterName':       '¡Introduce tu nombre!',
+      'error.roomNameNotAllowed': 'Nombre de sala no permitido.',
       'error.invalidCode':     '¡Código inválido!',
       'error.roomNotFound':    '¡Sala no encontrada o ya iniciada!',
       'error.roomFull':        '¡Sala llena!',
@@ -3187,6 +3190,7 @@
       'lobby.startWith':       'Moo moo {n} moos',
 
       'error.enterName':       'Moo moo moo!',
+      'error.roomNameNotAllowed': 'Moo moo moo moo.',
       'error.invalidCode':     'Moo moo!',
       'error.roomNotFound':    'Moo moo moo moo moo!',
       'error.roomFull':        'Moo moo!',

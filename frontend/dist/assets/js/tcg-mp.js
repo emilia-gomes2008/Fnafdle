@@ -223,6 +223,7 @@ async function mpConfirmCreate() {
   const roomCode = mpRandomCode();
   const roomNameInput = document.getElementById('mp-room-name')?.value.trim();
   const roomName = roomNameInput || `${name}'s Room`;
+  if (window._containsHate?.(roomName)) { mpStatusHtml(`<div style="color:var(--red-text)">Room name not allowed.</div>`); return; }
   const isPrivate = document.querySelector('input[name="tcg-privacy"]:checked')?.value === 'private';
 
   mpCancelCreate();
