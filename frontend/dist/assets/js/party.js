@@ -813,6 +813,7 @@ function cancelPartyCreateRoom() {
 async function confirmCreatePartyRoom() {
   const name = document.getElementById('lobby-name').value.trim();
   if (!name) { lobbyError(T('error.enterName')); return; }
+  if (window.mpChatContainsHate?.(name)) { lobbyError(T('error.nameNotAllowed')); return; }
 
   const code = document.getElementById('create-room-code').textContent;
   const roomName = document.getElementById('create-room-name').value.trim() || `${name}'s Room`;
@@ -935,6 +936,7 @@ async function startEarlyParty() {
 async function joinRoom() {
   const name = document.getElementById('lobby-name').value.trim();
   if (!name) { lobbyError(T('error.enterName')); return; }
+  if (window.mpChatContainsHate?.(name)) { lobbyError(T('error.nameNotAllowed')); return; }
   const code = document.getElementById('join-code').value.trim().toUpperCase();
   if (code.length < 6) { lobbyError(T('error.invalidCode')); return; }
 

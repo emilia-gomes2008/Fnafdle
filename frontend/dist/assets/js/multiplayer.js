@@ -23,7 +23,6 @@ let roomData = null;
 let myChar = null;
 let gameInit = false;
 let selectionShown = false;
-let currentAskTarget = null; // target chosen in multi-player ask phase
 let activeElimTarget = null; // which opponent's elimination board is shown
 let elimFilterState = {};   // per-opponent filter values { slot: { search, type, animal, year } }
 
@@ -97,6 +96,13 @@ const GAMES = [
 const WORLD_UCN_CHARS = [131, 132];
 const GAME_IDX_WORLD = 4;
 const GAME_IDX_UCN = 7;
+
+// Map each character object to its game's name (by original CHARS index range)
+const CHAR_GAME = new Map();
+CHARS.forEach((c, i) => {
+  const g = GAMES.find(g => i >= g.start && i <= g.end);
+  CHAR_GAME.set(c, g ? g.name : '');
+});
 
 function getFilteredChars() {
   const filter = roomData && roomData.game_filter;
@@ -183,35 +189,6 @@ function filterLabel(filter) {
   return label;
 }
 
-// ── Predefined questions ──────────────────────────────────────────────────────
-const QUESTIONS = [
-  { field: 'animal', text: '<span class="e">🐾</span> What animal is this animatronic?', uiType: 'list' },
-  { field: 'type', text: '<span class="e">🏷️</span> What type category is this animatronic?', uiType: 'list' },
-  { field: 'color', text: '<span class="e">🎨</span> What is the main color of this animatronic?', uiType: 'color' },
-  { field: 'eyeColor', text: '<span class="e">👁️</span> What eye color does this animatronic have?', uiType: 'color' },
-  { field: 'year', text: '<span class="e">📅</span> What year does this animatronic originate from?', uiType: 'year' },
-];
-
-function getQuestion(field) { return QUESTIONS.find(q => q.field === field) || QUESTIONS[0]; }
-
-function randomQuestion() {
-  return QUESTIONS[Math.floor(Math.random() * QUESTIONS.length)].field;
-}
-
-// Derive unique values from CHARS
-function uniqueVals(field) {
-  const vals = new Set();
-  CHARS.forEach(c => {
-    const v = c[field];
-    if (Array.isArray(v)) v.forEach(x => vals.add(String(x)));
-    else if (v !== undefined && v !== null) vals.add(String(v));
-  });
-  const arr = [...vals];
-  if (field === 'year') arr.sort((a, b) => { if (a === 'Unconfirmed') return 1; if (b === 'Unconfirmed') return -1; return +a - +b; });
-  else arr.sort();
-  return arr;
-}
-
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const SCREENS = ['lobby', 'waiting', 'selection', 'game', 'result'];
 function showScreen(name) {
@@ -223,13 +200,7 @@ function showScreen(name) {
 
 function lobbyError(msg) { document.getElementById('lobby-error').textContent = msg; }
 function genCode() { return Math.random().toString(36).slice(2, 8).toUpperCase(); }
-function other(slot) { return slot === 'player1' ? 'player2' : 'player1'; }
 function escHtml(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-function colorSwatch(val) {
-  if (/^#[0-9a-f]{6}$/i.test(val))
-    return `<span style="display:inline-block;width:14px;height:14px;background:${val};border-radius:3px;border:1px solid rgba(255,255,255,0.3);vertical-align:middle;margin-right:5px;flex-shrink:0;"></span>`;
-  return '';
-}
 
 // ── Create / Join ─────────────────────────────────────────────────────────────
 function showCreatePanel() {
@@ -256,6 +227,7 @@ function cancelCreateRoom() {
 async function confirmCreateRoom() {
   const name = document.getElementById('lobby-name').value.trim();
   if (!name) return lobbyError('Enter your name first.');
+  if (window.mpChatContainsHate?.(name)) return lobbyError('Name not allowed.');
 
   const code = document.getElementById('create-room-code').textContent;
   const roomName = document.getElementById('create-room-name').value.trim() || `${name}'s Room`;
@@ -285,13 +257,13 @@ async function confirmCreateRoom() {
   cancelCreateRoom();
   showScreen('waiting');
   subscribeRoom();
-  if (typeof initMpChat === 'function') initMpChat(roomId, 'mp', name);
 }
 
 async function joinRoom() {
   const name = document.getElementById('lobby-name').value.trim();
   const code = document.getElementById('lobby-code').value.trim().toUpperCase();
   if (!name) return lobbyError('Enter your name first.');
+  if (window.mpChatContainsHate?.(name)) return lobbyError('Name not allowed.');
   if (code.length < 6) return lobbyError('Enter the full 6-character code.');
 
   const { data: room, error } = await db.from('mp_rooms').select('*').eq('room_code', code).eq('state', 'waiting').single();
@@ -319,7 +291,6 @@ async function joinRoom() {
   if (isLast) {
     selectionShown = true;
     showSelectionScreen();
-    if (typeof initMpChat === 'function') initMpChat(roomId, 'mp', name);
   } else {
     document.getElementById('waiting-code').textContent = room.room_code;
     document.getElementById('waiting-filter-label').textContent = '🎮 ' + filterLabel(room.game_filter);
@@ -328,7 +299,6 @@ async function joinRoom() {
     updateWaitingPlayerList(data);
     showScreen('waiting');
     selectionShown = false;
-    if (typeof initMpChat === 'function') initMpChat(roomId, 'mp', name);
   }
 }
 
@@ -436,19 +406,12 @@ function subscribeEvents() {
 
 function announceNewRankings(oldRoom, newRoom) {
   if (!gameInit) return;
-  const chatLog = document.getElementById('chat-log');
-  if (!chatLog) return;
   let oldR = []; try { oldR = JSON.parse(oldRoom?.rankings) || []; } catch { }
   let newR = []; try { newR = JSON.parse(newRoom?.rankings) || []; } catch { }
   newR.forEach((slot, idx) => {
     if (oldR.includes(slot)) return;
     const pName = newRoom[`${slot}_name`] || slot;
-    const msg = document.createElement('div');
-    msg.className = 'chat-msg msg-system';
-    msg.style.fontWeight = 'bold';
-    msg.innerHTML = `<span class="e">🏆</span> ${pName} finished in ${ordinal(idx + 1)}!`;
-    chatLog.appendChild(msg);
-    chatLog.scrollTop = chatLog.scrollHeight;
+    window.mpChatSystemMsg?.(`<strong><span class="e">🏆</span> ${escHtml(pName)} finished in ${ordinal(idx + 1)}!</strong>`);
   });
 }
 
@@ -506,7 +469,7 @@ function buildCharGrid(containerEl, onSelect, allowMultiple = false) {
     card.dataset.name = char.name;
     card.dataset.animal = char.animal || '';
     card.dataset.type = char.type || '';
-    card.dataset.year = String(char.year ?? '');
+    card.dataset.game = CHAR_GAME.get(char) || '';
     const img = document.createElement('img');
     img.src = '../assets/' + char.img;
     img.alt = char.name;
@@ -550,12 +513,12 @@ function filterCharGrid(grid, q, opts = {}) {
   const lq = q ? q.toLowerCase() : '';
   const fAni = opts.animal ? opts.animal.toLowerCase() : '';
   const fTyp = opts.type ? opts.type.toLowerCase() : '';
-  const fYr = opts.year ? String(opts.year) : '';
+  const fGame = opts.game ? opts.game.toLowerCase() : '';
   grid.querySelectorAll('.char-grid-card').forEach(card => {
     const ok = (!lq || card.dataset.name.toLowerCase().includes(lq))
       && (!fAni || card.dataset.animal.toLowerCase() === fAni)
       && (!fTyp || card.dataset.type.toLowerCase() === fTyp)
-      && (!fYr || card.dataset.year === fYr);
+      && (!fGame || card.dataset.game.toLowerCase() === fGame);
     card.style.display = ok ? '' : 'none';
   });
 }
@@ -571,7 +534,7 @@ function saveElimFilterState() {
     search: document.getElementById('elim-search').value,
     type: document.getElementById('elim-type').value,
     animal: document.getElementById('elim-animal').value,
-    year: document.getElementById('elim-year').value,
+    game: document.getElementById('elim-game').value,
   };
 }
 
@@ -580,7 +543,26 @@ function restoreElimFilterState(slot) {
   document.getElementById('elim-search').value = s.search || '';
   document.getElementById('elim-type').value = s.type || '';
   document.getElementById('elim-animal').value = s.animal || '';
-  document.getElementById('elim-year').value = s.year || '';
+  document.getElementById('elim-game').value = s.game || '';
+}
+
+function selectElimTarget(slot) {
+  if (!slot || slot === activeElimTarget) return;
+  const opponents = otherSlots();
+  if (!opponents.includes(slot)) return;
+  saveElimFilterState();
+  opponents.forEach(s => {
+    const g = document.getElementById(`elim-grid-${s}`);
+    if (g) g.style.display = s === slot ? '' : 'none';
+  });
+  const tabsEl = document.getElementById('elim-player-tabs');
+  if (tabsEl) {
+    const idx = opponents.indexOf(slot);
+    tabsEl.querySelectorAll('.elim-player-tab').forEach((t, j) => t.classList.toggle('active', j === idx));
+  }
+  activeElimTarget = slot;
+  restoreElimFilterState(slot);
+  applyElimFilters();
 }
 
 function applyElimFilters() {
@@ -590,7 +572,7 @@ function applyElimFilters() {
     {
       animal: document.getElementById('elim-animal').value,
       type: document.getElementById('elim-type').value,
-      year: document.getElementById('elim-year').value,
+      game: document.getElementById('elim-game').value,
     }
   );
 }
@@ -710,12 +692,14 @@ function renderGameScreen(room, rollMsg) {
   startPeriodicSync();
   showScreen('game');
 
+  if (typeof initMpChat === 'function') {
+    initMpChat(roomId, 'mp', room[`${playerSlot}_name`] || playerSlot, 'mp-chat-container');
+  }
+
   // Clear leftovers from previous game
   guessInput.value = '';
   guessDropdown.style.display = 'none';
   guessSelectedIndex = -1;
-  document.getElementById('ask-questions-list').innerHTML = '';
-  currentAskTarget = null;
 
   // My char badge
   const badge = document.getElementById('my-char-badge');
@@ -727,11 +711,10 @@ function renderGameScreen(room, rollMsg) {
   // Dice roll result
   const firstAsker = room.first_asker || 'player1';
   const firstName = room[`${firstAsker}_name`] || 'Player 1';
-  const chatLog = document.getElementById('chat-log');
   const diceMsg = rollMsg
-    ? `<span class="e">🎲</span> Dice roll! (${rollMsg}) - <strong>${firstName}</strong> goes first.`
-    : `<span class="e">🪙</span> Coin flip! <strong>${firstName}</strong> goes first.`;
-  chatLog.innerHTML = `<div class="chat-msg msg-system">${diceMsg}</div>`;
+    ? `<span class="e">🎲</span> Dice roll! (${rollMsg}) - <strong>${escHtml(firstName)}</strong> goes first.`
+    : `<span class="e">🪙</span> Coin flip! <strong>${escHtml(firstName)}</strong> goes first.`;
+  window.mpChatSystemMsg?.(diceMsg);
 
   // Build one elimination grid per opponent
   const opponents = otherSlots();
@@ -767,17 +750,7 @@ function renderGameScreen(room, rollMsg) {
       const tab = document.createElement('button');
       tab.className = 'elim-player-tab' + (i === 0 ? ' active' : '');
       tab.textContent = roomData[`${slot}_name`] || slot;
-      tab.addEventListener('click', () => {
-        saveElimFilterState();
-        opponents.forEach(s => {
-          const g = document.getElementById(`elim-grid-${s}`);
-          if (g) g.style.display = s === slot ? '' : 'none';
-        });
-        tabsEl.querySelectorAll('.elim-player-tab').forEach((t, j) => t.classList.toggle('active', j === i));
-        activeElimTarget = slot;
-        restoreElimFilterState(slot);
-        applyElimFilters();
-      });
+      tab.addEventListener('click', () => selectElimTarget(slot));
       tabsEl.appendChild(tab);
     });
   } else {
@@ -788,18 +761,22 @@ function renderGameScreen(room, rollMsg) {
   const pool = getFilteredChars().filter(c => c.img);
   const types = [...new Set(pool.map(c => c.type).filter(Boolean))].sort();
   const animals = [...new Set(pool.map(c => c.animal).filter(Boolean))].sort();
+  const games = GAMES.map(g => g.name).filter(n => pool.some(c => CHAR_GAME.get(c) === n));
   const typeEl = document.getElementById('elim-type');
   const animalEl = document.getElementById('elim-animal');
+  const gameEl = document.getElementById('elim-game');
   typeEl.innerHTML = '<option value="">All types</option>';
   animalEl.innerHTML = '<option value="">All animals</option>';
+  gameEl.innerHTML = '<option value="">All games</option>';
   types.forEach(t => typeEl.add(new Option(t, t)));
   animals.forEach(a => animalEl.add(new Option(a, a)));
+  games.forEach(g => gameEl.add(new Option(g, g)));
 
   // Elim search + advanced filters
   document.getElementById('elim-search').oninput = applyElimFilters;
   document.getElementById('elim-type').onchange = applyElimFilters;
   document.getElementById('elim-animal').onchange = applyElimFilters;
-  document.getElementById('elim-year').oninput = applyElimFilters;
+  document.getElementById('elim-game').onchange = applyElimFilters;
   document.getElementById('elim-adv-btn').onclick = () => {
     const adv = document.getElementById('elim-advanced');
     adv.style.display = adv.style.display === 'none' ? '' : 'none';
@@ -809,83 +786,64 @@ function renderGameScreen(room, rollMsg) {
     document.getElementById('elim-search').value = '';
     document.getElementById('elim-type').value = '';
     document.getElementById('elim-animal').value = '';
-    document.getElementById('elim-year').value = '';
+    document.getElementById('elim-game').value = '';
     applyElimFilters();
   };
 
   updateTurnUI(room.phase, room.current_question);
 }
 
-function buildAskUI() {
-  const container = document.getElementById('ask-questions-list');
-  const targetRow = document.getElementById('ask-target-row');
-  const targetBtns = document.getElementById('ask-target-btns');
-  container.innerHTML = '';
-  currentAskTarget = null;
+// ── Act-phase auto-pass timer ─────────────────────────────────────────────────
+const GW_ACT_TIMEOUT = 120000; // 2 minutes
+let _actTimer = null;
+function _clearActTimer() { if (_actTimer) { clearTimeout(_actTimer); _actTimer = null; } }
+function _startActTimer() {
+  _clearActTimer();
+  _actTimer = setTimeout(() => { passRound(); }, GW_ACT_TIMEOUT);
+}
 
-  const pc = getPlayerCount();
+// ── Guess Who hooks into the shared floating chat widget (mp-chat.js) ────────
+// Asking and answering both happen through the normal chat: the asker uses the
+// ❓ button (mpChatShowAsk), and the answer is just a normal reply to the
+// question message (mpChatOnMessage tells us when that reply was sent).
+window.mpChatOnMessage = function (info) {
+  if (!roomData || !roomId) return;
+  const { action, asker, target } = parsePhase(roomData.phase);
 
-  if (pc > 2) {
-    // Show target selector; questions are disabled until a target is chosen
-    targetRow.style.display = '';
-    targetBtns.innerHTML = '';
-    otherSlots().forEach(slot => {
-      const name = roomData[`${slot}_name`] || slot;
-      const btn = document.createElement('button');
-      btn.className = 'list-pick-btn';
-      btn.textContent = name;
-      btn.addEventListener('click', () => {
-        targetBtns.querySelectorAll('.list-pick-btn').forEach(b => b.classList.remove('chosen'));
-        btn.classList.add('chosen');
-        currentAskTarget = slot;
-        container.querySelectorAll('button').forEach(b => { b.disabled = false; });
-      });
-      targetBtns.appendChild(btn);
-    });
-  } else {
-    targetRow.style.display = 'none';
-    currentAskTarget = otherSlots()[0];
+  // I just asked a question (only I act on my own outgoing message)
+  if (info.askMeta && info.isMine && action === 'ask' && asker === playerSlot) {
+    const askTarget = info.askMeta.toSlot || otherSlots()[0];
+    (async () => {
+      const nextPhase = `answer:${playerSlot}:${askTarget}`;
+      const { data } = await db.from('mp_rooms').update({
+        phase: nextPhase, current_question: '_free:' + info.text,
+      }).eq('id', roomId).eq('phase', `ask:${playerSlot}`).select().single();
+      if (data) { roomData = data; updateTurnUI(nextPhase, roomData.current_question); }
+    })();
+    return;
   }
 
-  QUESTIONS.forEach(q => {
-    const btn = document.createElement('button');
-    btn.className = 'list-pick-btn';
-    btn.style.textAlign = 'left';
-    btn.innerHTML = q.text;
-    btn.disabled = pc > 2; // disabled until target chosen (for multi-player)
-    btn.addEventListener('click', async () => {
-      if (!currentAskTarget) return;
-      container.querySelectorAll('button').forEach(b => b.disabled = true);
-      targetBtns?.querySelectorAll('button').forEach(b => b.disabled = true);
-      const nextPhase = `answer:${playerSlot}:${currentAskTarget}`;
-      await db.from('mp_events').insert({
-        room_id: roomId, player: playerSlot, type: 'question',
-        content: JSON.stringify({ question: q.text, target: currentAskTarget }),
-      });
-      const { data } = await db.from('mp_rooms').update({
-        phase: nextPhase, current_question: q.field,
-      }).eq('id', roomId).select().single();
-      roomData = data;
-      updateTurnUI(nextPhase, q.field);
-    });
-    container.appendChild(btn);
-  });
-}
+  // The current target replied to the asker's question - that reply IS the answer
+  if (info.replyMeta && action === 'answer' && target === playerSlot) {
+    const askerName = roomData[`${asker}_name`] || asker;
+    if (info.replyMeta.u !== askerName) return; // reply to someone/something else - just banter
+    (async () => {
+      const nextPhase = `act:${asker}:${target}`;
+      const { data } = await db.from('mp_rooms').update({ phase: nextPhase })
+        .eq('id', roomId).eq('phase', `answer:${asker}:${target}`).select().single();
+      if (data) { roomData = data; updateTurnUI(nextPhase, roomData.current_question); }
+    })();
+  }
+};
 
 // ── Turn UI ───────────────────────────────────────────────────────────────────
 async function updateTurnUI(phase, questionField) {
   const indicator = document.getElementById('turn-indicator');
-  const actingPanel = document.getElementById('acting-panel');
-  const answerPanel = document.getElementById('answer-panel');
-  const waitingPanel = document.getElementById('waiting-panel');
-  const askPanel = document.getElementById('ask-panel');
+  const guessInputEl = document.getElementById('guess-input');
+  const guessBtnEl = document.getElementById('send-guess-btn');
 
-  actingPanel.style.display = 'none';
-  answerPanel.style.display = 'none';
-  waitingPanel.style.display = 'none';
-  if (askPanel) askPanel.style.display = 'none';
+  _clearActTimer();
 
-  const q = questionField ? getQuestion(questionField) : null;
   const { action, asker, target } = parsePhase(phase);
   const name = s => `${rankMedal(s) ? rankMedal(s) + ' ' : ''}${(roomData && roomData[`${s}_name`]) || s}`;
 
@@ -893,6 +851,21 @@ async function updateTurnUI(phase, questionField) {
   const isMyAct = action === 'act' && asker === playerSlot;
   const isMyAnswer = action === 'answer' && target === playerSlot;
   const iAsked = action === 'answer' && asker === playerSlot;
+  const isMyTurn = asker === playerSlot; // true through ask/answer-waiting/act - guessing is allowed all turn
+
+  // The elimination board should follow whoever I can currently guess against
+  if (isMyTurn && target) selectElimTarget(target);
+
+  guessInputEl.disabled = !isMyTurn;
+  guessBtnEl.disabled = !isMyTurn;
+
+  if (isMyAsk) {
+    window.mpChatShowAsk?.(otherSlots().map(s => ({ slot: s, name: roomData[`${s}_name`] || s })));
+  } else {
+    window.mpChatHideAsk?.();
+  }
+  if (isMyAct) window.mpChatShowPass?.(passRound);
+  else window.mpChatHidePass?.();
 
   if (isMyAsk || isMyAct) _gwStartInactivityTimer();
   else _gwStopInactivityTimer();
@@ -900,40 +873,26 @@ async function updateTurnUI(phase, questionField) {
   if (isMyAsk) {
     const myRank = getRankings().indexOf(playerSlot);
     if (myRank !== -1) {
-      // Already ranked - skip ask, show waiting
+      // Already ranked - skip ask
       indicator.className = 'turn-indicator opponent-turn';
       indicator.innerHTML = `${ordinal(myRank + 1)} - Waiting for others to finish...`;
-      document.getElementById('waiting-panel-text').textContent = 'You already guessed everyone!';
-      waitingPanel.style.display = '';
+      window.mpChatHideAsk?.();
       // Automatically pass the turn to the next non-ranked player
       await startNewRound();
       return;
     }
     indicator.className = 'turn-indicator my-turn';
-    indicator.textContent = getPlayerCount() > 2
-      ? 'Your turn - choose who and what to ask!'
-      : 'Your turn - choose a question to ask!';
-    buildAskUI();
-    if (askPanel) askPanel.style.display = '';
+    indicator.textContent = 'Your turn - tap ❓ to ask, or guess a character!';
   } else if (isMyAct) {
     indicator.className = 'turn-indicator my-turn';
     indicator.textContent = `Your turn - guess ${name(target)}'s character or pass!`;
-    if (q) document.getElementById('acting-question-text').innerHTML = q.text;
-    const tl = document.getElementById('acting-target-label');
-    if (tl) tl.innerHTML = getPlayerCount() > 2 ? `<span class="mp_emoji">🎯</span> Guessing: ${name(target)}` : '';
-    actingPanel.style.display = '';
+    _startActTimer();
   } else if (isMyAnswer) {
     indicator.className = 'turn-indicator answer-turn';
-    indicator.textContent = `${name(asker)} is asking you - answer honestly or lie!`;
-    if (q) renderAnswerUI(q);
-    answerPanel.style.display = '';
+    indicator.textContent = `${name(asker)} is asking you - reply to their question in chat!`;
   } else if (iAsked) {
     indicator.className = 'turn-indicator opponent-turn';
     indicator.textContent = `Waiting for ${name(target)} to answer...`;
-    document.getElementById('waiting-panel-text').innerHTML = q
-      ? `Waiting for <strong>${name(target)}</strong> to answer:<br><em class="qa-q-text">${q.text}</em>`
-      : `Waiting for ${name(target)} to answer...`;
-    waitingPanel.style.display = '';
   } else {
     indicator.className = 'turn-indicator opponent-turn';
     let waitText = 'Waiting...';
@@ -941,117 +900,8 @@ async function updateTurnUI(phase, questionField) {
     if (action === 'answer') waitText = `${name(target)} is answering ${name(asker)}'s question...`;
     if (action === 'act') waitText = `${name(asker)} is deciding...`;
     indicator.textContent = waitText;
-    document.getElementById('waiting-panel-text').textContent = waitText;
-    waitingPanel.style.display = '';
   }
 }
-
-// ── Answer UI ─────────────────────────────────────────────────────────────────
-let pendingAnswer = null;
-
-function renderAnswerUI(q) {
-  pendingAnswer = null;
-  document.getElementById('submit-answer-btn').disabled = true;
-  document.getElementById('answer-chosen-preview').textContent = '';
-  document.getElementById('answer-question-text').innerHTML = q.text;
-
-  const colorPicker = document.getElementById('answer-color-picker');
-  const listPicker = document.getElementById('answer-list-picker');
-  const yearPicker = document.getElementById('answer-year-picker');
-  colorPicker.style.display = listPicker.style.display = yearPicker.style.display = 'none';
-
-  if (q.uiType === 'color') {
-    colorPicker.style.display = '';
-    const colorInput = document.getElementById('answer-color-input');
-    const colorIdk = document.getElementById('answer-color-idk');
-
-    // Pre-enable with whatever color is currently in the picker
-    pendingAnswer = colorInput.value;
-    document.getElementById('answer-chosen-preview').innerHTML = `${colorSwatch(pendingAnswer)}Selected: ${pendingAnswer}`;
-    document.getElementById('submit-answer-btn').disabled = false;
-
-    colorInput.oninput = () => {
-      pendingAnswer = colorInput.value;
-      document.getElementById('answer-chosen-preview').innerHTML = `${colorSwatch(pendingAnswer)}Selected: ${pendingAnswer}`;
-      document.getElementById('submit-answer-btn').disabled = false;
-    };
-
-    colorIdk.onclick = () => {
-      pendingAnswer = "I don't know";
-      document.getElementById('answer-chosen-preview').textContent = `Selected: I don't know`;
-      document.getElementById('submit-answer-btn').disabled = false;
-    };
-  } else if (q.uiType === 'list') {
-    listPicker.style.display = '';
-    const grid = document.getElementById('answer-list-items');
-    grid.innerHTML = '';
-    const vals = uniqueVals(q.field);
-    vals.forEach(val => {
-      const btn = document.createElement('button');
-      btn.className = 'list-pick-btn';
-      btn.textContent = val;
-      btn.addEventListener('click', () => {
-        grid.querySelectorAll('.list-pick-btn').forEach(b => b.classList.remove('chosen'));
-        btn.classList.add('chosen');
-        pendingAnswer = val;
-        document.getElementById('answer-chosen-preview').textContent = `Selected: ${val}`;
-        document.getElementById('submit-answer-btn').disabled = false;
-      });
-      grid.appendChild(btn);
-    });
-    document.getElementById('answer-list-idk').onclick = () => {
-      grid.querySelectorAll('.list-pick-btn').forEach(b => b.classList.remove('chosen'));
-      pendingAnswer = "I don't know";
-      document.getElementById('answer-chosen-preview').textContent = `Selected: I don't know`;
-      document.getElementById('submit-answer-btn').disabled = false;
-    };
-  } else if (q.uiType === 'year') {
-    yearPicker.style.display = '';
-    const yrInput = document.getElementById('answer-year-input');
-    const yrUnc = document.getElementById('answer-year-unconfirmed');
-    const yrIdk = document.getElementById('answer-year-idk');
-
-    yrInput.value = '';
-    yrInput.oninput = () => {
-      if (yrInput.value.trim() !== '') {
-        pendingAnswer = yrInput.value.trim();
-        document.getElementById('answer-chosen-preview').textContent = `Selected: ${pendingAnswer}`;
-        document.getElementById('submit-answer-btn').disabled = false;
-      }
-    };
-    yrUnc.onclick = () => {
-      pendingAnswer = 'Unconfirmed';
-      yrInput.value = '';
-      document.getElementById('answer-chosen-preview').textContent = `Selected: Unconfirmed`;
-      document.getElementById('submit-answer-btn').disabled = false;
-    };
-    yrIdk.onclick = () => {
-      pendingAnswer = "I don't know";
-      yrInput.value = '';
-      document.getElementById('answer-chosen-preview').textContent = `Selected: I don't know`;
-      document.getElementById('submit-answer-btn').disabled = false;
-    };
-  }
-}
-
-document.getElementById('submit-answer-btn').addEventListener('click', async () => {
-  if (!pendingAnswer) return;
-  document.getElementById('submit-answer-btn').disabled = true;
-
-  const q = getQuestion(roomData.current_question);
-  await db.from('mp_events').insert({
-    room_id: roomId, player: playerSlot, type: 'answer',
-    content: JSON.stringify({ field: q.field, value: pendingAnswer, question: q.text }),
-  });
-
-  // answer:target:asker → act:asker:target
-  const { asker, target } = parsePhase(roomData.phase);
-  const nextPhase = `act:${asker}:${target}`;
-
-  const { data } = await db.from('mp_rooms').update({ phase: nextPhase }).eq('id', roomId).select().single();
-  roomData = data;
-  updateTurnUI(nextPhase, roomData.current_question);
-});
 
 // ── Guess dropdown ────────────────────────────────────────────────────────────
 const guessInput = document.getElementById('guess-input');
@@ -1124,8 +974,9 @@ async function sendGuess() {
   const char = CHARS.find(c => c.name.toLowerCase() === name.toLowerCase());
   if (!char) return;
 
-  const { asker, target } = parsePhase(roomData.phase);
+  const { asker, target: parsedTarget } = parsePhase(roomData.phase);
   if (asker !== playerSlot) return;
+  const target = parsedTarget || otherSlots()[0];
   const opponentChar = roomData[`${target}_char`];
   const correct = char.name === opponentChar;
 
@@ -1162,15 +1013,7 @@ async function sendGuess() {
       await db.from('mp_rooms').update(updatePayload).eq('id', roomId);
 
       // Announce locally (Supabase won't echo this update back to the triggering client)
-      const chatLog = document.getElementById('chat-log');
-      if (chatLog) {
-        const ann = document.createElement('div');
-        ann.className = 'chat-msg msg-system';
-        ann.style.fontWeight = 'bold';
-        ann.innerHTML = `<span class="e">🏆</span> You finished in ${ordinal(rankings.length)}!`;
-        chatLog.appendChild(ann);
-        chatLog.scrollTop = chatLog.scrollHeight;
-      }
+      window.mpChatSystemMsg?.(`<strong><span class="e">🏆</span> You finished in ${ordinal(rankings.length)}!</strong>`);
 
       // Update local roomData and render result directly (Supabase won't echo back to us)
       roomData = { ...roomData, ...updatePayload };
@@ -1199,16 +1042,17 @@ async function passRound() {
 }
 
 async function startNewRound() {
-  const { action, asker, target } = parsePhase(roomData.phase);
-  if (action !== 'act' || asker !== playerSlot) return;
+  _clearActTimer();
+  const { asker, target } = parsePhase(roomData.phase);
+  if (asker !== playerSlot) return;
 
-  // Next to ask = whoever was just interrogated, but skip already-ranked players
+  // Next to ask = whoever was just interrogated, but skip already-ranked or left players
   const rankings = getRankings();
   const slots = allSlots();
-  let next = target;
+  let next = target || otherSlots()[0];
   for (let i = 0; i < slots.length; i++) {
-    if (!rankings.includes(next)) break;
-    // This player is ranked → move to the next slot in the cycle
+    if (!rankings.includes(next) && roomData[`${next}_name`]) break;
+    // This player is ranked or has left → move to the next slot in the cycle
     const idx = slots.indexOf(next);
     next = slots[(idx + 1) % slots.length];
   }
@@ -1222,62 +1066,31 @@ async function startNewRound() {
   updateTurnUI(nextPhase, null);
 }
 
-document.getElementById('pass-btn').addEventListener('click', passRound);
-
 // ── Render event ──────────────────────────────────────────────────────────────
 function renderEvent(ev) {
-  const log = document.getElementById('chat-log');
   const isMe = ev.player === playerSlot;
-  const myName = roomData[`${playerSlot}_name`] || 'You';
-  const opName = roomData[`${other(playerSlot)}_name`] || 'Opponent';
-  const sender = isMe ? myName : opName;
+  const sender = escHtml(roomData[`${ev.player}_name`] || ev.player);
 
-  const msg = document.createElement('div');
-
-  if (ev.type === 'question') {
-    let parsed; try { parsed = JSON.parse(ev.content); } catch { parsed = { question: ev.content }; }
-    msg.className = `chat-msg ${isMe ? 'msg-me' : 'msg-opponent'}`;
-    msg.innerHTML =
-      `<span class="msg-sender">${sender}</span> asked:<br>` +
-      `<em class="qa-q-text">${parsed.question || ''}</em>`;
-  } else if (ev.type === 'answer') {
-    let parsed; try { parsed = JSON.parse(ev.content); } catch { parsed = { question: '?', value: ev.content }; }
-    msg.className = `chat-msg ${isMe ? 'msg-me' : 'msg-opponent'}`;
-    const val = parsed.value || '';
-    msg.innerHTML =
-      `<span class="msg-sender">${sender}</span> answered:<br>` +
-      `<em class="qa-q-text">${parsed.question || ''}</em><br>` +
-      `<strong class="qa-a-text" style="display:inline-flex;align-items:center;">${colorSwatch(val)}${escHtml(val)}</strong>`;
-
-    // Also populate acting panel if it's my acting turn
-    if (!isMe) {
-      document.getElementById('acting-question-text').textContent = parsed.question || '';
-      const ansDisp = document.getElementById('acting-answer-display');
-      ansDisp.innerHTML = `<span class="qa-a-badge" style="display:inline-flex;align-items:center;gap:6px;">${colorSwatch(val)}${escHtml(val)}</span>`;
-    }
-  } else if (ev.type === 'guess') {
+  if (ev.type === 'guess') {
     let guessedChar = ev.content, targetSlot = null;
     try { const p = JSON.parse(ev.content); guessedChar = p.char || ev.content; targetSlot = p.target; } catch { }
     const involvedInGuess = isMe || playerSlot === targetSlot;
-    msg.className = 'chat-msg msg-system';
+    let html;
     if (ev.correct) {
       if (involvedInGuess) {
-        const tLabel = targetSlot && roomData ? ` (${roomData[`${targetSlot}_name`] || targetSlot}'s char)` : '';
-        msg.innerHTML = `${sender} guessed "${guessedChar}"${tLabel} <span class="mp_emoji">✅</span>`;
+        const tLabel = targetSlot && roomData ? ` (${escHtml(roomData[`${targetSlot}_name`] || targetSlot)}'s char)` : '';
+        html = `${sender} guessed "${escHtml(guessedChar)}"${tLabel} <span class="mp_emoji">✅</span>`;
       } else {
-        msg.innerHTML = `${sender} got one right! <span class="e">🎉</span>`;
+        html = `${sender} got one right! <span class="e">🎉</span>`;
       }
     } else {
-      const tLabel = targetSlot && roomData ? ` (${roomData[`${targetSlot}_name`] || targetSlot}'s char)` : '';
-      msg.innerHTML = `${sender} guessed "${guessedChar}"${tLabel} <span class="mp_emoji">❌</span>`;
+      const tLabel = targetSlot && roomData ? ` (${escHtml(roomData[`${targetSlot}_name`] || targetSlot)}'s char)` : '';
+      html = `${sender} guessed "${escHtml(guessedChar)}"${tLabel} <span class="mp_emoji">❌</span>`;
     }
+    window.mpChatSystemMsg?.(html);
   } else if (ev.type === 'jumpscare') {
     if (!isMe) triggerJumpscare(ev.content || 'freddy', () => { });
-    return;
   }
-
-  log.appendChild(msg);
-  log.scrollTop = log.scrollHeight;
 }
 
 // ── Result screen ─────────────────────────────────────────────────────────────
@@ -1465,6 +1278,17 @@ document.getElementById('rematch-btn').addEventListener('click', async () => {
 });
 
 // ── Player leave detection ────────────────────────────────────────────────────
+// If the leaving player was the current asker or the one being asked/guessed,
+// the turn would otherwise get stuck forever - hand it to the next active player.
+function _advancePhaseAfterLeave(room, savedSlot, active) {
+  const { asker, target } = parsePhase(room.phase);
+  if (asker !== savedSlot && target !== savedSlot) return null;
+  let rankings = []; try { rankings = JSON.parse(room.rankings) || []; } catch (e) { }
+  const next = active.find(s => !rankings.includes(s));
+  if (!next) return null;
+  return { phase: `ask:${next}`, current_question: null };
+}
+
 async function cleanupMpPlayerLeft() {
   if (!roomId || !playerSlot) return;
   _gwStopInactivityTimer();
@@ -1491,6 +1315,9 @@ async function cleanupMpPlayerLeft() {
     update.phase = null;
     update.rankings = JSON.stringify([active[0]]);
     update.winner = active[0];
+  } else if (active.length > 1 && room.state === 'playing') {
+    const adv = _advancePhaseAfterLeave(room, savedSlot, active);
+    if (adv) Object.assign(update, adv);
   }
   try { await db.from('mp_rooms').update(update).eq('id', savedId); } catch (_) { }
 }
@@ -1522,6 +1349,9 @@ window.addEventListener('beforeunload', () => {
     body.phase = null;
     body.rankings = JSON.stringify([active[0]]);
     body.winner = active[0];
+  } else if (active.length > 1 && room.state === 'playing') {
+    const adv = _advancePhaseAfterLeave(room, savedSlot, active);
+    if (adv) Object.assign(body, adv);
   }
   fetch(`${cfg.SUPABASE_URL}/rest/v1/mp_rooms?id=eq.${savedId}`, {
     method: 'PATCH',

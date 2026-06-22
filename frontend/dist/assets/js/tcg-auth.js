@@ -99,6 +99,7 @@ async function tcgRegister(username, password) {
   username = username.trim().toLowerCase();
   if (username.length < 3) throw new Error('Username must be at least 3 characters');
   if (!/^[a-z0-9_]+$/.test(username)) throw new Error('Username can only contain letters, numbers and _');
+  if (_containsHate(username)) throw new Error('Username not allowed');
   if (password.length < 4) throw new Error('Password must be at least 4 characters');
 
   const hash = await tcgHash(password);
@@ -895,6 +896,10 @@ const _HATE_RX = [
   /m[a@4]t[a@4][\s-]*t[e3]/i,
   /\bse[\s-]*m[a@4]t[a@4]/i,
   /\bsmt\b/i,
+  /\bd[i1!]dd?y\b/i,
+  /\bch[a@4]rl[i1!]e[\s_-]*k[i1!]rk\b/i,
+  /\bc[._-]?p\b/i,
+  /\bch[i1!]ld\s*p[o0]rn\b/i,
 ];
 function _normHate(s) {
   return s.replace(/\|</g, 'k').replace(/\/\//g, 'n').replace(/\(\)/g, 'o').replace(/\|3/g, 'b');

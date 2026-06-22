@@ -4843,6 +4843,7 @@ function _tcgRestoreFromHash(hash) {
     // Unsubscribe so our own echo doesn't re-enter the game; clear roomId
     if (MP.channel) { try { MP.channel.unsubscribe(); } catch (e) { } MP.channel = null; }
     MP.roomId = null;
+    if (typeof stopMpChat === 'function') stopMpChat();
   }
 
   if (hash.startsWith('lobby/') || hash === 'lobby' || !hash) {

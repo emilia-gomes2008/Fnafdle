@@ -17,6 +17,11 @@
     /m[a@4]t[a@4][\s-]*t[e3]/i,
     /\bse[\s-]*m[a@4]t[a@4]/i,
     /\bsmt\b/i,
+    /\bd[i1!]dd?y\b/i,
+    /\bch[a@4]rl[i1!]e[\s_-]*k[i1!]rk\b/i,
+    /\bc[._-]?p\b/i,
+    /\bch[i1!]ld\s*p[o0]rn\b/i,
+    /\bch[i1!]ld\s*p[o0]rn[o0]gr[a4]ph[yi!e]\b/i,
   ];
   function _norm(s) {
     return s.replace(/\|</g, 'k').replace(/\/\//g, 'n').replace(/\(\)/g, 'o').replace(/\|3/g, 'b');
@@ -24,7 +29,7 @@
   function _hate(msg) { const t = _norm(msg); return _HATE_RX.some(p => p.test(t)); }
   window.mpChatContainsHate = _hate;
   function _esc(s) {
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
   let _db = null;
@@ -38,6 +43,10 @@
   let _unread = 0;
   let _gifOpen = false;
   let _gifTimeout = null;
+  let _replyingTo = null; // { username, text }
+  let _askTargets = null; // [{ slot, name }] - eligible ask targets, or null if asking disabled
+  let _asking = null;     // { slot, name } - target chosen while composing a question
+  let _containerId = null; // if set, render embedded inside this element instead of floating
 
   function _getDb() {
     if (_db) return _db;
@@ -52,16 +61,22 @@
   }
 
   // ── Public API ──────────────────────────────────────────────
-  window.initMpChat = function (roomId, roomType, username) {
+  // containerId (optional): if given, the chat renders embedded inside that
+  // element (always open, no floating toggle) instead of as a floating widget.
+  window.initMpChat = function (roomId, roomType, username, containerId) {
     if (_roomId === roomId && document.getElementById('mp-chat-widget')) return;
     stopMpChat();
     _roomId = roomId;
     _roomType = roomType;
     _username = username || 'Player';
+    _containerId = containerId || null;
     _msgCount = 0;
     _unread = 0;
-    _open = false;
+    _open = !!_containerId;
     _gifOpen = false;
+    _replyingTo = null;
+    _askTargets = null;
+    _asking = null;
 
     _renderWidget();
     _subscribeChat();
@@ -71,7 +86,7 @@
   window.stopMpChat = function () {
     _roomId = null;
     _roomType = null;
-    if (_sub) { try { _sub.unsubscribe(); } catch (e) {} _sub = null; }
+    if (_sub) { try { _sub.unsubscribe(); } catch (e) { } _sub = null; }
     if (_poll) { clearInterval(_poll); _poll = null; }
     if (_gifTimeout) { clearTimeout(_gifTimeout); _gifTimeout = null; }
     const w = document.getElementById('mp-chat-widget');
@@ -83,33 +98,45 @@
   function _renderWidget() {
     let w = document.getElementById('mp-chat-widget');
     if (w) w.remove();
+    const embedded = !!_containerId;
     w = document.createElement('div');
     w.id = 'mp-chat-widget';
-    w.className = 'mpc-widget';
+    w.className = embedded ? 'mpc-widget mpc-embedded' : 'mpc-widget';
     w.innerHTML = `
-      <button class="mpc-toggle" id="mpc-toggle" onclick="window._mpChatToggle()">
+      ${embedded ? '' : `<button class="mpc-toggle" id="mpc-toggle" onclick="window._mpChatToggle()">
         💬 Chat <span class="mpc-badge" id="mpc-badge" style="display:none">0</span>
-      </button>
-      <div class="mpc-box" id="mpc-box" style="display:none">
-        <div class="mpc-header">
+      </button>`}
+      <div class="mpc-box" id="mpc-box" style="display:${embedded ? 'flex' : 'none'}">
+        ${embedded ? '' : `<div class="mpc-header">
           💬 Chat
           <button class="mpc-close" onclick="window._mpChatToggle()">✕</button>
-        </div>
+        </div>`}
         <div class="mpc-msgs" id="mpc-msgs"></div>
         <div class="mpc-gif-picker" id="mpc-gif-picker" style="display:none">
           <input class="mpc-gif-search" id="mpc-gif-search" type="text" placeholder="🔍 Search GIFs…" autocomplete="off" />
           <div class="mpc-gif-grid" id="mpc-gif-grid"></div>
           <div class="mpc-tenor-attr">Powered by Tenor</div>
         </div>
+        <div class="mpc-target-row" id="mpc-target-row" style="display:none"></div>
+        <div class="mpc-reply-preview" id="mpc-reply-preview" style="display:none"></div>
         <div class="mpc-footer">
+          <button class="mpc-ask-btn" id="mpc-ask-btn" style="display:none" title="Ask a question">❓</button>
           <input id="mpc-input" class="mpc-input" type="text" placeholder="Type a message…" maxlength="200" />
           <button class="mpc-gif-btn" id="mpc-gif-btn" onclick="window._mpChatGif()">GIF</button>
+          <button class="mpc-pass-btn" id="mpc-pass-btn" style="display:none" title="Pass">⏭</button>
           <button class="mpc-send" id="mpc-send">→</button>
         </div>
       </div>`;
-    document.body.appendChild(w);
+
+    if (embedded) {
+      const container = document.getElementById(_containerId);
+      (container || document.body).appendChild(w);
+    } else {
+      document.body.appendChild(w);
+    }
 
     document.getElementById('mpc-send').onclick = _send;
+    document.getElementById('mpc-ask-btn').onclick = _clickAsk;
     document.getElementById('mpc-input').addEventListener('keydown', e => {
       if (e.key === 'Enter') _send();
     });
@@ -224,6 +251,76 @@
     } catch (e) { _sysMsg('Failed to send GIF'); }
   }
 
+  // ── Ask a question (Guess Who only) ───────────────────────────
+  function _clickAsk() {
+    if (!_askTargets || !_askTargets.length) return;
+    if (_askTargets.length === 1) { _enterAsking(_askTargets[0]); return; }
+    const row = document.getElementById('mpc-target-row');
+    row.innerHTML = '';
+    _askTargets.forEach(t => {
+      const btn = document.createElement('button');
+      btn.className = 'mpc-target-btn';
+      btn.textContent = `To ${t.name}`;
+      btn.onclick = () => _enterAsking(t);
+      row.appendChild(btn);
+    });
+    row.style.display = 'flex';
+  }
+  function _enterAsking(t) {
+    _asking = t;
+    const row = document.getElementById('mpc-target-row');
+    if (row) row.style.display = 'none';
+    const input = document.getElementById('mpc-input');
+    if (input) { input.placeholder = `Question to ${t.name}...`; input.focus(); }
+  }
+  function _cancelAsking() {
+    _asking = null;
+    const row = document.getElementById('mpc-target-row');
+    if (row) { row.style.display = 'none'; row.innerHTML = ''; }
+    const input = document.getElementById('mpc-input');
+    if (input) input.placeholder = 'Type a message…';
+  }
+  window.mpChatShowAsk = function (targets) {
+    _askTargets = targets && targets.length ? targets : null;
+    const btn = document.getElementById('mpc-ask-btn');
+    if (btn) btn.style.display = _askTargets ? '' : 'none';
+  };
+  window.mpChatHideAsk = function () {
+    _askTargets = null;
+    _cancelAsking();
+    const btn = document.getElementById('mpc-ask-btn');
+    if (btn) btn.style.display = 'none';
+  };
+  window.mpChatShowPass = function (onPass) {
+    const btn = document.getElementById('mpc-pass-btn');
+    if (!btn) return;
+    btn.style.display = '';
+    btn.onclick = onPass;
+  };
+  window.mpChatHidePass = function () {
+    const btn = document.getElementById('mpc-pass-btn');
+    if (btn) btn.style.display = 'none';
+  };
+
+  // ── Reply ────────────────────────────────────────────────────
+  function _startReply(username, text) {
+    _replyingTo = { username, text };
+    _renderReplyPreview();
+    document.getElementById('mpc-input')?.focus();
+  }
+  function _cancelReply() {
+    _replyingTo = null;
+    _renderReplyPreview();
+  }
+  function _renderReplyPreview() {
+    const box = document.getElementById('mpc-reply-preview');
+    if (!box) return;
+    if (!_replyingTo) { box.style.display = 'none'; box.innerHTML = ''; return; }
+    box.style.display = 'flex';
+    box.innerHTML = `<span class="mpc-reply-text">↩ Replying to <strong>${_esc(_replyingTo.username)}</strong>: ${_esc(_replyingTo.text.slice(0, 60))}</span><button class="mpc-reply-cancel" id="mpc-reply-cancel">✕</button>`;
+    document.getElementById('mpc-reply-cancel').onclick = _cancelReply;
+  }
+
   // ── Send ─────────────────────────────────────────────────────
   async function _send() {
     const input = document.getElementById('mpc-input');
@@ -234,14 +331,23 @@
     if (_hate(msg)) { _sysMsg('Message not allowed'); return; }
     input.value = '';
 
-    _appendMsg({ username: _username, message: msg });
+    let payload = msg;
+    if (_asking) {
+      payload = 'ask:' + encodeURIComponent(JSON.stringify({ to: _asking.name, toSlot: _asking.slot, q: msg }));
+      _cancelAsking();
+    } else if (_replyingTo) {
+      payload = 'reply:' + encodeURIComponent(JSON.stringify({ u: _replyingTo.username, t: _replyingTo.text.slice(0, 80), m: msg }));
+    }
+    _cancelReply();
+
+    _appendMsg({ username: _username, message: payload });
 
     const db = _getDb();
     if (!db) { _sysMsg('Not connected'); return; }
     try {
       await db.from('mp_chat').insert({
         room_type: _roomType, room_id: _roomId,
-        username: _username, message: msg,
+        username: _username, message: payload,
       });
     } catch (e) { _sysMsg('Failed to send'); }
   }
@@ -254,20 +360,50 @@
     const div = document.createElement('div');
     div.className = 'mpc-msg ' + (isMine ? 'mpc-mine' : 'mpc-other');
 
-    const isGif = typeof row.message === 'string' && row.message.startsWith('gif:');
-    const content = isGif
-      ? `<img class="mpc-gif-msg" src="${_esc(row.message.slice(4))}" alt="GIF" loading="lazy" />`
-      : `<span class="mpc-text">${_esc(row.message)}</span>`;
+    let bodyText = row.message;
+    let quoteHtml = '';
+    let headerExtra = '';
+    let replyMeta = null;
+    let askMeta = null;
+    if (typeof row.message === 'string' && row.message.startsWith('ask:')) {
+      let parsed = null;
+      try { parsed = JSON.parse(decodeURIComponent(row.message.slice(4))); } catch (e) { }
+      if (parsed) {
+        headerExtra = ` → To ${_esc(parsed.to)}`;
+        bodyText = parsed.q;
+        askMeta = parsed;
+      }
+    } else if (typeof row.message === 'string' && row.message.startsWith('reply:')) {
+      let parsed = null;
+      try { parsed = JSON.parse(decodeURIComponent(row.message.slice(6))); } catch (e) { }
+      if (parsed) {
+        quoteHtml = `<div class="mpc-quote">↩ <strong>${_esc(parsed.u)}</strong>: ${_esc(parsed.t)}</div>`;
+        bodyText = parsed.m;
+        replyMeta = parsed;
+      }
+    }
 
-    div.innerHTML = `<span class="mpc-who">${_esc(row.username)}</span>${content}`;
+    const isGif = typeof bodyText === 'string' && bodyText.startsWith('gif:');
+    const content = isGif
+      ? `<img class="mpc-gif-msg" src="${_esc(bodyText.slice(4))}" alt="GIF" loading="lazy" />`
+      : `<span class="mpc-text">${_esc(bodyText)}</span>`;
+
+    div.innerHTML = `<span class="mpc-who">${_esc(row.username)}${headerExtra}</span>${quoteHtml}${content}<button class="mpc-reply-btn" title="Reply">↩</button>`;
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
     _msgCount++;
+
+    const replyBtn = div.querySelector('.mpc-reply-btn');
+    if (replyBtn) replyBtn.onclick = () => _startReply(row.username, isGif ? '[GIF]' : bodyText);
 
     if (!_open) {
       _unread++;
       const badge = document.getElementById('mpc-badge');
       if (badge) { badge.textContent = _unread; badge.style.display = ''; }
+    }
+
+    if (typeof window.mpChatOnMessage === 'function') {
+      window.mpChatOnMessage({ username: row.username, isMine, text: bodyText, replyMeta, askMeta });
     }
   }
 
@@ -280,6 +416,24 @@
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
   }
+
+  // Locally-rendered system/game-event message (e.g. guess results) - each
+  // client calls this when it independently observes the same game event,
+  // so it appears for everyone without needing its own broadcast.
+  window.mpChatSystemMsg = function (html) {
+    const box = document.getElementById('mpc-msgs');
+    if (!box) return;
+    const div = document.createElement('div');
+    div.className = 'mpc-msg mpc-system';
+    div.innerHTML = html;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+    if (!_open) {
+      _unread++;
+      const badge = document.getElementById('mpc-badge');
+      if (badge) { badge.textContent = _unread; badge.style.display = ''; }
+    }
+  };
 
   async function _loadHistory() {
     const db = _getDb();
@@ -300,8 +454,10 @@
     if (!db || !_roomId) return;
 
     _sub = db.channel(`mp_chat_${_roomType}_${_roomId}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mp_chat',
-          filter: `room_id=eq.${_roomId}` }, p => {
+      .on('postgres_changes', {
+        event: 'INSERT', schema: 'public', table: 'mp_chat',
+        filter: `room_id=eq.${_roomId}`
+      }, p => {
         if (p.new.username !== _username || _msgCount === 0) _appendMsg(p.new);
       })
       .subscribe();

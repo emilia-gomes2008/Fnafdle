@@ -182,84 +182,21 @@
 
       <div class="game-layout-new">
 
-        <!-- Left: Q&A + controls + chat log -->
+        <!-- Left: guess box + embedded chat (all Q&A/banter happens here) -->
         <div class="qa-panel">
 
-          <!-- ASK PANEL: asker chooses a question to ask -->
-          <div id="ask-panel" class="acting-panel" style="display:none">
-            <div id="ask-target-row" style="display:none">
-              <div class="qa-label">🎯 Ask who?</div>
-              <div id="ask-target-btns" class="list-picker-grid" style="margin-top:6px;margin-bottom:10px;"></div>
+          <!-- GUESS BOX: always visible, enabled only on your acting turn -->
+          <div id="guess-box" class="acting-panel">
+            <div class="qa-label">🎯 Guess a character (only on your turn)</div>
+            <div class="guess-input-wrap">
+              <input id="guess-input" class="mp-input" type="text" placeholder="Type character name to guess..." maxlength="60" autocomplete="off" disabled />
+              <div id="guess-dropdown" class="dropdown" style="display:none"></div>
             </div>
-            <div class="qa-label"><span class="mp_emoji">❓</span> Choose a question to ask:</div>
-            <div id="ask-questions-list" class="list-picker-grid" style="margin-top:10px;"></div>
+            <button class="mp-btn primary small" id="send-guess-btn" disabled>🎯 Guess!</button>
           </div>
 
-          <!-- ACTING PANEL: asker sees question + answer, can guess or pass -->
-          <div id="acting-panel" class="acting-panel" style="display:none">
-            <div class="qa-display">
-              <div class="qa-label">📋 This turn's question</div>
-              <div class="qa-question-text" id="acting-question-text"></div>
-              <div class="qa-answer-display" id="acting-answer-display"></div>
-            </div>
-            <div id="acting-target-label" class="qa-label" style="margin-top:4px;color:var(--gold);"></div>
-            <div class="acting-actions">
-              <div class="guess-input-wrap">
-                <input id="guess-input" class="mp-input" type="text" placeholder="Type character name to guess..." maxlength="60" autocomplete="off" />
-                <div id="guess-dropdown" class="dropdown" style="display:none"></div>
-              </div>
-              <div class="acting-btns">
-                <button class="mp-btn primary small" id="send-guess-btn">🎯 Guess!</button>
-                <button class="mp-btn accent small" id="pass-btn">⏭ Pass</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- ANSWER PANEL: answerer picks a response (can lie!) -->
-          <div id="answer-panel" class="answer-panel" style="display:none">
-            <div class="answer-question-text" id="answer-question-text"></div>
-            <p class="answer-note"><span class="mp_emoji">⚠️</span> You can answer honestly or mislead your opponent!</p>
-
-            <!-- Color picker (color / eyeColor questions) -->
-            <div id="answer-color-picker" class="answer-picker" style="display:none">
-              <label for="answer-color-input">Pick a color:</label>
-              <div style="display:flex; gap:10px; align-items:center;">
-                <input type="color" id="answer-color-input" value="#ff0000" style="width:60px; height:40px; cursor:pointer; background:none; border:none; padding:0;" />
-                <button class="mp-btn accent" id="answer-color-idk">I don't know</button>
-              </div>
-            </div>
-
-            <!-- List picker (animal / type questions) -->
-            <div id="answer-list-picker" class="answer-picker" style="display:none">
-              <div id="answer-list-items" class="list-picker-grid"></div>
-              <button class="mp-btn accent" id="answer-list-idk" style="margin-top:8px;">I don't know</button>
-            </div>
-
-            <!-- Year picker -->
-            <div id="answer-year-picker" class="answer-picker" style="display:none">
-              <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                <input type="number" id="answer-year-input" class="mp-input" placeholder="e.g. 1987" style="width:120px;" />
-                <button class="mp-btn" id="answer-year-unconfirmed">Unconfirmed</button>
-                <button class="mp-btn accent" id="answer-year-idk">I don't know</button>
-              </div>
-            </div>
-
-            <div class="answer-submit-row">
-              <span id="answer-chosen-preview" class="answer-chosen-preview"></span>
-              <button class="mp-btn primary" id="submit-answer-btn" disabled>Submit Answer</button>
-            </div>
-          </div>
-
-          <!-- WAITING STATE: not your turn to answer -->
-          <div id="waiting-panel" class="waiting-panel" style="display:none">
-            <div class="waiting-dots"><span>.</span><span>.</span><span>.</span></div>
-            <p id="waiting-panel-text" class="mp-sub">Waiting for opponent...</p>
-          </div>
-
-          <!-- Chat log -->
-          <div id="chat-log" class="chat-log">
-            <div class="chat-msg msg-system">Game started! Player 1 goes first.</div>
-          </div>
+          <!-- Embedded chat widget (mp-chat.js renders into this) -->
+          <div id="mp-chat-container" class="mp-chat-container"></div>
         </div>
 
         <!-- Right: Elimination board (all chars) -->
@@ -271,6 +208,12 @@
           </div>
           <div id="elim-advanced" class="elim-advanced" style="display:none">
             <div class="elim-filter-col">
+              <span class="elim-filter-label">Game</span>
+              <select id="elim-game" class="elim-filter-select">
+                <option value="">All games</option>
+              </select>
+            </div>
+            <div class="elim-filter-col">
               <span class="elim-filter-label">Type</span>
               <select id="elim-type" class="elim-filter-select">
                 <option value="">All types</option>
@@ -281,10 +224,6 @@
               <select id="elim-animal" class="elim-filter-select">
                 <option value="">All animals</option>
               </select>
-            </div>
-            <div class="elim-filter-col">
-              <span class="elim-filter-label">Year</span>
-              <input type="number" id="elim-year" class="elim-filter-year" placeholder="e.g. 1987" min="1984" max="2030" />
             </div>
             <button id="elim-clear-filters" class="mp-btn small" style="align-self:flex-end">✕ Clear</button>
           </div>

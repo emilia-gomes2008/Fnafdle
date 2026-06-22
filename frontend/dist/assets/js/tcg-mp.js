@@ -74,7 +74,7 @@ function renderMpLobby() {
         <div class="setup-label">${T('tcg.mp.yourName')}</div>
         <input id="mp-name" class="tcg-input" type="text"
           placeholder="${T('tcg.mp.namePlaceholder')}" maxlength="20"
-          value="${mpEscHtml(sessionStorage.getItem('tcg_mp_name') || '')}"
+          value="${mpEscHtml(window.TCG_USER?.username || sessionStorage.getItem('tcg_mp_name') || '')}"
           style="max-width:220px" />
       </div>
       <!-- Action buttons -->
@@ -123,6 +123,7 @@ function renderMpLobby() {
     </div>
   `;
 
+  if (typeof _prefillPlayerName === 'function') _prefillPlayerName();
   mpLoadPublicLobby();
 }
 
@@ -219,6 +220,7 @@ function mpJoinFromLobby(code) {
 /* ── Create Room ─────────────────────────────────────── */
 async function mpConfirmCreate() {
   const name = (document.getElementById('mp-name')?.value.trim() || 'Online Player');
+  if (window._containsHate?.(name)) { mpStatusHtml(`<div style="color:var(--red-text)">Name not allowed.</div>`); return; }
   sessionStorage.setItem('tcg_mp_name', name);
   const roomCode = mpRandomCode();
   const roomNameInput = document.getElementById('mp-room-name')?.value.trim();
@@ -255,6 +257,7 @@ async function mpConfirmCreate() {
 /* ── Join Room ───────────────────────────────────────── */
 async function mpJoinRoom() {
   const name = (document.getElementById('mp-name')?.value.trim() || 'Online Player');
+  if (window._containsHate?.(name)) { mpStatusHtml(`<div style="color:var(--red-text)">Name not allowed.</div>`); return; }
   sessionStorage.setItem('tcg_mp_name', name);
   const code = (document.getElementById('mp-join-code')?.value.trim().toUpperCase()) || '';
   if (code.length < 4) { alert(T('tcg.mp.enterCode')); return; }
@@ -315,6 +318,11 @@ function mpShowWaiting(row) {
   waitEl.style.display = '';
   location.hash = 'lobby/online/waiting';
   mpRenderWaiting(row);
+
+  if (typeof initMpChat === 'function' && MP.roomId) {
+    const myName = (MP.myIdx === 0 ? row.host_name : row.guest_name) || 'Player';
+    initMpChat(MP.roomId, 'tcg', myName);
+  }
 }
 
 function mpHideWaiting() {
@@ -448,6 +456,7 @@ function mpUpdateWaiting(row) {
 
 function mpLeaveWaiting() {
   MP._currentRow = null;
+  if (typeof stopMpChat === 'function') stopMpChat();
   if (MP.channel) { try { MP.channel.unsubscribe(); } catch (e) { } MP.channel = null; }
   if (MP.roomId && MP.myIdx === 0) {
     // Host left: mark room abandoned
