@@ -668,7 +668,7 @@ window.CARDS_DB = {
   },
   dreadbear: {
     id: 'dreadbear', name: 'Dreadbear', type: 'shell', class: 'nightmare',
-    hp: 255, wakeThreshold: 3, energyType: 'agony', requiredEndo: 'endo_nm',
+    hp: 165, wakeThreshold: 3, energyType: 'agony', requiredEndo: 'endo_nm',
     img: 'nightmare/dreadbear.png',
     attacks: [
       { name: 'Thunderstrike', cost: 4, type: 'multi', targets: -1, damage: 45, postEffect: 'stall_pick2', desc: 'Deals 45 damage to ALL enemies. Choose 2 to stall for 1 turn.' }
@@ -1275,91 +1275,91 @@ window.CARDS_DB = {
   /* ─── CLASS CARDS ───────────────────────────────── */
   class_classic: {
     id: 'class_classic', name: 'The Original Band', type: 'class', class: 'classic',
-    img: null,
+    img: 'tcg/class/class_classic.png',
     effectId: 'class_classic_draw', oncePer: 'turn',
     effectDesc: 'Draw 1 card from the deck.',
     desc: 'Freddy, Bonnie, Chica and Foxy - the four originals of Fazbear Entertainment.'
   },
   class_toy: {
     id: 'class_toy', name: 'New Generation', type: 'class', class: 'toy',
-    img: null,
+    img: 'tcg/class/class_toy.png',
     effectId: 'class_toy_heal', oncePer: 'turn',
     effectDesc: 'Heal 10 HP on an ally. Discard 1⚡ from the Pool to heal 30 instead of 10.',
     desc: 'Modern, smiling models - but equally dangerous at night.'
   },
   class_withered: {
     id: 'class_withered', name: 'Damaged but Dangerous', type: 'class', class: 'withered',
-    img: null,
+    img: 'tcg/class/class_withered.png',
     effectId: 'class_withered_def', oncePer: 'turn',
     effectDesc: 'Give +15 defense for 1 turn to a Withered ally.',
     desc: 'Deteriorated bodies hide relentless power from the old versions.'
   },
   class_phantom: {
     id: 'class_phantom', name: 'Residual Agony', type: 'class', class: 'phantom',
-    img: null,
+    img: 'tcg/class/class_phantom.png',
     effectId: 'class_phantom_stall', oncePer: 'turn',
     effectDesc: 'Discard 1⚡ from the Pool and give Stall 1T to 1 enemy.',
     desc: 'Memories of agony that never disappear. Always present, never silenced.'
   },
   class_nightmare: {
     id: 'class_nightmare', name: 'Total Terror', type: 'class', class: 'nightmare',
-    img: null,
+    img: 'tcg/class/class_nightmare.png',
     effectId: 'class_nightmare_aoe', oncePer: 'turn',
     effectDesc: '15 damage to all enemies in standby.',
     desc: "Nightmares have no mercy. All tremble before the Nightmares' power."
   },
   class_jacko: {
     id: 'class_jacko', name: 'Flame of Agony', type: 'class', class: 'jacko',
-    img: null,
+    img: 'tcg/class/class_jacko.png',
     effectId: 'class_jacko_burn', oncePer: 'turn',
     effectDesc: 'Passive: +5 damage per Burn stack. Discard 1⚡ to give Burn 1 to 1 enemy.',
     desc: 'The fire of agony burns forever - and burns deeper than any other.'
   },
   class_shadow: {
     id: 'class_shadow', name: 'Devastating Shadow', type: 'class', class: 'shadow',
-    img: null,
+    img: 'tcg/class/class_shadow.png',
     effectId: 'class_shadow_drain', oncePer: 'turn',
     effectDesc: 'The enemy discards 1⚡ from one of their animatronics.',
     desc: "Shadows consume vital energy - nobody is safe from their influence."
   },
   class_funtime: {
     id: 'class_funtime', name: 'Scooping Protocol', type: 'class', class: 'funtime',
-    img: null,
+    img: 'tcg/class/class_funtime.png',
     effectId: 'class_funtime_draw', oncePer: 'turn',
     effectDesc: 'Discard 1 card from hand and draw 2 from the deck.',
     desc: 'The Scooping Room processes everything efficiently. Energy is never wasted.'
   },
   class_scrap: {
     id: 'class_scrap', name: 'Remnants', type: 'class', class: 'scrap',
-    img: null,
+    img: 'tcg/class/class_scrap.png',
     effectId: 'class_scrap_revive', oncePer: 'game',
     effectDesc: 'Choose 1 Scrap from the Blob Pile and put them with full HP in an empty slot.',
     desc: 'What was destroyed can be rebuilt. The Scraps always come back.'
   },
   class_rockstar: {
     id: 'class_rockstar', name: 'Rockstar Discount', type: 'class', class: 'rockstar',
-    img: null,
+    img: 'tcg/class/class_rockstar.png',
     effectId: 'class_rockstar_discount', oncePer: 'turn',
     effectDesc: "Discard 1 card from your hand. Choose one of your animatronics to reduce their Attack's Energy cost by 1⚡ this turn.",
     desc: 'The Rockstars know exactly how to turn a good investment into a devastating show.'
   },
   class_glamrock: {
     id: 'class_glamrock', name: 'Neon Attraction', type: 'class', class: 'glamrock',
-    img: null,
+    img: 'tcg/class/class_glamrock.png',
     effectId: 'class_glamrock_boost', oncePer: 'turn',
     effectDesc: 'Discard 1 card from your hand to draw 2 cards and gain 1 Energy.',
     desc: 'The Pizzaplex dazzles with glamour - and hides a dark secret beneath its shining stage.'
   },
   class_ruined: {
     id: 'class_ruined', name: "Ruined Signal", type: 'class', class: 'ruined',
-    img: null,
+    img: 'tcg/class/class_ruined.png',
     effectId: 'class_ruined_energize', oncePer: 'turn',
     effectDesc: 'Discard 1 card from your hand to draw 2 energies from your Generator.',
     desc: 'The Ruins pulse their signal through the dark - and every corrupted shell answers the call.'
   },
   class_mimic: {
     id: 'class_mimic', name: 'Imitation Protocol', type: 'class', class: 'mimic',
-    img: null,
+    img: 'tcg/class/class_mimic.png',
     effectId: 'class_mimic_cycle', oncePer: 'free',
     effectDesc: 'Swap an active Mimic shell in your party with a Mimic shell from your hand. The old shell returns to your hand.',
     desc: 'The Mimic does not just copy what it sees - it learns, adapts, and becomes something more.'
