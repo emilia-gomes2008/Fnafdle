@@ -3799,19 +3799,10 @@ function checkKO(pidx, slot) {
     triggerGlitchtrapTransform(pidx, idx, slot);
     return;
   }
-  // Scraptrap with Purple Guy → Glitchtrap transform on KO (double evolution)
-  if (slot.card.id === 'scraptrap' && slot.tools.some(t => t.passive === 'william') && idx >= 0) {
+  // Scraptrap with Purple Guy or Remnant Fragment → Glitchtrap transform on KO (double evolution).
+  // Burntrap is only reached from Scraptrap via the manual evolve action (skips this stage).
+  if (slot.card.id === 'scraptrap' && slot.tools.some(t => t.passive === 'william' || t.passive === 'scrap') && idx >= 0) {
     triggerNamedTransform(pidx, idx, slot, 'glitchtrap');
-    return;
-  }
-  // Scraptrap with Remnant Fragment → Burntrap transform on KO (double evolution)
-  if (slot.card.id === 'scraptrap' && slot.tools.some(t => t.passive === 'scrap') && idx >= 0) {
-    triggerNamedTransform(pidx, idx, slot, 'burntrap');
-    return;
-  }
-  // Glitchtrap KO'd while carrying Agony energy transforms naturally into Burntrap — no tool needed
-  if (slot.card.id === 'glitchtrap' && slot.elec > 0 && idx >= 0) {
-    triggerNamedTransform(pidx, idx, slot, 'burntrap');
     return;
   }
   // Scrap transform: animatronic with Fragmento de Remnant → Scrap version

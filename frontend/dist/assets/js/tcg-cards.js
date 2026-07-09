@@ -661,7 +661,7 @@ window.CARDS_DB = {
     id: 'glitchtrap', name: 'Glitchtrap', type: 'shell', class: 'glitch',
     hp: 210, wakeThreshold: 2, energyType: 'agony', requiredEndo: 'm2_endo',
     img: 'springlock/Glitchtrap.png',
-    desc: 'Requires Purple Guy equipped on M2 (or on Scraptrap) to evolve or transform.',
+    desc: 'Requires Purple Guy equipped on M2 to evolve or transform. Also emerges when Scraptrap is KO\'d with Purple Guy or Remnant Fragment equipped.',
     attacks: [
       { name: 'Digital Surge', cost: 2, type: 'single', damage: 65, effect: 'opponent_discard_energy1', desc: 'Deals 65 damage and removes 1 energy from the target.' },],
     ability: { name: 'Corrupt Mind', desc: 'Once per turn: force the opponent to discard 1 card from their hand.', id: 'glitchtrap_corrupt' }
@@ -745,7 +745,7 @@ window.CARDS_DB = {
     id: 'burntrap', name: 'Burntrap', type: 'shell', class: 'glitch',
     hp: 250, wakeThreshold: 3, energyType: 'agony', energyTypeAlt: 'phantom_agony',
     requiredShellAny: ['scraptrap', 'glitchtrap'],
-    desc: 'Also emerges when Scraptrap is KO\'d with Remnant Fragment equipped, or when Glitchtrap is KO\'d while carrying Agony energy.',
+    desc: 'Evolves from Scraptrap or Glitchtrap like a normal evolution (evolving straight from Scraptrap skips the Glitchtrap stage).',
     img: 'springlock/burntrap.png',
     attacks: [
       { name: 'Hellfire', cost: 3, type: 'multi', targets: 2, damage: 65, effect: 'burn3', desc: 'Deals 65 damage to 2 enemies and applies Burn 3 to each.' }
@@ -1082,7 +1082,7 @@ window.CARDS_DB = {
   fragmento_remnant: {
     id: 'fragmento_remnant', name: 'Remnant Fragment', type: 'tool', class: 'neutral',
     img: 'tcg/tools/remnant.png',
-    desc: 'Equip on Springtrap, Circus Baby, Funtime Freddy, Puppet, Carnie or M2. When that animatronic is KO, it transforms into the corresponding Scrap (or The Mimic for M2). On Scraptrap, it instead transforms into Burntrap.',
+    desc: 'Equip on Springtrap, Circus Baby, Funtime Freddy, Puppet, Carnie or M2. When that animatronic is KO, it transforms into the corresponding Scrap (or The Mimic for M2). On Scraptrap, it instead transforms into Glitchtrap.',
     passive: 'scrap',
     toolTarget: ['springtrap', 'baby', 'funtime_freddy', 'puppet', 'carnie', 'm2_endo', 'scraptrap']
   },
