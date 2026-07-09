@@ -1533,10 +1533,16 @@ function playShell(handIdx, card) {
   if (card.requiredShell || card.requiredShellAny) {
     const p = G.players[G.activePlayer];
     const validIds = card.requiredShellAny || [card.requiredShell];
-    const valid = p.party.filter(s => s && validIds.includes(s.card.id) && !s.justPlaced);
+    const isBurntrap = card.id === 'burntrap';
+    const valid = p.party.filter(s => {
+      if (!s || !validIds.includes(s.card.id) || s.justPlaced) return false;
+      // Burntrap from Scraptrap needs a tool equipped (either works); from Glitchtrap it's a normal evolution.
+      if (isBurntrap && s.card.id === 'scraptrap') return s.tools.some(t => t.passive === 'william' || t.passive === 'scrap');
+      return true;
+    });
     if (!valid.length) {
-      const nameList = validIds.map(id => CARDS[id]?.name || id).join(' or ');
-      addLog(T('tcg.log.noEvoTarget', { endo: nameList }), 'ko');
+      if (isBurntrap) addLog('Burntrap requires Purple Guy or Remnant Fragment equipped on Scraptrap (or a Glitchtrap in play)!', 'ko');
+      else addLog(T('tcg.log.noEvoTarget', { endo: validIds.map(id => CARDS[id]?.name || id).join(' or ') }), 'ko');
       return;
     }
     const eType = card.energyType;
@@ -1553,7 +1559,9 @@ function playShell(handIdx, card) {
   const isGlitchtrap = card.id === 'glitchtrap';
   const isMimicRuin = card.id === 'm2_mimic';
   const valid = p.party.filter(s => {
-    if (!s || s.card.id !== card.requiredEndo || s.justPlaced) return false;
+    if (!s || s.justPlaced) return false;
+    if (isGlitchtrap && s.card.id === 'scraptrap') return s.tools.some(t => t.passive === 'william' || t.passive === 'scrap');
+    if (s.card.id !== card.requiredEndo) return false;
     if (isSpringtrap && !s.tools.some(t => t.passive === 'william')) return false;
     if (isGlitchtrap && !s.tools.some(t => t.passive === 'william')) return false;
     if (isMimicRuin && !s.tools.some(t => t.passive === 'scrap')) return false;
@@ -1561,7 +1569,7 @@ function playShell(handIdx, card) {
   });
   if (!valid.length) {
     if (isSpringtrap) addLog(T('tcg.log.needSpringbonniePurple'));
-    else if (isGlitchtrap) addLog('Glitchtrap requires Purple Guy equipped on M2!', 'ko');
+    else if (isGlitchtrap) addLog('Glitchtrap requires Purple Guy equipped on M2, or Purple Guy/Remnant Fragment equipped on Scraptrap!', 'ko');
     else if (isMimicRuin) addLog('The Mimic requires Remnant Fragment equipped on M2!', 'ko');
     else addLog(T('tcg.log.noEvoTarget', { endo: card.requiredEndo }));
     return;
@@ -2015,7 +2023,8 @@ function clickSlot(pidx, slotIdx) {
   }
 
   if (pt?.action === 'evolve') {
-    const _evoValidIds = pt.card.requiredShellAny || (pt.card.requiredShell ? [pt.card.requiredShell] : [pt.card.requiredEndo]);
+    let _evoValidIds = pt.card.requiredShellAny || (pt.card.requiredShell ? [pt.card.requiredShell] : [pt.card.requiredEndo]);
+    if (pt.card.id === 'glitchtrap') _evoValidIds = [..._evoValidIds, 'scraptrap'];
     if (!isOwn || !slot || !_evoValidIds.includes(slot.card.id) || slot.justPlaced) return;
     const p = G.players[G.activePlayer];
     if (pt.card.id === 'ennard') {
@@ -2026,8 +2035,16 @@ function clickSlot(pidx, slotIdx) {
     const isGlitchtrapEvo = pt.card.id === 'glitchtrap';
     const isMimicRuinEvo = pt.card.id === 'm2_mimic';
     if (isSpringtrap && !slot.tools.some(t => t.passive === 'william')) { addLog(T('tcg.log.needSpringbonniePurple')); return; }
-    if (isGlitchtrapEvo && !slot.tools.some(t => t.passive === 'william')) { addLog('Glitchtrap requires Purple Guy equipped on M2!', 'ko'); return; }
+    if (isGlitchtrapEvo) {
+      const hasValidTool = slot.card.id === 'scraptrap'
+        ? slot.tools.some(t => t.passive === 'william' || t.passive === 'scrap')
+        : slot.tools.some(t => t.passive === 'william');
+      if (!hasValidTool) { addLog('Glitchtrap requires Purple Guy equipped on M2, or Purple Guy/Remnant Fragment equipped on Scraptrap!', 'ko'); return; }
+    }
     if (isMimicRuinEvo && !slot.tools.some(t => t.passive === 'scrap')) { addLog('The Mimic requires Remnant Fragment equipped on M2!', 'ko'); return; }
+    if (pt.card.id === 'burntrap' && slot.card.id === 'scraptrap' && !slot.tools.some(t => t.passive === 'william' || t.passive === 'scrap')) {
+      addLog('Burntrap requires Purple Guy or Remnant Fragment equipped on Scraptrap!', 'ko'); return;
+    }
     if (!isSpringtrap) {
       const type = pt.card.energyType;
       const altType = pt.card.energyTypeAlt;
