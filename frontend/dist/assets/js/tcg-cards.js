@@ -828,7 +828,7 @@ window.CARDS_DB = {
   },
   m2_mimic: {
     id: 'm2_mimic', name: 'The Mimic', type: 'shell', class: 'mimic',
-    hp: 260, wakeThreshold: 3, energyType: 'agony', requiredEndo: 'm2_endo',
+    hp: 110, wakeThreshold: 3, energyType: 'agony', requiredEndo: 'm2_endo',
     img: 'endo/m2_ruin.png',
     mimicMoveset: 'any',
     desc: 'Requires Remnant Fragment equipped on M2 to evolve or transform. Automatically learns the attacks of ANY animatronic shell or Endo in your Blob Pile — but has no attack of its own.',
