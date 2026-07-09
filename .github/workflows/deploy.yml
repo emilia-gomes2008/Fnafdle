@@ -28,11 +28,13 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_LKEY }}
+          KLIPY_KEY: ${{ secrets.KLIPY_KEY }}
         run: |
           cat > frontend/dist/assets/js/config.js << EOF
           window.FNAF_CONFIG = {
             SUPABASE_URL: "$SUPABASE_URL",
-            SUPABASE_ANON_KEY: "$SUPABASE_ANON_KEY"
+            SUPABASE_ANON_KEY: "$SUPABASE_ANON_KEY",
+            KLIPY_KEY: "$KLIPY_KEY"
           };
           EOF
           cat frontend/dist/assets/js/config.js
