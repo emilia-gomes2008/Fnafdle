@@ -757,7 +757,7 @@ window.CARDS_DB = {
     hp: 105, wakeThreshold: 2, maxCopies: 2,
     img: 'endo/blob.png',
     blobSummon: true, blobSummonCost: 5,
-    ability: { name: 'Blob Drain', desc: 'Once per turn: discard the top card of your Blob Pile to deal 15 damage to 1 enemy.', id: 'blob_drain' },
+    ability: { name: 'Blob Drain', desc: 'Once per turn: exile the top card of your Blob Pile to deal 15 damage to 1 enemy.', id: 'blob_drain' },
     attacks: [
       { name: 'Blob Tide', cost: 2, type: 'multi', targets: 2, damage: 45, effect: 'blob_stall10', desc: 'Deals 45 damage. If your Blob Pile has 10+ cards, also stalls the target for 1 turn.' }
     ]

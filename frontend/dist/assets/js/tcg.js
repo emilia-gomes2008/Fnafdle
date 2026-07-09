@@ -3427,15 +3427,13 @@ function triggerSpringtrapSearch(pidx, slotIdx, dyingSlot) {
   p.party[slotIdx] = null;
 
   if (!hasWilliam) { checkWin(); renderGame(); return; }
-  // Search hand, deck, then discard for Springtrap
+  // Search hand, then deck for Springtrap (not the Blob Pile)
   const stHand = p.hand.findIndex(c => c.id === 'springtrap');
   const stDeck = p.deck.findIndex(c => c.id === 'springtrap');
-  const stDiscard = p.discard.findIndex(c => c.id === 'springtrap');
-  if (stHand < 0 && stDeck < 0 && stDiscard < 0) { addLog(T('tcg.log.springtrapNotFound')); checkWin(); renderGame(); return; }
+  if (stHand < 0 && stDeck < 0) { addLog(T('tcg.log.springtrapNotFound')); checkWin(); renderGame(); return; }
   let st;
   if (stHand >= 0) { st = p.hand.splice(stHand, 1)[0]; }
-  else if (stDeck >= 0) { st = p.deck.splice(stDeck, 1)[0]; }
-  else { st = p.discard.splice(stDiscard, 1)[0]; }
+  else { st = p.deck.splice(stDeck, 1)[0]; }
   const newSlotSt = newSlot(st); newSlotSt.elec = elec; newSlotSt.justPlaced = false; checkAwake(newSlotSt);
   p.party[slotIdx] = newSlotSt;
   addLog(T('tcg.log.springtrapFound', { n: elec }), 'good');
@@ -3469,12 +3467,12 @@ function triggerScrapTransform(pidx, idx, dyingSlot) {
     }
   }
 
+  // Search hand, then deck for the Scrap card (not the Blob Pile)
   let scrapCard = null;
   const hIdx = p.hand.findIndex(c => c.id === scrapId);
   if (hIdx >= 0) { scrapCard = p.hand.splice(hIdx, 1)[0]; }
   else {
     const dIdx = p.deck.findIndex(c => c.id === scrapId); if (dIdx >= 0) { scrapCard = p.deck.splice(dIdx, 1)[0]; }
-    else { const bIdx = p.discard.findIndex(c => c.id === scrapId); if (bIdx >= 0) { scrapCard = p.discard.splice(bIdx, 1)[0]; } }
   }
   if (scrapCard) {
     const ns = newSlot(scrapCard); ns.justPlaced = false;
@@ -3760,14 +3758,13 @@ function triggerGlitchtrapTransform(pidx, slotIdx, dyingSlot) {
   addLog(`${dyingSlot.card.name} was destroyed — Glitchtrap emerges from the ruins!`, 'ko');
   p.discard.push(dyingSlot.card); dyingSlot.tools.forEach(t => p.discard.push(t));
   p.party[slotIdx] = null;
+  // Search hand, then deck for Glitchtrap (not the Blob Pile)
   const gtHand = p.hand.findIndex(c => c.id === 'glitchtrap');
   const gtDeck = p.deck.findIndex(c => c.id === 'glitchtrap');
-  const gtDisc = p.discard.findIndex(c => c.id === 'glitchtrap');
-  if (gtHand < 0 && gtDeck < 0 && gtDisc < 0) { addLog('No Glitchtrap found in hand, deck, or Blob Pile.', 'info'); checkWin(); renderGame(); return; }
+  if (gtHand < 0 && gtDeck < 0) { addLog('No Glitchtrap found in hand or deck.', 'info'); checkWin(); renderGame(); return; }
   let gt;
   if (gtHand >= 0) gt = p.hand.splice(gtHand, 1)[0];
-  else if (gtDeck >= 0) gt = p.deck.splice(gtDeck, 1)[0];
-  else gt = p.discard.splice(gtDisc, 1)[0];
+  else gt = p.deck.splice(gtDeck, 1)[0];
   const newGt = newSlot(gt); newGt.elec = elec; newGt.justPlaced = false; checkAwake(newGt);
   p.party[slotIdx] = newGt;
   addLog(`Glitchtrap materialized with ${elec} energy!`, 'good');
@@ -3783,14 +3780,13 @@ function triggerNamedTransform(pidx, slotIdx, dyingSlot, targetId) {
   addLog(`${dyingSlot.card.name} was destroyed — ${targetCard.name} emerges from the ruins!`, 'ko');
   p.discard.push(dyingSlot.card); dyingSlot.tools.forEach(t => p.discard.push(t));
   p.party[slotIdx] = null;
+  // Search hand, then deck for the target card (not the Blob Pile)
   const hIdx = p.hand.findIndex(c => c.id === targetId);
   const dIdx = p.deck.findIndex(c => c.id === targetId);
-  const discIdx = p.discard.findIndex(c => c.id === targetId);
-  if (hIdx < 0 && dIdx < 0 && discIdx < 0) { addLog(`No ${targetCard.name} found in hand, deck, or Blob Pile.`, 'info'); checkWin(); renderGame(); return; }
+  if (hIdx < 0 && dIdx < 0) { addLog(`No ${targetCard.name} found in hand or deck.`, 'info'); checkWin(); renderGame(); return; }
   let card;
   if (hIdx >= 0) card = p.hand.splice(hIdx, 1)[0];
-  else if (dIdx >= 0) card = p.deck.splice(dIdx, 1)[0];
-  else card = p.discard.splice(discIdx, 1)[0];
+  else card = p.deck.splice(dIdx, 1)[0];
   const newS = newSlot(card); newS.elec = elec; newS.justPlaced = false; checkAwake(newS);
   p.party[slotIdx] = newS;
   addLog(`${targetCard.name} materialized with ${elec} energy!`, 'good');
