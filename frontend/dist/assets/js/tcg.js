@@ -3757,6 +3757,29 @@ function triggerGlitchtrapTransform(pidx, slotIdx, dyingSlot) {
   checkWin(); renderGame();
 }
 
+/* ── Generic named transform (Scraptrap → Glitchtrap/Burntrap, Glitchtrap → Burntrap) ── */
+function triggerNamedTransform(pidx, slotIdx, dyingSlot, targetId) {
+  const p = G.players[pidx];
+  const elec = dyingSlot.elec;
+  const targetCard = CARDS[targetId];
+  G.players[1 - pidx].koPoints++;
+  addLog(`${dyingSlot.card.name} was destroyed — ${targetCard.name} emerges from the ruins!`, 'ko');
+  p.discard.push(dyingSlot.card); dyingSlot.tools.forEach(t => p.discard.push(t));
+  p.party[slotIdx] = null;
+  const hIdx = p.hand.findIndex(c => c.id === targetId);
+  const dIdx = p.deck.findIndex(c => c.id === targetId);
+  const discIdx = p.discard.findIndex(c => c.id === targetId);
+  if (hIdx < 0 && dIdx < 0 && discIdx < 0) { addLog(`No ${targetCard.name} found in hand, deck, or Blob Pile.`, 'info'); checkWin(); renderGame(); return; }
+  let card;
+  if (hIdx >= 0) card = p.hand.splice(hIdx, 1)[0];
+  else if (dIdx >= 0) card = p.deck.splice(dIdx, 1)[0];
+  else card = p.discard.splice(discIdx, 1)[0];
+  const newS = newSlot(card); newS.elec = elec; newS.justPlaced = false; checkAwake(newS);
+  p.party[slotIdx] = newS;
+  addLog(`${targetCard.name} materialized with ${elec} energy!`, 'good');
+  checkWin(); renderGame();
+}
+
 function checkKO(pidx, slot) {
   if (!slot || slot.hp > 0) return;
   const idx = G.players[pidx].party.indexOf(slot);
@@ -3774,6 +3797,21 @@ function checkKO(pidx, slot) {
   // M2 with Purple Guy → Glitchtrap transform on KO
   if (slot.card.id === 'm2_endo' && slot.tools.some(t => t.passive === 'william') && idx >= 0) {
     triggerGlitchtrapTransform(pidx, idx, slot);
+    return;
+  }
+  // Scraptrap with Purple Guy → Glitchtrap transform on KO (double evolution)
+  if (slot.card.id === 'scraptrap' && slot.tools.some(t => t.passive === 'william') && idx >= 0) {
+    triggerNamedTransform(pidx, idx, slot, 'glitchtrap');
+    return;
+  }
+  // Scraptrap with Remnant Fragment → Burntrap transform on KO (double evolution)
+  if (slot.card.id === 'scraptrap' && slot.tools.some(t => t.passive === 'scrap') && idx >= 0) {
+    triggerNamedTransform(pidx, idx, slot, 'burntrap');
+    return;
+  }
+  // Glitchtrap KO'd while carrying Agony energy transforms naturally into Burntrap — no tool needed
+  if (slot.card.id === 'glitchtrap' && slot.elec > 0 && idx >= 0) {
+    triggerNamedTransform(pidx, idx, slot, 'burntrap');
     return;
   }
   // Scrap transform: animatronic with Fragmento de Remnant → Scrap version

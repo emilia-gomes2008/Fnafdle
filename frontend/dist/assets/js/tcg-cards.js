@@ -661,7 +661,7 @@ window.CARDS_DB = {
     id: 'glitchtrap', name: 'Glitchtrap', type: 'shell', class: 'glitch',
     hp: 210, wakeThreshold: 2, energyType: 'agony', requiredEndo: 'm2_endo',
     img: 'springlock/Glitchtrap.png',
-    desc: 'Requires Purple Guy equipped on M2 to evolve or transform.',
+    desc: 'Requires Purple Guy equipped on M2 (or on Scraptrap) to evolve or transform.',
     attacks: [
       { name: 'Digital Surge', cost: 2, type: 'single', damage: 65, effect: 'opponent_discard_energy1', desc: 'Deals 65 damage and removes 1 energy from the target.' },],
     ability: { name: 'Corrupt Mind', desc: 'Once per turn: force the opponent to discard 1 card from their hand.', id: 'glitchtrap_corrupt' }
@@ -745,6 +745,7 @@ window.CARDS_DB = {
     id: 'burntrap', name: 'Burntrap', type: 'shell', class: 'glitch',
     hp: 250, wakeThreshold: 3, energyType: 'agony', energyTypeAlt: 'phantom_agony',
     requiredShellAny: ['scraptrap', 'glitchtrap'],
+    desc: 'Also emerges when Scraptrap is KO\'d with Remnant Fragment equipped, or when Glitchtrap is KO\'d while carrying Agony energy.',
     img: 'springlock/burntrap.png',
     attacks: [
       { name: 'Hellfire', cost: 3, type: 'multi', targets: 2, damage: 65, effect: 'burn3', desc: 'Deals 65 damage to 2 enemies and applies Burn 3 to each.' }
@@ -839,7 +840,7 @@ window.CARDS_DB = {
   /* ─── MIMIC CLASS ────────────────────────────────── */
   jackie: {
     id: 'jackie', name: 'Jackie', type: 'shell', class: 'mimic',
-    hp: 165, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'm2_endo',
+    hp: 110, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'm2_endo',
     img: 'sotm/jackie.png',
     attacks: [
       { name: 'Lure Trap', cost: 2, type: 'multi', targets: 2, damage: 30, effect: 'stall1', desc: 'Deals 30 damage to 2 enemies and stalls each for 1 turn.' }
@@ -848,7 +849,7 @@ window.CARDS_DB = {
   },
   big_top: {
     id: 'big_top', name: 'Big Top', type: 'shell', class: 'mimic',
-    hp: 195, wakeThreshold: 2, energyType: 'agony', requiredEndo: 'm2_endo',
+    hp: 120, wakeThreshold: 2, energyType: 'agony', requiredEndo: 'm2_endo',
     img: 'sotm/big_top.png',
     attacks: [
       { name: "Ringmaster's Whip", cost: 2, type: 'single', damage: 65, effect: 'burn2', desc: 'Deals 65 damage and applies Burn 2.' },
@@ -857,7 +858,7 @@ window.CARDS_DB = {
   },
   nurse_dollie: {
     id: 'nurse_dollie', name: 'Nurse Dollie', type: 'shell', class: 'mimic',
-    hp: 155, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'm2_endo',
+    hp: 110, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'm2_endo',
     img: 'sotm/dollie.png',
     attacks: [
       { name: 'Deep Sedation', cost: 2, type: 'single', damage: 40, effect: 'stall1', desc: 'Deals 40 damage and stalls the target for 1 turn.' }
@@ -866,7 +867,7 @@ window.CARDS_DB = {
   },
   party_time_chica: {
     id: 'party_time_chica', name: 'Party Time Chica', type: 'shell', class: 'mimic',
-    hp: 170, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'm2_endo',
+    hp: 100, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'm2_endo',
     img: 'sotm/mascot/party_time_chica.png',
     attacks: [
       { name: 'Party Revive', cost: 2, type: 'heal', healAmount: 75, healTargets: 2, desc: 'Heals 75 HP to 2 allies.' }
@@ -875,7 +876,7 @@ window.CARDS_DB = {
   },
   tiger_rock: {
     id: 'tiger_rock', name: 'White Tiger', type: 'shell', class: 'mimic',
-    hp: 195, wakeThreshold: 2, energyType: 'agony', requiredEndo: 'm2_endo',
+    hp: 130, wakeThreshold: 2, energyType: 'agony', requiredEndo: 'm2_endo',
     img: 'sotm/mascot/tiger_rock.png',
     attacks: [
       { name: 'Tiger Rock', cost: 3, type: 'multi', targets: -1, damage: 20, desc: 'Deals 20 damage to ALL enemies.' }
@@ -1081,9 +1082,9 @@ window.CARDS_DB = {
   fragmento_remnant: {
     id: 'fragmento_remnant', name: 'Remnant Fragment', type: 'tool', class: 'neutral',
     img: 'tcg/tools/remnant.png',
-    desc: 'Equip on Springtrap, Circus Baby, Funtime Freddy, Puppet, Carnie or M2. When that animatronic is KO, it transforms into the corresponding Scrap (or The Mimic for M2).',
+    desc: 'Equip on Springtrap, Circus Baby, Funtime Freddy, Puppet, Carnie or M2. When that animatronic is KO, it transforms into the corresponding Scrap (or The Mimic for M2). On Scraptrap, it instead transforms into Burntrap.',
     passive: 'scrap',
-    toolTarget: ['springtrap', 'baby', 'funtime_freddy', 'puppet', 'carnie', 'm2_endo']
+    toolTarget: ['springtrap', 'baby', 'funtime_freddy', 'puppet', 'carnie', 'm2_endo', 'scraptrap']
   },
   mr_can_do: {
     id: 'mr_can_do', name: 'Mr. Can-Do', type: 'tool', class: 'neutral',
@@ -1134,9 +1135,9 @@ window.CARDS_DB = {
   purple_guy: {
     id: 'purple_guy', name: 'Purple Guy', type: 'tool', class: 'neutral',
     img: 'human/afton.png',
-    desc: 'Equip on Springbonnie or M2: enables transformation into Springtrap or Glitchtrap.',
+    desc: 'Equip on Springbonnie or M2: enables transformation into Springtrap or Glitchtrap. On Scraptrap, it instead transforms into Glitchtrap.',
     passive: 'william',
-    toolTarget: ['springbonnie', 'm2_endo']
+    toolTarget: ['springbonnie', 'm2_endo', 'scraptrap']
   },
   william_afton: {
     id: 'william_afton', name: 'William Afton', type: 'supporter', class: 'neutral',
