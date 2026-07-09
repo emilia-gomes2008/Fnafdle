@@ -115,7 +115,7 @@
         <div class="mpc-gif-picker" id="mpc-gif-picker" style="display:none">
           <input class="mpc-gif-search" id="mpc-gif-search" type="text" placeholder="🔍 Search GIFs…" autocomplete="off" />
           <div class="mpc-gif-grid" id="mpc-gif-grid"></div>
-          <div class="mpc-tenor-attr">Powered by Tenor</div>
+          <div class="mpc-tenor-attr">Powered by KLIPY</div>
         </div>
         <div class="mpc-target-row" id="mpc-target-row" style="display:none"></div>
         <div class="mpc-reply-preview" id="mpc-reply-preview" style="display:none"></div>
@@ -191,32 +191,19 @@
     if (!grid) return;
     grid.innerHTML = '<div class="mpc-gif-loading">Loading…</div>';
     try {
-      const key = (window.FNAF_CONFIG || {}).TENOR_KEY || '';
-      let gifs;
+      const key = (window.FNAF_CONFIG || {}).KLIPY_KEY || '';
+      if (!key) { grid.innerHTML = '<div class="mpc-gif-loading">GIF search unavailable</div>'; return; }
 
-      if (key) {
-        // Tenor v2 (requires Google API key in FNAF_CONFIG.TENOR_KEY)
-        const base = q.trim()
-          ? `https://tenor.googleapis.com/v2/search?q=${encodeURIComponent(q)}&key=${key}&client_key=fnafdle_reborn&limit=15&media_filter=gif`
-          : `https://tenor.googleapis.com/v2/featured?key=${key}&client_key=fnafdle_reborn&limit=15&media_filter=gif`;
-        const r = await fetch(base);
-        const data = await r.json();
-        gifs = (data.results || []).map(item => ({
-          preview: item.media_formats?.nanogif?.url || item.media_formats?.tinygif?.url,
-          url: item.media_formats?.gif?.url,
-        })).filter(g => g.preview && g.url);
-      } else {
-        // Tenor v1 fallback (deprecated but still accessible)
-        const base = q.trim()
-          ? `https://api.tenor.com/v1/search?q=${encodeURIComponent(q)}&key=LIVDSRZULELA&limit=15&media_filter=minimal&contentfilter=low`
-          : `https://api.tenor.com/v1/trending?key=LIVDSRZULELA&limit=15&media_filter=minimal&contentfilter=low`;
-        const r = await fetch(base);
-        const data = await r.json();
-        gifs = (data.results || []).map(item => ({
-          preview: item.media?.[0]?.tinygif?.url || item.media?.[0]?.gif?.url,
-          url: item.media?.[0]?.mediumgif?.url || item.media?.[0]?.gif?.url,
-        })).filter(g => g.preview && g.url);
-      }
+      // KLIPY (Tenor-compatible GIF provider, Giphy-shaped response)
+      const base = q.trim()
+        ? `https://api.klipy.com/v2/gifs/search?q=${encodeURIComponent(q)}&key=${key}&per_page=15`
+        : `https://api.klipy.com/v2/gifs/trending?key=${key}&per_page=15`;
+      const r = await fetch(base);
+      const data = await r.json();
+      const gifs = (data.data || []).map(item => ({
+        preview: item.images?.fixed_height_small?.url || item.images?.preview_gif?.url,
+        url: item.images?.downsized?.url || item.images?.original?.url,
+      })).filter(g => g.preview && g.url);
 
       grid.innerHTML = '';
       if (!gifs.length) {

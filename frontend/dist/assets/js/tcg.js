@@ -2041,6 +2041,7 @@ function clickSlot(pidx, slotIdx) {
       const oldElec = slot.elec; const dmgTaken = endoCard.hp - slot.hp;
       p.discard.push(endoCard);
       slot.card = { ...pt.card, uid: uid() }; slot.hp = Math.max(1, pt.card.hp - dmgTaken); slot.elec = oldElec; slot.justPlaced = false; checkAwake(slot);
+      if (isMimicRuinEvo) syncMimicMoveset(G.activePlayer);
       addLog(T('tcg.log.evolved', { name: p.name, card: pt.card.name, energy: ENERGY_META[type]?.name || type }), 'good');
     } else {
       // Springtrap: Purple Guy consumed, no energy card needed
@@ -3859,8 +3860,8 @@ function openDeckSpyModal(spiedCards, onConfirm) {
 /* ═══════════════════════════════════════════════════════
    DECK SEARCH UI
    ═══════════════════════════════════════════════════════ */
-function startDeckSearch(title, cards, maxCount, pidx, onConfirm) {
-  pendingSearch = { title, cards, maxCount, pidx, selected: [], onConfirm };
+function startDeckSearch(title, cards, maxCount, pidx, onConfirm, opts) {
+  pendingSearch = { title, cards, maxCount, pidx, selected: [], onConfirm, fromClassCard: !!(opts && opts.fromClassCard) };
   renderSearchPanel();
 }
 function renderSearchPanel() {
@@ -3922,9 +3923,9 @@ function closeSearch() {
   pendingSearch = null;
   const panel = document.getElementById('search-panel'), bg = document.getElementById('search-bg');
   if (panel) panel.style.display = 'none'; if (bg) bg.style.display = 'none';
-  // Reset class card used state so the player can retry after cancelling
-  if (G && !G.winner) {
-    const pidx = ps != null ? ps.pidx : G.activePlayer;
+  // Reset class card used state only if this search belonged to a class card effect
+  if (G && !G.winner && ps && ps.fromClassCard) {
+    const pidx = ps.pidx;
     const p = G.players[pidx];
     if (p) p.classCardUsed = false; // only per-turn flag; classCardUsedForever stays
     renderGame();
@@ -4522,7 +4523,7 @@ function applyClassCardEffect(pidx, effectId, targetInfo) {
         addLog(T('tcg.log.classFuntimeDiscarded', { name: cp.name, card: cc.name, discarded: discCard.name, n: drew }), 'info');
         syncEnnardMoveset(pidx);
         renderGame(); pushGameState();
-      });
+      }, { fromClassCard: true });
       return;
     }
     case 'class_toy_heal': {
@@ -4587,12 +4588,12 @@ function applyClassCardEffect(pidx, effectId, targetInfo) {
       if (emptySlot === -1) { addLog(T('tcg.log.classNoEmptySlot'), 'info'); return; }
       const scraps = p.discard.filter(c => c.type === 'shell' && c.class === 'scrap');
       if (!scraps.length) { addLog(T('tcg.log.classNoBlobScraps'), 'info'); return; }
-      p.classCardUsed = true;
-      if (cc.oncePer === 'game') p.classCardUsedForever = true;
       G.pendingTarget = null;
       startDeckSearch('Choose a Scrap to revive (Remnants)', scraps, 1, pidx, (sel) => {
         const toRevive = sel[0];
         if (toRevive) {
+          p.classCardUsed = true;
+          if (cc.oncePer === 'game') p.classCardUsedForever = true;
           const i = p.discard.indexOf(toRevive);
           if (i >= 0) p.discard.splice(i, 1);
           const rs = newSlot(toRevive); rs.hp = rs.card.hp;
@@ -4601,7 +4602,7 @@ function applyClassCardEffect(pidx, effectId, targetInfo) {
           syncEnnardMoveset(pidx);
         }
         renderGame(); pushGameState();
-      });
+      }, { fromClassCard: true });
       return;
     }
     case 'class_rockstar_discount': {
@@ -4624,7 +4625,7 @@ function applyClassCardEffect(pidx, effectId, targetInfo) {
           renderGame();
           pushGameState();
         }
-      });
+      }, { fromClassCard: true });
       return;
     }
     case 'class_mimic_cycle': {
@@ -4656,9 +4657,9 @@ function applyClassCardEffect(pidx, effectId, targetInfo) {
             if (!sel2.length) { addLog('Imitation Protocol cancelled.', 'info'); renderGame(); return; }
             const slotIdx = activeShellIdxs.find(i => p.party[i].card === sel2[0]);
             doMimicSwap(newShell, slotIdx);
-          });
+          }, { fromClassCard: true });
         }
-      });
+      }, { fromClassCard: true });
       return;
     }
     case 'class_glamrock_boost': {
@@ -4672,7 +4673,7 @@ function applyClassCardEffect(pidx, effectId, targetInfo) {
         cp.energyPool++;
         addLog(`${cp.name}: Neon Attraction — discarded ${sel[0].name}, drew 2 cards and gained 1 Energy!`, 'good');
         G.pendingTarget = null; renderGame(); pushGameState();
-      });
+      }, { fromClassCard: true });
       return;
     }
     case 'class_ruined_energize': {
@@ -4685,7 +4686,7 @@ function applyClassCardEffect(pidx, effectId, targetInfo) {
         drawEnergyToPool(pidx, 2);
         addLog(`${cp.name}: Ruined Signal — discarded ${c.name}, gained 2 energy from Generator!`, 'good');
         G.pendingTarget = null; renderGame(); pushGameState();
-      });
+      }, { fromClassCard: true });
       return;
     }
   }
