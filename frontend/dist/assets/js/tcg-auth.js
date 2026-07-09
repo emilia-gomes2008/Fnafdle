@@ -362,7 +362,7 @@ const BOOSTERS = {
       'no_1_crate', 'no_1_crate', 'mr_hugs', 'mr_hugs',
       'ennard_summon',
       // Tools
-      'mr_can_do', 'mr_can_do',
+      'mr_can_do', 'mr_can_do', 'fragmento-remnant',
       // Mediocre Melodies supporters (extra weight)
       'happy_frog', 'happy_frog', 'mr_hippo', 'mr_hippo',
       'pigpatch', 'pigpatch', 'nedd_bear', 'nedd_bear', 'orville_elephant', 'orville_elephant',
@@ -1622,7 +1622,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // ── Dev: tcgGiveAll(n) ───────────────────────────────────────
 // Call from the browser console: tcgGiveAll() or tcgGiveAll(4)
-window.tcgGiveAll = async function(n = 12) {
+window.tcgGiveAll = async function (n = 12) {
   if (!window.TCG_USER) { console.error('[tcgGiveAll] Not logged in!'); return; }
   const db = _getDB(); if (!db) { console.error('[tcgGiveAll] No DB!'); return; }
   const allIds = Object.keys(window.CARDS || {});
