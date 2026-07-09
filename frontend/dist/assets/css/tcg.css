@@ -4,6 +4,9 @@
   user-select: none;
 }
 
+/* ── Header override (match Party Mode logo size) ───── */
+.fnaf-title img { max-width: 160px; }
+
 body {
   background: var(--bg-page);
   color: var(--text);

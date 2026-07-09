@@ -1892,7 +1892,7 @@ function playSupporter(handIdx, card) {
   // ── Edwin: look at top 4 cards, add 1 to hand ──
   if (card.effect === 'edwin_look4') {
     p.supporterPlayedThisTurn++;
-    const mimicCards = p.deck.filter(c => c.class === 'mimic');
+    const mimicCards = p.deck.filter(c => c.class === 'mimic' || c.class === 'glitch');
     if (!mimicCards.length) { addLog('Edwin: no Mimic class cards in deck!', 'info'); consumeSupporter(); G.pendingTarget = null; renderGame(); pushGameState(); return; }
     startDeckSearch('Edwin Murray — choose up to 3 Mimic class cards from your deck', mimicCards, 3, G.activePlayer, (sel) => {
       sel.forEach(c => { const i = p.deck.findIndex(x => x.uid === c.uid); if (i >= 0) p.deck.splice(i, 1); p.hand.push(c); });
@@ -2500,7 +2500,7 @@ function initiateAttack(slotIdx, atkIdx) {
 /* ── Freddy Mask check ───────────────────────────── */
 function checkMimicCounter(attackerCard, atk, defSlot) {
   if (!defSlot.tools?.some(t => t.passive === 'mimic_counter') && defSlot.card?.passive !== 'mimic_counter') return false;
-  if (attackerCard.class !== 'mimic') return false;
+  if (attackerCard.class !== 'mimic' && attackerCard.class !== 'glitch') return false;
   // M2 Endo's native Glitch Shock (not synced) still deals damage
   if (attackerCard.id === 'm2_endo' && !atk.synced) return false;
   return true;
@@ -3245,23 +3245,35 @@ function useAbility(slotIdx, abilityId) {
     return;
   }
 
-  // ── M2 Mimic: Endless Adaptation (deal 20 to all enemies) ──
+  // ── M2 Mimic: Endless Adaptation (discard 1 shell/endo from hand to the Blob Pile,
+  //    gaining its attacks, then deal 20 damage to 2 random enemies) ──
   if (abilityId === 'm2_mimic_aoe') {
-    const ep = 1 - G.activePlayer;
-    const candidates = G.players[ep].party.map((s, i) => s ? { s, i } : null).filter(Boolean);
-    if (!candidates.length) { addLog('Endless Adaptation: no valid targets.', 'info'); checkWin(); renderGame(); pushGameState(); return; }
-    for (let i = candidates.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[candidates[i], candidates[j]] = [candidates[j], candidates[i]]; }
-    candidates.slice(0, 2).forEach(({ s }) => {
-      s.hp = Math.max(0, s.hp - 20);
-      addLog(`${s.card.name} took 20 damage from Endless Adaptation!`, 'ko');
-      checkKO(ep, s);
+    const absorbable = p.hand.filter(c => c.type === 'shell' || c.type === 'endo');
+    if (!absorbable.length) { addLog('Endless Adaptation: no shell or endo cards in hand!', 'ko'); slot.usedAbilityThisTurn = false; return; }
+    startDeckSearch('Endless Adaptation — discard 1 shell/endo to your Blob Pile', absorbable, 1, G.activePlayer, (sel) => {
+      if (!sel.length) { addLog('Endless Adaptation cancelled.', 'info'); slot.usedAbilityThisTurn = false; renderGame(); return; }
+      const c = sel[0]; const ci = p.hand.indexOf(c); if (ci >= 0) p.hand.splice(ci, 1); p.discard.push(c);
+      syncMimicMoveset(G.activePlayer);
+      addLog(`Endless Adaptation: discarded ${c.name} to the Blob Pile!`, 'good');
+
+      const ep = 1 - G.activePlayer;
+      const candidates = G.players[ep].party.map((s, i) => s ? { s, i } : null).filter(Boolean);
+      if (candidates.length) {
+        for (let i = candidates.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[candidates[i], candidates[j]] = [candidates[j], candidates[i]]; }
+        candidates.slice(0, 2).forEach(({ s }) => {
+          s.hp = Math.max(0, s.hp - 20);
+          addLog(`${s.card.name} took 20 damage from Endless Adaptation!`, 'ko');
+          checkKO(ep, s);
+        });
+      }
+      checkWin(); renderGame(); pushGameState();
     });
-    checkWin(); renderGame(); pushGameState(); return;
+    return;
   }
 
   // ── M2 Endo: Data Absorb (send Mimic shell from hand to Blob) ──
   if (abilityId === 'm2_data_absorb') {
-    const mimicShells = p.hand.filter(c => c.class === 'mimic' && c.type === 'shell');
+    const mimicShells = p.hand.filter(c => (c.class === 'mimic' || c.class === 'glitch') && c.type === 'shell');
     if (!mimicShells.length) { addLog('Data Absorb: no Mimic class shells in hand!', 'ko'); slot.usedAbilityThisTurn = false; return; }
     startDeckSearch('Data Absorb — send 1 Mimic shell to Blob Pile', mimicShells, 1, G.activePlayer, (sel) => {
       if (!sel.length) { addLog('Data Absorb cancelled.', 'info'); slot.usedAbilityThisTurn = false; renderGame(); return; }
@@ -3421,7 +3433,7 @@ function triggerScrapTransform(pidx, idx, dyingSlot) {
   p.discard.push(dyingSlot.card); dyingSlot.tools.forEach(t => p.discard.push(t));
   for (let i = 0; i < dyingSlot.elec; i++) p.discard.push({ id: 'energy_spent', name: 'Energy', type: 'energy', energyType: 'generic', img: GENERIC });
   if (dyingSlot.card.class === 'funtime') syncEnnardMoveset(pidx);
-  if (dyingSlot.card.class === 'mimic') syncMimicMoveset(pidx);
+  if (dyingSlot.card.type === 'shell' || dyingSlot.card.type === 'endo') syncMimicMoveset(pidx);
 
   if (dyingSlot.card.id === 'carnie') {
     const puppetIdx = p.hand.findIndex(c => c.id === 'puppet');
@@ -3685,22 +3697,43 @@ function syncEnnardMoveset(pidx) {
 
 function syncMimicMoveset(pidx) {
   const p = G.players[pidx];
-  const m2Slots = p.party.filter(s => s && (s.card.id === 'm2_endo' || s.card.id === 'm2_mimic'));
-  if (!m2Slots.length) return;
-  const seen = new Set(['Glitch Shock']);
-  const atks = [
-    { name: 'Glitch Shock', cost: 1, type: 'single', damage: 25, desc: 'Deals 25 damage.' }
-  ];
-  p.discard.forEach(fc => {
-    if (fc.class !== 'mimic' || fc.type !== 'shell') return;
-    (fc.attacks || []).forEach(atk => {
-      if (!seen.has(atk.name)) {
-        seen.add(atk.name);
-        atks.push({ ...atk, name: `${atk.name} (${fc.name})`, synced: true });
-      }
+  // M2 (base Endo): only learns attacks from Mimic-class shells in the Blob Pile,
+  // always keeps its own baseline "Glitch Shock".
+  const m2Slots = p.party.filter(s => s && s.card.id === 'm2_endo');
+  if (m2Slots.length) {
+    const seen = new Set(['Glitch Shock']);
+    const atks = [
+      { name: 'Glitch Shock', cost: 1, type: 'single', damage: 25, desc: 'Deals 25 damage.' }
+    ];
+    p.discard.forEach(fc => {
+      if ((fc.class !== 'mimic' && fc.class !== 'glitch') || fc.type !== 'shell') return;
+      (fc.attacks || []).forEach(atk => {
+        if (!seen.has(atk.name)) {
+          seen.add(atk.name);
+          atks.push({ ...atk, name: `${atk.name} (${fc.name})`, synced: true });
+        }
+      });
     });
-  });
-  m2Slots.forEach(slot => { slot.card = { ...slot.card, attacks: atks }; });
+    m2Slots.forEach(slot => { slot.card = { ...slot.card, attacks: atks }; });
+  }
+
+  // The Mimic (Ruin evolution): learns attacks from ANY animatronic shell or endo in the
+  // Blob Pile, but has no attack of its own - an empty Blob Pile means no attacks at all.
+  const mimicSlots = p.party.filter(s => s && s.card.id === 'm2_mimic');
+  if (mimicSlots.length) {
+    const seen = new Set();
+    const atks = [];
+    p.discard.forEach(fc => {
+      if (fc.type !== 'shell' && fc.type !== 'endo') return;
+      (fc.attacks || []).forEach(atk => {
+        if (!seen.has(atk.name)) {
+          seen.add(atk.name);
+          atks.push({ ...atk, name: `${atk.name} (${fc.name})`, synced: true });
+        }
+      });
+    });
+    mimicSlots.forEach(slot => { slot.card = { ...slot.card, attacks: atks }; });
+  }
 }
 
 function triggerGlitchtrapTransform(pidx, slotIdx, dyingSlot) {
@@ -3756,7 +3789,7 @@ function checkKO(pidx, slot) {
   if (idx >= 0) {
     p.discard.push(slot.card); slot.tools.forEach(t => p.discard.push(t)); p.party[idx] = null;
     if (slot.card.class === 'funtime') syncEnnardMoveset(pidx);
-    if (slot.card.class === 'mimic') syncMimicMoveset(pidx);
+    if (slot.card.type === 'shell' || slot.card.type === 'endo') syncMimicMoveset(pidx);
   }
 }
 
@@ -4048,8 +4081,8 @@ function showCardInfo(card, slot, slotIdx, pidx, isHand, handIdx) {
         if (abl.id === 'dreadbear_stall_pick2') { abled = G.players[1 - pidx].party.some(s => s); }
         if (abl.id === 'claw_rend') { abled = G.players[1 - pidx].party.some(s => s && !s.awake); }
         if (abl.id === 'glitchtrap_corrupt') { abled = G.players[1 - pidx].hand.length > 0; }
-        if (abl.id === 'm2_mimic_aoe') { abled = G.players[1 - pidx].party.some(s => s); }
-        if (abl.id === 'm2_data_absorb') { abled = G.players[pidx].hand.some(c => c.class === 'mimic' && c.type === 'shell'); }
+        if (abl.id === 'm2_mimic_aoe') { abled = G.players[pidx].hand.some(c => c.type === 'shell' || c.type === 'endo'); }
+        if (abl.id === 'm2_data_absorb') { abled = G.players[pidx].hand.some(c => (c.class === 'mimic' || c.class === 'glitch') && c.type === 'shell'); }
         if (abl.id === 'grim_foxy_burning_frenzy') { abled = G.players[1 - pidx].party.some(s => s && s.burn > 0); }
         if (abl.id === 'jackie_ambush') { abled = G.players[1 - pidx].party.some(s => s && s.stalledTurns > 0); }
         if (abl.id === 'big_top_crowd_control') { abled = G.players[1 - pidx].party.some(s => s); }
@@ -4586,7 +4619,7 @@ function applyClassCardEffect(pidx, effectId, targetInfo) {
     case 'class_scrap_revive': {
       const emptySlot = G.players[pidx].party.findIndex(s => !s);
       if (emptySlot === -1) { addLog(T('tcg.log.classNoEmptySlot'), 'info'); return; }
-      const scraps = p.discard.filter(c => c.type === 'shell' && c.class === 'scrap');
+      const scraps = p.discard.filter(c => c.type === 'shell' && (c.class === 'scrap' || c.class === 'glitch'));
       if (!scraps.length) { addLog(T('tcg.log.classNoBlobScraps'), 'info'); return; }
       G.pendingTarget = null;
       startDeckSearch('Choose a Scrap to revive (Remnants)', scraps, 1, pidx, (sel) => {
@@ -4629,9 +4662,9 @@ function applyClassCardEffect(pidx, effectId, targetInfo) {
       return;
     }
     case 'class_mimic_cycle': {
-      const activeShellIdxs = p.party.map((s, i) => s && s.card.class === 'mimic' && s.card.type === 'shell' ? i : -1).filter(i => i >= 0);
+      const activeShellIdxs = p.party.map((s, i) => s && (s.card.class === 'mimic' || s.card.class === 'glitch') && s.card.type === 'shell' ? i : -1).filter(i => i >= 0);
       if (!activeShellIdxs.length) { addLog('Imitation Protocol: no Mimic shell in play to swap!', 'info'); return; }
-      const mimicInHand = p.hand.filter(c => c.class === 'mimic' && c.type === 'shell');
+      const mimicInHand = p.hand.filter(c => (c.class === 'mimic' || c.class === 'glitch') && c.type === 'shell');
       if (!mimicInHand.length) { addLog('Imitation Protocol: no Mimic shells in hand!', 'info'); return; }
       G.pendingTarget = null;
       const doMimicSwap = (newShell, slotIdx) => {

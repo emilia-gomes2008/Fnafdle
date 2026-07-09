@@ -347,7 +347,7 @@ const BOOSTERS = {
       'rockstar', 'rockstar',
       // Nightmare
       'nightmare_freddy', 'nightmare_bonnie', 'nightmare_chica', 'nightmare_foxy',
-      'nightmare_fredbear', 'plushtrap', 'nightmare_bb', 'nightmarionne',
+      'nightmare_fredbear', 'plushtrap', 'nightmare_bb', 'nightmare_mangle', 'nightmarionne',
       // Jack-O
       'jacko_bonnie', 'jacko_chica', 'jacko_lantern',
       'grim_foxy', 'grim_foxy',

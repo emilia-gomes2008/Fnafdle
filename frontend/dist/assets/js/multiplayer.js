@@ -92,6 +92,26 @@ const GAMES = [
   { name: "Five Nights at Freddy's: Secret of the Mimic", start: 320, end: 376 },
 ];
 
+// Per-game filter checkbox colors (mirrors the TCG class colors where applicable)
+const GAME_COLORS = [
+  '#7ad',    // 0  FNAF 1                     - Classic
+  '#c84',    // 1  FNAF 2                     - Withered
+  '#4caf50', // 2  FNAF 3                     - Green
+  '#d44',    // 3  FNAF 4                     - Nightmare (Jack-O subtype overridden below)
+  '#fff',    // 4  FNAF World
+  '#ff6699', // 5  Sister Location             - pink
+  '#a62',    // 6  FNAF 6                     - Scrap
+  '#C88600', // 7  Ultimate Custom Night      - gold
+  '#5b3fa8', // 8  Help Wanted                - purple (darker)
+  '#88ccff', // 9  FNAF AR / Special Delivery - light blue
+  '#00d4ff', // 10 Security Breach            - neon blue
+  '#1c0e22', // 11 Security Breach: Ruin      - darker purplish black
+  '#6a0dad', // 12 Help Wanted 2              - vibrant purple (darker)
+  '#ff8000', // 13 Secret of the Mimic        - pure orange
+];
+const JACKO_COLOR = '#e84';   // FNAF 4 Halloween Edition (Jack-O subtype)
+const SHADOW_COLOR = '#2a1235'; // "Shadow" type characters (dark purple), any game
+
 // Dee Dee (121) and Old Man Consequences (122) are FNAF World chars that also appear in UCN
 const WORLD_UCN_CHARS = [131, 132];
 const GAME_IDX_WORLD = 4;
@@ -99,9 +119,15 @@ const GAME_IDX_UCN = 7;
 
 // Map each character object to its game's name (by original CHARS index range)
 const CHAR_GAME = new Map();
+const CHAR_GAME_COLOR = new Map();
 CHARS.forEach((c, i) => {
   const g = GAMES.find(g => i >= g.start && i <= g.end);
   CHAR_GAME.set(c, g ? g.name : '');
+  const gi = g ? GAMES.indexOf(g) : -1;
+  const color = gi === 3 && c.type === 'Jack-O' ? JACKO_COLOR
+    : c.type === 'Shadow' ? SHADOW_COLOR
+    : GAME_COLORS[gi];
+  if (color) CHAR_GAME_COLOR.set(c, color);
 });
 
 function getFilteredChars() {
@@ -196,6 +222,7 @@ function showScreen(name) {
     const el = document.getElementById('screen-' + id);
     if (el) el.style.display = id === name ? '' : 'none';
   });
+  document.getElementById('multiplayer-screen')?.classList.toggle('wide-screen', name === 'game');
 }
 
 function lobbyError(msg) { document.getElementById('lobby-error').textContent = msg; }
@@ -463,13 +490,24 @@ document.getElementById('copy-code-btn').addEventListener('click', () => {
 function buildCharGrid(containerEl, onSelect, allowMultiple = false) {
   const pool = getFilteredChars().filter(c => c.img);
   containerEl.innerHTML = '';
+  let lastGame = null;
   pool.forEach(char => {
+    const game = CHAR_GAME.get(char) || '';
+    if (lastGame !== null && game !== lastGame) {
+      const brk = document.createElement('div');
+      brk.className = 'char-grid-gamebreak';
+      containerEl.appendChild(brk);
+    }
+    lastGame = game;
+
     const card = document.createElement('div');
     card.className = 'char-grid-card';
     card.dataset.name = char.name;
     card.dataset.animal = char.animal || '';
     card.dataset.type = char.type || '';
     card.dataset.game = CHAR_GAME.get(char) || '';
+    const gameColor = CHAR_GAME_COLOR.get(char);
+    if (gameColor) card.style.setProperty('--game-color', gameColor);
     const img = document.createElement('img');
     img.src = '../assets/' + char.img;
     img.alt = char.name;
@@ -1079,13 +1117,13 @@ function renderEvent(ev) {
     if (ev.correct) {
       if (involvedInGuess) {
         const tLabel = targetSlot && roomData ? ` (${escHtml(roomData[`${targetSlot}_name`] || targetSlot)}'s char)` : '';
-        html = `${sender} guessed "${escHtml(guessedChar)}"${tLabel} <span class="mp_emoji">✅</span>`;
+        html = `<div>${sender} guessed "${escHtml(guessedChar)}"${tLabel}</div><div class="mpc-event-emoji">✅</div>`;
       } else {
-        html = `${sender} got one right! <span class="e">🎉</span>`;
+        html = `<div>${sender} got one right!</div><div class="mpc-event-emoji">🎉</div>`;
       }
     } else {
       const tLabel = targetSlot && roomData ? ` (${escHtml(roomData[`${targetSlot}_name`] || targetSlot)}'s char)` : '';
-      html = `${sender} guessed "${escHtml(guessedChar)}"${tLabel} <span class="mp_emoji">❌</span>`;
+      html = `<div>${sender} guessed "${escHtml(guessedChar)}"${tLabel}</div><div class="mpc-event-emoji">❌</div>`;
     }
     window.mpChatSystemMsg?.(html);
   } else if (ev.type === 'jumpscare') {
@@ -1392,6 +1430,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const cb = document.createElement('input');
     cb.type = 'checkbox'; cb.className = 'filter-game-checkbox'; cb.value = i; cb.checked = true;
+    if (GAME_COLORS[i]) cb.style.accentColor = GAME_COLORS[i];
 
     const nameSpan = document.createElement('span');
     nameSpan.textContent = g.name;
@@ -1415,6 +1454,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const subCb = document.createElement('input');
       subCb.type = 'checkbox'; subCb.className = 'filter-subtype-checkbox';
       subCb.dataset.game = i; subCb.value = type; subCb.checked = true;
+      const subColor = (i === 3 && type === 'Jack-O') ? JACKO_COLOR
+        : type === 'Shadow' ? SHADOW_COLOR
+        : GAME_COLORS[i];
+      if (subColor) subCb.style.accentColor = subColor;
       const subSpan = document.createElement('span');
       subSpan.textContent = `${type} (${count})`;
       subLabel.append(subCb, subSpan);

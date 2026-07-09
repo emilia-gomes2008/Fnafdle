@@ -1,3 +1,6 @@
+/* ── Header override (match Party Mode logo size) ───── */
+.fnaf-title img { max-width: 160px; }
+
 /* =====================================================
        LEGENDA
        ===================================================== */

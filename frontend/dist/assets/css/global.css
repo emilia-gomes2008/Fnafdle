@@ -687,7 +687,7 @@ button:disabled {
   min-height: 80px;
   max-height: 260px;
   overflow-y: auto;
-  padding: 8px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -707,7 +707,8 @@ button:disabled {
   word-break: break-word;
 }
 .mpc-mine .mpc-text { background: var(--gold-dark); color: #fff; }
-.mpc-system { align-self: center; font-size: .72rem; color: var(--text-muted); font-style: italic; }
+.mpc-system { align-self: center; font-size: .72rem; color: var(--text-muted); font-style: italic; text-align: center; }
+.mpc-event-emoji { font-style: normal; font-size: 1rem; margin-top: 2px; }
 .mpc-quote {
   font-size: .72rem;
   color: var(--text-muted);

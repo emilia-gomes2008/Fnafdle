@@ -138,6 +138,8 @@
                   onclick="filterCards('glamrock',this)">Glamrock</button>
                 <button class="class-filter-btn" data-class="ruined"
                   onclick="filterCards('ruined',this)">Ruined</button>
+                <button class="class-filter-btn" data-class="glitch"
+                  onclick="filterCards('glitch',this)">Glitch</button>
                 <button class="class-filter-btn" data-class="mimic" onclick="filterCards('mimic',this)">Mimic</button>
                 <button class="class-filter-btn" data-class="item" onclick="filterCards('item',this)">Items</button>
                 <button class="class-filter-btn" data-class="tool" onclick="filterCards('tool',this)">Tools</button>
@@ -271,7 +273,9 @@
       <div class="hand-area">
         <div class="hand-label" id="hand-label">Hand (<span id="hand-count">0</span>) - click a card to see details
         </div>
-        <div id="turn-timer" style="display:none;text-align:center;font-size:1.1rem;font-weight:700;padding:4px 0 2px;letter-spacing:1px"></div>
+        <div id="turn-timer"
+          style="display:none;text-align:center;font-size:1.1rem;font-weight:700;padding:4px 0 2px;letter-spacing:1px">
+        </div>
         <div id="hand-cards" class="hand-cards"></div>
       </div>
 

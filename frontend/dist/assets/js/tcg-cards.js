@@ -428,6 +428,15 @@ window.CARDS_DB = {
       { name: 'Childish Terror', cost: 2, type: 'stall', stallTargets: 2, stallTurns: 2 }
     ]
   },
+  nightmare_mangle: {
+    id: 'nightmare_mangle', name: 'Nightmare Mangle', type: 'shell', class: 'nightmare',
+    hp: 120, wakeThreshold: 1, energyType: 'agony', requiredEndo: 'endo_nm',
+    img: 'nightmare/nightmare_mangle.png',
+    attacks: [
+      { name: 'Loose Wires', cost: 1, type: 'single', damage: 25, desc: 'Deals 25 damage to 1 enemy.' },
+      { name: 'Disassemble', cost: 2, type: 'multi', targets: 2, damage: 15, desc: 'Deals 15 damage to up to 2 enemies.' }
+    ]
+  },
   nightmarionne: {
     id: 'nightmarionne', name: 'Nightmarionne', type: 'shell', class: 'nightmare',
     hp: 130, wakeThreshold: 0, energyType: 'agony', requiredEndo: 'endo_nm',
@@ -649,7 +658,7 @@ window.CARDS_DB = {
 
   // Help Wanted
   glitchtrap: {
-    id: 'glitchtrap', name: 'Glitchtrap', type: 'shell', class: 'mimic',
+    id: 'glitchtrap', name: 'Glitchtrap', type: 'shell', class: 'glitch',
     hp: 210, wakeThreshold: 2, energyType: 'agony', requiredEndo: 'm2_endo',
     img: 'springlock/Glitchtrap.png',
     desc: 'Requires Purple Guy equipped on M2 to evolve or transform.',
@@ -733,7 +742,7 @@ window.CARDS_DB = {
     ability: { name: 'Bedtime', desc: 'Once per turn: stall 1 enemy for 1 turn.', id: 'moon_bedtime' }
   },
   burntrap: {
-    id: 'burntrap', name: 'Burntrap', type: 'shell', class: 'scrap',
+    id: 'burntrap', name: 'Burntrap', type: 'shell', class: 'glitch',
     hp: 250, wakeThreshold: 3, energyType: 'agony', energyTypeAlt: 'phantom_agony',
     requiredShellAny: ['scraptrap', 'glitchtrap'],
     img: 'springlock/burntrap.png',
@@ -821,11 +830,10 @@ window.CARDS_DB = {
     id: 'm2_mimic', name: 'The Mimic', type: 'shell', class: 'mimic',
     hp: 260, wakeThreshold: 3, energyType: 'agony', requiredEndo: 'm2_endo',
     img: 'endo/m2_ruin.png',
-    desc: 'Requires Remnant Fragment equipped on M2 to evolve or transform.',
-    attacks: [
-      { name: 'Total Mimicry', cost: 4, type: 'multi', targets: -1, damage: 45, effect: 'draw1', desc: 'Deals 45 damage to ALL enemies. Draw 1 card.' }
-    ],
-    ability: { name: 'Endless Adaptation', desc: 'Once per turn: deal 20 damage to 2 random enemies.', id: 'm2_mimic_aoe' }
+    mimicMoveset: 'any',
+    desc: 'Requires Remnant Fragment equipped on M2 to evolve or transform. Automatically learns the attacks of ANY animatronic shell or Endo in your Blob Pile — but has no attack of its own.',
+    attacks: [],
+    ability: { name: 'Endless Adaptation', desc: 'Once per turn: discard 1 shell or Endo from hand to your Blob Pile (gaining its attacks), then deal 20 damage to 2 random enemies.', id: 'm2_mimic_aoe' }
   },
 
   /* ─── MIMIC CLASS ────────────────────────────────── */
