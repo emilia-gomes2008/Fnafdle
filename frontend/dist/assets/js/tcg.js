@@ -4842,7 +4842,10 @@ async function showResult() {
   }
 }
 function goLobby() { closeCardInfo(); location.hash = 'lobby/' + _currentTab; _showScreenRaw('lobby'); populateDeckSelects(); }
-function rematchGame() { if (_startConfig) initGame(_startConfig); }
+function rematchGame() {
+  if (window.MP && MP.mode === 'online') { mpRematch(); return; }
+  if (_startConfig) initGame(_startConfig);
+}
 function confirmConcede() {
   if (confirm(T('tcg.result.concede'))) {
     const opIdx = (window.MP && MP.mode === 'online') ? 1 - MP.myIdx : 1 - G.activePlayer;

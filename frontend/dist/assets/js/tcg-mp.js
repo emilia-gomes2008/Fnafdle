@@ -493,9 +493,14 @@ function mpHandleRow(row, role) {
     return;
   }
 
-  // Guest joined → update waiting screen for host
-  if (role === 'host' && row.status === 'ready' && !row.game_state) {
-    mpUpdateWaiting(row);
+  // No active game: guest just joined, or a rematch reset the room back to deck-select.
+  if (row.status === 'ready' && !row.game_state) {
+    MP._inGame = false;
+    G = null; // clear any finished match so its _seq can't block the next game's state
+    const waitEl = document.getElementById('tcg-mp-waiting');
+    const isWaitingVisible = waitEl && waitEl.style.display !== 'none';
+    if (!isWaitingVisible) mpShowWaiting(row);
+    else mpUpdateWaiting(row);
     return;
   }
 
@@ -509,8 +514,9 @@ function mpHandleRow(row, role) {
 
   // Hide waiting screen, enter game
   mpHideWaiting();
-  if (MP.mode !== 'online') {
-    // First game-state receive: transition from waiting/lobby to the dice screen
+  if (!MP._inGame) {
+    // First game-state receive for this match: transition from waiting/lobby to the dice screen
+    MP._inGame = true;
     MP.mode = 'online';
     history.replaceState(null, '', '#lobby/online');
     location.hash = 'dice';
@@ -535,6 +541,7 @@ async function mpStartGame() {
   if (_validTotal(p2Deck) !== 40) { alert('Guest deck does not have exactly 40 valid cards.'); return; }
 
   MP.mode = 'online';
+  MP._inGame = true;
 
   // Replace waiting-room history entry so pressing back from game returns to online lobby
   history.replaceState(null, '', '#lobby/online');
@@ -551,6 +558,23 @@ async function mpStartGame() {
   mpHideWaiting();
   await pushGameState();
 }
+
+/* ── Rematch: reset the shared room and send both players back to deck-select ─── */
+async function mpRematch() {
+  if (!MP.roomId || !MP.db) return;
+  if (!MP.channel) mpSubscribe(MP.roomId, MP.myIdx === 0 ? 'host' : 'guest');
+
+  MP._inGame = false;
+  G = null; // clear the finished match so its _seq can't block the next game's state
+
+  const { data, error } = await MP.db.from('tcg_rooms')
+    .update({ game_state: null, host_deck: null, guest_deck: null })
+    .eq('id', MP.roomId).select().single();
+
+  if (error || !data) { alert('Failed to start rematch: ' + (error?.message || 'room not found')); return; }
+  mpShowWaiting(data);
+}
+window.mpRematch = mpRematch;
 
 /* ── Disconnect: mark opponent as winner on tab close ─── */
 window.addEventListener('beforeunload', () => {
