@@ -1285,7 +1285,7 @@ function beginTurn() {
     if (slot.abilityDisabledTurns > 0) slot.abilityDisabledTurns--;
     if (slot.defense) { slot.defense.turnsLeft--; if (slot.defense.turnsLeft <= 0) slot.defense = null; }
     if (slot.stalledTurns > 0) slot.stalledTurns--;
-    if (slot.tools.some(t => t.passive === 'regen10')) { slot.hp = Math.min(slot.card.hp, slot.hp + 10); addLog(`${slot.card.name} regenerated 10 HP.`, 'good'); }
+    if (slot.tools.some(t => t.passive === 'regen10')) { healSlot(slot, 10); addLog(`${slot.card.name} regenerated 10 HP.`, 'good'); }
   });
 
   // itemLocked is decremented at END of the locked player's turn (see endTurn)
@@ -1320,9 +1320,16 @@ function applyBurnDamage() {
   G.players[G.activePlayer].party.forEach(slot => {
     if (!slot || slot.burn <= 0) return;
     if (slot.tools.some(t => t.passive === 'burn_immune')) { slot.burn = 0; return; } // immune
-    const d = slot.burn * (10 + burnBonus); slot.hp -= d; slot.burn--;
-    addLog(T('tcg.log.burn', { name: slot.card.name, n: d }));
-    checkKO(G.activePlayer, slot);
+    const d = slot.burn * (10 + burnBonus); slot.burn--;
+    if (slot.card.class === 'jacko') {
+      // Jack-O's thrive on the flame: Burn heals them instead, even past max HP.
+      slot.hp += d;
+      addLog(`${slot.card.name} basked in the flames and healed ${d} HP!`, 'good');
+    } else {
+      slot.hp -= d;
+      addLog(T('tcg.log.burn', { name: slot.card.name, n: d }));
+      checkKO(G.activePlayer, slot);
+    }
   });
   checkWin(); // burn can kill the last animatronic → end game
 }
@@ -1630,7 +1637,7 @@ function playItem(handIdx, card) {
     addLog(T('tcg.log.ennardSummoned', { name: p.name }), 'good');
     G.pendingTarget = null; renderGame(); pushGameState(); return;
   }
-  const needsTarget = ['heal30', 'heal15x2', 'ruined_lil_heal'].includes(card.effect);
+  const needsTarget = ['heal30', 'heal15x2', 'ruined_lil_heal', 'lighter_burn'].includes(card.effect);
   const needsSearch = ['dee_dee_pearl', 'power_out', 'blob_recover2', 'hand_discard2_search', 'deck_discard3_choose'].includes(card.effect);
   if (needsTarget) {
     G._lastPlayedCard = { card, playerIdx: G.activePlayer, seq: (G._lastPlayedCard?.seq || 0) + 1 };
@@ -1961,7 +1968,7 @@ function playSupporter(handIdx, card) {
     p.supporterPlayedThisTurn++;
     p.party.forEach(s => {
       if (!s) return;
-      s.hp = Math.min(s.card.hp, s.hp + 20);
+      healSlot(s, 20);
       s.burn = 0;
       s.stalledTurns = 0;
       s.tools.push({ name: 'Status Shield', effect: 'status_shield' });
@@ -2096,7 +2103,7 @@ function clickSlot(pidx, slotIdx) {
   if (pt?.action === 'itemTarget') {
     const card = pt.card; const p = G.players[G.activePlayer];
     if (card.effect === 'heal30' && isOwn && slot) {
-      slot.hp = Math.min(slot.card.hp, slot.hp + 30);
+      healSlot(slot, 30);
       addLog(T('tcg.log.healHp', { healer: card.name, n: 30, card: slot.card.name }), 'good');
       p.hand.splice(pt.handIdx, 1); p.discard.push(card);
       G.pendingTarget = null; renderGame(); return;
@@ -2104,7 +2111,7 @@ function clickSlot(pidx, slotIdx) {
     if (card.effect === 'heal15x2' && isOwn && slot) {
       if (!pt.selected) pt.selected = [];
       if (pt.selected.includes(slotIdx)) return;
-      pt.selected.push(slotIdx); slot.hp = Math.min(slot.card.hp, slot.hp + 15);
+      pt.selected.push(slotIdx); healSlot(slot, 15);
       addLog(T('tcg.log.healHp', { healer: card.name, n: 15, card: slot.card.name }), 'good');
       if (pt.selected.length >= 2 || p.party.filter(s => s).length === pt.selected.length) {
         p.hand.splice(pt.handIdx, 1); p.discard.push(card); G.pendingTarget = null; renderGame();
@@ -2112,10 +2119,16 @@ function clickSlot(pidx, slotIdx) {
       return;
     }
     if (card.effect === 'ruined_lil_heal' && isOwn && slot) {
-      const h = Math.min(25, slot.card.hp - slot.hp); slot.hp += h;
+      const h = healSlot(slot, 25);
       addLog(`Ruined Lil': ${slot.card.name} healed ${h} HP!`, 'good');
       p.hand.splice(pt.handIdx, 1); p.discard.push(card);
       drawCardImmediate(G.activePlayer);
+      G.pendingTarget = null; renderGame(); pushGameState(); return;
+    }
+    if (card.effect === 'lighter_burn' && isOwn && slot) {
+      applyBurn(slot, 1);
+      addLog(`Lighter: ${slot.card.name} caught Burn 1!`, 'ko');
+      p.hand.splice(pt.handIdx, 1); p.discard.push(card);
       G.pendingTarget = null; renderGame(); pushGameState(); return;
     }
     return;
@@ -2226,35 +2239,35 @@ function clickSlot(pidx, slotIdx) {
   // Ability: Neon Bonnie - Live Wire (burn 1 to 1 enemy)
   if (pt?.action === 'abilityTarget' && pt.ability === 'live_wire') {
     if (!isEnemy || !slot) return;
-    slot.burn = (slot.burn || 0) + 1;
+    applyBurn(slot, 1);
     addLog(`Neon Bonnie: Live Wire! ${slot.card.name} +1 Burn.`, 'ko');
     G.pendingTarget = null; renderGame(); pushGameState(); return;
   }
   // Ability: Neon Chica - Strobe Effect (stall 1 enemy 1 turn, free)
   if (pt?.action === 'abilityTarget' && pt.ability === 'strobe_effect') {
     if (!isEnemy || !slot) return;
-    slot.stalledTurns = Math.max(slot.stalledTurns, 2);
-    addLog(`Neon Chica: Strobe Effect! ${slot.card.name} stalled for 1 turn.`, 'ko');
+    if (applyStall(slot, 2)) addLog(`Neon Chica: Strobe Effect! ${slot.card.name} stalled for 1 turn.`, 'ko');
+    else addLog(`${slot.card.name} is Burning and resists Stall!`, 'info');
     G.pendingTarget = null; renderGame(); pushGameState(); return;
   }
   // Ability: Toy Freddy - Game Over (stall 1 enemy 1 turn)
   if (pt?.action === 'abilityTarget' && pt.ability === 'toy_freddy_stall') {
     if (!isEnemy || !slot) return;
-    slot.stalledTurns = Math.max(slot.stalledTurns, 2);
-    addLog(`Toy Freddy: Game Over! ${slot.card.name} stalled for 1 turn.`, 'ko');
+    if (applyStall(slot, 2)) addLog(`Toy Freddy: Game Over! ${slot.card.name} stalled for 1 turn.`, 'ko');
+    else addLog(`${slot.card.name} is Burning and resists Stall!`, 'info');
     G.pendingTarget = null; renderGame(); pushGameState(); return;
   }
   // Ability: Funtime Foxy - Showstopper (stall 1 enemy 1 turn)
   if (pt?.action === 'abilityTarget' && pt.ability === 'funtime_foxy_showstopper') {
     if (!isEnemy || !slot) return;
-    slot.stalledTurns = Math.max(slot.stalledTurns, 2);
-    addLog(`Funtime Foxy: Showstopper! ${slot.card.name} stalled for 1 turn.`, 'ko');
+    if (applyStall(slot, 2)) addLog(`Funtime Foxy: Showstopper! ${slot.card.name} stalled for 1 turn.`, 'ko');
+    else addLog(`${slot.card.name} is Burning and resists Stall!`, 'info');
     G.pendingTarget = null; renderGame(); pushGameState(); return;
   }
   // Ability: Toy Bonnie - heal ally 20 HP
   if (pt?.action === 'abilityTarget' && pt.ability === 'toy_bonnie_heal') {
     if (!isOwn || !slot) return;
-    const h = Math.min(20, slot.card.hp - slot.hp); slot.hp += h;
+    const h = healSlot(slot, 20);
     addLog(`Toy Bonnie: Rock Star Encore! ${slot.card.name} healed ${h} HP.`, 'good');
     G.pendingTarget = null; renderGame(); pushGameState(); return;
   }
@@ -2267,7 +2280,7 @@ function clickSlot(pidx, slotIdx) {
   }
   if (pt?.action === 'abilityTarget' && pt.ability === 'glamrock_freddy_heal') {
     if (!isOwn || !slot) return;
-    const h = Math.min(20, slot.card.hp - slot.hp); slot.hp += h;
+    const h = healSlot(slot, 20);
     addLog(`Glamrock Freddy: Superstar! ${slot.card.name} healed ${h} HP.`, 'good');
     G.pendingTarget = null; renderGame(); pushGameState(); return;
   }
@@ -2282,22 +2295,22 @@ function clickSlot(pidx, slotIdx) {
   }
   if (pt?.action === 'abilityTarget' && pt.ability === 'sun_solar_care') {
     if (!isOwn || !slot) return;
-    const h = Math.min(30, slot.card.hp - slot.hp); slot.hp += h;
+    const h = healSlot(slot, 30);
     addLog(`Sun: Solar Care! ${slot.card.name} healed ${h} HP.`, 'good');
     G.pendingTarget = null; renderGame(); pushGameState(); return;
   }
   // Ability: Glamrock Chica - Beat Drop (stall 1 enemy after healing)
   if (pt?.action === 'abilityTarget' && pt.ability === 'glamrock_chica_beat_drop') {
     if (!isEnemy || !slot) return;
-    slot.stalledTurns = Math.max(slot.stalledTurns, 2);
-    addLog(`Glamrock Chica: Beat Drop! ${slot.card.name} stalled for 1 turn.`, 'ko');
+    if (applyStall(slot, 2)) addLog(`Glamrock Chica: Beat Drop! ${slot.card.name} stalled for 1 turn.`, 'ko');
+    else addLog(`${slot.card.name} is Burning and resists Stall!`, 'info');
     G.pendingTarget = null; renderGame(); pushGameState(); return;
   }
   // Ability: Moon - Bedtime (stall 1 enemy 1 turn)
   if (pt?.action === 'abilityTarget' && pt.ability === 'moon_bedtime') {
     if (!isEnemy || !slot) return;
-    slot.stalledTurns = Math.max(slot.stalledTurns, 2);
-    addLog(`Moon: Bedtime! ${slot.card.name} stalled for 1 turn.`, 'ko');
+    if (applyStall(slot, 2)) addLog(`Moon: Bedtime! ${slot.card.name} stalled for 1 turn.`, 'ko');
+    else addLog(`${slot.card.name} is Burning and resists Stall!`, 'info');
     G.pendingTarget = null; renderGame(); pushGameState(); return;
   }
   // Ability: Burntrap - Ignite (burn 2 to 1 enemy)
@@ -2309,19 +2322,36 @@ function clickSlot(pidx, slotIdx) {
   }
   if (pt?.action === 'abilityTarget' && pt.ability === 'big_top_crowd_control') {
     if (!isEnemy || !slot) return;
-    if (!consumeStatusShield(slot, 'Stall')) { slot.stalledTurns = Math.max(slot.stalledTurns || 0, 2); addLog(`Big Top: Crowd Control! ${slot.card.name} stalled 1 turn.`, 'ko'); }
+    if (!consumeStatusShield(slot, 'Stall')) { if (applyStall(slot, 2)) addLog(`Big Top: Crowd Control! ${slot.card.name} stalled 1 turn.`, 'ko'); else addLog(`${slot.card.name} is Burning and resists Stall!`, 'info'); }
+    G.pendingTarget = null; renderGame(); pushGameState(); return;
+  }
+  // Ability: Dreadbear - Undying Terror (stall 1 enemy, discard 1⚡)
+  if (pt?.action === 'abilityTarget' && pt.ability === 'dreadbear_stall_pick2') {
+    if (!isEnemy || !slot) return;
+    if (!consumeStatusShield(slot, 'Stall')) { if (applyStall(slot, 2)) addLog(`Dreadbear: Undying Terror! ${slot.card.name} stalled for 1 turn.`, 'ko'); else addLog(`${slot.card.name} is Burning and resists Stall!`, 'info'); }
+    G.pendingTarget = null; renderGame(); pushGameState(); return;
+  }
+  // Ability: Freddy Frostbear - Ice Show (stall 1 enemy, discard 1⚡)
+  if (pt?.action === 'abilityTarget' && pt.ability === 'ice_stall') {
+    if (!isEnemy || !slot) return;
+    if (!consumeStatusShield(slot, 'Stall')) { if (applyStall(slot, 2)) addLog(`Frostbear: Ice Show! ${slot.card.name} stalled for 1 turn.`, 'ko'); else addLog(`${slot.card.name} is Burning and resists Stall!`, 'info'); }
+    G.pendingTarget = null; renderGame(); pushGameState(); return;
+  }
+  // Ability: Eclipse - Equilibrium (stall 1 enemy, discard 1⚡)
+  if (pt?.action === 'abilityTarget' && pt.ability === 'eclipse_equilibrium') {
+    if (!isEnemy || !slot) return;
+    if (!consumeStatusShield(slot, 'Stall')) { if (applyStall(slot, 2)) addLog(`Eclipse: Equilibrium! ${slot.card.name} stalled for 1 turn.`, 'ko'); else addLog(`${slot.card.name} is Burning and resists Stall!`, 'info'); }
     G.pendingTarget = null; renderGame(); pushGameState(); return;
   }
   if (pt?.action === 'abilityTarget' && pt.ability === 'nurse_dollie_heal') {
     if (!isOwn || !slot) return;
-    const healed = Math.min(30, slot.card.hp - slot.hp);
-    slot.hp = Math.min(slot.card.hp, slot.hp + 30);
+    const healed = healSlot(slot, 30);
     addLog(`Nurse Dollie: Field Medic! ${slot.card.name} restored ${healed} HP.`, 'good');
     G.pendingTarget = null; renderGame(); pushGameState(); return;
   }
   if (pt?.action === 'abilityTarget' && pt.ability === 'burntrap_ignite') {
     if (!isEnemy || !slot) return;
-    if (!consumeStatusShield(slot, 'Burn')) { slot.burn = (slot.burn || 0) + 2; }
+    if (!consumeStatusShield(slot, 'Burn')) { applyBurn(slot, 2); }
     addLog(`Burntrap: Ignite! ${slot.card.name} +2 Burn.`, 'ko');
     G.pendingTarget = null; renderGame(); pushGameState(); return;
   }
@@ -2372,8 +2402,8 @@ function clickSlot(pidx, slotIdx) {
     if (effect === 'pan_stan') return;
     if (effect === 'trash_stall') {
       if (!consumeStatusShield(slot, 'Stall')) {
-        slot.stalledTurns = Math.max(slot.stalledTurns, 3);
-        addLog(`${slot.card.name} was stalled for 2 turns.`, 'ko');
+        if (applyStall(slot, 3)) addLog(`${slot.card.name} was stalled for 2 turns.`, 'ko');
+        else addLog(`${slot.card.name} is Burning and resists Stall!`, 'info');
       }
     }
     if (effect === 'energy_steal') {
@@ -2394,8 +2424,8 @@ function clickSlot(pidx, slotIdx) {
     }
     if (effect === 'stall_single2') {
       if (!consumeStatusShield(slot, 'Stall')) {
-        slot.stalledTurns = Math.max(slot.stalledTurns, 3);
-        addLog(`Strobe Flash! ${slot.card.name} stalled for 2 turns.`, 'ko');
+        if (applyStall(slot, 3)) addLog(`Strobe Flash! ${slot.card.name} stalled for 2 turns.`, 'ko');
+        else addLog(`${slot.card.name} is Burning and resists Stall!`, 'info');
       }
     }
     G.pendingTarget = null; renderGame(); pushGameState(); return;
@@ -2503,9 +2533,12 @@ function initiateAttack(slotIdx, atkIdx) {
   if (atk.type === 'multi') {
     const ep = 1 - G.activePlayer;
     if (atk.targets === -1) { finalizeMultiAttack({ ...base, action: 'selectMultiTarget', needed: -1, selected: [] }); return; }
+    // Burning Jack-O's reach further: +1 target while on fire.
+    const jackoBonus = (slot.card.class === 'jacko' && slot.burn > 0) ? 1 : 0;
     const ec = G.players[ep].party.filter(s => s).length;
-    const needed = Math.min(atk.targets, ec);
+    const needed = Math.min(atk.targets + jackoBonus, ec);
     if (!needed) { addLog(T('tcg.log.noEnemies')); return; }
+    if (jackoBonus) addLog(`${slot.card.name} is Burning! +1 target on ${atk.name}.`, 'info');
     G.pendingTarget = { ...base, action: 'selectMultiTarget', needed, selected: [] };
     addLog(T('tcg.log.chooseMulti', { n: needed }), 'info'); renderGame(); return;
   }
@@ -2636,11 +2669,24 @@ function finalizeMultiAttack(pt) {
 function finalizeHealAttack(pt) {
   const att = G.players[pt.attackerPidx].party[pt.attackerSlotIdx]; if (!att) return;
   consumeEnergy(att, pt.atk.cost, pt.attackerPidx);
+  const overheal = pt.atk.postEffect === 'overheal_damage';
+  let overhealCount = 0;
   pt.selected.forEach(({ pidx, slotIdx }) => {
     const s = G.players[pidx].party[slotIdx]; if (!s) return;
-    const h = Math.min(pt.atk.healAmount, s.card.hp - s.hp); s.hp += h; addLog(T('tcg.log.healHp', { healer: att.card.name, n: h, card: s.card.name }), 'good');
+    const h = overheal ? pt.atk.healAmount : Math.max(0, Math.min(pt.atk.healAmount, s.card.hp - s.hp));
+    if (overheal && s.hp + h > s.card.hp) overhealCount++;
+    s.hp += h; addLog(T('tcg.log.healHp', { healer: att.card.name, n: h, card: s.card.name }), 'good');
   });
   addLog(T('tcg.log.healUsed', { card: att.card.name, move: pt.atk.name }));
+  if (overheal && overhealCount > 0) {
+    const ep = 1 - pt.attackerPidx;
+    if (G.players[ep].party.some(Boolean)) {
+      const dmg = overhealCount * 10;
+      G.pendingTarget = { action: 'selectSingleTarget', attackerPidx: pt.attackerPidx, attackerSlotIdx: pt.attackerSlotIdx, atk: { name: 'Icicle Crash (Over-heal)', cost: 0, type: 'single', damage: dmg } };
+      addLog(`Icicle Crash: over-healed ${overhealCount} all${overhealCount > 1 ? 'ies' : 'y'}! Choose an enemy to take ${dmg} damage!`, 'info');
+      renderGame(); return;
+    }
+  }
   markAttacked(att); G.pendingTarget = null; renderGame(); pushGameState();
 }
 
@@ -2657,8 +2703,9 @@ function finalizeStallAttack(pt) {
     if (checkMask(att.card, def)) return;
     if (consumeStatusShield(def, 'Stall')) return;
     if (def.tools.some(t => t.passive === 'stall_immune')) { addLog(`${def.card.name} is immune to Stall!`, 'good'); return; }
-    def.stalledTurns = Math.max(def.stalledTurns, pt.atk.stallTurns + 1); addLog(T('tcg.log.stallApplied', { card: def.card.name, n: pt.atk.stallTurns }));
-    if (pt.atk.effect === 'burn1_on_stalled') def.burn = (def.burn || 0) + 1;
+    if (applyStall(def, pt.atk.stallTurns + 1)) addLog(T('tcg.log.stallApplied', { card: def.card.name, n: pt.atk.stallTurns }));
+    else addLog(`${def.card.name} is Burning and resists Stall!`, 'info');
+    if (pt.atk.effect === 'burn1_on_stalled') applyBurn(def, 1);
   });
   addLog(T('tcg.log.stallUsed', { card: att.card.name, move: pt.atk.name }));
   markAttacked(att); G.pendingTarget = null; checkWin(); renderGame(); pushGameState();
@@ -2671,7 +2718,8 @@ function finalizePostStall(pt) {
     const def = G.players[dp].party[di]; if (!def) return;
     if (consumeStatusShield(def, 'Stall')) return;
     if (def.tools?.some(t => t.passive === 'stall_immune')) { addLog(`${def.card.name} is immune to Stall!`, 'good'); return; }
-    def.stalledTurns = Math.max(def.stalledTurns, 2); addLog(`${def.card.name} stalled 1 turn!`, 'ko');
+    if (applyStall(def, 2)) addLog(`${def.card.name} stalled 1 turn!`, 'ko');
+    else addLog(`${def.card.name} is Burning and resists Stall!`, 'info');
   });
   if (att && !pt.fromAbility) markAttacked(att);
   G.pendingTarget = null; checkWin(); renderGame(); pushGameState();
@@ -2961,7 +3009,7 @@ function useAbility(slotIdx, abilityId) {
   }
 
   if (abilityId === 'lefty_heal') {
-    p.party.forEach(s => { if (s) { s.hp = Math.min(s.card.hp, s.hp + 30); } });
+    p.party.forEach(s => { if (s) healSlot(s, 30); });
     addLog(T('tcg.log.leftyHeal'), 'good');
     renderGame(); return;
   }
@@ -3006,7 +3054,7 @@ function useAbility(slotIdx, abilityId) {
 
   // ── Party Freddy: Party Spirit (heal 20 to all allies) ──
   if (abilityId === 'party_spirit') {
-    p.party.forEach(s => { if (!s) return; const h = Math.min(10, s.card.hp - s.hp); s.hp += h; });
+    p.party.forEach(s => { if (!s) return; healSlot(s, 10); });
     addLog(`${slot.card.name}: Party Spirit! All allies healed 10 HP.`, 'good');
     renderGame(); pushGameState(); return;
   }
@@ -3033,11 +3081,11 @@ function useAbility(slotIdx, abilityId) {
     renderGame(); return;
   }
 
-  // ── Classic Golden Freddy: It's Me ──
+  // ── Classic Golden Freddy: It's Me (50% chance to stall all enemies) ──
   if (abilityId === 'golden_freddy_stall_gamble') {
     if (Math.random() < 0.5) {
       const ep = 1 - G.activePlayer;
-      G.players[ep].party.forEach(s => { if (!s) return; s.stalledTurns = Math.max(s.stalledTurns, 2); });
+      G.players[ep].party.forEach(s => { if (!s) return; applyStall(s, 2); });
       addLog(`${slot.card.name}: IT'S ME! All enemies stalled for 1 turn!`, 'good');
     } else {
       addLog(`${slot.card.name}: It's Me... Nothing happened.`, 'ko');
@@ -3045,11 +3093,11 @@ function useAbility(slotIdx, abilityId) {
     renderGame(); pushGameState(); return;
   }
 
-  // ── Withered Golden Freddy: Mass Hallucination ──
+  // ── Withered Golden Freddy: Mass Hallucination (50% chance to stall all enemies) ──
   if (abilityId === 'wgolden_mass_stall') {
     if (Math.random() < 0.5) {
       const ep = 1 - G.activePlayer;
-      G.players[ep].party.forEach(s => { if (!s) return; s.stalledTurns = Math.max(s.stalledTurns, 2); });
+      G.players[ep].party.forEach(s => { if (!s) return; applyStall(s, 2); });
       addLog(`${slot.card.name}: Mass Hallucination! All enemies stalled!`, 'good');
     } else {
       addLog(`${slot.card.name}: Mass Hallucination... faded. Nothing happened.`, 'ko');
@@ -3131,12 +3179,13 @@ function useAbility(slotIdx, abilityId) {
     renderGame(); return;
   }
 
-  // ── Glamrock Chica: Beat Drop (heal 15 all allies, stall 1 enemy) ──
+  // ── Glamrock Chica: Beat Drop (heal 15 all allies free; discard 1⚡ → stall 1 enemy) ──
   if (abilityId === 'glamrock_chica_beat_drop') {
     const ep = 1 - G.activePlayer;
-    p.party.forEach(s => { if (s) s.hp = Math.min(s.card.hp, s.hp + 15); });
+    p.party.forEach(s => { if (s) healSlot(s, 15); });
     addLog(`${slot.card.name}: Beat Drop! All allies healed 15 HP.`, 'good');
-    if (!G.players[ep].party.some(s => s)) { renderGame(); pushGameState(); return; }
+    if (slot.elec < 1 || !G.players[ep].party.some(s => s)) { renderGame(); pushGameState(); return; }
+    slot.elec--; checkAwake(slot);
     G.pendingTarget = { action: 'abilityTarget', ability: 'glamrock_chica_beat_drop', slotIdx };
     addLog('Click an enemy to stall for 1 turn.', 'info');
     renderGame(); return;
@@ -3159,10 +3208,12 @@ function useAbility(slotIdx, abilityId) {
     renderGame(); return;
   }
 
-  // ── Moon: Bedtime (stall 1 enemy 1 turn) ──
+  // ── Moon: Bedtime (discard 1⚡ → stall 1 enemy 1 turn) ──
   if (abilityId === 'moon_bedtime') {
+    if (slot.elec < 1) { addLog('Moon needs 1 energy for Bedtime.', 'ko'); slot.usedAbilityThisTurn = false; return; }
     const ep = 1 - G.activePlayer;
     if (!G.players[ep].party.some(s => s)) { addLog('No enemies to stall!', 'ko'); slot.usedAbilityThisTurn = false; return; }
+    slot.elec--; checkAwake(slot);
     G.pendingTarget = { action: 'abilityTarget', ability: 'moon_bedtime', slotIdx };
     addLog('Bedtime! Click an enemy to stall for 1 turn.', 'info');
     renderGame(); return;
@@ -3171,7 +3222,7 @@ function useAbility(slotIdx, abilityId) {
   // ── Glamrock Bonnie: Band Leader (draw 1, heal 10 all allies) ──
   if (abilityId === 'glamrock_bonnie_band') {
     drawCardImmediate(G.activePlayer);
-    p.party.forEach(s => { if (s) s.hp = Math.min(s.card.hp, s.hp + 10); });
+    p.party.forEach(s => { if (s) healSlot(s, 10); });
     addLog(`${slot.card.name}: Band Leader! Drew 1 card and healed all allies 10 HP.`, 'good');
     renderGame(); pushGameState(); return;
   }
@@ -3207,33 +3258,54 @@ function useAbility(slotIdx, abilityId) {
     let hit = false;
     G.players[ep].party.forEach(s => {
       if (!s) return;
-      if (!consumeStatusShield(s, 'Burn')) { s.burn = (s.burn || 0) + 1; hit = true; addLog(`Primal Shriek! ${s.card.name} +1 Burn.`, 'ko'); }
+      if (!consumeStatusShield(s, 'Burn')) { applyBurn(s, 1); hit = true; addLog(`Primal Shriek! ${s.card.name} +1 Burn.`, 'ko'); }
     });
     if (!hit) addLog('Primal Shriek: no enemies to burn.', 'info');
     renderGame(); pushGameState(); return;
   }
 
-  // ── Eclipse: Equilibrium (heal 15 all allies + stall all enemies 1T) ──
+  // ── Eclipse: Equilibrium (heal 15 all allies free; discard 1⚡ → stall 1 enemy) ──
   if (abilityId === 'eclipse_equilibrium') {
     const ep = 1 - G.activePlayer;
-    p.party.forEach(s => { if (s) s.hp = Math.min(s.card.hp, s.hp + 15); });
+    p.party.forEach(s => { if (s) healSlot(s, 15); });
     addLog(`${slot.card.name}: Equilibrium! All allies healed 15 HP.`, 'good');
-    G.players[ep].party.forEach(s => {
-      if (!s) return;
-      if (!consumeStatusShield(s, 'Stall')) { s.stalledTurns = Math.max(s.stalledTurns, 2); addLog(`${s.card.name} stalled for 1 turn!`, 'ko'); }
-    });
-    renderGame(); pushGameState(); return;
+    if (slot.elec < 1 || !G.players[ep].party.some(s => s)) { renderGame(); pushGameState(); return; }
+    slot.elec--; checkAwake(slot);
+    G.pendingTarget = { action: 'abilityTarget', ability: 'eclipse_equilibrium', slotIdx };
+    addLog('Click an enemy to stall for 1 turn.', 'info');
+    renderGame(); return;
   }
 
-  // ── Dreadbear: Undying Terror (stall all enemies 1T) ──
+  // ── Dreadbear: Undying Terror (discard 1⚡→stall 1, or discard 2⚡→stall 2) ──
   if (abilityId === 'dreadbear_stall_pick2') {
+    if (slot.elec < 1) { addLog('Dreadbear needs 1 energy for Undying Terror.', 'ko'); slot.usedAbilityThisTurn = false; return; }
     const ep = 1 - G.activePlayer;
-    const enemies = G.players[ep].party.filter(Boolean);
-    if (!enemies.length) { addLog('Undying Terror: no valid targets.', 'info'); slot.usedAbilityThisTurn = false; return; }
-    const needed = Math.min(2, enemies.length);
-    G.pendingTarget = { action: 'postStallPick', needed, selected: [], attackerPidx: G.activePlayer, attackerSlotIdx: slotIdx, fromAbility: true };
-    addLog(`Undying Terror: choose ${needed} enem${needed > 1 ? 'ies' : 'y'} to stall for 1 turn!`, 'info');
-    updateTargetCounter(0, needed); renderGame(); return;
+    if (!G.players[ep].party.some(s => s)) { addLog('Undying Terror: no valid targets.', 'info'); slot.usedAbilityThisTurn = false; return; }
+    if (slot.elec >= 2) {
+      G.pendingTarget = { action: 'stallChoice', ability: 'dreadbear_stall_pick2', name: 'Undying Terror', slotIdx };
+      addLog('Undying Terror: discard 1⚡ to stall 1 enemy, or 2⚡ to stall 2.', 'info');
+      renderGame(); return;
+    }
+    slot.elec--; checkAwake(slot);
+    G.pendingTarget = { action: 'abilityTarget', ability: 'dreadbear_stall_pick2', slotIdx };
+    addLog('Undying Terror! Click an enemy to stall for 1 turn.', 'info');
+    renderGame(); return;
+  }
+
+  // ── Freddy Frostbear: Ice Show (discard 1⚡→stall 1, or discard 2⚡→stall 2) ──
+  if (abilityId === 'ice_stall') {
+    if (slot.elec < 1) { addLog('Frostbear needs 1 energy for Ice Show.', 'ko'); slot.usedAbilityThisTurn = false; return; }
+    const ep = 1 - G.activePlayer;
+    if (!G.players[ep].party.some(s => s)) { addLog('Ice Show: no valid targets.', 'info'); slot.usedAbilityThisTurn = false; return; }
+    if (slot.elec >= 2) {
+      G.pendingTarget = { action: 'stallChoice', ability: 'ice_stall', name: 'Ice Show', slotIdx };
+      addLog('Ice Show: discard 1⚡ to stall 1 enemy, or 2⚡ to stall 2.', 'info');
+      renderGame(); return;
+    }
+    slot.elec--; checkAwake(slot);
+    G.pendingTarget = { action: 'abilityTarget', ability: 'ice_stall', slotIdx };
+    addLog('Ice Show! Click an enemy to stall for 1 turn.', 'info');
+    renderGame(); return;
   }
 
   // ── Tiger Rock: Claw Rend (20 dmg to all sleeping enemies) ──
@@ -3325,10 +3397,12 @@ function useAbility(slotIdx, abilityId) {
     renderGame(); return;
   }
 
-  // ── Big Top: Crowd Control (stall 1 enemy 1 turn) ──
+  // ── Big Top: Crowd Control (discard 1⚡ → stall 1 enemy 1 turn) ──
   if (abilityId === 'big_top_crowd_control') {
+    if (slot.elec < 1) { addLog('Big Top needs 1 energy for Crowd Control.', 'ko'); slot.usedAbilityThisTurn = false; return; }
     const ep = 1 - G.activePlayer;
     if (!G.players[ep].party.some(s => s)) { addLog('Crowd Control: no enemies!', 'ko'); slot.usedAbilityThisTurn = false; return; }
+    slot.elec--; checkAwake(slot);
     G.pendingTarget = { action: 'abilityTarget', ability: 'big_top_crowd_control', slotIdx };
     addLog('Crowd Control! Click an enemy to stall for 1 turn.', 'info');
     renderGame(); return;
@@ -3416,6 +3490,27 @@ function confirmGambleRepeat(repeat) {
   }
 }
 
+/* ── Generic 1-vs-2 stall energy choice (Dreadbear, Frostbear) ── */
+function confirmStallChoice(count) {
+  const pt = G.pendingTarget;
+  if (!pt || pt.action !== 'stallChoice') return;
+  const slot = G.players[G.activePlayer].party[pt.slotIdx];
+  if (!slot) { G.pendingTarget = null; return; }
+  const ep = 1 - G.activePlayer;
+  if (count === 2) {
+    slot.elec -= 2; checkAwake(slot);
+    const enemies = G.players[ep].party.filter(Boolean);
+    const needed = Math.min(2, enemies.length);
+    G.pendingTarget = { action: 'postStallPick', needed, selected: [], attackerPidx: G.activePlayer, attackerSlotIdx: pt.slotIdx, fromAbility: true };
+    addLog(`${pt.name}: choose ${needed} enem${needed > 1 ? 'ies' : 'y'} to stall for 1 turn!`, 'info');
+    updateTargetCounter(0, needed); renderGame(); return;
+  }
+  slot.elec--; checkAwake(slot);
+  G.pendingTarget = { action: 'abilityTarget', ability: pt.ability, slotIdx: pt.slotIdx };
+  addLog(`${pt.name}! Click an enemy to stall for 1 turn.`, 'info');
+  renderGame(); return;
+}
+
 /* ── Springtrap search ───────────────────────────── */
 function triggerSpringtrapSearch(pidx, slotIdx, dyingSlot) {
   const p = G.players[pidx]; const hasWilliam = dyingSlot.tools.some(t => t.passive === 'william');
@@ -3493,7 +3588,7 @@ function applyAttackEffect(effect, aPidx, dPidx, dSlotIdx) {
   if (effect.startsWith('burn')) {
     if (consumeStatusShield(def, 'Burn')) return;
     const n = parseInt(effect.replace('burn', '')) || 1;
-    def.burn = (def.burn || 0) + n;
+    applyBurn(def, n);
     addLog(T('tcg.log.burnApplied', { n, card: def.card.name }));
   }
   if (effect === 'discard_energy1' && def.elec > 0) { def.elec--; checkAwake(def); addLog(T('tcg.log.energyRemoved')); }
@@ -3501,26 +3596,26 @@ function applyAttackEffect(effect, aPidx, dPidx, dSlotIdx) {
   if (effect === 'draw1') drawCardImmediate(aPidx);
   if (effect === 'stall1' || effect === 'stall1_1') {
     if (!consumeStatusShield(def, 'Stall')) {
-      def.stalledTurns = Math.max(def.stalledTurns, 2);
-      addLog(T('tcg.log.stallTurn', { card: def.card.name }));
+      if (applyStall(def, 2)) addLog(T('tcg.log.stallTurn', { card: def.card.name }));
+      else addLog(`${def.card.name} is Burning and resists Stall!`, 'info');
     }
   }
   if (effect === 'stall3') {
     if (!consumeStatusShield(def, 'Stall')) {
-      def.stalledTurns = Math.max(def.stalledTurns, 4);
-      addLog(`${def.card.name} was stalled for 3 turns!`, 'ko');
+      if (applyStall(def, 4)) addLog(`${def.card.name} was stalled for 3 turns!`, 'ko');
+      else addLog(`${def.card.name} is Burning and resists Stall!`, 'info');
     }
   }
   if (effect === 'lefty_rockstar') {
     if (!consumeStatusShield(def, 'Stall')) {
-      def.stalledTurns = Math.max(def.stalledTurns, 2);
-      addLog(`${def.card.name} was stalled for 1 turn.`, 'ko');
+      if (applyStall(def, 2)) addLog(`${def.card.name} was stalled for 1 turn.`, 'ko');
+      else addLog(`${def.card.name} is Burning and resists Stall!`, 'info');
     }
   }
   if (effect === 'stall2') {
     if (!consumeStatusShield(def, 'Stall')) {
-      def.stalledTurns = Math.max(def.stalledTurns, 3);
-      addLog(`${def.card.name} was stalled for 2 turns!`, 'ko');
+      if (applyStall(def, 3)) addLog(`${def.card.name} was stalled for 2 turns!`, 'ko');
+      else addLog(`${def.card.name} is Burning and resists Stall!`, 'info');
     }
   }
   if (effect === 'discard5') {
@@ -3537,8 +3632,8 @@ function applyAttackEffect(effect, aPidx, dPidx, dSlotIdx) {
     const attacker = G.players[aPidx];
     if (attacker.discard.length >= 10) {
       if (!consumeStatusShield(def, 'Stall')) {
-        def.stalledTurns = Math.max(def.stalledTurns, 2);
-        addLog(`Blob Tide! Blob Pile has ${attacker.discard.length} cards — ${def.card.name} stalled for 1 turn!`, 'ko');
+        if (applyStall(def, 2)) addLog(`Blob Tide! Blob Pile has ${attacker.discard.length} cards — ${def.card.name} stalled for 1 turn!`, 'ko');
+        else addLog(`${def.card.name} is Burning and resists Stall!`, 'info');
       }
     }
   }
@@ -3558,11 +3653,11 @@ function applyItemEffect(effect, pidx) {
     return; // pendingTarget will be handled in clickSlot
   }
   if (effect === 'opponent_discard_hand1' && op.hand.length) { const i = Math.floor(Math.random() * op.hand.length); const c = op.hand.splice(i, 1)[0]; op.discard.push(c); addLog(`${op.name} discarded ${c.name}!`); }
-  if (effect === 'heal_all20') { p.party.forEach(s => { if (s) s.hp = Math.min(s.card.hp, s.hp + 20); }); addLog(`All allies of ${p.name} +20 HP.`, 'good'); }
+  if (effect === 'heal_all20') { p.party.forEach(s => { if (s) healSlot(s, 20); }); addLog(`All allies of ${p.name} +20 HP.`, 'good'); }
   if (effect === 'party_hat_draw') { const n = Math.min(3, p.party.filter(Boolean).length); for (let i = 0; i < n; i++) drawCardImmediate(pidx); addLog(`Party Hat: drew ${n} card(s)!`, 'good'); }
 
   if (effect === 'defense_guard') { const s = p.party[0]; if (s) { s.defense = { reduction: 15, turnsLeft: 2 }; addLog(`${s.card.name} -15 damage for 2 turns.`, 'good'); } }
-  if (effect === 'lantern_stall') { const ep = 1 - pidx; let any = false; G.players[ep].party.forEach(s => { if (!s) return; const id = s.card.id; if (id.includes('foxy') || id === 'mangle' || id === 'p_mangle') { s.stalledTurns = Math.max(s.stalledTurns, 2); addLog(`Lantern! ${s.card.name} stalled for 1 turn.`, 'ko'); any = true; } }); if (!any) addLog('No enemy Foxy or Mangle.'); }
+  if (effect === 'lantern_stall') { const ep = 1 - pidx; let any = false; G.players[ep].party.forEach(s => { if (!s) return; const id = s.card.id; if (id.includes('foxy') || id === 'mangle' || id === 'p_mangle') { any = true; if (applyStall(s, 2)) addLog(`Lantern! ${s.card.name} stalled for 1 turn.`, 'ko'); else addLog(`${s.card.name} is Burning and resists Stall!`, 'info'); } }); if (!any) addLog('No enemy Foxy or Mangle.'); }
   if (effect === 'pan_stan') {
     const targets = op.party.filter(Boolean);
     if (!targets.length) { addLog('No enemy targets for Pan Stan.', 'info'); return; }
@@ -3576,7 +3671,7 @@ function applyItemEffect(effect, pidx) {
     if (!targets.length) { addLog('#1 Crate: no enemies!', 'info'); return; }
     const shuffled = targets.slice().sort(() => Math.random() - 0.5);
     shuffled.slice(0, 2).forEach(s => {
-      if (!consumeStatusShield(s, 'Stall')) { s.stalledTurns = Math.max(s.stalledTurns, 3); addLog(`${s.card.name} was stalled for 2 turns by #1 Crate!`, 'ko'); }
+      if (!consumeStatusShield(s, 'Stall')) { if (applyStall(s, 3)) addLog(`${s.card.name} was stalled for 2 turns by #1 Crate!`, 'ko'); else addLog(`${s.card.name} is Burning and resists Stall!`, 'info'); }
     });
     checkWin(); renderGame(); pushGameState(); return;
   }
@@ -3630,7 +3725,7 @@ function applyItemEffect(effect, pidx) {
     let hit = false;
     ep.party.forEach(s => {
       if (!s) return;
-      if (!consumeStatusShield(s, 'Burn')) { s.burn = (s.burn || 0) + 1; addLog(`Party Popper! ${s.card.name} gets Burn 1!`, 'ko'); hit = true; }
+      if (!consumeStatusShield(s, 'Burn')) { applyBurn(s, 1); addLog(`Party Popper! ${s.card.name} gets Burn 1!`, 'ko'); hit = true; }
     });
     if (!hit) addLog('No enemies to burn.', 'info');
   }
@@ -3644,7 +3739,7 @@ function applyItemEffect(effect, pidx) {
     let hit = false;
     ep.party.forEach(s => {
       if (!s) return;
-      if (!consumeStatusShield(s, 'Stall')) { s.stalledTurns = Math.max(s.stalledTurns, 2); addLog(`Crying Child stalled ${s.card.name}!`, 'ko'); hit = true; }
+      if (!consumeStatusShield(s, 'Stall')) { if (applyStall(s, 2)) { addLog(`Crying Child stalled ${s.card.name}!`, 'ko'); hit = true; } else addLog(`${s.card.name} is Burning and resists Stall!`, 'info'); }
     });
     if (!hit) addLog('No enemies to stall.', 'info');
   }
@@ -3655,7 +3750,7 @@ function applyItemEffect(effect, pidx) {
     let hit = false;
     ep.party.forEach(s => {
       if (!s) return;
-      if (!consumeStatusShield(s, 'Stall')) { s.stalledTurns = Math.max(s.stalledTurns, 2); addLog(`Ruined DJ Music Man stalled ${s.card.name}!`, 'ko'); hit = true; }
+      if (!consumeStatusShield(s, 'Stall')) { if (applyStall(s, 2)) { addLog(`Ruined DJ Music Man stalled ${s.card.name}!`, 'ko'); hit = true; } else addLog(`${s.card.name} is Burning and resists Stall!`, 'info'); }
     });
     if (!hit) addLog('No enemies to stall.', 'info');
     drawCardImmediate(pidx);
@@ -3844,6 +3939,27 @@ function consumeStatusShield(slot, statusName) {
   return true;
 }
 
+/* ── Heal that never reduces HP, even on an over-healed (Jack-O Burn) slot ── */
+function healSlot(slot, n) {
+  if (!slot || n <= 0) return 0;
+  const before = slot.hp;
+  slot.hp = Math.max(slot.hp, Math.min(slot.card.hp, slot.hp + n));
+  return slot.hp - before;
+}
+
+/* ── Burn / Stall interaction: Burning animatronics can't be Stalled, and applying Burn cures an existing Stall ── */
+function applyStall(slot, turns) {
+  if (!slot || slot.burn > 0) return false;
+  slot.stalledTurns = Math.max(slot.stalledTurns || 0, turns);
+  return true;
+}
+function applyBurn(slot, n) {
+  if (!slot) return false;
+  slot.burn = (slot.burn || 0) + n;
+  if (slot.burn > 0) slot.stalledTurns = 0;
+  return true;
+}
+
 function checkWin() {
   for (const p of G.players) { if (p.koPoints >= 4) { G.winner = p; showResult(); pushGameState(); return; } }
   for (let i = 0; i < 2; i++) {
@@ -3865,7 +3981,7 @@ function cancelPending() {
   if (G.pendingTarget?.action === 'gambleRepeat') return;
   if (!G.winner && G) {
     // Reset ability used flag - covers abilityTarget AND ennardGeneratorBoost
-    const abilityActions = ['abilityTarget', 'ennardGeneratorBoost'];
+    const abilityActions = ['abilityTarget', 'ennardGeneratorBoost', 'stallChoice'];
     if (abilityActions.includes(G.pendingTarget?.action) && G.pendingTarget?.slotIdx != null) {
       const slot = G.players[G.activePlayer]?.party[G.pendingTarget.slotIdx];
       if (slot) slot.usedAbilityThisTurn = false;
@@ -4065,8 +4181,9 @@ function showCardInfo(card, slot, slotIdx, pidx, isHand, handIdx) {
         const actualCost = Math.max(0, atk.cost - (slot.costReductionThisTurn || 0));
         btn.disabled = slot.elec < actualCost;
         let meta = '';
+        const jackoBonus = (slot.card.class === 'jacko' && slot.burn > 0) ? 1 : 0;
         if (atk.type === 'single') meta = `${atk.damage} dmg · single`;
-        if (atk.type === 'multi') meta = `${atk.damage} dmg × ${atk.targets === -1 ? 'all' : atk.targets}`;
+        if (atk.type === 'multi') meta = `${atk.damage} dmg × ${atk.targets === -1 ? 'all' : atk.targets + jackoBonus}`;
         if (atk.type === 'heal') meta = `Heal ${atk.healAmount} × ${atk.healTargets} ally/allies`;
         if (atk.type === 'defense') meta = `Defense ${atk.defenseReduction} for ${atk.defenseTurns}T`;
         if (atk.type === 'stall') meta = `Stall ${atk.stallTargets === -1 ? 'all' : atk.stallTargets} × ${atk.stallTurns}T`;
@@ -4119,15 +4236,16 @@ function showCardInfo(card, slot, slotIdx, pidx, isHand, handIdx) {
         if (abl.id === 'strobe_effect') { abled = slot.elec > 0 && G.players[1 - pidx].party.some(s => s); }
         if (abl.id === 'ruined_chica_shriek') { abled = slot.elec > 0 && G.players[1 - pidx].party.some(s => s); }
         if (abl.id === 'sun_solar_care') { abled = G.players[pidx].party.some(s => s && s.hp < s.card.hp); }
-        if (abl.id === 'moon_bedtime') { abled = G.players[1 - pidx].party.some(s => s); }
-        if (abl.id === 'dreadbear_stall_pick2') { abled = G.players[1 - pidx].party.some(s => s); }
+        if (abl.id === 'moon_bedtime') { abled = slot.elec > 0 && G.players[1 - pidx].party.some(s => s); }
+        if (abl.id === 'dreadbear_stall_pick2') { abled = slot.elec > 0 && G.players[1 - pidx].party.some(s => s); }
+        if (abl.id === 'ice_stall') { abled = slot.elec > 0 && G.players[1 - pidx].party.some(s => s); }
         if (abl.id === 'claw_rend') { abled = G.players[1 - pidx].party.some(s => s && !s.awake); }
         if (abl.id === 'glitchtrap_corrupt') { abled = G.players[1 - pidx].hand.length > 0; }
         if (abl.id === 'm2_mimic_aoe') { abled = G.players[pidx].hand.some(c => c.type === 'shell' || c.type === 'endo'); }
         if (abl.id === 'm2_data_absorb') { abled = G.players[pidx].hand.some(c => (c.class === 'mimic' || c.class === 'glitch') && c.type === 'shell'); }
         if (abl.id === 'grim_foxy_burning_frenzy') { abled = G.players[1 - pidx].party.some(s => s && s.burn > 0); }
         if (abl.id === 'jackie_ambush') { abled = G.players[1 - pidx].party.some(s => s && s.stalledTurns > 0); }
-        if (abl.id === 'big_top_crowd_control') { abled = G.players[1 - pidx].party.some(s => s); }
+        if (abl.id === 'big_top_crowd_control') { abled = slot.elec > 0 && G.players[1 - pidx].party.some(s => s); }
         if (abl.id === 'nurse_dollie_heal') { abled = G.players[pidx].party.some(s => s); }
         if (abl.id === 'party_chica_encore') { abled = G.players[pidx].deck.length > 0; }
         const ablBtn = document.createElement('button'); ablBtn.className = 'info-attack-btn';
@@ -4351,6 +4469,10 @@ function renderGame() {
       hintEl.innerHTML = `${T('tcg.hint.gambleRepeat')} <button class="gamble-repeat-btn" onclick="confirmGambleRepeat(true)">↺ Repeat</button> <button class="gamble-repeat-btn" onclick="confirmGambleRepeat(false)">✕ Decline</button>`;
       hintEl.style.display = ''; cancelBtn.style.display = 'none';
       if (tcEl) tcEl.style.display = 'none';
+    } else if (pt.action === 'stallChoice') {
+      hintEl.innerHTML = `${pt.name}: choose how many to stall <button class="gamble-repeat-btn" onclick="confirmStallChoice(1)">1 enemy (-1⚡)</button> <button class="gamble-repeat-btn" onclick="confirmStallChoice(2)">2 enemies (-2⚡)</button>`;
+      hintEl.style.display = ''; cancelBtn.style.display = '';
+      if (tcEl) tcEl.style.display = 'none';
     } else {
       const hints = { attachEnergy: T('tcg.hint.attachEnergy'), evolve: T('tcg.hint.evolve'), equipTool: T('tcg.hint.equipTool'), itemTarget: T('tcg.hint.itemTarget'), itemEnemyEffect: 'Select an enemy target', selectSingleTarget: T('tcg.hint.selectSingle'), selectMultiTarget: T('tcg.hint.selectMulti'), selectHealTargets: T('tcg.hint.selectHeal'), selectStallTargets: T('tcg.hint.selectStall'), postStallPick: 'Choose enemies to stall for 1 turn', abilityTarget: T('tcg.hint.ability'), ennardGeneratorBoost: T('tcg.hint.ennard'), classCardTarget: T('tcg.hint.classCard') };
       if (pt.ability === 'baby_trap_target') hints.abilityTarget = T('tcg.hint.babyTrap');
@@ -4405,7 +4527,7 @@ function renderSlot(slot, pidx, slotIdx, pt) {
 
   const selMulti = pt && ['selectMultiTarget', 'selectStallTargets', 'postStallPick'].includes(pt.action) && isEnemy && pt.selected?.some(s => s.slotIdx === slotIdx);
   if (selMulti) cls += ' selected-target';
-  const isEnemyAbility = pt?.action === 'abilityTarget' && ['baby_trap_target', 'ballora_steal', 'molten_steal', 'toy_freddy_stall', 'funtime_foxy_showstopper', 'plushtrap_plush_trap', 'live_wire', 'strobe_effect', 'blob_drain', 'moon_bedtime', 'burntrap_ignite', 'mxes_override', 'glamrock_chica_beat_drop'].includes(pt?.ability);
+  const isEnemyAbility = pt?.action === 'abilityTarget' && ['baby_trap_target', 'ballora_steal', 'molten_steal', 'toy_freddy_stall', 'funtime_foxy_showstopper', 'plushtrap_plush_trap', 'live_wire', 'strobe_effect', 'blob_drain', 'moon_bedtime', 'burntrap_ignite', 'mxes_override', 'glamrock_chica_beat_drop', 'dreadbear_stall_pick2', 'ice_stall', 'eclipse_equilibrium'].includes(pt?.ability);
   const isClassEnemyTarget = pt?.action === 'classCardTarget' && ['class_shadow_drain', 'class_jacko_burn', 'class_phantom_stall'].includes(pt?.ability);
   const isClassAllyTarget = pt?.action === 'classCardTarget' && ['class_toy_heal', 'class_withered_def', 'class_rockstar_discount'].includes(pt?.ability);
   if (isEnemy && pt && (['selectSingleTarget', 'selectMultiTarget', 'selectStallTargets', 'itemEnemyEffect'].includes(pt.action) || isEnemyAbility || isClassEnemyTarget)) cls += ' enemy-target';
@@ -4457,7 +4579,7 @@ function renderHand(pidx, pt) {
   const el = document.getElementById('hand-cards'); if (!el) return;
   const hcEl = document.getElementById('hand-count'); if (hcEl) hcEl.textContent = p.hand.length;
   el.innerHTML = '';
-  const locked = pt && ['selectSingleTarget', 'selectMultiTarget', 'selectStallTargets', 'selectHealTargets', 'evolve', 'equipTool', 'gambleRepeat'].includes(pt.action);
+  const locked = pt && ['selectSingleTarget', 'selectMultiTarget', 'selectStallTargets', 'selectHealTargets', 'evolve', 'equipTool', 'gambleRepeat', 'stallChoice'].includes(pt.action);
   p.hand.forEach((card, handIdx) => {
     const div = document.createElement('div');
     const canPhantom = card.phantomSummon && (p.hand.some((c, i) => c.type === 'energy' && c.energyType === 'phantom_agony' && i !== handIdx) || p.party.some(s => s?.tools.some(t => t.passive === 'william')));
@@ -4609,7 +4731,7 @@ function applyClassCardEffect(pidx, effectId, targetInfo) {
         if (p.energyPool >= 1 && confirm('Discard 1⚡ from the Pool to heal 30 instead of 10?')) {
           p.energyPool -= 1; p.discard.push({ id: 'energy_spent', name: 'Energy', type: 'energy', energyType: 'generic', img: GENERIC }); heal = 30;
         }
-        slot.hp = Math.min(slot.card.hp, slot.hp + heal);
+        healSlot(slot, heal);
         addLog(T('tcg.log.classHeal', { name: p.name, card: cc.name, slot: slot.card.name, n: heal }), 'info');
       }
       break;
@@ -4631,7 +4753,7 @@ function applyClassCardEffect(pidx, effectId, targetInfo) {
         if (p.energyPool < 1) { addLog(T('tcg.log.classNoEnergyPool'), 'info'); return; }
         p.energyPool -= 1;
         p.discard.push({ id: 'energy_spent', name: 'Energy', type: 'energy', energyType: 'generic', img: GENERIC });
-        slot.burn = (slot.burn || 0) + 1;
+        applyBurn(slot, 1);
         addLog(T('tcg.log.classJackoBurn', { name: p.name, card: cc.name, slot: slot.card.name }), 'info');
       }
       break;
@@ -4653,8 +4775,8 @@ function applyClassCardEffect(pidx, effectId, targetInfo) {
         if (p.energyPool < 1) { addLog(T('tcg.log.classNoEnergyPool'), 'info'); return; }
         p.energyPool -= 1;
         p.discard.push({ id: 'energy_spent', name: 'Energy', type: 'energy', energyType: 'generic', img: GENERIC });
-        slot.stalledTurns = Math.max(slot.stalledTurns, 2);
-        addLog(T('tcg.log.classPhantomStall', { name: p.name, card: cc.name, slot: slot.card.name }), 'info');
+        if (applyStall(slot, 2)) addLog(T('tcg.log.classPhantomStall', { name: p.name, card: cc.name, slot: slot.card.name }), 'info');
+        else addLog(`${slot.card.name} is Burning and resists Stall!`, 'info');
       }
       break;
     }

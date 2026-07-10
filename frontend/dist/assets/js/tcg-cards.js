@@ -8,7 +8,7 @@ window.CARDS_DB = {
   /* ─── UNIVERSAL ENDOS ───────────────────────────── */
   endo_01: {
     id: 'endo_01', name: 'Endo-01', type: 'endo', class: 'classic',
-    hp: 50, wakeThreshold: 1, maxCopies: 6, img: 'tcg/endo/endo01.png',
+    hp: 50, wakeThreshold: 1, maxCopies: 6, img: '../tcg/endo/endo01.png',
     attacks: [
       { name: 'Broken Wire', cost: 1, type: 'single', damage: 15 },
       { name: 'Inner Spring', cost: 2, type: 'defense', defenseTurns: 1, defenseReduction: 15 }
@@ -16,7 +16,7 @@ window.CARDS_DB = {
   },
   endo_02: {
     id: 'endo_02', name: 'Endo-02', type: 'endo', class: 'toy',
-    hp: 50, wakeThreshold: 1, maxCopies: 6, img: 'tcg/endo/endo02.png',
+    hp: 50, wakeThreshold: 1, maxCopies: 6, img: '../tcg/endo/endo02.png',
     attacks: [
       { name: 'New Circuit', cost: 1, type: 'single', damage: 15 },
       { name: 'Facial Sensor', cost: 1, type: 'stall', stallTargets: 1, stallTurns: 1, desc: 'Stall 1 enemy for 1 turn.' }
@@ -24,7 +24,7 @@ window.CARDS_DB = {
   },
   spring_endo: {
     id: 'spring_endo', name: 'Springlock Endo', type: 'endo', class: 'phantom',
-    hp: 60, wakeThreshold: 1, maxCopies: 6, img: 'tcg/endo/springlock.png',
+    hp: 60, wakeThreshold: 1, maxCopies: 6, img: '../tcg/endo/springlock.png',
     attacks: [
       { name: 'Tensioned Spring', cost: 1, type: 'single', damage: 10 },
       { name: 'Faulty Mechanism', cost: 2, type: 'stall', stallTargets: 1, stallTurns: 1 }
@@ -32,7 +32,7 @@ window.CARDS_DB = {
   },
   endo_nm: {
     id: 'endo_nm', name: 'Nightmare Endo', type: 'endo', class: 'nightmare',
-    hp: 60, wakeThreshold: 1, maxCopies: 6, img: 'tcg/endo/nightmare_endo.png',
+    hp: 60, wakeThreshold: 1, maxCopies: 6, img: '../tcg/endo/nightmare_endo.png',
     attacks: [
       { name: 'Terror Claws', cost: 1, type: 'single', damage: 15 },
       { name: 'Dark Roar', cost: 2, type: 'stall', stallTargets: 1, stallTurns: 1 }
@@ -40,7 +40,7 @@ window.CARDS_DB = {
   },
   yenndo: {
     id: 'yenndo', name: 'Funtime Endo', type: 'endo', class: 'funtime',
-    hp: 60, wakeThreshold: 1, maxCopies: 6, img: 'tcg/endo/funtime_endo.png',
+    hp: 60, wakeThreshold: 1, maxCopies: 6, img: '../tcg/endo/funtime_endo.png',
     attacks: [
       { name: 'System Lock', cost: 1, type: 'single', damage: 5, effect: 'item_lock', desc: '5 damage + blocks opponent items for 1 turn.' },
       { name: 'Electronic Block', cost: 1, type: 'single', damage: 10 }
@@ -48,7 +48,7 @@ window.CARDS_DB = {
   },
   rockstar: {
     id: 'rockstar', name: 'Rockstar Endo', type: 'endo', class: 'rockstar',
-    hp: 60, wakeThreshold: 1, maxCopies: 6, img: 'tcg/endo/rockstar_endo.png',
+    hp: 60, wakeThreshold: 1, maxCopies: 6, img: '../tcg/endo/rockstar_endo.png',
     attacks: [
       { name: 'Tuning', cost: 1, type: 'search', effect: 'rockstar_search_top', desc: 'Search your deck for a "rockstar" class Shell card and reveal it. Shuffle your deck and place that card on top.' },
       { name: 'Metal Scraping', cost: 1, type: 'single', damage: 20, effect: 'remnant_on_kill', desc: 'Deals 20 damage. If this attack defeats the target, gain 1 Remnant.' }
@@ -673,7 +673,7 @@ window.CARDS_DB = {
     attacks: [
       { name: 'Thunderstrike', cost: 4, type: 'multi', targets: -1, damage: 45, postEffect: 'stall_pick2', desc: 'Deals 45 damage to ALL enemies. Choose 2 to stall for 1 turn.' }
     ],
-    ability: { name: 'Undying Terror', desc: 'Once per turn: choose 2 enemies to stall for 1 turn.', id: 'dreadbear_stall_pick2' }
+    ability: { name: 'Undying Terror', desc: 'Once per turn: discard 1⚡ from Dreadbear to stall 1 enemy, or 2⚡ to stall 2 enemies, for 1 turn.', id: 'dreadbear_stall_pick2' }
   },
   grim_foxy: {
     id: 'grim_foxy', name: 'Grimm Foxy', type: 'shell', class: 'jacko',
@@ -683,6 +683,17 @@ window.CARDS_DB = {
       { name: 'Infernal Charge', cost: 2, type: 'multi', targets: -1, damage: 25, effect: 'burn2', desc: 'Deals 25 damage to ALL enemies and applies Burn 2 to each.' }
     ],
     ability: { name: 'Burning Frenzy', desc: 'Once per turn: deal 20 damage to all enemies that are currently Burning.', id: 'grim_foxy_burning_frenzy' }
+  },
+
+  //Fnaf AR
+  frostbear: {
+    id: 'frostbear', name: 'Freddy Frostbear', type: 'shell', class: 'classic',
+    hp: 130, wakeThreshold: 1, energyType: 'remnant', requiredEndo: 'endo_01',
+    img: 'classic/freddy_frostbear.png',
+    attacks: [
+      { name: 'Icicle Crash', cost: 2, type: 'heal', healTargets: 4, healAmount: 25, postEffect: 'overheal_damage', desc: 'Heals 50 to 4 allies. If they over-heal, that health is added to them over their maximum HP and it deals 10 damage to an enemy animatronic for each over-heal.' }
+    ],
+    ability: { name: 'Ice Show', desc: 'Once per turn: discard 1⚡ from Freddy Frostbear to stall 1 enemy, or 2⚡ to stall 2 enemies, for 1 turn.', id: 'ice_stall' }
   },
 
   /* ─── SECURITY BREACH ─────────────────────────────── */
@@ -703,7 +714,7 @@ window.CARDS_DB = {
     attacks: [
       { name: 'Screech', cost: 2, type: 'single', damage: 35, desc: 'Deals 35 damage to 1 enemy.' }
     ],
-    ability: { name: 'Beat Drop', desc: 'Once per turn: heal 15 HP to all allies and stall 1 enemy for 1 turn.', id: 'glamrock_chica_beat_drop' }
+    ability: { name: 'Beat Drop', desc: 'Once per turn: heal 15 HP to all allies. If Glamrock Chica has ⚡, discard 1 to also stall 1 enemy for 1 turn.', id: 'glamrock_chica_beat_drop' }
   },
   roxy: {
     id: 'roxy', name: 'Roxanne Wolf', type: 'shell', class: 'glamrock',
@@ -739,7 +750,7 @@ window.CARDS_DB = {
     attacks: [
       { name: 'Crescent Strike', cost: 2, type: 'single', damage: 45, desc: 'Deals 45 damage to 1 enemy.' }
     ],
-    ability: { name: 'Bedtime', desc: 'Once per turn: stall 1 enemy for 1 turn.', id: 'moon_bedtime' }
+    ability: { name: 'Bedtime', desc: 'Once per turn: discard 1⚡ from Moon to stall 1 enemy for 1 turn.', id: 'moon_bedtime' }
   },
   burntrap: {
     id: 'burntrap', name: 'Burntrap', type: 'shell', class: 'glitch',
@@ -805,7 +816,7 @@ window.CARDS_DB = {
     attacks: [
       { name: 'Total Eclipse', cost: 3, type: 'single', damage: 60, desc: 'Deals 60 damage to 1 enemy.' }
     ],
-    ability: { name: 'Equilibrium', desc: 'Once per turn: heal 15 HP to all allies and stall all enemies for 1 turn.', id: 'eclipse_equilibrium' }
+    ability: { name: 'Equilibrium', desc: 'Once per turn: heal 15 HP to all allies. If Eclipse has ⚡, discard 1 to also stall 1 enemy for 1 turn.', id: 'eclipse_equilibrium' }
   },
   glamrock_bonnie: {
     id: 'glamrock_bonnie', name: 'Glamrock Bonnie', type: 'shell', class: 'glamrock',
@@ -854,7 +865,7 @@ window.CARDS_DB = {
     attacks: [
       { name: "Ringmaster's Whip", cost: 2, type: 'single', damage: 65, effect: 'burn2', desc: 'Deals 65 damage and applies Burn 2.' },
     ],
-    ability: { name: 'Crowd Control', desc: 'Once per turn: stall 1 enemy for 1 turn.', id: 'big_top_crowd_control' }
+    ability: { name: 'Crowd Control', desc: 'Once per turn: discard 1⚡ from Big Top to stall 1 enemy for 1 turn.', id: 'big_top_crowd_control' }
   },
   nurse_dollie: {
     id: 'nurse_dollie', name: 'Nurse Dollie', type: 'shell', class: 'mimic',
@@ -887,25 +898,25 @@ window.CARDS_DB = {
   /* ─── ITEMS ──────────────────────────────────────── */
   cupcake: {
     id: 'cupcake', name: 'Cupcake', type: 'item', class: 'neutral',
-    img: 'tcg/items/cupcake.png',
+    img: '../tcg/items/cupcake.png',
     desc: 'Restores 30 HP to 1 allied animatronic.',
     effect: 'heal30'
   },
   mini_cupcake: {
     id: 'mini_cupcake', name: 'Mini Cupcake', type: 'item', class: 'neutral',
-    img: 'tcg/items/mini_cupcake.png',
+    img: '../tcg/items/mini_cupcake.png',
     desc: 'Restores 15 HP to up to 2 allied animatronics.',
     effect: 'heal15x2'
   },
   lantern: {
     id: 'lantern', name: 'Flashlight', type: 'item', class: 'neutral',
-    img: 'tcg/items/flashlight.png',
+    img: '../tcg/items/flashlight.png',
     desc: 'Stalls all enemy Foxys and Mangles for 1 turn.',
     effect: 'lantern_stall'
   },
   power_out: {
     id: 'power_out', name: 'Power Out', type: 'item', class: 'neutral',
-    img: 'tcg/items/out.png',
+    img: '../tcg/items/out.png',
     desc: 'Discard 2 energies from your Pool to search any card in the deck and add it to your hand.',
     effect: 'power_out'
   },
@@ -917,49 +928,55 @@ window.CARDS_DB = {
   },
   power_battery: {
     id: 'power_battery', name: 'Extra Battery', type: 'item', class: 'neutral',
-    img: 'tcg/items/extra_battery.png',
+    img: '../tcg/items/extra_battery.png',
     desc: 'Draw 2 energies from the Generator to your Pool.',
     effect: 'draw2energy'
   },
   birthday_cake: {
     id: 'birthday_cake', name: 'Birthday Cake', type: 'item', class: 'neutral',
-    img: 'tcg/items/cake.png',
+    img: '../tcg/items/cake.png',
     desc: 'Draw 2 cards from the main deck.',
     effect: 'draw2'
   },
   security_tape: {
     id: 'security_tape', name: 'Security Tape', type: 'item', class: 'neutral',
-    img: 'tcg/items/tape.png',
+    img: '../tcg/items/tape.png',
     desc: 'Removes stall from 1 allied animatronic.',
     effect: 'remove_stall'
   },
   antidote: {
     id: 'antidote', name: 'Fazbear Antidote', type: 'item', class: 'neutral',
-    img: 'tcg/items/antidote.png',
+    img: '../tcg/items/antidote.png',
     desc: 'Removes all Burn stacks from 1 allied animatronic.',
     effect: 'remove_burn'
   },
+  lighter: {
+    id: 'lighter', name: 'Lighter', type: 'item', class: 'neutral',
+    img: '../tcg/items/lighter.png',
+    desc: 'Applies Burn 1 to 1 of your own animatronics.',
+    effect: 'lighter_burn'
+  },
   energy_recharge: {
     id: 'energy_recharge', name: 'Energy Recharge', type: 'item', class: 'neutral',
-    img: 'tcg/items/recharge.png',
+    img: '../tcg/items/recharge.png',
     desc: 'Search the Blob Pile and recover up to 2 energies to your Pool.',
     effect: 'blob_recover2', maxCopies: 4
   },
   data_escape: {
     id: 'data_escape', name: 'Data Escape', type: 'item', class: 'neutral',
-    img: 'tcg/items/data.png',
+    img: '../tcg/items/data.png',
     desc: 'Discard 2 cards from your hand to search any 1 card from the deck and add it to your hand.',
     effect: 'hand_discard2_search'
   },
   system_corrupt: {
     id: 'system_corrupt', name: 'System Corruption', type: 'item', class: 'neutral',
-    img: 'tcg/items/system.png',
+    img: '../tcg/items/system.png',
     desc: 'Discard up to 2 cards from your deck (your choice).',
     effect: 'deck_discard3_choose'
   },
   ennard_summon: {
     id: 'ennard_summon', name: 'The Cable Net', type: 'item', maxCopies: 1,
-    img: 'tcg/items/ennard_cable.png',
+    img: '../tcg/items/ennard_cable.png',
     desc: 'Requires Ennard in hand and ≥2 evolved Funtime shells in Party. Sends party Funtimes to Blob, then Ennard inherits unique attacks & abilities from ALL Funtimes in the Blob Pile.',
     effect: 'summon_ennard'
   },
@@ -1001,13 +1018,13 @@ window.CARDS_DB = {
   },
   party_popper: {
     id: 'party_popper', name: 'Party Popper', type: 'item', class: 'neutral',
-    img: 'tcg/items/party_popper.png',
+    img: '../tcg/items/party_popper.png',
     desc: 'Apply Burn 1 to all enemies.',
     effect: 'burn_all1'
   },
   strobe_flash: {
     id: 'strobe_flash', name: 'Strobe Flash', type: 'item', class: 'neutral',
-    img: 'tcg/items/spotlight.png',
+    img: '../tcg/items/spotlight.png',
     desc: 'Stall 1 enemy for 2 turns.',
     effect: 'stall_single2'
   },
@@ -1027,61 +1044,61 @@ window.CARDS_DB = {
   /* ─── TOOLS ──────────────────────────────────────── */
   freddy_mask: {
     id: 'freddy_mask', name: 'Freddy Mask', type: 'tool', class: 'neutral',
-    img: 'tcg/tools/mask.png',
+    img: '../tcg/tools/mask.png',
     desc: 'Immune to attacks and effects from the Toy and Withered factions - except Withered Foxy.',
     passive: 'faction_immunity'
   },
   mendos_endos: {
     id: 'mendos_endos', name: "Mendo's Endos", type: 'tool', class: 'neutral',
-    img: 'tcg/tools/mendo.png',
+    img: '../tcg/tools/mendo.png',
     desc: "On equip: increases the bearer's maximum and current HP by 40.",
     passive: 'hp+40', onEquip: true
   },
   hat_mic: {
     id: 'hat_mic', name: 'Hat + Microphone', type: 'tool', class: 'neutral',
-    img: 'tcg/tools/hat.png',
+    img: '../tcg/tools/hat.png',
     desc: "+10 damage on all of the bearer's attacks.",
     passive: 'attack+10'
   },
   guitar_axe: {
     id: 'guitar_axe', name: 'Guitar Axe', type: 'tool', class: 'neutral',
-    img: 'tcg/tools/guitar.png',
+    img: '../tcg/tools/guitar.png',
     desc: 'Attacks costing ≥3 energy deal +20 damage.',
     passive: 'heavyattack+20'
   },
   hook: {
     id: 'hook', name: 'Pirate Hook', type: 'tool', class: 'neutral',
-    img: 'tcg/tools/hook.png',
+    img: '../tcg/tools/hook.png',
     desc: '+1 extra turn on any activated defense.',
     passive: 'defense+1turn'
   },
   springlock_device: {
     id: 'springlock_device', name: 'Springlock Device', type: 'tool', class: 'neutral',
-    img: 'tcg/tools/springlock.png',
+    img: '../tcg/tools/springlock.png',
     desc: 'When the bearer is KO, deals 30 damage to the animatronic that defeated it.',
     passive: 'revenge30'
   },
   fireproof_suit: {
     id: 'fireproof_suit', name: 'Fireproof Suit', type: 'tool', class: 'neutral',
-    img: 'tcg/tools/fire_proof.png',
+    img: '../tcg/tools/fire_proof.png',
     desc: 'The bearer is immune to Burn. If it already has Burn stacks when equipped, they are removed.',
     passive: 'burn_immune'
   },
   static_dampener: {
     id: 'static_dampener', name: 'Static Dampener', type: 'tool', class: 'neutral',
-    img: 'tcg/tools/static.png',
+    img: '../tcg/tools/static.png',
     desc: 'The bearer is immune to Stall effects.',
     passive: 'stall_immune'
   },
   puppet_box: {
     id: 'puppet_box', name: 'Music Box', type: 'tool', class: 'neutral',
-    img: 'tcg/tools/box.png',
+    img: '../tcg/tools/box.png',
     desc: 'Once per turn: draw 1 card from the deck.',
     once_per_turn: 'draw1'
   },
   fragmento_remnant: {
     id: 'fragmento_remnant', name: 'Remnant Fragment', type: 'tool', class: 'neutral',
-    img: 'tcg/tools/remnant.png',
+    img: '../tcg/tools/remnant.png',
     desc: 'Equip on Springtrap, Circus Baby, Funtime Freddy, Puppet, Carnie or M2. When that animatronic is KO, it transforms into the corresponding Scrap (or The Mimic for M2). On Scraptrap, it instead transforms into Glitchtrap.',
     passive: 'scrap',
     toolTarget: ['springtrap', 'baby', 'funtime_freddy', 'puppet', 'carnie', 'm2_endo', 'scraptrap']
@@ -1108,13 +1125,13 @@ window.CARDS_DB = {
   },
   shadow_band: {
     id: 'shadow_band', name: 'Shadow Band', type: 'tool', class: 'neutral',
-    img: 'tcg/tools/shadow_band.png',
+    img: '../tcg/tools/shadow_band.png',
     desc: 'The bearer takes no damage from multi-target attacks when multiple targets are selected. Items, abilities, and single-target attacks still apply.',
     passive: 'shadow_band'
   },
   repair_kit: {
     id: 'repair_kit', name: 'Repair Kit', type: 'tool', class: 'neutral',
-    img: 'tcg/tools/repair_kit.png',
+    img: '../tcg/tools/repair_kit.png',
     desc: 'At the start of each of your turns, the bearer regenerates 10 HP.',
     passive: 'regen10'
   },
@@ -1141,7 +1158,7 @@ window.CARDS_DB = {
   },
   william_afton: {
     id: 'william_afton', name: 'William Afton', type: 'supporter', class: 'neutral',
-    img: 'tcg/supporters/afton.png',
+    img: '../tcg/supporters/afton.png',
     desc: 'Gambling - 50%: 20 damage to all enemies; 50%: 20 damage to all allies.',
     effect: 'william_gamble'
   },
@@ -1153,13 +1170,13 @@ window.CARDS_DB = {
   },
   william_search: {
     id: 'william_search', name: "Afton's Research", type: 'supporter', class: 'neutral',
-    img: 'tcg/supporters/research.png',
+    img: '../tcg/supporters/research.png',
     desc: 'Search your deck for up to 2 Energy cards (Remnant or Agony) and add them to your hand.',
     effect: 'william_search'
   },
   mrs_afton: {
     id: 'mrs_afton', name: 'Mrs. Afton', type: 'supporter', class: 'neutral',
-    img: 'tcg/supporters/mrs_afton.png',
+    img: '../tcg/supporters/mrs_afton.png',
     desc: 'Restores 20 HP to all your animatronics in play.',
     effect: 'heal_all20'
   },
@@ -1171,7 +1188,7 @@ window.CARDS_DB = {
   },
   night_guard: {
     id: 'night_guard', name: 'Night Guard', type: 'supporter', class: 'neutral',
-    img: 'tcg/supporters/guard.png',
+    img: '../tcg/supporters/guard.png',
     desc: 'Your active animatronic reduces 15 damage for the next 2 attacks received.',
     effect: 'defense_guard'
   },
@@ -1275,91 +1292,91 @@ window.CARDS_DB = {
   /* ─── CLASS CARDS ───────────────────────────────── */
   class_classic: {
     id: 'class_classic', name: 'The Original Band', type: 'class', class: 'classic',
-    img: 'tcg/class/class_classic.png',
+    img: '../tcg/class/class_classic.png',
     effectId: 'class_classic_draw', oncePer: 'turn',
     effectDesc: 'Draw 1 card from the deck.',
     desc: 'Freddy, Bonnie, Chica and Foxy - the four originals of Fazbear Entertainment.'
   },
   class_toy: {
     id: 'class_toy', name: 'New Generation', type: 'class', class: 'toy',
-    img: 'tcg/class/class_toy.png',
+    img: '../tcg/class/class_toy.png',
     effectId: 'class_toy_heal', oncePer: 'turn',
     effectDesc: 'Heal 10 HP on an ally. Discard 1⚡ from the Pool to heal 30 instead of 10.',
     desc: 'Modern, smiling models - but equally dangerous at night.'
   },
   class_withered: {
     id: 'class_withered', name: 'Damaged but Dangerous', type: 'class', class: 'withered',
-    img: 'tcg/class/class_withered.png',
+    img: '../tcg/class/class_withered.png',
     effectId: 'class_withered_def', oncePer: 'turn',
     effectDesc: 'Give +15 defense for 1 turn to a Withered ally.',
     desc: 'Deteriorated bodies hide relentless power from the old versions.'
   },
   class_phantom: {
     id: 'class_phantom', name: 'Residual Agony', type: 'class', class: 'phantom',
-    img: 'tcg/class/class_phantom.png',
+    img: '../tcg/class/class_phantom.png',
     effectId: 'class_phantom_stall', oncePer: 'turn',
     effectDesc: 'Discard 1⚡ from the Pool and give Stall 1T to 1 enemy.',
     desc: 'Memories of agony that never disappear. Always present, never silenced.'
   },
   class_nightmare: {
     id: 'class_nightmare', name: 'Total Terror', type: 'class', class: 'nightmare',
-    img: 'tcg/class/class_nightmare.png',
+    img: '../tcg/class/class_nightmare.png',
     effectId: 'class_nightmare_aoe', oncePer: 'turn',
     effectDesc: '15 damage to all enemies in standby.',
     desc: "Nightmares have no mercy. All tremble before the Nightmares' power."
   },
   class_jacko: {
     id: 'class_jacko', name: 'Flame of Agony', type: 'class', class: 'jacko',
-    img: 'tcg/class/class_jacko.png',
+    img: '../tcg/class/class_jacko.png',
     effectId: 'class_jacko_burn', oncePer: 'turn',
-    effectDesc: 'Passive: +5 damage per Burn stack. Discard 1⚡ to give Burn 1 to 1 enemy.',
+    effectDesc: 'Passive: Jack-O animatronics heal from their own Burn instead of taking damage (can over-heal), and multi-target attacks hit +1 extra target while Burning. Enemy Burn deals +5 extra damage per stack. Discard 1⚡ to give Burn 1 to 1 enemy.',
     desc: 'The fire of agony burns forever - and burns deeper than any other.'
   },
   class_shadow: {
     id: 'class_shadow', name: 'Devastating Shadow', type: 'class', class: 'shadow',
-    img: 'tcg/class/class_shadow.png',
+    img: '../tcg/class/class_shadow.png',
     effectId: 'class_shadow_drain', oncePer: 'turn',
     effectDesc: 'The enemy discards 1⚡ from one of their animatronics.',
     desc: "Shadows consume vital energy - nobody is safe from their influence."
   },
   class_funtime: {
     id: 'class_funtime', name: 'Scooping Protocol', type: 'class', class: 'funtime',
-    img: 'tcg/class/class_funtime.png',
+    img: '../tcg/class/class_funtime.png',
     effectId: 'class_funtime_draw', oncePer: 'turn',
     effectDesc: 'Discard 1 card from hand and draw 2 from the deck.',
     desc: 'The Scooping Room processes everything efficiently. Energy is never wasted.'
   },
   class_scrap: {
     id: 'class_scrap', name: 'Remnants', type: 'class', class: 'scrap',
-    img: 'tcg/class/class_scrap.png',
+    img: '../tcg/class/class_scrap.png',
     effectId: 'class_scrap_revive', oncePer: 'game',
     effectDesc: 'Choose 1 Scrap from the Blob Pile and put them with full HP in an empty slot.',
     desc: 'What was destroyed can be rebuilt. The Scraps always come back.'
   },
   class_rockstar: {
     id: 'class_rockstar', name: 'Rockstar Discount', type: 'class', class: 'rockstar',
-    img: 'tcg/class/class_rockstar.png',
+    img: '../tcg/class/class_rockstar.png',
     effectId: 'class_rockstar_discount', oncePer: 'turn',
     effectDesc: "Discard 1 card from your hand. Choose one of your animatronics to reduce their Attack's Energy cost by 1⚡ this turn.",
     desc: 'The Rockstars know exactly how to turn a good investment into a devastating show.'
   },
   class_glamrock: {
     id: 'class_glamrock', name: 'Neon Attraction', type: 'class', class: 'glamrock',
-    img: 'tcg/class/class_glamrock.png',
+    img: '../tcg/class/class_glamrock.png',
     effectId: 'class_glamrock_boost', oncePer: 'turn',
     effectDesc: 'Discard 1 card from your hand to draw 2 cards and gain 1 Energy.',
     desc: 'The Pizzaplex dazzles with glamour - and hides a dark secret beneath its shining stage.'
   },
   class_ruined: {
     id: 'class_ruined', name: "Ruined Signal", type: 'class', class: 'ruined',
-    img: 'tcg/class/class_ruined.png',
+    img: '../tcg/class/class_ruined.png',
     effectId: 'class_ruined_energize', oncePer: 'turn',
     effectDesc: 'Discard 1 card from your hand to draw 2 energies from your Generator.',
     desc: 'The Ruins pulse their signal through the dark - and every corrupted shell answers the call.'
   },
   class_mimic: {
     id: 'class_mimic', name: 'Imitation Protocol', type: 'class', class: 'mimic',
-    img: 'tcg/class/class_mimic.png',
+    img: '../tcg/class/class_mimic.png',
     effectId: 'class_mimic_cycle', oncePer: 'free',
     effectDesc: 'Swap an active Mimic shell in your party with a Mimic shell from your hand. The old shell returns to your hand.',
     desc: 'The Mimic does not just copy what it sees - it learns, adapts, and becomes something more.'
@@ -1368,17 +1385,17 @@ window.CARDS_DB = {
   /* ─── ENERGY CARDS ───────────────────────────────── */
   energy_remnant: {
     id: 'energy_remnant', name: 'Remnant Energy', type: 'energy', class: 'neutral',
-    energyType: 'remnant', maxCopies: 12, img: 'tcg/energy/remnant.png',
+    energyType: 'remnant', maxCopies: 12, img: '../tcg/energy/remnant.png',
     desc: 'Play to add 1 Remnant to your Pool.'
   },
   energy_agony: {
     id: 'energy_agony', name: 'Agony Energy', type: 'energy', class: 'neutral',
-    energyType: 'agony', maxCopies: 12, img: 'tcg/energy/agony.png',
+    energyType: 'agony', maxCopies: 12, img: '../tcg/energy/agony.png',
     desc: 'Play to add 1 Agony to your Pool.'
   },
   energy_phantom_agony: {
     id: 'energy_phantom_agony', name: 'Phantom Agony', type: 'energy', class: 'neutral',
-    energyType: 'phantom_agony', maxCopies: 12, img: 'tcg/energy/phantom.png',
+    energyType: 'phantom_agony', maxCopies: 12, img: '../tcg/energy/phantom.png',
     desc: 'Play to add 1 Phantom Agony to your Pool.'
   }
 };

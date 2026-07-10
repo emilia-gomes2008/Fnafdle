@@ -327,7 +327,7 @@ const BOOSTERS = {
       'fragmento_remnant', 'purple_guy',
       // Supporters
       'phone_guy', 'phone_guy', 'henry_emily', 'fazbear_tech',
-      'william_afton', 'helpy', 'william_search', 'mrs_afton', 'night_guard'
+      'william_afton', 'helpy', 'william_search', 'mrs_afton', 'night_guard', 'lighter', 'lighter',
     ]
   },
   flames_of_agony: {
@@ -360,7 +360,7 @@ const BOOSTERS = {
       // Trash n' Gang items (extra weight)
       'bucket_bob', 'bucket_bob', 'pan_stan', 'pan_stan',
       'no_1_crate', 'no_1_crate', 'mr_hugs', 'mr_hugs',
-      'ennard_summon',
+      'ennard_summon', 'lighter', 'lighter',
       // Tools
       'mr_can_do', 'mr_can_do', 'fragmento-remnant',
       // Mediocre Melodies supporters (extra weight)
@@ -394,7 +394,7 @@ const BOOSTERS = {
       // Shells - Classic Variants
       'dark_freddy', 'dark_freddy', 'party_freddy', 'party_freddy',
       'neon_bonnie', 'neon_bonnie', 'neon_chica', 'neon_chica',
-      'burnt_foxy', 'burnt_foxy',
+      'burnt_foxy', 'burnt_foxy', 'frostbear', 'frostbear', 'lighter', 'lighter',
       // Shells - Shadow
       'shadow_mangle', 'shadow_mangle',
       // Items
