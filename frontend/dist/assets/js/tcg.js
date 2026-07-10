@@ -362,6 +362,7 @@ function populateDeckSelects() {
 
 let dbDeck = {}, dbClassCard = null, dbFilters = new Set(), dbEditIdx = -1, dbSearch = '';
 let dbEnergyFilters = new Set();
+let dbAbilityFilter = false, dbBoosterFilter = '';
 function filterCards(cls, btn) {
   if (cls === 'all') {
     dbFilters.clear(); dbEnergyFilters.clear();
@@ -378,6 +379,24 @@ function toggleEnergyFilter(type, btn) {
   if (dbEnergyFilters.has(type)) { dbEnergyFilters.delete(type); btn.classList.remove('active'); }
   else { dbEnergyFilters.add(type); btn.classList.add('active'); }
   renderCardPool();
+}
+function toggleAbilityFilter(btn) {
+  dbAbilityFilter = !dbAbilityFilter;
+  btn.classList.toggle('active', dbAbilityFilter);
+  renderCardPool();
+}
+function setBoosterFilter(id) {
+  dbBoosterFilter = id;
+  renderCardPool();
+}
+function populateBoosterFilterSelect() {
+  const sel = document.getElementById('db-booster-filter');
+  if (!sel || typeof BOOSTERS === 'undefined') return;
+  Object.values(BOOSTERS).forEach(b => {
+    const o = document.createElement('option');
+    o.value = b.id; o.textContent = b.name;
+    sel.appendChild(o);
+  });
 }
 
 /* ── Card Face Builder ───────────────────────────── */
@@ -524,6 +543,9 @@ function renderCardPool() {
   const isLoggedIn = !!window.TCG_USER;
   const _srch = dbSearch.toLowerCase();
   const TYPE_FILTERS = new Set(['endo', 'item', 'tool', 'supporter', 'energy', 'class']);
+  const boosterIdSet = (dbBoosterFilter && typeof BOOSTERS !== 'undefined' && BOOSTERS[dbBoosterFilter])
+    ? new Set([...(BOOSTERS[dbBoosterFilter].regularPool || []), ...(BOOSTERS[dbBoosterFilter].classPool || []), ...(BOOSTERS[dbBoosterFilter].energyPool || [])])
+    : null;
   Object.values(CARDS).filter(c => {
     if (c.summonOnly) return false;
     if (_srch && !c.name.toLowerCase().includes(_srch)) return false;
@@ -543,6 +565,10 @@ function renderCardPool() {
     }
     // Class cards hidden unless 'class' filter active or searching
     if (c.type === 'class' && !_srch && !dbFilters.has('class') && dbFilters.size > 0) return false;
+    // Ability filter: only animatronics with an ability/abilities
+    if (dbAbilityFilter && !((c.type === 'shell' || c.type === 'endo') && (c.ability || (c.abilities && c.abilities.length)))) return false;
+    // Booster filter: only cards drawable from the selected booster
+    if (boosterIdSet && !boosterIdSet.has(c.id)) return false;
     // Energy type filter (only affects animatronics)
     const isAnim = c.type === 'endo' || c.type === 'shell';
     if (dbEnergyFilters.size > 0 && isAnim) {
@@ -5086,6 +5112,7 @@ window.addEventListener('beforeunload', () => {
 document.addEventListener('DOMContentLoaded', () => {
   validateDecks();
   populateDeckSelects();
+  populateBoosterFilterSelect();
   initCloudDecks(); // load cloud decks if already logged in (fire-and-forget)
 
   // Restore screen from URL hash on load

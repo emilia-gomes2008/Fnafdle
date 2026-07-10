@@ -159,6 +159,14 @@
                 <button class="energy-filter-btn class-filter-btn" onclick="toggleEnergyFilter('phantom_agony',this)"
                   style="color:#a7d;border-color:#a7d">◆ Phantom</button>
               </div>
+              <div style="display:flex;gap:6px;margin:4px 0 2px;flex-wrap:wrap;align-items:center">
+                <button id="db-ability-filter-btn" class="class-filter-btn" onclick="toggleAbilityFilter(this)"
+                  style="border-color:var(--gold);color:var(--gold)">✦ Has Ability</button>
+                <select id="db-booster-filter" class="tcg-select" style="font-size:.72rem"
+                  onchange="setBoosterFilter(this.value)">
+                  <option value="">All Boosters</option>
+                </select>
+              </div>
               <input id="db-search" class="tcg-input" type="text" placeholder="🔍 Search cards..." maxlength="40"
                 style="width:100%;max-width:none;margin:6px 0 4px"
                 oninput="dbSearch=this.value.trim();renderCardPool()" />
