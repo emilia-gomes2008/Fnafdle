@@ -29,14 +29,21 @@ window.CARDS = CARDS; // expose for tcg-auth.js
 const SCRAP_MAP = { springtrap: 'scraptrap', baby: 'scrap_baby', funtime_freddy: 'molten_freddy', puppet: 'lefty', carnie: 'lefty', m2_endo: 'm2_mimic' };
 
 function makeEnergy(type, n) {
-  return Array.from({ length: n }, (_, i) => ({ id: `gen_${i}`, name: 'Energy', type: 'energy', energyType: 'generic', img: GENERIC }));
+  return Array.from({ length: n }, (_, i) => ({ id: `gen_${i}`, name: 'Energy', type: 'energy', energyType: type, img: GENERIC }));
 }
 const GENERATOR_PRESETS = {
   remnant: () => shuffle([...makeEnergy('remnant', 30)]),
   agony: () => shuffle([...makeEnergy('agony', 30)]),
   phantom: () => shuffle([...makeEnergy('phantom_agony', 15), ...makeEnergy('agony', 15)]),
-  mixed: () => shuffle([...makeEnergy('remnant', 15), ...makeEnergy('agony', 15)])
+  mixed: () => shuffle([...makeEnergy('remnant', 15), ...makeEnergy('agony', 15)]),
+  // Smaller Generator, bigger deck: less energy tempo, more card variety.
+  standard20: () => shuffle([...makeEnergy('generic', 20)]),
+  // Bigger Generator, smaller deck: more energy tempo, less card variety.
+  standard10: () => shuffle([...makeEnergy('generic', 10)])
 };
+// Deck size required by each generator (falls back to 40 for legacy/unlisted presets).
+const GENERATOR_DECK_SIZE = { standard20: 50, standard10: 60 };
+function deckSizeFor(generatorKey) { return GENERATOR_DECK_SIZE[generatorKey] || 40; }
 
 /* ═══════════════════════════════════════════════════════
    STARTER DECKS
@@ -690,22 +697,25 @@ function removeCardFromDeck(id) {
 
 function isDeckInvalid() {
   const total = Object.values(dbDeck).reduce((a, b) => a + b, 0);
-  if (total !== 40) return true;
+  const gen = document.getElementById('db-generator')?.value || 'remnant';
+  if (total !== deckSizeFor(gen)) return true;
   return Object.entries(dbDeck).some(([id, count]) => count > (CARDS[id]?.maxCopies || 3));
 }
 function renderDeckList() {
   const list = document.getElementById('db-deck-list'), cnt = document.getElementById('db-count'); if (!list) return;
   const total = Object.values(dbDeck).reduce((a, b) => a + b, 0);
+  const gen = document.getElementById('db-generator')?.value || 'remnant';
+  const need = deckSizeFor(gen);
   const invalid = isDeckInvalid();
-  cnt.textContent = `${total}/40`;
+  cnt.textContent = `${total}/${need}`;
   cnt.style.color = invalid ? 'var(--red, #f55)' : 'var(--green, #5d5)';
   list.innerHTML = '';
-  if (total < 40) {
+  if (total < need) {
     const warn = document.createElement('div');
     warn.style.cssText = 'font-size:.68rem;color:var(--red,#f55);text-align:center;padding:4px 0 6px';
-    warn.textContent = `⚠ ${40 - total} more card(s) needed — can save but not play`;
+    warn.textContent = `⚠ ${need - total} more card(s) needed — can save but not play`;
     list.appendChild(warn);
-  } else if (total > 40 || Object.entries(dbDeck).some(([id, c]) => c > (CARDS[id]?.maxCopies || 3))) {
+  } else if (total > need || Object.entries(dbDeck).some(([id, c]) => c > (CARDS[id]?.maxCopies || 3))) {
     const warn = document.createElement('div');
     warn.style.cssText = 'font-size:.68rem;color:var(--red,#f55);text-align:center;padding:4px 0 6px';
     warn.textContent = '⚠ Deck over limit — can save but not play';
@@ -882,8 +892,9 @@ function startGame() {
   const b1 = _deckBadIds(p1d), b2 = _deckBadIds(p2d);
   if (b1.length) { alert(`"${p1d.name}" has unknown card ID(s): ${b1.join(', ')}. Edit the deck to fix it.`); return; }
   if (b2.length) { alert(`"${p2d.name}" has unknown card ID(s): ${b2.join(', ')}. Edit the deck to fix it.`); return; }
-  if (_deckTotal(p1d) !== 40 || _deckCardOver(p1d) || p1d.overLimit) { alert(`"${p1d.name}" must have exactly 40 cards (within copy limits) to play.`); return; }
-  if (_deckTotal(p2d) !== 40 || _deckCardOver(p2d) || p2d.overLimit) { alert(`"${p2d.name}" must have exactly 40 cards (within copy limits) to play.`); return; }
+  const p1Need = deckSizeFor(p1d.generator), p2Need = deckSizeFor(p2d.generator);
+  if (_deckTotal(p1d) !== p1Need || _deckCardOver(p1d) || p1d.overLimit) { alert(`"${p1d.name}" must have exactly ${p1Need} cards (within copy limits) to play.`); return; }
+  if (_deckTotal(p2d) !== p2Need || _deckCardOver(p2d) || p2d.overLimit) { alert(`"${p2d.name}" must have exactly ${p2Need} cards (within copy limits) to play.`); return; }
   const p1Name = document.getElementById('p1-name')?.value.trim() || 'Player 1';
   const p2Name = document.getElementById('p2-name')?.value.trim() || 'Player 2';
   const p1Class = p1d.classCard || 'class_classic';

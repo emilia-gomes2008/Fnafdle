@@ -105,8 +105,11 @@
               <input id="db-name" class="tcg-input" type="text" placeholder="My Deck" maxlength="30"
                 style="width:100%;max-width:none" />
               <div class="setup-label" style="margin-top:8px" data-i18n="tcg.db.generator">Generator</div>
-              <select id="db-generator" class="tcg-select" style="width:100%;max-width:none;margin-bottom:8px">
-                <option value="remnant">Generator ⚡ - 30 Generic Energies</option>
+              <select id="db-generator" class="tcg-select" style="width:100%;max-width:none;margin-bottom:8px"
+                onchange="renderDeckList()">
+                <option value="remnant">Generator ⚡ - 30 Energies (Deck: 40 cards)</option>
+                <option value="standard20">Generator ⚡ - 20 Energies (Deck: 50 cards)</option>
+                <option value="standard10">Generator ⚡ - 10 Energies (Deck: 60 cards)</option>
               </select>
               <div style="font-size:.68rem;color:var(--text-muted);margin-bottom:8px" data-i18n="tcg.db.generatorDesc">
                 The Generator produces 1 Energy per turn, accumulating if unused. Energy cards in the deck (○●◆) are for

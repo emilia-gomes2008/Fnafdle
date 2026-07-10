@@ -922,7 +922,7 @@ window.CARDS_DB = {
   },
   dee_dee_pearl: {
     id: 'dee_dee_pearl', name: "DeeDee's Pearl", type: 'item', class: 'neutral',
-    img: 'trophy/pearl_tropy.png',
+    img: 'trophy/pearl_tropy.png', maxCopies: 4,
     desc: 'Choose up to 5 cards (animatronics or energies) from your Blob Pile and return them to your hand.',
     effect: 'dee_dee_pearl'
   },
@@ -934,7 +934,7 @@ window.CARDS_DB = {
   },
   birthday_cake: {
     id: 'birthday_cake', name: 'Birthday Cake', type: 'item', class: 'neutral',
-    img: '../tcg/items/cake.png',
+    img: '../tcg/items/cake.png', maxCopies: 4,
     desc: 'Draw 2 cards from the main deck.',
     effect: 'draw2'
   },
@@ -952,7 +952,7 @@ window.CARDS_DB = {
   },
   lighter: {
     id: 'lighter', name: 'Lighter', type: 'item', class: 'neutral',
-    img: '../tcg/items/lighter.png',
+    img: '../tcg/items/lighter.png', maxCopies: 4,
     desc: 'Applies Burn 1 to 1 of your own animatronics.',
     effect: 'lighter_burn'
   },
@@ -1141,7 +1141,7 @@ window.CARDS_DB = {
     id: 'phone_guy', name: 'Phone Guy', type: 'supporter', class: 'neutral',
     img: 'human/phone_guy.png',
     desc: 'Draw 3 cards from the deck.',
-    effect: 'draw3'
+    effect: 'draw3', maxCopies: 4,
   },
   henry_emily: {
     id: 'henry_emily', name: 'Henry Emily', type: 'supporter', class: 'neutral',
