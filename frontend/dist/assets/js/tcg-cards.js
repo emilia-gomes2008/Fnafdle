@@ -10,23 +10,23 @@ window.CARDS_DB = {
     id: 'endo_01', name: 'Endo-01', type: 'endo', class: 'classic',
     hp: 50, wakeThreshold: 1, maxCopies: 6, img: '../tcg/endo/endo01.png',
     attacks: [
-      { name: 'Broken Wire', cost: 1, type: 'single', damage: 15 },
-      { name: 'Inner Spring', cost: 2, type: 'defense', defenseTurns: 1, defenseReduction: 15 }
+      { name: 'Broken Wire', cost: 1, type: 'single', damage: 25 },
+      { name: 'Inner Spring', cost: 2, type: 'defense', defenseTurns: 1, defenseReduction: 25 }
     ]
   },
   endo_02: {
     id: 'endo_02', name: 'Endo-02', type: 'endo', class: 'toy',
     hp: 50, wakeThreshold: 1, maxCopies: 6, img: '../tcg/endo/endo02.png',
     attacks: [
-      { name: 'New Circuit', cost: 1, type: 'single', damage: 15 },
-      { name: 'Facial Sensor', cost: 1, type: 'stall', stallTargets: 1, stallTurns: 1, desc: 'Stall 1 enemy for 1 turn.' }
+      { name: 'New Circuit', cost: 1, type: 'single', damage: 25 },
+      { name: 'Facial Sensor', cost: 2, type: 'stall', stallTargets: 1, stallTurns: 1, desc: 'Stall 1 enemy for 1 turn.' }
     ]
   },
   spring_endo: {
     id: 'spring_endo', name: 'Springlock Endo', type: 'endo', class: 'phantom',
     hp: 60, wakeThreshold: 1, maxCopies: 6, img: '../tcg/endo/springlock.png',
     attacks: [
-      { name: 'Tensioned Spring', cost: 1, type: 'single', damage: 10 },
+      { name: 'Tensioned Spring', cost: 1, type: 'single', damage: 20 },
       { name: 'Faulty Mechanism', cost: 2, type: 'stall', stallTargets: 1, stallTurns: 1 }
     ]
   },
@@ -34,7 +34,7 @@ window.CARDS_DB = {
     id: 'endo_nm', name: 'Nightmare Endo', type: 'endo', class: 'nightmare',
     hp: 60, wakeThreshold: 1, maxCopies: 6, img: '../tcg/endo/nightmare_endo.png',
     attacks: [
-      { name: 'Terror Claws', cost: 1, type: 'single', damage: 15 },
+      { name: 'Terror Claws', cost: 1, type: 'single', damage: 25 },
       { name: 'Dark Roar', cost: 2, type: 'stall', stallTargets: 1, stallTurns: 1 }
     ]
   },
@@ -42,8 +42,8 @@ window.CARDS_DB = {
     id: 'yenndo', name: 'Funtime Endo', type: 'endo', class: 'funtime',
     hp: 60, wakeThreshold: 1, maxCopies: 6, img: '../tcg/endo/funtime_endo.png',
     attacks: [
-      { name: 'System Lock', cost: 1, type: 'single', damage: 5, effect: 'item_lock', desc: '5 damage + blocks opponent items for 1 turn.' },
-      { name: 'Electronic Block', cost: 1, type: 'single', damage: 10 }
+      { name: 'System Lock', cost: 1, type: 'single', damage: 10, effect: 'item_lock', desc: '10 damage + blocks opponent items for 1 turn.' },
+      { name: 'Electronic Block', cost: 1, type: 'single', damage: 20 }
     ]
   },
   rockstar: {
@@ -51,7 +51,7 @@ window.CARDS_DB = {
     hp: 60, wakeThreshold: 1, maxCopies: 6, img: '../tcg/endo/rockstar_endo.png',
     attacks: [
       { name: 'Tuning', cost: 1, type: 'search', effect: 'rockstar_search_top', desc: 'Search your deck for a "rockstar" class Shell card and reveal it. Shuffle your deck and place that card on top.' },
-      { name: 'Metal Scraping', cost: 1, type: 'single', damage: 20, effect: 'remnant_on_kill', desc: 'Deals 20 damage. If this attack defeats the target, gain 1 Remnant.' }
+      { name: 'Metal Scraping', cost: 1, type: 'single', damage: 30, effect: 'remnant_on_kill', desc: 'Deals 30 damage. If this attack defeats the target, gain 1 Remnant.' }
     ]
   },
   glamrock_endo: {
@@ -59,7 +59,7 @@ window.CARDS_DB = {
     hp: 70, wakeThreshold: 1, maxCopies: 6,
     img: 'endo/glamrock.png',
     attacks: [
-      { name: 'Stage Prep', cost: 1, type: 'single', damage: 10, desc: 'Deals 10 damage to 1 enemy.' },
+      { name: 'Stage Prep', cost: 1, type: 'single', damage: 20, desc: 'Deals 20 damage to 1 enemy.' },
       { name: 'Onstage Glitch', cost: 2, type: 'stall', stallTargets: 1, stallTurns: 1, desc: 'Stalls 1 enemy for 1 turn.' }
     ]
   },
@@ -70,7 +70,7 @@ window.CARDS_DB = {
     mimicMoveset: true,
     desc: 'M2 automatically learns the attacks of any Mimic class shells in your Blob Pile.',
     attacks: [
-      { name: 'Glitch Shock', cost: 1, type: 'single', damage: 25, desc: 'Deals 25 damage.' }
+      { name: 'Glitch Shock', cost: 1, type: 'single', damage: 35, desc: 'Deals 35 damage.' }
     ],
     ability: { name: 'Data Absorb', desc: 'Once per turn: send 1 Mimic class shell from hand to your Blob Pile, gaining its attacks.', id: 'm2_data_absorb' }
   },
@@ -81,7 +81,7 @@ window.CARDS_DB = {
     hp: 120, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'endo_01',
     img: 'classic/freddy.png',
     attacks: [
-      { name: 'Stage Microphone', cost: 1, type: 'single', damage: 25, desc: 'Deals 25 damage to 1 enemy.' }
+      { name: 'Stage Microphone', cost: 1, type: 'single', damage: 40, desc: 'Deals 40 damage to 1 enemy.' }
     ],
     ability: { name: 'Showtime', desc: 'Once per turn: draw 1 card from the deck.', id: 'class_classic_draw' }
   },
@@ -90,7 +90,7 @@ window.CARDS_DB = {
     hp: 110, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'endo_01',
     img: 'classic/bonnie.png',
     attacks: [
-      { name: 'Guitar Solo', cost: 1, type: 'single', damage: 25, desc: 'Deals 25 damage to 1 enemy.' }
+      { name: 'Guitar Solo', cost: 1, type: 'single', damage: 40, desc: 'Deals 40 damage to 1 enemy.' }
     ],
     ability: { name: 'Backstage Dash', desc: 'Once per turn: discard 1⚡ from Bonnie to give +15 defense for 1 turn to an ally.', id: 'bonnie_quick_defense' }
   },
@@ -99,7 +99,7 @@ window.CARDS_DB = {
     hp: 110, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'endo_01',
     img: 'classic/chica.png',
     attacks: [
-      { name: 'Party Feast', cost: 2, type: 'heal', healAmount: 30, healTargets: 2, desc: 'Heals 30 HP to 2 allies.' }
+      { name: 'Party Feast', cost: 2, type: 'heal', healAmount: 45, healTargets: 2, desc: 'Heals 45 HP to 2 allies.' }
     ],
     ability: { name: 'Kitchen Raid', desc: 'Once per turn: recover 1 energy from the Blob to your Pool.', id: 'chica_blob_energy' }
   },
@@ -108,8 +108,8 @@ window.CARDS_DB = {
     hp: 120, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'endo_01',
     img: 'classic/foxy.png',
     attacks: [
-      { name: 'Cove Run', cost: 1, type: 'single', damage: 30 },
-      { name: 'Pirate Shield', cost: 2, type: 'defense', defenseTurns: 2, defenseReduction: 15 }
+      { name: 'Cove Run', cost: 1, type: 'single', damage: 45 },
+      { name: 'Pirate Shield', cost: 2, type: 'defense', defenseTurns: 2, defenseReduction: 25 }
     ]
   },
   golden_freddy: {
@@ -117,7 +117,7 @@ window.CARDS_DB = {
     hp: 140, wakeThreshold: 3, energyType: 'agony', requiredEndo: 'endo_01',
     img: 'classic/golden_freddy.png',
     attacks: [
-      { name: 'Collapse', cost: 3, type: 'single', damage: 80, desc: 'Deals 80 damage to 1 enemy.' }
+      { name: 'Collapse', cost: 3, type: 'single', damage: 100, desc: 'Deals 100 damage to 1 enemy.' }
     ],
     ability: { name: "It's Me", desc: 'Once per turn: 50% chance to stall all enemies for 1 turn; 50%: nothing.', id: 'golden_freddy_stall_gamble' }
   },
@@ -128,7 +128,7 @@ window.CARDS_DB = {
     hp: 180, wakeThreshold: 2, energyType: 'remnant', requiredShell: 'freddy',
     img: 'classic/dark_freddy.png',
     attacks: [
-      { name: 'Shadow Encore', cost: 3, type: 'multi', targets: 2, damage: 65, desc: 'Deals 65 damage to 2 enemies.' }
+      { name: 'Shadow Encore', cost: 3, type: 'multi', targets: 2, damage: 80, desc: 'Deals 80 damage to 2 enemies.' }
     ],
     ability: { name: 'Dark Stage', desc: 'Once per turn: the opponent discards 1 random non-energy card from their hand.', id: 'dark_stage' }
   },
@@ -137,7 +137,7 @@ window.CARDS_DB = {
     hp: 165, wakeThreshold: 2, energyType: 'remnant', requiredShell: 'bonnie',
     img: 'classic/neon_bonnie.png',
     attacks: [
-      { name: 'Electric Overload', cost: 3, type: 'single', damage: 95, effect: 'burn2', desc: 'Deals 95 damage + applies Burn 2.' }
+      { name: 'Electric Overload', cost: 3, type: 'single', damage: 110, effect: 'burn2', desc: 'Deals 110 damage + applies Burn 2.' }
     ],
     ability: { name: 'Live Wire', desc: 'Once per turn: discard 1⚡ from Neon Bonnie to apply Burn 1 to 1 enemy.', id: 'live_wire' }
   },
@@ -146,7 +146,7 @@ window.CARDS_DB = {
     hp: 165, wakeThreshold: 2, energyType: 'remnant', requiredShell: 'chica',
     img: 'classic/neon_chica.png',
     attacks: [
-      { name: 'Strobe Burst', cost: 3, type: 'multi', targets: 2, damage: 40, effect: 'stall2', desc: 'Deals 40 damage to 2 enemies and stalls each for 2 turns.' }
+      { name: 'Strobe Burst', cost: 3, type: 'multi', targets: 2, damage: 55, effect: 'stall2', desc: 'Deals 55 damage to 2 enemies and stalls each for 2 turns.' }
     ],
     ability: { name: 'Strobe Effect', desc: 'Once per turn: discard 1⚡ from Neon Chica to stall 1 enemy for 1 turn.', id: 'strobe_effect' }
   },
@@ -155,8 +155,8 @@ window.CARDS_DB = {
     hp: 185, wakeThreshold: 2, energyType: 'agony', requiredShell: 'foxy',
     img: 'classic/burnt_foxy.png',
     attacks: [
-      { name: 'Ember Dash', cost: 1, type: 'single', damage: 10, effect: 'burn2', desc: 'Deals 10 damage + applies Burn 2.' },
-      { name: 'Ash Cove', cost: 3, type: 'multi', targets: 2, damage: 30, effect: 'burn2', desc: 'Deals 30 damage to 2 enemies + applies Burn 2 to each.' }
+      { name: 'Ember Dash', cost: 1, type: 'single', damage: 20, effect: 'burn2', desc: 'Deals 20 damage + applies Burn 2.' },
+      { name: 'Ash Cove', cost: 3, type: 'multi', targets: 2, damage: 40, effect: 'burn2', desc: 'Deals 40 damage to 2 enemies + applies Burn 2 to each.' }
     ]
   },
   party_freddy: {
@@ -164,7 +164,7 @@ window.CARDS_DB = {
     hp: 175, wakeThreshold: 4, energyType: 'remnant', requiredShell: 'golden_freddy',
     img: 'classic/party_freddy.png',
     attacks: [
-      { name: 'Grand Finale', cost: 5, type: 'single', damage: 100, desc: 'Deals 100 damage to 1 enemy.' }
+      { name: 'Grand Finale', cost: 5, type: 'single', damage: 120, desc: 'Deals 120 damage to 1 enemy.' }
     ],
     ability: { name: 'Party Spirit', desc: 'Once per turn: heal 10 HP to all allies.', id: 'party_spirit' }
   },
@@ -175,7 +175,7 @@ window.CARDS_DB = {
     hp: 120, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'endo_02',
     img: 'toy/toy_freddy.png',
     attacks: [
-      { name: 'Strumble', cost: 1, type: 'single', damage: 25, desc: 'Deals 25 damage to 1 enemy.' }
+      { name: 'Strumble', cost: 1, type: 'single', damage: 40, desc: 'Deals 40 damage to 1 enemy.' }
     ],
     ability: { name: 'Game Over', desc: 'Once per turn: discard 1⚡ from Toy Freddy to stall 1 enemy for 1 turn.', id: 'toy_freddy_stall' }
   },
@@ -184,7 +184,7 @@ window.CARDS_DB = {
     hp: 110, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'endo_02',
     img: 'toy/toy_bonnie.png',
     attacks: [
-      { name: 'Perfect Riff', cost: 1, type: 'single', damage: 25, desc: 'Deals 25 damage to 1 enemy.' }
+      { name: 'Perfect Riff', cost: 1, type: 'single', damage: 40, desc: 'Deals 40 damage to 1 enemy.' }
     ],
     ability: { name: 'Rock Star Encore', desc: 'Once per turn: heal 20 HP to an injured ally.', id: 'toy_bonnie_heal' }
   },
@@ -193,7 +193,7 @@ window.CARDS_DB = {
     hp: 110, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'endo_02',
     img: 'toy/toy_chica.png',
     attacks: [
-      { name: 'Fashion Cupcake', cost: 1, type: 'heal', healAmount: 25, healTargets: 1, desc: 'Heals 25 HP to 1 ally.' }
+      { name: 'Fashion Cupcake', cost: 1, type: 'heal', healAmount: 35, healTargets: 1, desc: 'Heals 35 HP to 1 ally.' }
     ],
     ability: { name: 'Glamour Boost', desc: 'Once per turn: the next attack from an ally deals +15 extra damage.', id: 'toy_chica_dmgbuff' }
   },
@@ -202,8 +202,8 @@ window.CARDS_DB = {
     hp: 130, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'endo_02',
     img: 'toy/mangle.png',
     attacks: [
-      { name: 'Chaos Bite', cost: 1, type: 'single', damage: 30 },
-      { name: 'Radio Signal', cost: 3, type: 'stall', stallTargets: 2, stallTurns: 2 }
+      { name: 'Chaos Bite', cost: 1, type: 'single', damage: 45 },
+      { name: 'Radio Signal', cost: 3, type: 'stall', stallTargets: 2, stallTurns: 3 }
     ]
   },
   bb: {
@@ -211,8 +211,8 @@ window.CARDS_DB = {
     hp: 80, wakeThreshold: 1, energyType: 'remnant', requiredEndo: 'endo_02',
     img: 'toy/bb.png',
     attacks: [
-      { name: 'Dumb Balloon', cost: 1, type: 'single', damage: 10, effect: 'opponent_discard_energy1' },
-      { name: 'Ha Ha Ha!', cost: 2, type: 'stall', stallTargets: 2, stallTurns: 1 }
+      { name: 'Dumb Balloon', cost: 1, type: 'single', damage: 20, effect: 'opponent_discard_energy1' },
+      { name: 'Ha Ha Ha!', cost: 2, type: 'stall', stallTargets: 2, stallTurns: 2 }
     ]
   },
   jj: {
@@ -220,7 +220,7 @@ window.CARDS_DB = {
     hp: 80, wakeThreshold: 1, energyType: 'remnant', requiredEndo: 'endo_02',
     img: 'toy/jj.png',
     attacks: [
-      { name: 'Balloon Toss', cost: 1, type: 'single', damage: 10, effect: 'opponent_discard_energy1', desc: '10 damage + removes 1 energy from the target.' }
+      { name: 'Balloon Toss', cost: 1, type: 'single', damage: 20, effect: 'opponent_discard_energy1', desc: '20 damage + removes 1 energy from the target.' }
     ],
     ability: { name: 'Switcheroo', desc: "Once per turn: swap JJ's bench position with an ally (both keep their HP, energy and status). Costs 0 energy.", id: 'jj_switcheroo' }
   },
@@ -229,8 +229,8 @@ window.CARDS_DB = {
     hp: 100, wakeThreshold: 0, energyType: 'remnant', requiredEndo: 'endo_02',
     img: 'toy/puppet.png',
     attacks: [
-      { name: 'Strings of Fate', cost: 1, type: 'single', damage: 20 },
-      { name: 'Musical Gift', cost: 3, type: 'heal', healAmount: 30, healTargets: 2 }
+      { name: 'Strings of Fate', cost: 1, type: 'single', damage: 30 },
+      { name: 'Musical Gift', cost: 3, type: 'heal', healAmount: 45, healTargets: 2 }
     ]
   },
 
@@ -240,7 +240,7 @@ window.CARDS_DB = {
     hp: 130, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'endo_02',
     img: 'withered/withered_freddy.png',
     attacks: [
-      { name: 'Classic Collapse', cost: 2, type: 'gamble', successChance: 0.5, successTargets: -1, successDamage: 25, failEffect: null, desc: '50%: 25 damage to all enemies. 50%: nothing.' }
+      { name: 'Classic Collapse', cost: 3, type: 'gamble', successChance: 0.5, successTargets: -1, successDamage: 45, successStallTargets: 2, successStallTurns: 1, failEffect: null, desc: '50%: 45 damage to all enemies and stalls 2 of them at random 1 turn. 50%: nothing.' }
     ],
     ability: { name: 'Recover Energy', desc: 'Retrieves 1 energy from the Blob and places it on a Withered ally.', id: 'wfreddy_blob_energy' }
   },
@@ -249,16 +249,16 @@ window.CARDS_DB = {
     hp: 120, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'endo_02',
     img: 'withered/withered_bonnie.png',
     attacks: [
-      { name: 'Faceless Claw', cost: 1, type: 'single', damage: 30, desc: 'Deals 30 damage to 1 enemy.' }
+      { name: 'Faceless Claw', cost: 1, type: 'single', damage: 45, desc: 'Deals 45 damage to 1 enemy.' }
     ],
-    ability: { name: 'Reinforced Defense', desc: 'Discards 2⚡ from the Generator to the Blob and applies -20 damage for 2 turns to this card.', id: 'wbonnie_discard_defend' }
+    ability: { name: 'Reinforced Defense', desc: 'Discards 2⚡ from the Generator to the Blob and applies -50 damage and immunity to status effects for 2 turns to this card.', id: 'wbonnie_discard_defend' }
   },
   withered_chica: {
     id: 'withered_chica', name: 'Withered Chica', type: 'shell', class: 'withered',
     hp: 120, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'endo_02',
     img: 'withered/withered_chica.png',
     attacks: [
-      { name: 'Broken Beak', cost: 1, type: 'single', damage: 25, desc: 'Deals 25 damage to 1 enemy.' }
+      { name: 'Broken Beak', cost: 1, type: 'single', damage: 35, desc: 'Deals 35 damage to 1 enemy.' }
     ],
     ability: { name: 'Oxidized Boost', desc: 'Discards 1⚡ from this card so a Withered ally (not this one) can attack 2× this turn.', id: 'wchica_double_attack' }
   },
@@ -267,8 +267,8 @@ window.CARDS_DB = {
     hp: 140, wakeThreshold: 2, energyType: 'remnant', requiredEndo: 'endo_02',
     img: 'withered/withered_foxy.png',
     attacks: [
-      { name: 'Damaged Sprint', cost: 1, type: 'single', damage: 30 },
-      { name: 'Iron Shield', cost: 2, type: 'defense', defenseTurns: 2, defenseReduction: 20 }
+      { name: 'Damaged Sprint', cost: 1, type: 'single', damage: 50 },
+      { name: 'Iron Shield', cost: 2, type: 'defense', defenseTurns: 2, defenseReduction: 50 }
     ]
   },
   withered_golden: {
@@ -276,7 +276,7 @@ window.CARDS_DB = {
     hp: 150, wakeThreshold: 3, energyType: 'agony', requiredEndo: 'endo_02',
     img: 'withered/withered_golden.png',
     attacks: [
-      { name: 'Total Collapse', cost: 3, type: 'single', damage: 90, desc: 'Deals 90 damage to 1 enemy.' }
+      { name: 'Total Collapse', cost: 3, type: 'multi', targets: 2, damage: 90, desc: 'Deals 90 damage to 2 enemies.' }
     ],
     ability: { name: 'Mass Hallucination', desc: 'Once per turn: 50% chance to stall all enemies for 1 turn; 50%: nothing.', id: 'wgolden_mass_stall' }
   },
@@ -287,17 +287,17 @@ window.CARDS_DB = {
     hp: 170, wakeThreshold: 2, energyType: 'agony', requiredEndo: 'springbonnie',
     img: 'springlock/springtrap.png',
     attacks: [
-      { name: 'Suit Claws', cost: 1, type: 'single', damage: 40, desc: 'Deals 40 damage to 1 enemy.' }
+      { name: 'Suit Claws', cost: 1, type: 'single', damage: 60, desc: 'Deals 60 damage to 1 enemy.' }
     ],
-    ability: { name: 'Summon Phantoms', desc: 'Searches a Phantom in the deck and summons it for free (no Phantom Agony cost).', id: 'springtrap_phantom_search' }
+    ability: { name: 'Summon Phantoms', desc: 'Searches a Phantom in the deck and summons it for free (no Phantom Agony cost). Its attacks are free for the turn they\'re summoned.', id: 'springtrap_phantom_search' }
   },
   fredbear: {
     id: 'fredbear', name: 'Fredbear', type: 'shell', class: 'phantom',
     hp: 150, wakeThreshold: 3, energyType: 'agony', requiredEndo: 'spring_endo',
     img: 'springlock/fredbear.png',
     attacks: [
-      { name: 'Fredbear Bite', cost: 2, type: 'stall', stallTargets: 2, stallTurns: 2 },
-      { name: 'Golden Collapse', cost: 4, type: 'single', damage: 90 }
+      { name: 'Fredbear Bite', cost: 2, type: 'stall', stallTargets: 2, stallTurns: 3 },
+      { name: 'Total Collapse', cost: 3, type: 'multi', targets: 2, damage: 90, desc: 'Deals 90 damage to 2 enemies.' }
     ]
   },
   springbonnie: {
@@ -305,8 +305,8 @@ window.CARDS_DB = {
     hp: 80, wakeThreshold: 2, energyType: 'agony', requiredEndo: 'spring_endo',
     img: 'springlock/springbonnie.png',
     attacks: [
-      { name: 'Spring Mechanism', cost: 1, type: 'single', damage: 20 },
-      { name: 'Unstable Spring', cost: 2, type: 'gamble', successChance: 0.6, successDamage: 70, successEffect: null, failEffect: 'springlock_failure', desc: '60%: 70 damage. 40%: Springlock fails - Spring Bonnie is destroyed.' }
+      { name: 'Spring Mechanism', cost: 1, type: 'single', damage: 30 },
+      { name: 'Unstable Spring', cost: 3, type: 'gamble', successChance: 0.6, successDamage: 90, successEffect: null, failEffect: 'springlock_failure', desc: '60%: 90 damage. 40%: Springlock fails - Spring Bonnie is destroyed.' }
     ]
   },
   p_freddy: {
@@ -315,7 +315,7 @@ window.CARDS_DB = {
     img: 'phantom/p_freddy.png',
     attacks: [
       { name: 'Burned Apparition', cost: 1, type: 'stall', stallTargets: 1, stallTurns: 1 },
-      { name: 'Smoke Suffocation', cost: 3, type: 'stall', stallTargets: 2, stallTurns: 2 }
+      { name: 'Smoke Suffocation', cost: 3, type: 'stall', stallTargets: 2, stallTurns: 3 }
     ]
   },
   p_chica: {
@@ -324,7 +324,7 @@ window.CARDS_DB = {
     img: 'phantom/p_chica.png',
     attacks: [
       { name: 'Rotten Cupcake', cost: 1, type: 'stall', stallTargets: 1, stallTurns: 1 },
-      { name: 'Shadow Banquet', cost: 2, type: 'stall', stallTargets: 2, stallTurns: 1 }
+      { name: 'Shadow Banquet', cost: 2, type: 'stall', stallTargets: 2, stallTurns: 2 }
     ]
   },
   p_bb: {
@@ -333,7 +333,7 @@ window.CARDS_DB = {
     img: 'phantom/p_bb.png',
     attacks: [
       { name: 'Phantom Ha Ha', cost: 1, type: 'stall', stallTargets: 1, stallTurns: 1 },
-      { name: 'Total Interference', cost: 2, type: 'stall', stallTargets: 2, stallTurns: 2 }
+      { name: 'Total Interference', cost: 2, type: 'stall', stallTargets: 2, stallTurns: 3 }
     ]
   },
   p_foxy: {
@@ -342,7 +342,7 @@ window.CARDS_DB = {
     img: 'phantom/p_foxy.png',
     attacks: [
       { name: "Foxy's Apparition", cost: 1, type: 'stall', stallTargets: 1, stallTurns: 2 },
-      { name: 'Spectral Run', cost: 3, type: 'stall', stallTargets: 3, stallTurns: 1 }
+      { name: 'Spectral Run', cost: 3, type: 'stall', stallTargets: 3, stallTurns: 2 }
     ]
   },
   p_mangle: {
@@ -351,7 +351,7 @@ window.CARDS_DB = {
     img: 'phantom/p_mangle.png',
     attacks: [
       { name: 'Phantom Static', cost: 1, type: 'stall', stallTargets: 1, stallTurns: 1 },
-      { name: 'Corrupted Signal', cost: 2, type: 'stall', stallTargets: 2, stallTurns: 2 }
+      { name: 'Corrupted Signal', cost: 2, type: 'stall', stallTargets: 2, stallTurns: 3 }
     ]
   },
   p_puppet: {
@@ -360,7 +360,7 @@ window.CARDS_DB = {
     img: 'phantom/p_puppet.png',
     attacks: [
       { name: 'Strings from Beyond', cost: 1, type: 'stall', stallTargets: 1, stallTurns: 2 },
-      { name: 'Total Control', cost: 3, type: 'stall', stallTargets: -1, stallTurns: 1 }
+      { name: 'Total Control', cost: 3, type: 'stall', stallTargets: -1, stallTurns: 2 }
     ]
   },
 
@@ -370,17 +370,17 @@ window.CARDS_DB = {
     hp: 150, wakeThreshold: 2, energyType: 'agony', requiredEndo: 'endo_nm',
     img: 'nightmare/nightmare_freddy.png',
     attacks: [
-      { name: 'Freddles Swarm', cost: 2, type: 'multi', targets: 3, damage: 20, desc: 'Deals 20 damage to up to 3 enemies.' }
+      { name: 'Freddles Swarm', cost: 2, type: 'multi', targets: 3, damage: 30, postStealEnergy: 2, desc: 'Deals 30 damage to up to 3 enemies and steals 2 energies from one them (they can go negative).' }
     ],
-    ability: { name: 'Freddles', desc: 'Once per turn: deal 10 damage to all enemy animatronics in standby.', id: 'nightmare_freddy_freddles' }
+    ability: { name: 'Freddles', desc: 'Once per turn: deal 15 damage to all enemy animatronics in standby.', id: 'nightmare_freddy_freddles' }
   },
   nightmare_bonnie: {
     id: 'nightmare_bonnie', name: 'Nightmare Bonnie', type: 'shell', class: 'nightmare',
     hp: 140, wakeThreshold: 2, energyType: 'agony', requiredEndo: 'endo_nm',
     img: 'nightmare/nightmare_bonnie.png',
     attacks: [
-      { name: 'Darkness Claws', cost: 1, type: 'single', damage: 30 },
-      { name: 'Hallway Jumpscare', cost: 2, type: 'stall', stallTargets: 2, stallTurns: 2 }
+      { name: 'Darkness Claws', cost: 1, type: 'single', damage: 45 },
+      { name: 'Hallway Jumpscare', cost: 2, type: 'stall', stallTargets: 2, stallTurns: 3 }
     ]
   },
   nightmare_chica: {
@@ -388,8 +388,8 @@ window.CARDS_DB = {
     hp: 140, wakeThreshold: 2, energyType: 'agony', requiredEndo: 'endo_nm',
     img: 'nightmare/nightmare_chica.png',
     attacks: [
-      { name: 'Devour', cost: 1, type: 'single', damage: 25 },
-      { name: 'Nightmare Banquet', cost: 3, type: 'heal', healAmount: 60, healTargets: 1 }
+      { name: 'Devour', cost: 1, type: 'single', damage: 40 },
+      { name: 'Nightmare Banquet', cost: 3, type: 'heal', healAmount: 75, healTargets: 1 }
     ]
   },
   nightmare_foxy: {
@@ -397,8 +397,8 @@ window.CARDS_DB = {
     hp: 150, wakeThreshold: 2, energyType: 'agony', requiredEndo: 'endo_nm',
     img: 'nightmare/nightmare_foxy.png',
     attacks: [
-      { name: 'Terror Run', cost: 1, type: 'single', damage: 35 },
-      { name: 'Night Armor', cost: 2, type: 'defense', defenseTurns: 2, defenseReduction: 20 }
+      { name: 'Terror Run', cost: 1, type: 'single', damage: 50 },
+      { name: 'Night Armor', cost: 2, type: 'defense', defenseTurns: 2, defenseReduction: 30 }
     ]
   },
   nightmare_fredbear: {
@@ -406,8 +406,8 @@ window.CARDS_DB = {
     hp: 180, wakeThreshold: 3, energyType: 'agony', requiredEndo: 'endo_nm',
     img: 'nightmare/nightmare_fredbear.png',
     attacks: [
-      { name: 'Supreme Terror', cost: 2, type: 'stall', stallTargets: 3, stallTurns: 3 },
-      { name: 'Final Nightmare', cost: 4, type: 'single', damage: 90 }
+      { name: 'Supreme Terror', cost: 2, type: 'stall', stallTargets: 3, stallTurns: 4 },
+      { name: 'Final Nightmare', cost: 4, type: 'single', damage: 110 }
     ]
   },
   plushtrap: {
@@ -415,7 +415,7 @@ window.CARDS_DB = {
     hp: 90, wakeThreshold: 1, energyType: 'agony', requiredEndo: 'endo_nm',
     img: 'nightmare/creonzadoruin.png',
     attacks: [
-      { name: 'Spring Snap', cost: 1, type: 'single', damage: 20, desc: 'Deals 20 damage to 1 enemy.' }
+      { name: 'Spring Snap', cost: 1, type: 'single', damage: 30, desc: 'Deals 30 damage to 1 enemy.' }
     ],
     ability: { name: 'Plush Trap', desc: 'Once per turn: place a Plush Trap on 1 enemy. The next time that enemy attacks with a single target attack, it takes 30 damage before resolving (one-time trigger).', id: 'plushtrap_plush_trap' }
   },
@@ -424,8 +424,8 @@ window.CARDS_DB = {
     hp: 100, wakeThreshold: 1, energyType: 'agony', requiredEndo: 'endo_nm',
     img: 'nightmare/nightmare_bb.png',
     attacks: [
-      { name: 'Nightmare Balloon', cost: 1, type: 'single', damage: 20, effect: 'opponent_discard_energy1', desc: '20 damage + removes 1 energy from the target.' },
-      { name: 'Childish Terror', cost: 2, type: 'stall', stallTargets: 2, stallTurns: 2 }
+      { name: 'Nightmare Balloon', cost: 1, type: 'single', damage: 30, effect: 'opponent_discard_energy1', desc: '30 damage + removes 1 energy from the target.' },
+      { name: 'Childish Terror', cost: 2, type: 'stall', stallTargets: 2, stallTurns: 3 }
     ]
   },
   nightmare_mangle: {
@@ -433,8 +433,8 @@ window.CARDS_DB = {
     hp: 120, wakeThreshold: 1, energyType: 'agony', requiredEndo: 'endo_nm',
     img: 'nightmare/nightmare_mangle.png',
     attacks: [
-      { name: 'Loose Wires', cost: 1, type: 'single', damage: 25, desc: 'Deals 25 damage to 1 enemy.' },
-      { name: 'Disassemble', cost: 2, type: 'multi', targets: 2, damage: 15, desc: 'Deals 15 damage to up to 2 enemies.' }
+      { name: 'Loose Wires', cost: 1, type: 'single', damage: 40, desc: 'Deals 40 damage to 1 enemy.' },
+      { name: 'Disassemble', cost: 2, type: 'multi', targets: 2, damage: 25, desc: 'Deals 25 damage to up to 2 enemies.' }
     ]
   },
   nightmarionne: {
@@ -442,8 +442,8 @@ window.CARDS_DB = {
     hp: 130, wakeThreshold: 0, energyType: 'agony', requiredEndo: 'endo_nm',
     img: 'nightmare/nightmarionne.png',
     attacks: [
-      { name: 'Dark Strings', cost: 1, type: 'multi', targets: 3, damage: 20 },
-      { name: 'String Rain', cost: 3, type: 'stall', stallTargets: -1, stallTurns: 1 }
+      { name: 'Dark Strings', cost: 1, type: 'multi', targets: 3, damage: 30 },
+      { name: 'String Rain', cost: 3, type: 'stall', stallTargets: -1, stallTurns: 2 }
     ]
   },
 
