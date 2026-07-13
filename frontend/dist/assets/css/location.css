@@ -1,9 +1,12 @@
 /* =====================================================
-       LOCATION MODE (no image)
+       LOCATION MODE
+       (guess rows keep a small thumbnail of the guessed
+        location, same convention as Classic mode — the
+        "no image" part only means no blurred mystery image)
        ===================================================== */
 .location-table-header, .location-guess-row {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 70px 2fr 1fr;
   gap: 6px;
   margin-bottom: 6px;
 }
@@ -16,8 +19,16 @@
   text-transform: uppercase;
 }
 
+.cell-img img {
+  width: 54px;
+  height: 54px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
 @media (max-width: 480px) {
   .location-table-header, .location-guess-row {
+    grid-template-columns: 40px 2fr 1fr;
     gap: 3px;
   }
 
@@ -38,4 +49,7 @@
     hyphens: auto;
     line-height: 1.2;
   }
+
+  .cell-img img { width: 36px; height: 36px; }
+  .placeholder-avatar { width: 36px; height: 36px; font-size: 1.1rem; }
 }

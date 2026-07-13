@@ -103,6 +103,28 @@ function renderLocGuess(loc) {
   const row = document.createElement('div');
   row.className = 'location-guess-row';
 
+  const imgCell = document.createElement('div');
+  imgCell.className = 'cell cell-img';
+  if (loc.img) {
+    const img = document.createElement('img');
+    img.src = '../assets/' + loc.img;
+    img.alt = loc.name;
+    img.onerror = () => {
+      imgCell.innerHTML = '';
+      const ph = document.createElement('div');
+      ph.className = 'placeholder-avatar';
+      ph.textContent = '🗺️';
+      imgCell.appendChild(ph);
+    };
+    imgCell.appendChild(img);
+  } else {
+    const ph = document.createElement('div');
+    ph.className = 'placeholder-avatar';
+    ph.textContent = '🗺️';
+    imgCell.appendChild(ph);
+  }
+  row.appendChild(imgCell);
+
   const nameCell = document.createElement('div');
   nameCell.className = 'cell';
   nameCell.classList.add(loc.id === locTarget.id ? 'correct' : 'wrong');
