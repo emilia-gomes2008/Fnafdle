@@ -31,6 +31,16 @@ function getDailyBookIndex() {
   return Math.abs(h) % BOOKS.length;
 }
 
+function getDailyLocationIndex() {
+  const now = new Date();
+  const seed = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate() + 13131;
+  let h = seed ^ 0xdeadbeef;
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b);
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b);
+  h ^= h >>> 16;
+  return Math.abs(h) % LOCATIONS.length;
+}
+
 /* =======================================================
        Daily lock (localStorage)
 ======================================================= */
@@ -44,12 +54,21 @@ function getDailyBookKey() {
   return `fnaf_book_daily_${now.getFullYear()}_${now.getMonth() + 1}_${now.getDate()}`;
 }
 
+function getDailyLocationKey() {
+  const now = new Date();
+  return `fnaf_location_daily_${now.getFullYear()}_${now.getMonth() + 1}_${now.getDate()}`;
+}
+
 function getDailyResult() {
   try { return JSON.parse(localStorage.getItem(getDailyKey())); } catch { return null; }
 }
 
 function getDailyBookResult() {
   try { return JSON.parse(localStorage.getItem(getDailyBookKey())); } catch { return null; }
+}
+
+function getDailyLocationResult() {
+  try { return JSON.parse(localStorage.getItem(getDailyLocationKey())); } catch { return null; }
 }
 
 function saveDailyResult(won, targetName, guessCount) {
@@ -59,6 +78,11 @@ function saveDailyResult(won, targetName, guessCount) {
 
 function saveDailyBookResult(won, targetTitle, guessCount) {
   localStorage.setItem(getDailyBookKey(), JSON.stringify({ won, targetTitle, guessCount }));
+  updateStats('daily', won, guessCount);
+}
+
+function saveDailyLocationResult(won, targetName, guessCount) {
+  localStorage.setItem(getDailyLocationKey(), JSON.stringify({ won, targetName, guessCount }));
   updateStats('daily', won, guessCount);
 }
 

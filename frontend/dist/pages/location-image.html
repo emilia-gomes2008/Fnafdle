@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-MY3EVSV9FB"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag("js", new Date());
+
+    gtag("config", "G-MY3EVSV9FB");
+  </script>
+  <meta name="description" content="Play FNAFdle Reborn! The definitive FNAF guessing game with multiple modes, daily challenges and multiplayer.">
+  <meta name="keywords" content="FNAF, Fnafdle, FNAFdle Reborn, FNAF game, guessing game, FNAF quiz">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://emilia-gomes2008.github.io/FnafdleReborn/">
+  <meta property="og:title" content="FNAFdle Reborn - The Best FNAF Guessing Game">
+  <meta property="og:description" content="Test your FNAF knowledge! Play now!">
+  <meta property="og:image" content="https://emilia-gomes2008.github.io/FnafdleReborn/frontend/dist/assets/images/default.png">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://emilia-gomes2008.github.io/FnafdleReborn/">
+  <meta property="twitter:title" content="FNAFdle Reborn">
+  <meta property="twitter:description" content="The definitive FNAF guessing game!">
+  <meta property="twitter:image" content="https://emilia-gomes2008.github.io/FnafdleReborn/frontend/dist/assets/images/default.png">
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FNAFdle Reborn - Location Image Guessing</title>
+  <link rel="icon" type="icon/png" href="../assets/images/default.png">
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Oswald:wght@400;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/global.css" />
+  <link rel="stylesheet" href="../assets/css/image.css" />
+  <link rel="stylesheet" href="../assets/css/location-image.css" />
+
+</head>
+
+<body>
+
+  <div id="tcg-auth-bar" class="tcg-auth-bar"></div>
+  <div class="fnaf-header">
+    <div class="fnaf-title">
+      <img src="../assets/images/title/fnafdlereborn.png" alt="Fnafdle" />
+    </div>
+    <div class="fnaf-subtitle" data-i18n="locationImage.subtitle">Location Image Guessing</div>
+  </div>
+
+  <!-- ===== LOCATION IMAGE MODE SCREEN ===== -->
+  <div class="container" id="locimg-screen" style="display:none;">
+
+    <div class="mode-badge-row">
+      <span class="mode-badge" id="locimg-mode-badge">🔍 Location Image Mode</span>
+      <div id="streak-widget" class="streak-widget" style="display:none">
+        <div class="streak-item"><span class="streak-label">🔥 Streak</span><span class="streak-num" id="streak-current">0</span></div>
+        <div class="streak-divider"></div>
+        <div class="streak-item"><span class="streak-label">Best</span><span class="streak-num" id="streak-best">0</span></div>
+      </div>
+      <button class="back-btn" onclick="goHome()">← Modes</button>
+    </div>
+
+    <div class="image-mode-hint-row">
+      <div class="attempts-left" id="locimg-attempts-left"></div>
+    </div>
+
+    <div class="mystery-image-wrap">
+      <div class="mystery-image-container" id="mystery-locimg-container">
+        <img id="mystery-locimg" src="" alt="?" />
+      </div>
+    </div>
+
+    <div class="search-area" id="locimg-search-area">
+      <input class="search-input" id="locimg-search-input" placeholder="Write a location..." autocomplete="off" />
+      <div class="dropdown" id="locimg-dropdown" style="display:none;"></div>
+    </div>
+
+    <div id="locimg-guesses-list"></div>
+
+    <div class="result-banner" id="locimg-result-banner">
+      <div class="result-title" id="locimg-result-title"></div>
+      <div class="result-content">
+        <div id="locimg-result-img-container"></div>
+        <p class="result-msg" id="locimg-result-msg"></p>
+      </div>
+      <div class="result-buttons">
+        <button id="locimg-daily-stats-btn" onclick="showStatsModal('daily')">📊 Daily Stats</button>
+        <button id="locimg-endless-stats-btn" onclick="showStatsModal('endless')">📊 Endless Stats</button>
+        <button id="locimg-play-switch-btn" style="display:none; grid-column:1/-1"></button>
+        <button class="btn-modes" onclick="goHome()" style="background:var(--bg-cell); border:1px solid var(--border);">← Modes</button>
+      </div>
+    </div>
+
+  </div>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="../assets/js/config.js"></script>
+  <script src="../../../backend/src/db/database.js"></script>
+  <script src="../../../backend/src/db/books_database.js"></script>
+  <script src="../../../backend/src/db/locations_database.js"></script>
+  <script src="../assets/js/translations.js"></script>
+  <script>document.addEventListener('DOMContentLoaded', function () { document.querySelectorAll('[data-i18n]').forEach(function (el) { el.textContent = T(el.dataset.i18n); }); });</script>
+  <script src="../assets/js/core.js?v=3"></script>
+  <script src="../assets/js/tcg-auth.js"></script>
+  <script src="../assets/js/location-image.js"></script>
+</body>
+
+</html>

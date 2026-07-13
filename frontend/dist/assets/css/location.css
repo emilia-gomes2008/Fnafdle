@@ -1,0 +1,41 @@
+/* =====================================================
+       LOCATION MODE (no image)
+       ===================================================== */
+.location-table-header, .location-guess-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.col-label {
+  text-align: center;
+  font-size: 0.68rem;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+@media (max-width: 480px) {
+  .location-table-header, .location-guess-row {
+    gap: 3px;
+  }
+
+  .col-label {
+    font-size: 0.52rem;
+    letter-spacing: 0.5px;
+  }
+
+  .cell {
+    min-height: 50px;
+    padding: 4px 2px;
+    font-size: 0.6rem;
+  }
+
+  .cell-label {
+    font-size: 0.58rem;
+    word-break: break-word;
+    hyphens: auto;
+    line-height: 1.2;
+  }
+}
