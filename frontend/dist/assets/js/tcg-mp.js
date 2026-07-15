@@ -537,8 +537,9 @@ async function mpStartGame() {
   const b1 = _badIds(p1Deck), b2 = _badIds(p2Deck);
   if (b1.length) { alert(`Host deck has unknown card ID(s): ${b1.join(', ')}. The host must edit their deck.`); return; }
   if (b2.length) { alert(`Guest deck has unknown card ID(s): ${b2.join(', ')}. The guest must edit their deck.`); return; }
-  if (_validTotal(p1Deck) !== 40) { alert('Host deck does not have exactly 40 valid cards.'); return; }
-  if (_validTotal(p2Deck) !== 40) { alert('Guest deck does not have exactly 40 valid cards.'); return; }
+  const p1Need = deckSizeFor(p1Deck.generator), p2Need = deckSizeFor(p2Deck.generator);
+  if (_validTotal(p1Deck) !== p1Need) { alert(`Host deck does not have exactly ${p1Need} valid cards.`); return; }
+  if (_validTotal(p2Deck) !== p2Need) { alert(`Guest deck does not have exactly ${p2Need} valid cards.`); return; }
 
   MP.mode = 'online';
   MP._inGame = true;
