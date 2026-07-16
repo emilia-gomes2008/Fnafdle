@@ -3413,7 +3413,7 @@ function useAbility(slotIdx, abilityId) {
         });
       }
       checkWin(); renderGame(); pushGameState();
-    });
+    }, { abilitySlot: slot });
     return;
   }
 
@@ -3427,7 +3427,7 @@ function useAbility(slotIdx, abilityId) {
       syncMimicMoveset(G.activePlayer);
       addLog(`M2: Data Absorb — ${c.name}'s attacks absorbed into moveset!`, 'good');
       G.pendingTarget = null; renderGame(); pushGameState();
-    });
+    }, { abilitySlot: slot });
     return;
   }
 
@@ -3873,7 +3873,9 @@ function syncMimicMoveset(pidx) {
     const learned = [];
     p.discard.forEach(fc => {
       if ((fc.class !== 'mimic' && fc.class !== 'glitch') || fc.type !== 'shell') return;
-      (fc.attacks || []).forEach(atk => {
+      // Use the card's native attack list, not a runtime-mutated copy - a dead Mimic/M2
+      // must never leak attacks it only had via its own "learn from Blob Pile" ability.
+      (CARDS[fc.id]?.attacks || []).forEach(atk => {
         if (!seen.has(atk.name)) {
           seen.add(atk.name);
           learned.push({ ...atk, name: `${atk.name} (${fc.name})`, synced: true });
@@ -3894,7 +3896,9 @@ function syncMimicMoveset(pidx) {
     const learned = [];
     p.discard.forEach(fc => {
       if (fc.type !== 'shell' && fc.type !== 'endo') return;
-      (fc.attacks || []).forEach(atk => {
+      // Use the card's native attack list, not a runtime-mutated copy - a dead Mimic/M2
+      // must never leak attacks it only had via its own "learn from Blob Pile" ability.
+      (CARDS[fc.id]?.attacks || []).forEach(atk => {
         if (!seen.has(atk.name)) {
           seen.add(atk.name);
           learned.push({ ...atk, name: `${atk.name} (${fc.name})`, synced: true });
@@ -4114,7 +4118,7 @@ function openDeckSpyModal(spiedCards, onConfirm) {
    DECK SEARCH UI
    ═══════════════════════════════════════════════════════ */
 function startDeckSearch(title, cards, maxCount, pidx, onConfirm, opts) {
-  pendingSearch = { title, cards, maxCount, pidx, selected: [], onConfirm, fromClassCard: !!(opts && opts.fromClassCard) };
+  pendingSearch = { title, cards, maxCount, pidx, selected: [], onConfirm, fromClassCard: !!(opts && opts.fromClassCard), abilitySlot: opts && opts.abilitySlot };
   renderSearchPanel();
 }
 function renderSearchPanel() {
@@ -4181,6 +4185,12 @@ function closeSearch() {
     const pidx = ps.pidx;
     const p = G.players[pidx];
     if (p) p.classCardUsed = false; // only per-turn flag; classCardUsedForever stays
+    renderGame();
+  }
+  // Reset ability used state if this search belonged to an ability activation - cancelling
+  // must not burn the once-per-turn use when nothing was actually discarded/absorbed.
+  if (G && !G.winner && ps && ps.abilitySlot) {
+    ps.abilitySlot.usedAbilityThisTurn = false;
     renderGame();
   }
 }
@@ -4499,6 +4509,9 @@ function showDeckRearrangeUI(cards) {
    ═══════════════════════════════════════════════════════ */
 function renderGame() {
   if (!G || G.phase === 'mulligan') return;
+  // Re-sync on every render (not just on discard-changing events) so a freshly summoned/evolved
+  // M2 or Mimic always reflects the Blob Pile's current contents, with no external input needed.
+  syncMimicMoveset(0); syncMimicMoveset(1);
   const ap = G.activePlayer, ep = 1 - ap;
   // In online mode, always render from the perspective of the local player
   const viewMe = (window.MP && MP.mode === 'online') ? MP.myIdx : ap;
