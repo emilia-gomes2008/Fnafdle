@@ -653,7 +653,7 @@ function showDbCardInfo(card) {
     countLabel.textContent = `${count} / ${effectiveMax}`;
     countLabel.style.color = over ? 'var(--red, #f55)' : 'var(--gold)';
     minusBtn.disabled = count <= 0;
-    plusBtn.disabled = false;
+    plusBtn.disabled = count >= effectiveMax;
     renderCardPool();
     renderDeckList();
   };
@@ -687,6 +687,7 @@ function addCardToDeck(id) {
     ? (window.tcgCollectionLimit(id, cardMax) ?? cardMax)
     : cardMax;
   const count = dbDeck[id] || 0;
+  if (count >= effectiveMax) return;
   dbDeck[id] = count + 1; renderDeckList(); renderCardPool();
 }
 function removeCardFromDeck(id) {
@@ -1981,7 +1982,7 @@ function playSupporter(handIdx, card) {
       for (let i = 0; i < 4; i++) drawCardImmediate(G.activePlayer);
       addLog(`${p.name}: David — discarded ${sel[0]?.name || '?'}, drew 4 cards!`, 'good');
       consumeSupporter(); G.pendingTarget = null; renderGame(); pushGameState();
-    });
+    }, { onCancel: () => { p.supporterPlayedThisTurn--; } });
     return;
   }
 
@@ -2428,6 +2429,14 @@ function clickSlot(pidx, slotIdx) {
     if (!isOwn || !slot) return;
     const prev = slot.burn || 0; slot.burn = 0;
     addLog(`Fazbear Antidote: All ${prev} Burn stacks removed from ${slot.card.name}!`, 'good');
+    G.pendingTarget = null; renderGame(); pushGameState(); return;
+  }
+
+  // Item: Security Tape - remove stall from selected ally
+  if (pt?.action === 'removeStallTarget') {
+    if (!isOwn || !slot) return;
+    slot.stalledTurns = 0;
+    addLog(`Security Tape: Stall removed from ${slot.card.name}!`, 'good');
     G.pendingTarget = null; renderGame(); pushGameState(); return;
   }
 
@@ -3703,7 +3712,11 @@ function applyItemEffect(effect, pidx) {
   if (effect === 'draw2') { drawCardImmediate(pidx); drawCardImmediate(pidx); addLog(`${p.name} drew 2 cards.`); }
   if (effect === 'draw3') { for (let i = 0; i < 3; i++)drawCardImmediate(pidx); addLog(`${p.name} drew 3 cards.`); }
   if (effect === 'draw2energy_draw1') { drawEnergyToPool(pidx, 2); drawCardImmediate(pidx); }
-  if (effect === 'remove_stall') { const s = p.party.find(s => s?.stalledTurns > 0); if (s) { s.stalledTurns = 0; addLog('Stall removed.', 'good'); } }
+  if (effect === 'remove_stall') {
+    G.pendingTarget = { action: 'removeStallTarget', pidx };
+    addLog('Click an ally to remove Stall.', 'info');
+    return; // pendingTarget will be handled in clickSlot
+  }
   if (effect === 'remove_burn') {
     G.pendingTarget = { action: 'removeBurnTarget', pidx };
     addLog('Click an ally to remove all Burn stacks.', 'info');
@@ -4016,11 +4029,14 @@ function healSlot(slot, n) {
 /* ── Burn / Stall interaction: Burning animatronics can't be Stalled, and applying Burn cures an existing Stall ── */
 function applyStall(slot, turns) {
   if (!slot || slot.burn > 0 || slot.statusImmuneTurns > 0) return false;
+  // Immunity tools must deny this condition regardless of source (attack, item, supporter, ability).
+  if (slot.tools?.some(t => t.passive === 'stall_immune')) return false;
   slot.stalledTurns = Math.max(slot.stalledTurns || 0, turns);
   return true;
 }
 function applyBurn(slot, n) {
   if (!slot || slot.statusImmuneTurns > 0) return false;
+  if (slot.tools?.some(t => t.passive === 'burn_immune')) return false;
   slot.burn = (slot.burn || 0) + n;
   if (slot.burn > 0) slot.stalledTurns = 0;
   return true;
@@ -4118,7 +4134,7 @@ function openDeckSpyModal(spiedCards, onConfirm) {
    DECK SEARCH UI
    ═══════════════════════════════════════════════════════ */
 function startDeckSearch(title, cards, maxCount, pidx, onConfirm, opts) {
-  pendingSearch = { title, cards, maxCount, pidx, selected: [], onConfirm, fromClassCard: !!(opts && opts.fromClassCard), abilitySlot: opts && opts.abilitySlot };
+  pendingSearch = { title, cards, maxCount, pidx, selected: [], onConfirm, fromClassCard: !!(opts && opts.fromClassCard), abilitySlot: opts && opts.abilitySlot, onCancel: opts && opts.onCancel };
   renderSearchPanel();
 }
 function renderSearchPanel() {
@@ -4191,6 +4207,12 @@ function closeSearch() {
   // must not burn the once-per-turn use when nothing was actually discarded/absorbed.
   if (G && !G.winner && ps && ps.abilitySlot) {
     ps.abilitySlot.usedAbilityThisTurn = false;
+    renderGame();
+  }
+  // Generic rollback for effects that reserved state (e.g. the turn's supporter play)
+  // before opening the picker - cancelling must not consume that reservation.
+  if (G && !G.winner && ps && ps.onCancel) {
+    ps.onCancel();
     renderGame();
   }
 }
@@ -4607,7 +4629,7 @@ function renderSlot(slot, pidx, slotIdx, pt) {
   const isClassAllyTarget = pt?.action === 'classCardTarget' && ['class_toy_heal', 'class_withered_def', 'class_rockstar_discount'].includes(pt?.ability);
   if (isEnemy && pt && (['selectSingleTarget', 'selectMultiTarget', 'selectStallTargets', 'itemEnemyEffect'].includes(pt.action) || isEnemyAbility || isClassEnemyTarget)) cls += ' enemy-target';
   const isEquipToolValid = pt?.action === 'equipTool' && (!pt.card.toolTarget || (slot && pt.card.toolTarget.includes(slot.card.id)));
-  if (!isEnemy && pt && ((['selectHealTargets', 'evolve', 'attachEnergy', 'ennardGeneratorBoost', 'removeBurnTarget'].includes(pt.action)) || (pt.action === 'equipTool' && isEquipToolValid) || (pt.action === 'abilityTarget' && !isEnemyAbility) || isClassAllyTarget)) cls += ' ally-target';
+  if (!isEnemy && pt && ((['selectHealTargets', 'evolve', 'attachEnergy', 'ennardGeneratorBoost', 'removeBurnTarget', 'removeStallTarget'].includes(pt.action)) || (pt.action === 'equipTool' && isEquipToolValid) || (pt.action === 'abilityTarget' && !isEnemyAbility) || isClassAllyTarget)) cls += ' ally-target';
 
   div.className = cls; div.onclick = () => clickSlot(pidx, slotIdx);
 
