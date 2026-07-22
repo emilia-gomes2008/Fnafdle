@@ -1329,7 +1329,7 @@ window.CARDS_DB = {
     id: 'class_jacko', name: 'Flame of Agony', type: 'class', class: 'jacko',
     img: '../tcg/class/class_jacko.png',
     effectId: 'class_jacko_burn', oncePer: 'turn',
-    effectDesc: 'Passive: Jack-O animatronics heal from their own Burn instead of taking damage (can over-heal), and multi-target attacks hit +1 extra target while Burning. Enemy Burn deals +5 extra damage per stack. Discard 1⚡ to give Burn 1 to 1 enemy.',
+    effectDesc: 'Jack-O animatronics heal from their Burn (can over-heal), multi-target attacks hit +1 target while Burning. Burn they inflict deals +10 damage. You can apply a free Burn 1 to any animatronic, ally or enemy.',
     desc: 'The fire of agony burns forever - and burns deeper than any other.'
   },
   class_shadow: {

@@ -250,7 +250,7 @@ function makePlayer(name, deckList, generatorKey, classCardId) {
     itemLocked: 0, skipNextDraw: false,
     classCard: CARDS[classCardId] || CARDS['class_classic'] || null,
     classCardUsed: false, classCardUsedForever: false,
-    burnBonus: classCardId === 'class_jacko' ? 5 : 0
+    burnBonus: classCardId === 'class_jacko' ? 10 : 0
   };
 }
 
@@ -1355,12 +1355,12 @@ function drawEnergyToPool(pidx, count = 1) {
 }
 
 function applyBurnDamage() {
-  const opp = G.players[1 - G.activePlayer];
-  const burnBonus = opp.burnBonus || 0;
   G.players[G.activePlayer].party.forEach(slot => {
     if (!slot || slot.burn <= 0) return;
     if (slot.tools.some(t => t.passive === 'burn_immune')) { slot.burn = 0; return; } // immune
-    const d = slot.burn * (10 + burnBonus); slot.burn--;
+    // Flat bonus from whoever inflicted this Burn (Jack-O's own class card), not the current turn's opponent -
+    // matters now that Jack-O can Burn its own allies too.
+    const d = slot.burn * 10 + (slot.burnBonus || 0); slot.burn--;
     if (slot.card.class === 'jacko') {
       // Jack-O's thrive on the flame: Burn heals them instead, even past max HP.
       slot.hp += d;
@@ -2484,7 +2484,11 @@ function clickSlot(pidx, slotIdx) {
   if (pt?.action === 'classCardTarget') {
     const eid = pt.ability; const activePidx = pt.pidx;
     const needsAlly = ['class_toy_heal', 'class_withered_def', 'class_rockstar_discount'].includes(eid);
-    const needsEnemy = ['class_jacko_burn', 'class_shadow_drain', 'class_phantom_stall'].includes(eid);
+    const needsEnemy = ['class_shadow_drain', 'class_phantom_stall'].includes(eid);
+    const needsAny = ['class_jacko_burn'].includes(eid);
+    if (needsAny && slot) {
+      applyClassCardEffect(activePidx, eid, { slotIdx, pidx }); return;
+    }
     if (needsAlly && pidx === activePidx && slot) {
       applyClassCardEffect(activePidx, eid, { slotIdx }); return;
     }
@@ -3925,6 +3929,7 @@ function syncMimicMoveset(pidx) {
   }
 }
 
+
 function triggerGlitchtrapTransform(pidx, slotIdx, dyingSlot) {
   const p = G.players[pidx];
   const elec = dyingSlot.elec;
@@ -4037,7 +4042,11 @@ function applyStall(slot, turns) {
 function applyBurn(slot, n) {
   if (!slot || slot.statusImmuneTurns > 0) return false;
   if (slot.tools?.some(t => t.passive === 'burn_immune')) return false;
-  slot.burn = (slot.burn || 0) + n;
+  // Burn is a level, not a stack - a new application never adds onto the current one (same as Stall).
+  slot.burn = Math.max(slot.burn || 0, n);
+  // Remember whoever inflicted it (for Jack-O's own +10 bonus), not whichever player happens to be
+  // "the opponent" when it ticks - Jack-O can now Burn its own side too.
+  slot.burnBonus = G.players[G.activePlayer]?.burnBonus || 0;
   if (slot.burn > 0) slot.stalledTurns = 0;
   return true;
 }
@@ -4625,11 +4634,12 @@ function renderSlot(slot, pidx, slotIdx, pt) {
   const selMulti = pt && ['selectMultiTarget', 'selectStallTargets', 'postStallPick'].includes(pt.action) && isEnemy && pt.selected?.some(s => s.slotIdx === slotIdx);
   if (selMulti) cls += ' selected-target';
   const isEnemyAbility = pt?.action === 'abilityTarget' && ['baby_trap_target', 'ballora_steal', 'molten_steal', 'toy_freddy_stall', 'funtime_foxy_showstopper', 'plushtrap_plush_trap', 'live_wire', 'strobe_effect', 'blob_drain', 'moon_bedtime', 'burntrap_ignite', 'mxes_override', 'glamrock_chica_beat_drop', 'dreadbear_stall_pick2', 'ice_stall', 'eclipse_equilibrium'].includes(pt?.ability);
-  const isClassEnemyTarget = pt?.action === 'classCardTarget' && ['class_shadow_drain', 'class_jacko_burn', 'class_phantom_stall'].includes(pt?.ability);
+  const isClassEnemyTarget = pt?.action === 'classCardTarget' && ['class_shadow_drain', 'class_phantom_stall'].includes(pt?.ability);
   const isClassAllyTarget = pt?.action === 'classCardTarget' && ['class_toy_heal', 'class_withered_def', 'class_rockstar_discount'].includes(pt?.ability);
-  if (isEnemy && pt && (['selectSingleTarget', 'selectMultiTarget', 'selectStallTargets', 'itemEnemyEffect'].includes(pt.action) || isEnemyAbility || isClassEnemyTarget)) cls += ' enemy-target';
+  const isClassAnyTarget = pt?.action === 'classCardTarget' && pt?.ability === 'class_jacko_burn';
+  if (isEnemy && pt && (['selectSingleTarget', 'selectMultiTarget', 'selectStallTargets', 'itemEnemyEffect'].includes(pt.action) || isEnemyAbility || isClassEnemyTarget || isClassAnyTarget)) cls += ' enemy-target';
   const isEquipToolValid = pt?.action === 'equipTool' && (!pt.card.toolTarget || (slot && pt.card.toolTarget.includes(slot.card.id)));
-  if (!isEnemy && pt && ((['selectHealTargets', 'evolve', 'attachEnergy', 'ennardGeneratorBoost', 'removeBurnTarget', 'removeStallTarget'].includes(pt.action)) || (pt.action === 'equipTool' && isEquipToolValid) || (pt.action === 'abilityTarget' && !isEnemyAbility) || isClassAllyTarget)) cls += ' ally-target';
+  if (!isEnemy && pt && ((['selectHealTargets', 'evolve', 'attachEnergy', 'ennardGeneratorBoost', 'removeBurnTarget', 'removeStallTarget'].includes(pt.action)) || (pt.action === 'equipTool' && isEquipToolValid) || (pt.action === 'abilityTarget' && !isEnemyAbility) || isClassAllyTarget || isClassAnyTarget)) cls += ' ally-target';
 
   div.className = cls; div.onclick = () => clickSlot(pidx, slotIdx);
 
@@ -4772,9 +4782,15 @@ function useClassCard(pidx) {
     renderGame(); pushGameState(); return;
   }
   // Effects that need an enemy slot target
-  if (['class_shadow_drain', 'class_jacko_burn', 'class_phantom_stall'].includes(eid)) {
+  if (['class_shadow_drain', 'class_phantom_stall'].includes(eid)) {
     G.pendingTarget = { action: 'classCardTarget', ability: eid, pidx };
     addLog(T('tcg.log.classSelectEnemy', { card: cc.name }), 'info');
+    renderGame(); pushGameState(); return;
+  }
+  // Effects that can target any animatronic, ally or enemy
+  if (['class_jacko_burn'].includes(eid)) {
+    G.pendingTarget = { action: 'classCardTarget', ability: eid, pidx };
+    addLog(`${cc.name}: click any animatronic to apply Burn 1.`, 'info');
     renderGame(); pushGameState(); return;
   }
   // Instant effects
@@ -4845,11 +4861,8 @@ function applyClassCardEffect(pidx, effectId, targetInfo) {
     }
     case 'class_jacko_burn': {
       if (targetInfo) {
-        const slot = G.players[1 - pidx].party[targetInfo.slotIdx];
-        if (!slot) { addLog(T('tcg.log.classNeedEnemy'), 'info'); return; }
-        if (p.energyPool < 1) { addLog(T('tcg.log.classNoEnergyPool'), 'info'); return; }
-        p.energyPool -= 1;
-        p.discard.push({ id: 'energy_spent', name: 'Energy', type: 'energy', energyType: 'generic', img: GENERIC });
+        const slot = G.players[targetInfo.pidx].party[targetInfo.slotIdx];
+        if (!slot) return;
         applyBurn(slot, 1);
         addLog(T('tcg.log.classJackoBurn', { name: p.name, card: cc.name, slot: slot.card.name }), 'info');
       }

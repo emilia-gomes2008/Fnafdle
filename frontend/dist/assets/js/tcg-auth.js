@@ -371,7 +371,7 @@ const BOOSTERS = {
   haunting_future: {
     id: 'haunting_future',
     name: 'Haunting Future',
-    subtitle: 'FNAF Help Wanted',
+    subtitle: 'FNAF HW - SOTM',
     desc: 'Glitchtrap, Grim Foxy, Dreadbear & more from the Steel Wool era',
     color: '#b47fff',
     bg: '#0d001a',
