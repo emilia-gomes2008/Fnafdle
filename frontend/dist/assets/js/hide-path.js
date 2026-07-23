@@ -5,11 +5,20 @@
 // Only runs on the actual GitHub Pages deployment: that 404.html fallback isn't present
 // on localhost/LAN dev servers, so reloading the shortened URL there would just 404.
 (function () {
+  // Pin every relative path (css/js/images, including ones injected by game JS later,
+  // e.g. result screenshots) to the real directory *before* changing what the address bar
+  // shows. Without this, anything resolved after the URL is rewritten - even much later,
+  // by in-game code - would resolve against the shortened fake path instead.
+  var realPath = window.location.pathname;
+  var dir = realPath.slice(0, realPath.lastIndexOf('/') + 1);
+  var base = document.createElement('base');
+  base.href = window.location.origin + dir;
+  document.head.insertBefore(base, document.head.firstChild);
+
   if (!/\.github\.io$/.test(window.location.hostname)) return;
   var marker = '/frontend/dist/pages/';
-  var path = window.location.pathname;
-  var idx = path.indexOf(marker);
+  var idx = realPath.indexOf(marker);
   if (idx === -1) return;
-  var clean = path.slice(0, idx) + '/' + path.slice(idx + marker.length);
+  var clean = realPath.slice(0, idx) + '/' + realPath.slice(idx + marker.length);
   window.history.replaceState(window.history.state, document.title, clean + window.location.search + window.location.hash);
 })();
