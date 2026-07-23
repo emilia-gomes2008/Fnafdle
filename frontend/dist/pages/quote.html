@@ -26,6 +26,7 @@
   <meta property="twitter:image" content="https://emilia-gomes2008.github.io/FnafdleReborn/frontend/dist/assets/images/default.png">
 
   <meta charset="UTF-8" />
+  <script src="../assets/js/hide-path.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FNAFdle - Quote Guesser</title>
   <link rel="icon" type="icon/png" href="../assets/images/default.png">
@@ -82,6 +83,7 @@
         <p class="result-msg" id="result-msg"></p>
       </div>
       <div class="result-buttons">
+        <button id="quote-next-btn" style="display:none" onclick="window.location.href=this.dataset.href" data-i18n="game.next">▶ Next</button>
         <button id="quote-daily-stats-btn" onclick="showStatsModal('daily')">📊 Daily Stats</button>
         <button id="quote-endless-stats-btn" onclick="showStatsModal('endless')">📊 Endless Stats</button>
         <button id="quote-play-switch-btn" style="display:none; grid-column:1/-1"></button>

@@ -319,6 +319,11 @@ function endQuoteGame(won) {
     switchBtn.textContent = isDaily ? T('game.playEndless') : T('game.playDaily');
     switchBtn.onclick = () => { window.location.href = isDaily ? 'quote.html?mode=endless' : 'quote.html?mode=daily'; };
   }
+  const nextBtn = document.getElementById('quote-next-btn');
+  if (nextBtn) {
+    nextBtn.style.display = '';
+    nextBtn.dataset.href = isDaily ? 'location.html?mode=daily' : 'location.html?mode=endless';
+  }
 
   renderResultChar(quoteChar);
 }
